@@ -86,15 +86,26 @@ def spectrum(data, col, frequency=10, absolute=True):
 	return aux
 
 def gradients(data, levels, order='Crescent'):
-	""" Takes the gradients of the columns provided
+	"""
+	Calculates the gradients for data considering the levels provided.
+	
+	Parameters
+	----------
 
-	for a n length array, gives n*(n-1)/2 combinations
+	data: pandas DataFrame/ timeSeries
+	the data for which the gradients should be calculated
+
+	levels: list
+	the columns considered to calculate the gradients
+
 	"""
 	from algs import combine
+	flux=pd.DataFrame(index=data.index)
 	for pair in combine(levels, order=order):
+		a,b=pair
 		print pair
-	#gradient=data[levels[1]] - data[levels[0]]
-        return gradient
+		flux[str(a)+'-'+str(b)]=data[a]-data[b]
+        return flux
 
 
 #------------------------------------
