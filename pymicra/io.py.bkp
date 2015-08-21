@@ -168,33 +168,40 @@ class dataloggerConf(object):
         self.description=description
 
 
-def timeSeries(flist, datalogger, index_by_date=True):
+class timeSeries(pd.DataFrame):
     """
     Creates a micrometeorological time series from a file or list of files.
 
     UNDER DEVELOPMENT
     It needs a dataloggerConf object.
     """
-    
-    if isinstance(flist, str):
-        flist=[flist]
-    header_lines=datalogger.header_lines
-    columns_separator=datalogger.columns_separator
-    date_cols=datalogger.date_cols
-    date_connector=datalogger.date_connector
-    series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames)
-    series=parseDates(series, date_cols, connector=date_connector, first_time_skip=datalogger.first_time_skip, clean=True)
-    print series
-    print 'Needs to return pandas df'
-    return series
+    def __init__(self, flist, datalogger, index_by_date=True):
+        """
+        Starts the class
+        """
+
+        self.description='Data read with dataloggerConf: ', datalogger.description
+        
+        if isinstance(flist, str):
+            flist=[flist]
+        header_lines=datalogger.header_lines
+        columns_separator=datalogger.columns_separator
+        date_cols=datalogger.date_cols
+        date_connector=datalogger.date_connector
+        series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames)
+        series=parseDates(series, date_cols, connector=date_connector, first_time_skip=datalogger.first_time_skip, clean=True)
+        print series
+        pd.DataFrame(series)
+        print 'Needs to return pandas df'
+        return
 
 
-def to_array(data):
-    """
-    Returns the contents of a timeSeries into an array type
-    """
-    vals=zip(*data.values)
-    return [data.index.to_pydatetime]+vals
+    def to_array(self):
+        """
+        Returns the contents of a timeSeries into an array type
+        """
+        vals=zip(*self.values)
+        return [self.index]+vals
 
 
 

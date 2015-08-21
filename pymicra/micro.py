@@ -88,6 +88,7 @@ def spectrum(data, col, frequency=10, absolute=True):
 def gradients(data, levels, order='Crescent'):
 	"""
 	Calculates the gradients for data considering the levels provided.
+	UNDER DEVELOPMENT
 	
 	Parameters
 	----------
@@ -103,7 +104,6 @@ def gradients(data, levels, order='Crescent'):
 	flux=pd.DataFrame(index=data.index)
 	for pair in combine(levels, order=order):
 		a,b=pair
-		print pair
 		flux[str(a)+'-'+str(b)]=data[a]-data[b]
         return flux
 
@@ -129,13 +129,7 @@ class siteConstants(object):
 		Rv: Specific gas constant for water vapor
 		mu: Rv/Rs
 	"""
-
-	R=8.3144621	#universal gas constant J/(mol.K)
-	molar_masses={'dry_air' : 28.9645,
-			'h2o' : 18.0153,
-			'co2' : 44.0095,
-			'ch4' : 16.0425,
-			'n2o' : 44.01280}
+	from physics import constants
 
 	def __init__(self, variables_height, canopy_height,
 		     displacement_height=None,
@@ -147,7 +141,7 @@ class siteConstants(object):
 		# Checks if the variables_height is actually a Dict
 		if not isinstance(variables_height, dict):
 			raise TypeError('variables_height should be a dictionary. Ex.: {"u" : 10, "v" : 10, "theta" : 12 }')
-		self.instrument_height = instrument_height #meters
+		self.variables_height = variables_height #meters
 		self.canopy_height = canopy_height         #meters
 		if displacement_height==None:
 			self.displacement_height = (2./3.)*self.canopy_height #meters

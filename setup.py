@@ -16,7 +16,7 @@ except ImportError:
 	_has_setuptools = False
 
 if _has_setuptools:
-	extra_kwargs={'install_requires' : dependecies }
+	extra_kwargs={'install_requires' : dependencies }
 else:
 	import pkg_resources
 	pkg_resources.require(dependencies)
@@ -25,7 +25,7 @@ else:
 
 
 setup(name='pymicra',
-      version='0.1',
+      version='0.1.0',
       description='A Python Micrometeorology Analysis tool',
       long_description=open('README.md').read(),
       url='https://github.com/tomchor/pymicra.git',
