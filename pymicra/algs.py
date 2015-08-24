@@ -4,6 +4,8 @@
 """
 import pandas as pd
 import numpy as np
+
+
 def combine(levels, order='Crescent'):
     """ Combines the elements of the levels in non-repeting pairs
     for a n length array, gives n*(n-1)/2 combinations
@@ -50,6 +52,8 @@ def splitData(data, frequency='30Min'):
     S   secondly frequency
     L   milliseconds
     U   microseconds
+    
+    check it complete at http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
     """
     res_index=data.resample(frequency).index
     out=[]
@@ -63,26 +67,24 @@ def splitData(data, frequency='30Min'):
     return out
 
 
-def fitByDate(data, degree=1, frequency=None):
+def fitByDate(data, degree=1, rule=None):
     """
     Given a pandas DataFrame with the index as datetime, this routine
     fit a n-degree polynomial to the dataset
 
     SHOULD LATER ADD MULTIPLE COLUMNS FUNCTIONALITY
     """
-    if frequency==None:
+    if rule==None:
         dflist=[data]
     else:
-        dflist=splitData(data, frequency=frequency)
+        dflist=splitData(data, frequency=rule)
     out=pd.DataFrame()
     for data in dflist:
-        print out
         y=data.values
         x=data.index.to_julian_date()
         coefs=np.polyfit(x,y,degree)
         yy=np.polyval(coefs,x)
         aux=pd.DataFrame(yy, index=data.index)
         out=out.append(aux)
-        #out=pd.DataFrame(yy, index=data.index)
     return out
 

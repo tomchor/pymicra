@@ -5,22 +5,22 @@ Parts of this file were taken from Pandas under the
 Apache License, Version 2.0
 """
 
-dependencies=['Pandas', 'Numpy']
+dependencies=['Pandas>=0.15', 'Numpy']
 
 try:
-	from setuptools import setup
-	_has_setuptools = True
+    from setuptools import setup
+    _has_setuptools = True
 except ImportError:
-	# no setuptools installed
-	from distutils.core import setup
-	_has_setuptools = False
+    # no setuptools installed
+    from distutils.core import setup
+    _has_setuptools = False
 
 if _has_setuptools:
-	extra_kwargs={'install_requires' : dependencies }
+    extra_kwargs={'install_requires' : dependencies }
 else:
-	import pkg_resources
-	pkg_resources.require(dependencies)
-	extra_kwargs={}
+    import pkg_resources
+    pkg_resources.require(dependencies)
+    extra_kwargs={}
 
 
 

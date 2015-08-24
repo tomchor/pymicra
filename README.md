@@ -11,7 +11,7 @@ This package is licensed under GNU General Public License V3.0 (http://chooseali
 ## Main Features
 A small list of things this package is designed to do:
 
-  - Automatically read and understand micrometeorological data in virtual any ASCII format (thanks to pandas).
+  - Automatically read and understand micrometeorological data in virtually any column-separated ASCII format (thanks to pandas).
   - Interpolate and detrend data in the most common ways (block averages, moving averages and linear detrending).
   - Automatically rotate the coordinates given wind data, so that the v and w averages are null.
   - Calculate fluxes
