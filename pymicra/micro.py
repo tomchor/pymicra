@@ -14,6 +14,7 @@ Modifications:
 """
 import pandas as pd
 import numpy as np
+import physics
 
 def rotCoor(data, wind_vars=['u','v','w'], verbose=0):
     """
@@ -155,20 +156,20 @@ def obukhovLen(theta_v_star, theta_v_mean, u_star, siteConst):
     """
     Calculates the Monin-Obukhov stability length
     """
-    g=siteConst.constants.g
-    kappa=siteConst.constants.g
-    z=siteConst.variables_height
+    g=siteConst.constants.gravity
+    kappa=siteConst.constants.kappa
+    z=siteConst.variables_height['u']
     d=siteConst.displacement_height
-    return - ((z* u_star *u_star* theta_v_mean) / (kappa *g* theta_v_star)
+    zeta=MonObuVar(theta_v_star, theta_v_mean, u_star, g=g)
+    return (z-d)/zeta
 
 
-
-def MonObuVar(theta_v_star, theta_v_mean, u_star, siteConst):
+def MonObuVar(theta_v_star, theta_v_mean, u_star, g=9.81):
     """
     Calculates the Monin-Obukhov stability variable
     """
-    L0=obukhovLen(theta_v_star, theta_v_mean, u_star, siteConst=siteConst)
-    return (siteConst.variables_height['u']-siteConst.displacement_height)/L0
+    kappa=.4
+    return - (kappa *g* theta_v_star) / (u_star *u_star* theta_v_mean)
 
 
 
@@ -219,28 +220,20 @@ class siteConstants(object):
         Rv: Specific gas constant for water vapor
         mu: Rv/Rs
     """
-    from physics import constants
-
     def __init__(self, variables_height, canopy_height,
              displacement_height=None,
              variables_units=None,
-             gravity=9.81,
-             Rs=287.04, 
-             Rv=461.50, 
              cp=1003.5):
         # Checks if the variables_height is actually a Dict
         if not isinstance(variables_height, dict):
             raise TypeError('variables_height should be a dictionary. Ex.: {"u" : 10, "v" : 10, "theta" : 12 }')
+        self.constants=physics.constants()
         self.variables_height = variables_height #meters
         self.canopy_height = canopy_height         #meters
         if displacement_height==None:
             self.displacement_height = (2./3.)*self.canopy_height #meters
         else:
             self.displacement_height=displacement_height
-        self.gravity = gravity        #meters/(s**2)
-        self.Rs = Rs    #specific gas constant for dry air J/(kg.K)
-        self.Rv = Rv    #J/(kg.K)
-        self.mu = Rv/Rs
         self.cp = cp     #specific heat for constant pressure J/(kg.K)
 
 

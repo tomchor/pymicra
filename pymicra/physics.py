@@ -12,6 +12,7 @@ class constants(object):
     Defines some useful constants for physical calculations involving gases and miscelaneous things
     """
     def __init__(self):
+        # Gas constants
         self.molar_mass={'dry_air' : 28.9645,
             'o3'  : 47.99820,
             'h2o' : 18.0153,
@@ -22,12 +23,25 @@ class constants(object):
             'o' : 15.99940,
             'n' : 14.00670}
     
-        self.R=8.3144621     #universal gas constant J/(mol.K)
+        self.R=8.3144621    # universal gas constant J/(mol.K)
         R_spec={}
         for key, val in self.molar_mass.iteritems():
             R_spec.update( {key : self.R/val} )
-        self.R_spec=R_spec
-        self.units={'molar_mass' : 'g/mol',
+        self.R_spec=R_spec  # specific gas constants
+        self.mu=R_spec['dry_air']/R_spec['h2o']
+        self.cp_dry=1003.5  # specific heat of dry air at constant pressure
+        self.cp_h2o=1850.0  # specific heat of water vapor at constant pressure
+
+        # physical constants
+        self.g=9.80665      # gravity
+OMEGA = 7.29212E-5  # angular valocity of the earth
+earth_radius=6378140.0 # meters
+standard_pressure = 101325.00 # pascals
+celsius_offset = 273.15 # subtract from kelvin to get deg C, add to deg C to get kelvin
+temperature_lapse_rate = -0.0065 # change in temperature with height, kelvin/metre
+
+        # units
+units={'molar_mass' : 'g/mol',
             'R' : 'J/(mol * K)',
             'R_spec' : 'J/(g * K)'}
 
@@ -63,3 +77,40 @@ def wetAirDens(p=None, T=None, q=None):
 temp,e,p,eps=[1]*4
 virt_temp=temp/(1. -(e/p)*(1.-eps))
 
+
+
+def get_pressure_with_elevation(h, 
+  Ps=standard_pressure, Ts=standard_temperature, 
+  Tl=earth_temperature_lapse_rate, Hb=0.0, R=air_gas_constant, 
+  g=earth_gravity, M=earth_atmosphere_molar_mass):
+    """
+    This function returns an estimate of the pressure in pascals as a function of
+    elevation above sea level
+    NOTES:" 
+      * This equation is only accurate up to 11000 meters
+      * results might be odd for elevations below 0 (sea level), like Dead Sea.
+    h=elevation relative to sea level (m)
+    Ps= static pressure (pascals)
+    Ts= temperature (kelvin)
+    Tl= temperature lapse rate (kelvin/meter)
+    Hb= height at the bottom of the layer
+    R= universal gas constant for air
+    g= gravitational acceleration
+    M= Molar mass of atmosphere
+    P = Ps * (Ts / ((Ts + Tl) * (h - Hb))) ^ ((g * M)/(R * Tl))
+    returns pressure in pascals
+    """
+    if h > 11000.0 :
+          print "Warning: Elevation used exceeds the recommended maximum elevation for this function (11,000m)"
+    return  Ps * (Ts / (Ts + Tl * (h - Hb))) ** ((g * M) / (R * Tl))
+
+def get_temperature_with_elevation(h, Ts=standard_temperature, Tl=earth_temperature_lapse_rate):
+    """This function returns an estimate of temperature as a function above sea level.
+    NOTES:
+      * This equation is only accurate up to 11,000 meters
+      * results might be odd for elevations below 0 (sea level), like Dead Sea.
+    Ts= temperature (kelvin)
+    Tl= temperature lapse rate (kelvin/meter)
+    returns temp in kelvin
+    """
+    return Ts + h *Tl
