@@ -105,6 +105,8 @@ def get_pressure_with_elevation(h,
           print "Warning: Elevation used exceeds the recommended maximum elevation for this function (11,000m)"
     return  Ps * (Ts / (Ts + Tl * (h - Hb))) ** ((g * M) / (R * Tl))
 
+
+
 def get_temperature_with_elevation(h, Ts=standard_temperature, Tl=temperature_lapse_rate):
     """This function returns an estimate of temperature as a function above sea level.
     NOTES:
@@ -115,3 +117,6 @@ def get_temperature_with_elevation(h, Ts=standard_temperature, Tl=temperature_la
     returns temp in kelvin
     """
     return Ts + h *Tl
+
+
+
