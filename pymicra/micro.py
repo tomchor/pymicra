@@ -34,14 +34,14 @@ def rotCoor(data, wind_vars=['u','v','w'], verbose=0):
     DC= np.zeros((3,3))
     wind_vec = data[wind_vars].mean().values
     m_u, m_v, m_w = wind_vec
-    alfa = atan2(m_v,m_u)
+    alpha = atan2(m_v,m_u)
     beta =-atan2(m_w, sqrt((m_u**2.)+(m_v**2.)))
     if verbose:
-        print "alpha: ",alfa,"\nbeta: ",beta
+        print "alpha: ",alpha,"\nbeta: ",beta
     # definition of rotation matrix
-    DC[0,0],DC[0,1],DC[0,2] = np.cos(alfa)*np.cos(beta), np.cos(beta)*np.sin(alfa),-np.sin(beta)
-    DC[1,0],DC[1,1],DC[1,2] =-np.sin(alfa)          , np.cos(alfa)          , 0.
-    DC[2,0],DC[2,1],DC[2,2] = np.cos(alfa)*np.sin(beta), np.sin(alfa)*np.sin(beta), np.cos(beta)
+    DC[0,0],DC[0,1],DC[0,2] = np.cos(alpha)*np.cos(beta), np.cos(beta)*np.sin(alpha),-np.sin(beta)
+    DC[1,0],DC[1,1],DC[1,2] =-np.sin(alpha)          , np.cos(alpha)          , 0.
+    DC[2,0],DC[2,1],DC[2,2] = np.cos(alpha)*np.sin(beta), np.sin(alpha)*np.sin(beta), np.cos(beta)
     if verbose:
         print "Rotation matrix is:\n", DC
     # application of rotation as a matrix product
@@ -51,7 +51,7 @@ def rotCoor(data, wind_vars=['u','v','w'], verbose=0):
 
 def trend(data, mode='moving average', rule='10min', window=None, **kwargs):
     """
-    Wrapper to return the moving/block average of a given data
+    Wrapper to return the moving/block average or polynomial fit of a given data
     -------------
 
     Parameters
@@ -86,6 +86,14 @@ def trend(data, mode='moving average', rule='10min', window=None, **kwargs):
     else:
         # if no mode can be identified
         raise KeyError('Mode defined is not correct. Options are "moving" and "block".')
+
+def detrend(data, variables, mode='moving average', rule='10Min', **kwargs):
+    """
+    Returns the detrended data of variables
+    """
+    mode=mode.lower().replace('_',' ').replace('-','').replace(' ','')
+    return False 
+
 
 def spectrum(data, variable=None, frequency=10, absolute=True):
     """
@@ -143,6 +151,53 @@ def gradients(data, levels, order='Crescent'):
     return flux
 
 
+def obukhovLen(theta_v_star, theta_v_mean, u_star, siteConst):
+    """
+    Calculates the Monin-Obukhov stability length
+    """
+    g=siteConst.constants.g
+    kappa=siteConst.constants.g
+    z=siteConst.variables_height
+    d=siteConst.displacement_height
+    return - ((z* u_star *u_star* theta_v_mean) / (kappa *g* theta_v_star)
+
+
+
+def MonObuVar(theta_v_star, theta_v_mean, u_star, siteConst):
+    """
+    Calculates the Monin-Obukhov stability variable
+    """
+    L0=obukhovLen(theta_v_star, theta_v_mean, u_star, siteConst=siteConst)
+    return (siteConst.variables_height['u']-siteConst.displacement_height)/L0
+
+
+
+def calcLenghts(data,
+  mode='linear fit',
+  rule='10Min',
+  varDict={'u':'u',
+  'v':'v',
+  'w':'u',
+  'pressure':'p',
+  'temperature':'T',
+  'specific humidity':'q',
+  'relative humidity':'rh'},
+  **kwargs):
+    """
+    Calculates the usual characteristic lengths
+    """
+    from algs import splitData
+    chunks=splitData(data, frequency=rule)
+    for chunk in chunks:
+        u_prime=detrend(data, varDict['u'], mode=mode, **kwargs)
+        w_prime=detrend(data, varDict['w'], mode=mode, **kwargs)
+        theta_prime=detrend(data, varDict['thermodynamic temp'], mode=mode, **kwargs)
+        p_mean=data[varDict['pressure']].mean()
+        T_mean=data[varDict['temperature']].mean()
+        q_mean=data[varDict['specific humidity']].mean()
+        rho_wet=physics.wetAirDens(p=p_mean, T=T_mean, q=q_mean)
+
+
 #------------------------------------
 #
 #------------------------------------
@@ -181,7 +236,7 @@ class siteConstants(object):
         if displacement_height==None:
             self.displacement_height = (2./3.)*self.canopy_height #meters
         else:
-            self.displacament_height=displacement_height
+            self.displacement_height=displacement_height
         self.gravity = gravity        #meters/(s**2)
         self.Rs = Rs    #specific gas constant for dry air J/(kg.K)
         self.Rv = Rv    #J/(kg.K)
