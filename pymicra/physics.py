@@ -6,6 +6,7 @@ Module that contains physical functions for general use
 
 ADD PINT FUNCTIONALITY LATER
 """
+from constants import *
 
 class constants(object):
     """
@@ -81,8 +82,8 @@ virt_temp=temp/(1. -(e/p)*(1.-eps))
 
 def get_pressure_with_elevation(h, 
   Ps=standard_pressure, Ts=standard_temperature, 
-  Tl=earth_temperature_lapse_rate, Hb=0.0, R=air_gas_constant, 
-  g=earth_gravity, M=earth_atmosphere_molar_mass):
+  Tl=temperature_lapse_rate, Hb=0.0, R=R_spec['dry_air'], 
+  g=gravity, M=earth_atmosphere_molar_mass):
     """
     This function returns an estimate of the pressure in pascals as a function of
     elevation above sea level
@@ -104,7 +105,7 @@ def get_pressure_with_elevation(h,
           print "Warning: Elevation used exceeds the recommended maximum elevation for this function (11,000m)"
     return  Ps * (Ts / (Ts + Tl * (h - Hb))) ** ((g * M) / (R * Tl))
 
-def get_temperature_with_elevation(h, Ts=standard_temperature, Tl=earth_temperature_lapse_rate):
+def get_temperature_with_elevation(h, Ts=standard_temperature, Tl=temperature_lapse_rate):
     """This function returns an estimate of temperature as a function above sea level.
     NOTES:
       * This equation is only accurate up to 11,000 meters
