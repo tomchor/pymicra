@@ -195,5 +195,21 @@ def to_array(data):
     return [data.index.to_pydatetime]+vals
 
 
+def read_dlc(file):
+    """
+    Reads datalogger configuration file
+    """
+    globs={}
+    dlcvars={}
+    try:
+        execfile(dlcfile, globs, dlcvars)
+    except NameError:
+        # python3 does not have an execfilen function
+        # this is yet to be tested
+        with open(file) as f:
+            code=compile(f.read(), file, 'exec')
+            exec(code, globs, dlcvars)
+    return dataloggerConf(**dlcvars)
+
 
 
