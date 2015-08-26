@@ -5,6 +5,23 @@ Author: Tomas Chor
 Module that contains physical functions for general use
 
 ADD PINT FUNCTIONALITY LATER
+
+
+
+
+
+
+
+
+TO DO LIST:
+
+* REMOVE CONSTANTS CLASS
+* ADD GENERAL SOLAR ZENITH CALCULATION
+* ADD PINT FUNCTIONALITY
+* ADD FOOTPRINT CALCULATION
+* ADD CO-SPECTRUM
+
+
 """
 from constants import *
 
