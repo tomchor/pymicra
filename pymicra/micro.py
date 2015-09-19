@@ -96,7 +96,7 @@ def detrend(data, variables, mode='moving average', rule='10Min', **kwargs):
     return False 
 
 
-def spectrum(data, variable=None, frequency=10, absolute=True):
+def spectrum(data, variable=None, frequency=10, absolute=True, T=30):
     """
     Author: Tomas Chor
 
@@ -115,14 +115,19 @@ def spectrum(data, variable=None, frequency=10, absolute=True):
 
     absolute: bool
     wether or not the results will be given in absolute value
+
+    T: int, float
+    period in minutes
     """
+    T=T*60.
     if variable==None:
         variable=data.columns[0]
     sig=data[variable].values
     spec= np.fft.rfft(sig)
     freq= np.fft.rfftfreq(len(sig), d=1./frequency)
     if absolute==True:
-        spec=map(abs,spec)
+        specnp.real((2./T)*(spec*spec.conjugate()))
+        #spec=map(abs,spec)
     aux=pd.DataFrame( data={variable+' spectrum':spec}, index=freq )
     aux.index.name='frequencies'
     return aux
