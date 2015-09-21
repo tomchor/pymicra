@@ -95,6 +95,57 @@ def detrend(data, variables, mode='moving average', rule='10Min', **kwargs):
     mode=mode.lower().replace('_',' ').replace('-','').replace(' ','')
     return False 
 
+def spectrum2(data, window='1min', frequency=10, absolute=True, T=30):
+    """
+    Calculates the spectrum for a set of data
+
+    Parameters
+    ----------
+
+    data: pandas DataFrame/ timeSeries
+
+    frequency: float
+    frequency of measurement of signal to pass to numpy.fft.rfftfreq
+
+    absolute: bool
+    wether or not the results will be given in absolute value
+
+    T: int, float
+    period in minutes
+    """
+    T=T*60.
+    sig2=None
+    var1=''
+    if type(data)==pd.Series:
+        sig=data.values
+    elif type(data)==pd.DataFrame:
+        if len(data.columns)==1:
+            var1=data.columns[0]
+        elif len(data.columns)==2:
+            var1,var2=data.columns
+            sig2=data[var2].values
+        else:
+            raise Exception('Too many columns of data. Chose one (spectrum) or two (cross-spectrum')
+        sig=data[var1].values
+    else:
+        if len(data)==1:
+            sig=data
+        elif len(data)==2:
+            sig,sig2=data
+        else:
+            raise Exception('Too many columns of data. Chose one (spectrum) or two (cross-spectrum')
+    spec= np.fft.rfft(sig)
+    freq= np.fft.rfftfreq(len(sig), d=1./frequency)
+    if sig2 != None:
+        spec2=np.fft.rfft(sig2)
+        spec=np.real((2./T)*(spec*spec2.conjugate()))
+    elif absolute==True:
+        spec=np.real((2./T)*(spec*spec.conjugate()))
+    aux=pd.DataFrame( data={var1+' spectrum':spec}, index=freq )
+    aux.index.name='frequencies'
+    return aux
+
+
 
 def spectrum(data, variable=None, frequency=10, absolute=True, T=30):
     """
@@ -126,8 +177,8 @@ def spectrum(data, variable=None, frequency=10, absolute=True, T=30):
     spec= np.fft.rfft(sig)
     freq= np.fft.rfftfreq(len(sig), d=1./frequency)
     if absolute==True:
-        specnp.real((2./T)*(spec*spec.conjugate()))
-        #spec=map(abs,spec)
+        #specnp.real((2./T)*(spec*spec.conjugate()))
+        spec=map(abs,spec)
     aux=pd.DataFrame( data={variable+' spectrum':spec}, index=freq )
     aux.index.name='frequencies'
     return aux
