@@ -47,6 +47,8 @@ def readDataFiles(flist, **kwargs):
 
     * returns one pandas.DataFrame
     """
+    if len(flist)==0:
+        raise ValueError('Passed a list of files of zero length to be read.')
     data=pd.DataFrame()
     for f in flist:
         subdata=readDataFile(f, **kwargs)

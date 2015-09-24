@@ -17,63 +17,108 @@ import numpy as np
 import physics
 import algs
 
-def obukhovLen(theta_v_star, theta_v_mean, u_star, siteConst):
+def MonObuSimVar(L_m, siteConst):
     """
-    Calculates the Monin-Obukhov stability length
+    Calculates the Monin-Obukhov Similarity Variable
+    according to:
+
+    GARRAT, 
+    zeta = z/L
     """
-    g=siteConst.constants.gravity
-    kappa=siteConst.constants.kappa
-    z=siteConst.variables_height['u']
+    z=siteConst.variables_height
     d=siteConst.displacement_height
-    zeta=MonObuVar(theta_v_star, theta_v_mean, u_star, g=g)
-    return (z-d)/zeta
+    return (z-d)/L_m
 
 
-def MonObuVar(theta_v_star, theta_v_mean, u_star, g=9.81):
+def MonObuLen(theta_v_star, theta_v_mean, u_star, g=9.81, kappa=0.4):
     """
-    Calculates the Monin-Obukhov stability variable
+    Calculates the Monin-Obukhov Length
+    according to:
+
+    GARRAT, The atmospheric boundary layer, 1992 (eq. 1.11, p. 10)
+    L = ( u_star^2 * theta_v ) / ( kappa * g * theta_v_star )
+
+    KUNDU, Fluid mechanics, 1990 (eq 71, chap. 12, p. 462)
+    L_M = - u_star^3 / ( kappa * alpha * g * cov(w,T') )
+
+    ARYA, Introduction to micrometeorology (eq. 11.1, p. 214)
+    L = - u_star^3 / (kappa * (g/T_0) * (H_0/(rho*c_p)) )
+
+    STULL, An introduction to Boundary layer meteorology, 1988 (eq. 5.7b, p. 181)
+    L = - ( theta_v * u_star^3 ) / ( kappa *g* cov(w',theta_v') )
     """
-    kappa=.4
-    return - (kappa *g* theta_v_star) / (u_star *u_star* theta_v_mean)
+    return - ( (u_star**2) * theta_v_mean) / (kappa *g* theta_v_star)
 
 
-def get_scales(data, u="u'", w="w'", theta="theta'", theta_v="theta_v'", q="q'"):
+def get_scales(data, siteConst,  
+  varDict={'u':r"u'",
+  'v':r"v'",
+  'w':r"w'",
+  'pressure':'p',
+  'temperature':'theta_v',
+  'temperature fluctuations':r"theta_v'",
+  'specific humidity':r"q'",
+  'relative humidity':'rh'},
+  g=9.81, kappa=0.4,
+  updt={}):
+
     """
+    Calculates characteristics lengths for data
     Assumes
     u_*^2 = -mean(u' * w')
     theta_* = -mean(theta' * w') / u_*
     theta_v_* = -mean(theta_v' * w') / u_*
     q_* = -mean(q' * w') / u_*
+
+    CHECKLIST:
+    ADD UDPT DICTIONARY FUNCTIONALITY
+    NEEDS IMPROVEMENT IN ORDER TO GET CONSTANTS FROM SITECONST OBJECT
+    ADD MIXED-LAYER CONVECTION SCALES FOR VELOCITY (w*) AND TEMPERATURE (t*)
     """
-    return np.sqrt(-algs.auxCov(data[uw]))
+    u=varDict['u']
+    v=varDict['v']
+    w=varDict['w']
+    p=varDict['pressure']
+    theta_v=varDict['temperature']
+    theta_v_fluc=varDict['temperature fluctuations']
+    q=varDict['specific humidity']
+    
+    u_star=np.sqrt(-algs.auxCov( data[[u,w]] ))
+    theta_v_star=algs.auxCov( data[[theta_v_fluc,w]] )/u_star
+    theta_v_mean=data[theta_v].mean()
+    q_star=algs.auxCov( data[[q,w]] )/u_star
+
+    L_m=MonObuLen(theta_v_star, theta_v_mean, u_star, g=g, kappa=kappa)
+    zeta=MonObuSimVar(L_m, siteConst)
+    return zeta, u_star, (L_m, theta_v_star, q_star)
 
 
-
-def calcLenghts(data,
-  mode='linear fit',
-  rule='10Min',
-  varDict={'u':'u',
-  'v':'v',
-  'w':'u',
-  'pressure':'p',
-  'temperature':'T',
-  'specific humidity':'q',
-  'relative humidity':'rh'},
-  **kwargs):
-    """
-    Calculates the usual characteristic lengths
-    """
-    from algs import splitData
-    chunks=splitData(data, frequency=rule)
-    for chunk in chunks:
-        u_prime=detrend(data, varDict['u'], mode=mode, **kwargs)
-        w_prime=detrend(data, varDict['w'], mode=mode, **kwargs)
-        theta_prime=detrend(data, varDict['thermodynamic temp'], mode=mode, **kwargs)
-        p_mean=data[varDict['pressure']].mean()
-        T_mean=data[varDict['temperature']].mean()
-        q_mean=data[varDict['specific humidity']].mean()
-        rho_wet=physics.wetAirDens(p=p_mean, T=T_mean, q=q_mean)
-
+#
+#def calcLenghts(data,
+#  mode='linear fit',
+#  rule='10Min',
+#  varDict={'u':'u',
+#  'v':'v',
+#  'w':'u',
+#  'pressure':'p',
+#  'temperature':'T',
+#  'specific humidity':'q',
+#  'relative humidity':'rh'},
+#  **kwargs):
+#    """
+#    Calculates the usual characteristic lengths
+#    """
+#    from algs import splitData
+#    chunks=splitData(data, frequency=rule)
+#    for chunk in chunks:
+#        u_prime=detrend(data, varDict['u'], mode=mode, **kwargs)
+#        w_prime=detrend(data, varDict['w'], mode=mode, **kwargs)
+#        theta_prime=detrend(data, varDict['thermodynamic temp'], mode=mode, **kwargs)
+#        p_mean=data[varDict['pressure']].mean()
+#        T_mean=data[varDict['temperature']].mean()
+#        q_mean=data[varDict['specific humidity']].mean()
+#        rho_wet=physics.wetAirDens(p=p_mean, T=T_mean, q=q_mean)
+#
 
 
 
@@ -104,9 +149,11 @@ class siteConstants(object):
              variables_units=None,
              cp=1003.5):
         # Checks if the variables_height is actually a Dict
-        if not isinstance(variables_height, dict):
-            raise TypeError('variables_height should be a dictionary. Ex.: {"u" : 10, "v" : 10, "theta" : 12 }')
-        self.constants=physics.constants()
+
+#        if not isinstance(variables_height, dict):
+#            raise TypeError('variables_height should be a dictionary. Ex.: {"u" : 10, "v" : 10, "theta" : 12 }')
+        import constants
+        self.constants=constants
         self.variables_height = variables_height #meters
         self.canopy_height = canopy_height         #meters
         if displacement_height==None:
