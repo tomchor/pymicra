@@ -15,6 +15,7 @@ Modifications:
 import pandas as pd
 import numpy as np
 import physics
+import algs
 
 def obukhovLen(theta_v_star, theta_v_mean, u_star, siteConst):
     """
@@ -34,6 +35,18 @@ def MonObuVar(theta_v_star, theta_v_mean, u_star, g=9.81):
     """
     kappa=.4
     return - (kappa *g* theta_v_star) / (u_star *u_star* theta_v_mean)
+
+
+def get_scales(data, u="u'", w="w'", theta="theta'", theta_v="theta_v'", q="q'"):
+    """
+    Assumes
+    u_*^2 = -mean(u' * w')
+    theta_* = -mean(theta' * w') / u_*
+    theta_v_* = -mean(theta_v' * w') / u_*
+    q_* = -mean(q' * w') / u_*
+    """
+    return np.sqrt(-algs.auxCov(data[uw]))
+
 
 
 def calcLenghts(data,
