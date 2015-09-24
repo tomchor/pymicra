@@ -9,7 +9,7 @@
  micrometeorology data. It mainly uses Pandas and Numpy for its
  analysis so these are required packages.
 """
-from io import dataloggerConf, timeSeries
+from io import dataloggerConf, timeSeries, read_dlc
 from micro import *
 import io
 import physics

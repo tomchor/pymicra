@@ -66,13 +66,30 @@ def splitData(data, frequency='30Min'):
     out.append(data[pdate:])
     return out
 
+def fitWrap(x,y,degree=1):
+    """
+    A wrapper to numpy.polyfit and numpy.polyval that fits data given an x and y arrays.
+    This is specifically designed to be used with by pandas.DataFrame.apply method
+
+    Parameters
+    ----------
+    x: array, list
+    y: array, list
+    degree: int
+    """
+    coefs=np.polyfit(x,y,degree)
+    yy=np.polyval(coefs,x)
+    return yy
 
 def fitByDate(data, degree=1, rule=None):
     """
     Given a pandas DataFrame with the index as datetime, this routine
     fit a n-degree polynomial to the dataset
 
-    SHOULD LATER ADD MULTIPLE COLUMNS FUNCTIONALITY
+    Parameters
+    ----------
+    data: pd.DataFrame, pd.Series
+        dataframe whose columns have to be fitted
     """
     if rule==None:
         dflist=[data]
@@ -80,11 +97,23 @@ def fitByDate(data, degree=1, rule=None):
         dflist=splitData(data, frequency=rule)
     out=pd.DataFrame()
     for data in dflist:
-        y=data.values
-        x=data.index.to_julian_date()
-        coefs=np.polyfit(x,y,degree)
-        yy=np.polyval(coefs,x)
-        aux=pd.DataFrame(yy, index=data.index)
+        xx=data.index.to_julian_date()
+        aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
         out=out.append(aux)
     return out
 
+
+def stripDown(str, final='', args=['_', '-']):
+    for arg in args:
+        str=str.replace(arg,final)
+    return str
+        
+
+def auxCov(data):
+    colnum=len(data.columns)
+    if colnum==1:
+        return np.mean(data.columns[0]*data.columns[0])
+    elif colnum==2:
+        return np.mean(data.columns[0]*data.columns[1])
+    else:
+        raise TypeError('Datset with more than two columns')

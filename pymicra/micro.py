@@ -24,11 +24,9 @@ def rotCoor(data, wind_vars=['u','v','w'], verbose=0):
     Parameters
     ----------
     data: pandas DataFrame 
-    the dataFrame to be rotated
-
+        the dataFrame to be rotated
     wind_vars: list
-    a list with the names of columns which define the wind speed, typically ['u','v','w']
-
+        a list with the names of columns which define the wind speed, typically ['u','v','w']
     """
     from numpy import cos,sin,zeros,dot
     from math import atan2, sqrt
@@ -50,23 +48,20 @@ def rotCoor(data, wind_vars=['u','v','w'], verbose=0):
     return data
 
 
-def trend(data, mode='moving average', rule='10min', window=None, **kwargs):
+def trend(data, mode='moving average', rule=None, window=None, **kwargs):
     """
-    Wrapper to return the moving/block average or polynomial fit of a given data
+    Wrapper to return the trend given data. Can be achieved using a moving avg, block avg or polynomial fitting
     -------------
 
     Parameters
     ----------
 
     data: pandas DataFrame 
-    the dataFrame to be rotated
-
+        the dataFrame to be rotated
     mode: string
-    mode of average to apply. Currently {'moving', 'block'}.
-
+        mode of average to apply. Currently {'moving', 'block'}.
     rule: string
-    pandas offset string to define the block in the block average. Default is "10min".
-
+        pandas offset string to define the block in the block average. Default is "10min".
     """
     mode=mode.lower().replace('_',' ').replace('-','').replace(' ','')
     if any(w==mode for w in ['moving', 'movingaverage']):
@@ -76,10 +71,13 @@ def trend(data, mode='moving average', rule='10min', window=None, **kwargs):
             window=int(len(data)/len(data.resample(rule)))
         return pd.rolling_mean(data, window=window, **kwargs)
     elif any(w==mode for w in ['block', 'blockaverage']):
-        # performs block average on the data with the window being the rule
-        # assumes that frequency is constant
-        freq=str((data.index[1]-data.index[0]).microseconds)
-        return data.resample(rule, how='mean', **kwargs).resample(freq+'U', fill_method='pad')
+        # performs block average on the data with the window being the rule. Assumes that frequency is constant
+        if rule==None:
+            return data.apply(lambda x: [np.mean(x)]*len(x), axis=0)
+        else:
+            print 'Warning. Might be bugged. Check results.'
+            freq=data.index.inferred_freq
+            return data.resample(rule, how='mean', **kwargs).resample(freq, fill_method='pad')
     elif any(w in mode for w in ['linear', 'detrend', 'fit']):
         # performs a polynomial fit on the data in blocks of "rule"
         from algs import fitByDate
@@ -88,12 +86,27 @@ def trend(data, mode='moving average', rule='10min', window=None, **kwargs):
         # if no mode can be identified
         raise KeyError('Mode defined is not correct. Options are "moving" and "block".')
 
-def detrend(data, variables, mode='moving average', rule='10Min', **kwargs):
+def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
     """
-    Returns the detrended data of variables
+    Returns the detrended fluctuations of a given dataset
+
+    Parameters
+    ----------
+
+    data: pandas.DataFrame, pandas.Series
+
+    mode: string
+        what method to use in order to identify the trend
+    rule: pandas offset string
+        the blocks for which the trends should be calculated
+    suffix: string
+        suffix to add to variable names after fluctuation is extracted
     """
-    mode=mode.lower().replace('_',' ').replace('-','').replace(' ','')
-    return False 
+    from algs import stripDown
+    mode=stripDown(mode.lower(), args='-_')
+    data=data-trend(data, mode=mode, rule=rule, **kwargs)
+    return data.add_suffix(suffix)
+
 
 def spectrum2(data, window='1min', frequency=10, absolute=True, T=30):
     """
@@ -159,16 +172,13 @@ def spectrum(data, variable=None, frequency=10, absolute=True, T=30):
     data: pandas DataFrame/ timeSeries
 
     col: str
-    the column for which to calculate the spectrum
-
+        the column for which to calculate the spectrum
     frequency: float
-    frequency of measurement of signal to pass to numpy.fft.rfftfreq
-
+        frequency of measurement of signal to pass to numpy.fft.rfftfreq
     absolute: bool
-    wether or not the results will be given in absolute value
-
+        whether or not the results will be given in absolute value
     T: int, float
-    period in minutes
+        period in minutes
     """
     T=T*60.
     if variable==None:
@@ -226,7 +236,6 @@ def MonObuVar(theta_v_star, theta_v_mean, u_star, g=9.81):
     """
     kappa=.4
     return - (kappa *g* theta_v_star) / (u_star *u_star* theta_v_mean)
-
 
 
 def calcLenghts(data,

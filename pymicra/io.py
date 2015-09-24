@@ -53,7 +53,7 @@ def readDataFiles(flist, **kwargs):
         data=pd.concat( [data, subdata], ignore_index=True)
     return data
 
-def parseDates(data, date_cols, connector='-', first_time_skip=1, clean=True):
+def parseDates(data, date_cols, connector='-', first_time_skip=0, clean=True):
     """
     Author: Tomas Chor
     date: 2015-08-10
@@ -77,7 +77,10 @@ def parseDates(data, date_cols, connector='-', first_time_skip=1, clean=True):
     #-------------------------------------
     # joins the appropriate pandas columns because pandas can read only one column into datetime
     #-------------------------------------
-    aux=data[date_cols[0]].astype(int).astype(str)
+    try:
+        aux=data[date_cols[0]].astype(int).astype(str)
+    except ValueError:
+        aux=data[date_cols[0]].astype(str)
     for col in date_cols[1:]:
         aux+=connector + data[col].astype(int).astype(str)
     dates=pd.to_datetime(aux, format=date_format)
@@ -87,7 +90,10 @@ def parseDates(data, date_cols, connector='-', first_time_skip=1, clean=True):
     #-------------------------------------
     first_date=dates.unique()[1]
     n_fracs=len(dates[dates.values==first_date])
-    print 'Identified that each minute contains', n_fracs, 'fractions'
+    if n_fracs>1:
+        print 'Warninig! I identified that each timestamp entry contains', n_fracs, 'fractions.\n\
+This generally means that the data is sampled at a frequency greater than the frequency of the timestamp.\
+I will then proceed to guess the fractions based of the keyword "first_time_skip" and correct the index.'
     dates=[ date.strftime(auxformat) for date in dates ]
     aux=dates[0]
     cont=first_time_skip
@@ -195,19 +201,26 @@ def to_array(data):
     return [data.index.to_pydatetime]+vals
 
 
-def read_dlc(file):
+def read_dlc(dlcfile):
     """
     Reads datalogger configuration file
+
+    WARNING! When defining the .dlc note that by default columns that are enclosed between doublequotes
+    will appear without the doublequotes. So if your file is of the form :
+
+    "2013-04-05 00:00:00", .345, .344, ...
+
+    Then the .dlc should have: varNames=['%Y-%m-%d %H:%M:%S','u','v']. This is the default csv format of
+    CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
     """
     globs={}
     dlcvars={}
     try:
         execfile(dlcfile, globs, dlcvars)
     except NameError:
-        # python3 does not have an execfilen function
-        # this is yet to be tested
-        with open(file) as f:
-            code=compile(f.read(), file, 'exec')
+        print '''This version of python does not have an execfile function. This workaround should work but is yet to be fully tested'''
+        with open(dlcfile) as f:
+            code=compile(f.read(), dlcfile, 'exec')
             exec(code, globs, dlcvars)
     return dataloggerConf(**dlcvars)
 
