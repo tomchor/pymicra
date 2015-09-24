@@ -117,3 +117,14 @@ def auxCov(data):
         return np.mean(data.columns[0]*data.columns[1])
     else:
         raise TypeError('Datset with more than two columns')
+
+
+
+def lenYear(year):
+    import calendar
+    feblen=calendar.monthrange(year,2)[1]
+    otherlens=365-28
+    return feblen + otherlens
+
+
+

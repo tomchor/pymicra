@@ -11,7 +11,9 @@
 """
 from io import dataloggerConf, timeSeries, read_dlc
 from micro import *
+from data import *
 import io
 import physics
 import algs
+import util
 __version__='0.1.0'
