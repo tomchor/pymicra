@@ -96,6 +96,35 @@ def get_scales(data, siteConst,
     return zeta, u_star, (L_m, theta_v_star, q_star)
 
 
+def get_fluxes(u_star, q_star, theta_star, theta_v_star, c_star, rho_mean, cp=1):
+    """
+    Get fluxes according to char lengths
+    
+    TO-DO LIST:
+    add more concentrations to the variables
+    """
+    tau=rho_mean* (u_star**2.)
+    H=  rho_mean* cp* u_star* theta_star
+    E=  rho_mean* cp* u_star* q_star
+    Hv= rho_mean* cp* u_star* theta_v_star
+    F=  rho_mean* u_star* c_star
+    return, tau, H, E, Hv, F
+
+
+def phi_H(zeta):
+    """
+    Currently using Businger-Dyer eqs.
+
+    TO-DO LIST:
+    include more types
+    """
+    if zeta<0:
+        return np.sqrt(1. - 16.*zeta)
+    if zeta>0:
+        return 1. + 5.*zeta
+
+
+
 #
 #def calcLenghts(data,
 #  mode='linear fit',

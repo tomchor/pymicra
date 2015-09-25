@@ -36,7 +36,8 @@ def gradients(data, levels, order='Crescent'):
     flux=pd.DataFrame(index=data.index)
     for pair in combine(levels, order=order):
         a,b=pair
-        flux[str(a)+'-'+str(b)]=data[a]-data[b]
+        grad=data[a]-data[b]
+        flux[str(a)+'-'+str(b)]= rho_mean* C_f* u_mean* grad
     return flux
 
 
