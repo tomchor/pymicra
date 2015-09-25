@@ -59,7 +59,6 @@ def get_scales(data, siteConst,
   'temperature fluctuations':r"theta_v'",
   'specific humidity':r"q'",
   'relative humidity':'rh'},
-  g=9.81, kappa=0.4,
   updt={}):
 
     """
@@ -75,7 +74,6 @@ def get_scales(data, siteConst,
     u,v,w,pressure, temperature, temperature fluctuations, specific humidity, relative humidity
 
     CHECKLIST:
-    ADD UDPT DICTIONARY FUNCTIONALITY
     NEEDS IMPROVEMENT IN ORDER TO GET CONSTANTS FROM SITECONST OBJECT
     ADD MIXED-LAYER CONVECTION SCALES FOR VELOCITY (w*) AND TEMPERATURE (t*)
     """
@@ -93,7 +91,7 @@ def get_scales(data, siteConst,
     theta_v_mean=data[theta_v].mean()
     q_star=algs.auxCov( data[[q,w]] )/u_star
 
-    L_m=MonObuLen(theta_v_star, theta_v_mean, u_star, g=g, kappa=kappa)
+    L_m=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity, kappa=siteConst.constants.kappa)
     zeta=MonObuSimVar(L_m, siteConst)
     return zeta, u_star, (L_m, theta_v_star, q_star)
 
