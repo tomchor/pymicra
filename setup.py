@@ -16,7 +16,7 @@ except ImportError:
     _has_setuptools = False
 
 if _has_setuptools:
-    extra_kwargs={'install_requires' : dependencies }
+    extra_kwargs={'install_requires' : dependencies, zip_safe : False}
 else:
     import pkg_resources
     pkg_resources.require(dependencies)
@@ -33,5 +33,4 @@ setup(name='pymicra',
       author_email='t.chor0@gmail.com',
       license='GNU GPL V3.0',
       packages=['pymicra'],
-      zip_safe=False,
       **extra_kwargs)
