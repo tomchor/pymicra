@@ -70,11 +70,16 @@ def get_scales(data, siteConst,
     theta_v_* = -mean(theta_v' * w') / u_*
     q_* = -mean(q' * w') / u_*
 
+    The names of the variables are retrived out the dictionary. You can update the dictionary
+    and change the names by using the updt keyword with the keys
+    u,v,w,pressure, temperature, temperature fluctuations, specific humidity, relative humidity
+
     CHECKLIST:
     ADD UDPT DICTIONARY FUNCTIONALITY
     NEEDS IMPROVEMENT IN ORDER TO GET CONSTANTS FROM SITECONST OBJECT
     ADD MIXED-LAYER CONVECTION SCALES FOR VELOCITY (w*) AND TEMPERATURE (t*)
     """
+    varDict.update(updt)
     u=varDict['u']
     v=varDict['v']
     w=varDict['w']

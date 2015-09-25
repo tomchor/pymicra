@@ -48,7 +48,12 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
     ---------
     dr is the julian day of the solstice. Default is June 21
     """
-    da=lenYear(date.year)   # Number of days in the year
+    from calendar import isleap
+    if isleap(date.year):   # checks if its a leapyear
+        da=366
+    else:
+        da=365
+    #da=lenYear(date.year)   # Number of days in the year
     tt=date.timetuple()
     j_day=tt.tm_yday
     gamma = 2.*pi/365.*(j_day - 1.)

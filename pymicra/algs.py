@@ -104,23 +104,36 @@ def fitByDate(data, degree=1, rule=None):
 
 
 def stripDown(str, final='', args=['_', '-']):
+    """
+    Auxiliar function to strip down kaywords from symbols
+    """
     for arg in args:
         str=str.replace(arg,final)
     return str
         
 
 def auxCov(data):
+    """
+    Auxiliar function to obtain covariances in a pandas.DataFrame
+
+    data: pandas.DataFrame, pandas.Series
+        the data whose covariance you want to obtain. Maximum number of columns is 2
+    """
     colnum=len(data.columns)
     if colnum==1:
-        return np.mean(data.columns[0]*data.columns[0])
+        return np.mean( data[data.columns[0]]*data[data.columns[0]] )
     elif colnum==2:
-        return np.mean(data.columns[0]*data.columns[1])
+        return np.mean( data[data.columns[0]]*data[data.columns[1]] )
     else:
         raise TypeError('Datset with more than two columns')
 
 
 
 def lenYear(year):
+    """
+    Calculates the length of a year in days
+    Useful to figure out if a certain year is a leap year
+    """
     import calendar
     feblen=calendar.monthrange(year,2)[1]
     otherlens=365-28
