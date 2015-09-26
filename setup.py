@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 """
-Parts of this file were taken from Pandas under the
-Apache License, Version 2.0
+Python Micrometeorological Analysis tool - Pymicra
 """
 
 dependencies=['Pandas>=0.15', 'Numpy']
@@ -30,7 +29,7 @@ setup(name='pymicra',
       long_description=open('README.md').read(),
       url='https://github.com/tomchor/pymicra.git',
       author='Tomas Chor',
-      author_email='t.chor0@gmail.com',
+      author_email='tomaschor@gmail.com',
       license='GNU GPL V3.0',
       packages=['pymicra'],
       **extra_kwargs)

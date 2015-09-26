@@ -4,10 +4,6 @@ Author: Tomas Chor
 Date: 2015-08-07
 -------------------------
 
-This module works with micrometeorological data using pandas, numpy, datetime and several other packages
-
--------------------------
-
 Modifications:
 
 """

@@ -167,6 +167,7 @@ def spectrum_old(data, variable=None, frequency=10, absolute=True, T=30):
 
     Parameters
     ----------
+    SHOULD NOT BE USED - PROBABLY OBSOLETE
 
     data: pandas DataFrame/ timeSeries
 

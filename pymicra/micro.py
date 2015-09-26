@@ -125,36 +125,6 @@ def phi_H(zeta):
 
 
 
-#
-#def calcLenghts(data,
-#  mode='linear fit',
-#  rule='10Min',
-#  varDict={'u':'u',
-#  'v':'v',
-#  'w':'u',
-#  'pressure':'p',
-#  'temperature':'T',
-#  'specific humidity':'q',
-#  'relative humidity':'rh'},
-#  **kwargs):
-#    """
-#    Calculates the usual characteristic lengths
-#    """
-#    from algs import splitData
-#    chunks=splitData(data, frequency=rule)
-#    for chunk in chunks:
-#        u_prime=detrend(data, varDict['u'], mode=mode, **kwargs)
-#        w_prime=detrend(data, varDict['w'], mode=mode, **kwargs)
-#        theta_prime=detrend(data, varDict['thermodynamic temp'], mode=mode, **kwargs)
-#        p_mean=data[varDict['pressure']].mean()
-#        T_mean=data[varDict['temperature']].mean()
-#        q_mean=data[varDict['specific humidity']].mean()
-#        rho_wet=physics.wetAirDens(p=p_mean, T=T_mean, q=q_mean)
-#
-
-
-
-
 #------------------------------------
 #
 #------------------------------------

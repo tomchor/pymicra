@@ -6,16 +6,15 @@ Module that contains physical functions for general use
 
 TO DO LIST:
 
-* REMOVE CONSTANTS CLASS
 * ADD GENERAL SOLAR ZENITH CALCULATION
 * ADD PINT FUNCTIONALITY
 * ADD FOOTPRINT CALCULATION
-* ADD CO-SPECTRUM
 
 
 """
 from constants import *
-
+from datetime import timedelta
+from math import pi,sin,cos,acos,radians,degrees
 
 def gradients(data, levels, order='Crescent'):
     """
@@ -45,6 +44,8 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
     """
     Calculates the solar zenith angle at any given day
 
+    needs validation and needs to work without dr or lon0
+
     Parameters
     ---------
     dr is the julian day of the solstice. Default is June 21
@@ -61,7 +62,7 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
     et = 1./60.* (229.18*(0.000075 + 0.001868*cos(gamma) - 0.032077*sin(gamma)-0.014615*cos(2.*gamma) - 0.04089*sin(2.*gamma)))
     y = (lon-lon0)/15.*60. # Calculo em minutos
     soma = y + 60.*et # Calculo em minutos
-    solar_date = date + datetime.timedelta(soma/(24.*60.)) # adiciono os minutos ao dia oficial!
+    solar_date = date + timedelta(soma/(24.*60.)) # adiciono os minutos ao dia oficial!
     delta = 0.409*cos((2.*pi*(j_day-dr)/da))
     Hsv = solar_date.hour + solar_date.minute/60. + solar_date.second/3600.
     h = 2.*pi/24.*(Hsv - 12.) # Descobrir em que unidade entrar essa hora solar aqui!!
