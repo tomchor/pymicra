@@ -145,8 +145,12 @@ def wetAirDens(p=None, T=None, q=None):
     rho_wet=(p/(R_dry*T)) * (1. - q*(1. - R_dry/R_h2o))
     return rho_wet
 
-temp,e,p,eps=[1]*4
-virt_temp=temp/(1. -(e/p)*(1.-eps))
-
+def virtualTemp(T, tpres, ppres):
+    """
+    Gets virtual temperature from thermodynamic temperature, total pressure and water vapor pressure
+    mu=R_dry/R_water_vapor is approx 0.622
+    """
+    virt_temp=temp/(1. -(ppres/tpres)*(1.-mu))
+    return virt_temp
 
 
