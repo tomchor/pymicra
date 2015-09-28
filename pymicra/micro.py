@@ -47,18 +47,21 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=9.81, kappa=0.4):
     STULL, An introduction to Boundary layer meteorology, 1988 (eq. 5.7b, p. 181)
     L = - ( theta_v * u_star^3 ) / ( kappa *g* cov(w',theta_v') )
     """
-    return - ( (u_star**2) * theta_v_mean) / (kappa *g* theta_v_star)
+    Lm= - ( (u_star**2) * theta_v_mean) / (kappa *g* theta_v_star)
+    return Lm
 
 
 def get_scales(data, siteConst,  
-  varDict={'u':r"u'",
-  'v':r"v'",
-  'w':r"w'",
-  'pressure':'p',
-  'temperature':'theta_v',
-  'temperature fluctuations':r"theta_v'",
-  'specific humidity':r"q'",
-  'relative humidity':'rh'},
+  varDict={
+  'u'   :r"u'",
+  'v'   :r"v'",
+  'w'   :r"w'",
+  'pressure'        :'p',
+  'temperature'     :'theta',
+  'virtual temperature' :'theta_v',
+  'virtual temperature fluctuations'    :"theta_v'",
+  'specific humidity'   :r"q'",
+  'relative humidity'   :'rh'},
   updt={}):
 
     """
@@ -82,8 +85,9 @@ def get_scales(data, siteConst,
     v=varDict['v']
     w=varDict['w']
     p=varDict['pressure']
-    theta_v=varDict['temperature']
-    theta_v_fluc=varDict['temperature fluctuations']
+    theta=varDict['temperature']
+    theta_v=varDict['virtual temperature']
+    theta_v_fluc=varDict['virtual temperature fluctuations']
     q=varDict['specific humidity']
     
     u_star=np.sqrt(-algs.auxCov( data[[u,w]] ))
