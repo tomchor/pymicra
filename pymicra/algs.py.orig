@@ -140,6 +140,7 @@ def lenYear(year):
     return feblen + otherlens
 
 
+<<<<<<< HEAD
 def limited_interpolation(data, maxcount=3):
     '''
     Interpolates linearly but only if gap is smaller of equal to maxcout
@@ -161,6 +162,7 @@ def limited_interpolation(data, maxcount=3):
     return data
 
 
+=======
 def inverse_normal_cdf(mu, sigma):
     """
     Inverse normal CDF
@@ -172,5 +174,6 @@ def inverse_normal_cdf(mu, sigma):
         Z=math.sqrt(2)*erfinv(-2.*phi+1.)
         return sigma*Z + mu
     return f
+>>>>>>> 17d48ece69a3aaed2472da5f395858261c55bfdc
 
 

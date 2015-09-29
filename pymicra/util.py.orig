@@ -11,6 +11,7 @@ CHECKLIST
 
 """
 
+<<<<<<< HEAD
 def check_spikes(dfs, maxcount=3):
     '''
     Applies spikes-check accorgin to Vickers and Mart (1997)
@@ -41,9 +42,7 @@ def check_spikes(dfs, maxcount=3):
     valid_cols=valid_cols/fou_points
     return fou, valid_cols
 
-
-
-
+=======
 def reverse_arrangement(array, points_number=None, alpha=0.05):
     '''
     Performs the reverse arrangement test
@@ -104,4 +103,5 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
         return True
     else:
         return False
+>>>>>>> 17d48ece69a3aaed2472da5f395858261c55bfdc
 
