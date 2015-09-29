@@ -140,4 +140,26 @@ def lenYear(year):
     return feblen + otherlens
 
 
+def limited_interpolation(data, maxcount=3):
+    '''
+    Interpolates linearly but only if gap is smaller of equal to maxcout
+
+    Parameters:
+    -----------
+
+    data: pandas.DataFrame
+        dataset to interpolate
+    maxcount: int
+        maximum number of consecutive NaNs to interpolate. If the number is smaller than that, nothing is done with the points.
+    '''
+    mask = data.copy()
+    grp = ((mask.notnull() != mask.shift().notnull()).cumsum())
+    grp['ones'] = 1
+    for i in data.columns:
+        mask[i] = (grp.groupby(i)['ones'].transform('count') <= maxcount) | data[i].notnull()
+    data=data.interpolate(mode='time').bfill()[mask]
+    return data
+
+
+
 

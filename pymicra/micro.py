@@ -59,7 +59,8 @@ def get_scales(data, siteConst,
   'temperature fluctuations':r"theta_v'",
   'specific humidity':r"q'",
   'relative humidity':'rh'},
-  updt={}):
+  updt={},
+  use_theta=False):
 
     """
     Calculates characteristics lengths for data
