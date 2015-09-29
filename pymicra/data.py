@@ -78,7 +78,7 @@ def trend(data, mode='moving average', rule=None, window=None, **kwargs):
             print 'Warning. Might be bugged. Check results.'
             freq=data.index.inferred_freq
             return data.resample(rule, how='mean', **kwargs).resample(freq, fill_method='pad')
-    elif any(w in mode for w in ['linear', 'detrend', 'fit']):
+    elif any(w in mode for w in ['linear', 'polynomial', 'fit']):
         # performs a polynomial fit on the data in blocks of "rule"
         from algs import fitByDate
         return fitByDate(data, rule=rule, **kwargs)

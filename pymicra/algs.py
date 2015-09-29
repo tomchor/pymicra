@@ -161,5 +161,17 @@ def limited_interpolation(data, maxcount=3):
     return data
 
 
+def inverse_normal_cdf(mu, sigma):
+    """
+    Inverse normal CDF
+
+    Parameters
+    """
+    from scipy.special import erfinv
+    def f(phi):
+        Z=math.sqrt(2)*erfinv(-2.*phi+1.)
+        return sigma*Z + mu
+    return f
+>>>>>>> 17d48ece69a3aaed2472da5f395858261c55bfdc
 
 
