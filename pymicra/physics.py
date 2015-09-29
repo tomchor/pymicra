@@ -120,18 +120,18 @@ def get_temperature_with_elevation(h, Ts=standard_temperature, Tl=temperature_la
     return Ts + h *Tl
 
 
-def perfGas(p=None, rho=None, R=None, T=None, gas='dry_air'):
+def perfGas(p=None, rho=None, R=None, T=None, gas=None):
     """
     Returns the only value that is not provided in the ideal gas law
     """
-    aux=constants()
-    R_spec=aux.R_spec[gas]
+    if gas==None and R==None:
+        R=R_spec[gas]
     if p == None:
-        return rho*Ri_spec*T
+        return rho*R*T
     elif rho == None:
-        return p / (R_spec*T)
+        return p / (R*T)
     elif T == None:
-        return p / (R_spec*rho)
+        return p / (R*rho)
     elif R == None:
         return p / (rho*T)
     return

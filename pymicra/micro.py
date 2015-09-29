@@ -60,6 +60,7 @@ def get_scales(data, siteConst,
   'temperature'     :'theta',
   'virtual temperature' :'theta_v',
   'virtual temperature fluctuations'    :"theta_v'",
+  'co2 fluctuations':    "co2'",
   'specific humidity'   :r"q'",
   'relative humidity'   :'rh'},
   updt={},
@@ -91,15 +92,17 @@ def get_scales(data, siteConst,
     theta_v=varDict['virtual temperature']
     theta_v_fluc=varDict['virtual temperature fluctuations']
     q=varDict['specific humidity']
+    c=varDict["co2 fluctuations"]
     
     u_star=np.sqrt(-algs.auxCov( data[[u,w]] ))
     theta_v_star=algs.auxCov( data[[theta_v_fluc,w]] )/u_star
     theta_v_mean=data[theta_v].mean()
     q_star=algs.auxCov( data[[q,w]] )/u_star
+    c_star=algs.auxCov( data[[c,w]] )/u_star
 
     L_m=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity, kappa=siteConst.constants.kappa)
     zeta=MonObuSimVar(L_m, siteConst)
-    return zeta, u_star, (L_m, theta_v_star, q_star)
+    return zeta, u_star, (L_m, theta_v_star, q_star, c_star)
 
 
 def get_fluxes(u_star, q_star, theta_star, theta_v_star, c_star, rho_mean, cp=None):
@@ -110,7 +113,8 @@ def get_fluxes(u_star, q_star, theta_star, theta_v_star, c_star, rho_mean, cp=No
     add more concentrations to the variables
     """
     if cp==None:
-        from constants import cp
+        from constants import cp_dry
+    cp=cp_dry
     tau=rho_mean* (u_star**2.)
     H=  rho_mean* cp* u_star* theta_star
     Hv= rho_mean* cp* u_star* theta_v_star
