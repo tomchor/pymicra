@@ -1,6 +1,8 @@
-# PyMicrA - Python Micrometeorology Analysis tool
+# PyMicrA - Python Micrometeorological Analysis tool
 
 This package was designed at Lemma, at the Federal University of Parana (UFPR), to make it easier to work with micrometeorological data. Currently the package is aimed towards agregating all of the functionality commonly needed to process, read, and extract fluxes and etc from micrometeorological data. This leaves Pandas in charge of the optimization. In a near future we will also focus on our own kinds of optimization.
+
+Pymicra is currently fully writen in python.
 
 *This package is still under construction. More will come soon.*
 
