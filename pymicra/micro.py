@@ -66,13 +66,13 @@ def get_scales(data, siteConst,
   'specific humidity'   :r"q'",
   'relative humidity'   :'rh'},
   updt={},
-  use_theta=False,
   output_as_df=True):
 
 
     """
     Calculates characteristics lengths for data
-    Assumes
+
+    Assumes:
     u_*^2 = -mean(u' * w')
     theta_* = -mean(theta' * w') / u_*
     theta_v_* = -mean(theta_v' * w') / u_*
@@ -81,6 +81,19 @@ def get_scales(data, siteConst,
     The names of the variables are retrived out the dictionary. You can update the dictionary
     and change the names by using the updt keyword with the keys
     u,v,w,pressure, temperature, temperature fluctuations, specific humidity, relative humidity
+
+    Parameters:
+    -----------
+    data: pandas.DataFrame
+        dataset to be used. Must have a minimum of columns in order for it to work
+    siteConst: pymicra.siteConstants object
+        currently not used
+    varDict: dictionary
+        dictionary saying which names the variables have in the dataframe
+    updt: dictionary
+        use this dictionary to change a small amount of the names that the variables have in the dataframe
+    output_as_df: boolean
+        True if you want the output to be a one-line pandas.DataFrame
 
     CHECKLIST:
     NEEDS IMPROVEMENT IN ORDER TO GET CONSTANTS FROM SITECONST OBJECT
@@ -115,14 +128,44 @@ def get_scales(data, siteConst,
     Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity, kappa=siteConst.constants.kappa)
     zeta=MonObuSimVar(Lm, siteConst)
     if output_as_df:
+        namespace=locals()
         columns=['zeta', 'Lm', 'u_mean', 'u_star', 'theta_v_mean', 'theta_v_star', 'theta_mean', 'theta_star', 'q_mean', 'q_star', 'c_mean', 'c_star']
-        dic={ col : [eval(col)] for col in columns }
-        #out=pd.DataFrame([zeta, Lm, u_mean, u_star, theta_v_mean, theta_v_star, theta_mean, theta_star, q_mean, q_star, c_mean, c_star],
-        out=pd.DataFrame(dic,
-          index=[data.index[0]])
+        dic={ col : [namespace[col]] for col in columns }
+        out=pd.DataFrame(dic, index=[data.index[0]])
         return out
     else:
         return zeta, Lm, (u_mean, u_star), (theta_v_mean, theta_v_star), (theta_mean, theta_star), (q_mean, q_star), (c_mean, c_star)
+
+
+def get_fluxes_DF(data, cp=None):
+    """
+    Get fluxes according to char lengths
+    
+    add more concentrations to the variables
+
+    Parameters:
+    -----------
+    data: pandas.DataFrame
+        dataframe with the characteristic lengths calculated
+    cp: float (optional)
+        value for the specific heat capacity at constant pressure
+    """
+    if cp==None:
+        from constants import cp_dry
+    cp=cp_dry
+    rho_mean=data['rho_mean']
+    u_star=data['u_star']
+    theta_star=data['theta_star']
+    theta_v_star=data['theta_v_star']
+    q_star=data['q_star']
+    c_star=data['c_star']
+    tau=rho_mean* (u_star**2.)
+    data['H']=  rho_mean* cp* u_star* theta_star
+    data['Hv']= rho_mean* cp* u_star* theta_v_star
+    # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
+    data['E']=  rho_mean* u_star* q_star
+    data['F']=  rho_mean* u_star* c_star
+    return data
 
 
 def get_fluxes(u_star, q_star, theta_star, theta_v_star, c_star, rho_mean, cp=None):

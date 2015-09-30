@@ -174,3 +174,11 @@ def inverse_normal_cdf(mu, sigma):
     return f
 
 
+def limitedSubs(data,maxcount=3):
+    df=data.copy()
+    cond = abs(df) > abs(df.std())
+    for c in df.columns:
+        grouper = (cond[c] != cond[c].shift(1)).cumsum() * cond[c]
+        fill = (df.groupby(grouper)[c].transform('size') <= maxcount)
+        df.loc[fill, c] = np.nan
+    return df
