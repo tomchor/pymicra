@@ -8,8 +8,10 @@ This module works with micrometeorological data using pandas, numpy, datetime an
 
 -------------------------
 
-Modifications:
+TO-DO LIST
 
+Maybe add all these variables that EddyPro calculates:
+http://www.licor.com/env/help/EddyPro3/Content/Topics/Calculating_Micromet_Variables.htm
 
 """
 import pandas as pd
@@ -64,7 +66,8 @@ def get_scales(data, siteConst,
   'specific humidity'   :r"q'",
   'relative humidity'   :'rh'},
   updt={},
-  use_theta=False):
+  use_theta=False,
+  output_as_df=True):
 
 
     """
@@ -95,14 +98,31 @@ def get_scales(data, siteConst,
     c=varDict["co2 fluctuations"]
     
     u_star=np.sqrt(-algs.auxCov( data[[u,w]] ))
+    u_mean=data[u].mean()
+
     theta_v_star=algs.auxCov( data[[theta_v_fluc,w]] )/u_star
     theta_v_mean=data[theta_v].mean()
-    q_star=algs.auxCov( data[[q,w]] )/u_star
-    c_star=algs.auxCov( data[[c,w]] )/u_star
 
-    L_m=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity, kappa=siteConst.constants.kappa)
-    zeta=MonObuSimVar(L_m, siteConst)
-    return zeta, u_star, (L_m, theta_v_star, q_star, c_star)
+    q_star=algs.auxCov( data[[q,w]] )/u_star
+    q_mean=data[q].mean()
+
+    c_star=algs.auxCov( data[[c,w]] )/u_star
+    c_mean=data[c].mean()
+
+    theta_mean=data[theta].mean()
+    theta_star=(theta_v_star - 0.61*theta_mean*q_star)/(1.+0.61*q_mean)
+
+    Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity, kappa=siteConst.constants.kappa)
+    zeta=MonObuSimVar(Lm, siteConst)
+    if output_as_df:
+        columns=['zeta', 'Lm', 'u_mean', 'u_star', 'theta_v_mean', 'theta_v_star', 'theta_mean', 'theta_star', 'q_mean', 'q_star', 'c_mean', 'c_star']
+        dic={ col : [eval(col)] for col in columns }
+        #out=pd.DataFrame([zeta, Lm, u_mean, u_star, theta_v_mean, theta_v_star, theta_mean, theta_star, q_mean, q_star, c_mean, c_star],
+        out=pd.DataFrame(dic,
+          index=[data.index[0]])
+        return out
+    else:
+        return zeta, Lm, (u_mean, u_star), (theta_v_mean, theta_v_star), (theta_mean, theta_star), (q_mean, q_star), (c_mean, c_star)
 
 
 def get_fluxes(u_star, q_star, theta_star, theta_v_star, c_star, rho_mean, cp=None):
