@@ -137,7 +137,7 @@ def get_scales(data, siteConst,
         return zeta, Lm, (u_mean, u_star), (theta_v_mean, theta_v_star), (theta_mean, theta_star), (q_mean, q_star), (c_mean, c_star)
 
 
-def get_fluxes_DF(data, cp=None):
+def get_fluxes_DF(data, cp=None, wpl=True):
     """
     Get fluxes according to char lengths
     
@@ -159,13 +159,18 @@ def get_fluxes_DF(data, cp=None):
     theta_v_star=data['theta_v_star']
     q_star=data['q_star']
     c_star=data['c_star']
-    tau=rho_mean* (u_star**2.)
-    data['H']=  rho_mean* cp* u_star* theta_star
-    data['Hv']= rho_mean* cp* u_star* theta_v_star
+    out=pd.DataFrame(index=data.index)
+    out['tau']=rho_mean* (u_star**2.)
+    out['H']=  rho_mean* cp* u_star* theta_star
+    out['Hv']= rho_mean* cp* u_star* theta_v_star
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
-    data['E']=  rho_mean* u_star* q_star
-    data['F']=  rho_mean* u_star* c_star
-    return data
+    if wpl:
+        out['E']=  rho_mean* u_star* q_star
+        out['F']=  rho_mean* u_star* c_star
+    else:
+        out['E']=   (1+mu*rv)*(cov(w,rho_v) + rho_v_mean*(cov(w*theta)/theta_mean))
+        out['F']=   rho_c*(1 + mu*rv)*cov(w,theta)/theta_mean + mu*rc*cov(w,rho_v) + cov(w,rho_c)
+    return out
 
 
 def get_fluxes(u_star, q_star, theta_star, theta_v_star, c_star, rho_mean, cp=None):
