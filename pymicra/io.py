@@ -9,6 +9,12 @@ Modifications:
 """
 import pandas as pd
 
+
+#-------------------------------------------
+#-------------------------------------------
+# INPUT OF DATA
+#-------------------------------------------
+#-------------------------------------------
 def readDataFile(fname, varNames=None, **kwargs):
     """
     Author: Tomas Chor
@@ -223,4 +229,50 @@ def read_dlc(dlcfile):
     return dataloggerConf(**dlcvars)
 
 
+def readUnitsCsv(filename, names=0 units=1):
+    """
+    Reads a csv file in which the first line is the name of the variables
+    and the second line contains the units
 
+    Parameters:
+    -----------
+    filename: string
+        path of the csv file to read
+    names: int
+        line number (starting from zero) that has the variables' names
+    units: int
+        line number (starting from zero) that has the variables' units
+
+    Returns:
+    --------
+    df: pandas.DataFrame
+        dataframe with the data
+    unitsdic: dictionary
+        dictionary with the variable names as keys and the units as values
+    """
+    df=pd.read_csv(filename, header=[names, units], index_col=0, parse_dates=[0])
+    cols,units=zip(*df.columns)
+    unitsdic={ k:v for k,v in zip(cols,units) }
+    df.columns=cols
+    return df, unitsdic
+
+
+#-------------------------------------------
+#-------------------------------------------
+# OUTPUT OF DATA
+#-------------------------------------------
+#-------------------------------------------
+
+def csv_with_units(data, units, filename, tex=None, double_col=False):
+    if tex=None:
+        if r" \ " in units.values:
+            tex=True
+        else:
+            tex=False
+    if tex:
+        try:
+            import pint
+        except ImportError:
+            raise("To use tex functionality to the fullest, you must install python-pint")
+        data.columns=[ fl+r' $\Big({0}\Big)$'.format(units[fl]) for fl in data.columns ]
+    return

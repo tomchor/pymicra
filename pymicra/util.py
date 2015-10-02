@@ -105,3 +105,8 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
     else:
         return False
 
+def printUnit(string, mode='latex'):
+    from pint.unit import UnitRegistry
+    ur=UnitRegistry()
+    u=ur[string]
+    print u
