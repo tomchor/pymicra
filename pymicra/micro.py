@@ -165,31 +165,12 @@ def get_fluxes_DF(data, cp=None, wpl=True):
     out['Hv']= rho_mean* cp* u_star* theta_v_star
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
-        out['E']=  rho_mean* u_star* q_star
-        out['F']=  rho_mean* u_star* c_star
-    else:
         out['E']=   (1+mu*rv)*(cov(w,rho_v) + rho_v_mean*(cov(w*theta)/theta_mean))
         out['F']=   rho_c*(1 + mu*rv)*cov(w,theta)/theta_mean + mu*rc*cov(w,rho_v) + cov(w,rho_c)
+    else:
+        out['E']=  rho_mean* u_star* q_star
+        out['F']=  rho_mean* u_star* c_star
     return out
-
-
-def get_fluxes(u_star, q_star, theta_star, theta_v_star, c_star, rho_mean, cp=None):
-    """
-    Get fluxes according to char lengths
-    
-    TO-DO LIST:
-    add more concentrations to the variables
-    """
-    if cp==None:
-        from constants import cp_dry
-    cp=cp_dry
-    tau=rho_mean* (u_star**2.)
-    H=  rho_mean* cp* u_star* theta_star
-    Hv= rho_mean* cp* u_star* theta_v_star
-    # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
-    E=  rho_mean* u_star* q_star
-    F=  rho_mean* u_star* c_star
-    return tau, H, E, Hv, F
 
 
 def phi_H(zeta):

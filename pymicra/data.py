@@ -187,11 +187,28 @@ def spectrum_old(data, variable=None, frequency=10, absolute=True, T=30):
     spec= np.fft.rfft(sig)
     freq= np.fft.rfftfreq(len(sig), d=1./frequency)
     if absolute==True:
-        #specnp.real((2./T)*(spec*spec.conjugate()))
         spec=map(abs,spec)
     aux=pd.DataFrame( data={variable+' spectrum':spec}, index=freq )
     aux.index.name='frequencies'
     return aux
 
 
+def bulkCorr(data):
+    if type(data)==pd.DataFrame:
+        a,b=data.columns
+        a,b=data[a], data[b]
+    else:
+        a,b=data
+    r=np.mean(a*b)
+    r/=np.sqrt(np.nanmean(a*a))*np.sqrt(np.nanmean(b*b))
+    return r
 
+def ste(data):
+    w=data['w']
+    data=data.drop(['w'])
+    a,b=data.columns
+    a,b=data[a],data[b]
+    rwa=bulkCorr([w,a])
+    rwb=bulkCorr([w,b])
+    return np.abs(np.abs(rwa) - np.abs(rwb))/( np.abs(rwa) + np.abs(rwb))
+    
