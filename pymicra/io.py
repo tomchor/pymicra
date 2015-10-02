@@ -229,7 +229,7 @@ def read_dlc(dlcfile):
     return dataloggerConf(**dlcvars)
 
 
-def readUnitsCsv(filename, names=0 units=1):
+def readUnitsCsv(filename, names=0, units=1):
     """
     Reads a csv file in which the first line is the name of the variables
     and the second line contains the units
@@ -263,16 +263,36 @@ def readUnitsCsv(filename, names=0 units=1):
 #-------------------------------------------
 #-------------------------------------------
 
-def csv_with_units(data, units, filename, tex=None, double_col=False):
-    if tex=None:
-        if r" \ " in units.values:
-            tex=True
-        else:
-            tex=False
-    if tex:
-        try:
-            import pint
-        except ImportError:
-            raise("To use tex functionality to the fullest, you must install python-pint")
-        data.columns=[ fl+r' $\Big({0}\Big)$'.format(units[fl]) for fl in data.columns ]
+def toUnitsCsv(data, units, filename, totex=False, double_col=False):
+    """
+    Writes s csv with the units of the variables as a second line
+    """
+    if totex:
+        from util import printUnit as pru
+        units={ k : pru(v) for k,v in units.iteritems() }
+    cols=data.columns
+    unts=[ units[c] for c in cols ]
+    columns=pd.MultiIndex.from_tuples(zip(cols, unts))
+    df=data.copy()
+    df.columns=columns
+    df.to_csv(filename)
     return
+
+def get_printable(data, units, totex_cols=True, totex_units=True):
+    """
+    Returns a csv that is pandas-printable. It does so changing the column names to add units to it.
+
+    """
+    if totex_cols==True:
+        from constants import greek_alphabet
+        columns=[ u'\\'+c if c in greek_alphabet.values() else c for c in data.columns ]
+        units={ u'\\'+ c if c in greek_alphabet.values() else c : v for c,v in units.iteritems() }
+    if totex_units==True:
+        from util import printUnit as pru
+        units={ k : pru(v) for k,v in units.iteritems() }
+    columns=[ r'$\rm '+fl+r'\, \left({0}\right)$'.format(units[fl]) for fl in columns ]
+    df=data.copy()
+    df.columns=columns
+    return df
+
+

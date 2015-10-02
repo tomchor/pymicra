@@ -105,8 +105,22 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
     else:
         return False
 
-def printUnit(string, mode='latex'):
-    from pint.unit import UnitRegistry
+def printUnit(string, mode='L', trim=True, greek=True):
+    """
+    string: string
+        string (unambiguous) that represents the unit
+    mode: string
+        {'L' : 'latex', 'P' : 'pretty', 'H' : 'html' }
+    """
+    try:
+        from pint.unit import UnitRegistry
+    except ImportError:
+        raise ImportError('You must install python-pint in order to use this function')
     ur=UnitRegistry()
+    ur.default_format=mode
     u=ur[string]
-    print u
+    u='{:~L}'.format(u)
+    if trim:
+        u=u[3:].strip()
+    return u
+
