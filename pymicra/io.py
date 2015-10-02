@@ -263,7 +263,7 @@ def readUnitsCsv(filename, names=0, units=1):
 #-------------------------------------------
 #-------------------------------------------
 
-def toUnitsCsv(data, units, filename, totex=False, double_col=False):
+def toUnitsCsv(data, units, filename, totex=False):
     """
     Writes s csv with the units of the variables as a second line
     """
