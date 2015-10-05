@@ -103,9 +103,16 @@ def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
         suffix to add to variable names after fluctuation is extracted
     """
     from algs import stripDown
+    from scipy import signal
     mode=stripDown(mode.lower(), args='-_')
-    data=data-trend(data, mode=mode, rule=rule, **kwargs)
-    return data.add_suffix(suffix)
+    df=data.copy()
+    if mode=='linear' or mode=='constant':
+        df=df.apply(signal.detrend, axis=0, type=mode)
+    elif mode=='block':
+        df=df.apply(signal.detrend, axis=0, type='constant')
+    else:
+        df=df-trend(df, mode=mode, rule=rule, **kwargs)
+    return df.add_suffix(suffix)
 
 
 def spectrum(data, window='1min', frequency=10, absolute=True, T=30):
@@ -203,12 +210,3 @@ def bulkCorr(data):
     r/=np.sqrt(np.nanmean(a*a))*np.sqrt(np.nanmean(b*b))
     return r
 
-def ste(data):
-    w=data['w']
-    data=data.drop(['w'])
-    a,b=data.columns
-    a,b=data[a],data[b]
-    rwa=bulkCorr([w,a])
-    rwb=bulkCorr([w,b])
-    return np.abs(np.abs(rwa) - np.abs(rwb))/( np.abs(rwa) + np.abs(rwb))
-    

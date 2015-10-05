@@ -39,7 +39,7 @@ def gradients(data, levels, order='Crescent'):
     return flux
 
 
-def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, dr=173):
+def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, dr=None):
     """
     Calculates the solar zenith angle at any given day
 
@@ -47,10 +47,13 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
 
     Parameters
     ---------
-    dr is the julian day of the solstice. Default is June 21
+    dr is the julian day of the solstice. Default is to get from dictionary
     """
     from math import pi,sin,cos,acos,radians,degrees
     from calendar import isleap
+    if dr==None:
+        from constants import sumsolstice
+        dr=sumsolstice[date.year].timetuple().tm_yday
     if isleap(date.year):   # checks if its a leapyear
         da=366
     else:
@@ -59,12 +62,12 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
     j_day=tt.tm_yday
     gamma = 2.*pi/365.*(j_day - 1.)
     et = 1./60.* (229.18*(0.000075 + 0.001868*cos(gamma) - 0.032077*sin(gamma)-0.014615*cos(2.*gamma) - 0.04089*sin(2.*gamma)))
-    y = (lon-lon0)/15.*60. # Calculo em minutos
-    soma = y + 60.*et # Calculo em minutos
-    solar_date = date + timedelta(soma/(24.*60.)) # adiciono os minutos ao dia oficial!
+    y = (lon-lon0)/15.*60. # minutes
+    soma = y + 60.*et # minutes
+    solar_date = date + timedelta(soma/(24.*60.)) # add minutes to the official time
     delta = 0.409*cos((2.*pi*(j_day-dr)/da))
     Hsv = solar_date.hour + solar_date.minute/60. + solar_date.second/3600.
-    h = 2.*pi/24.*(Hsv - 12.) # Descobrir em que unidade entrar essa hora solar aqui!!
+    h = 2.*pi/24.*(Hsv - 12.)
     zen_ang = degrees(acos(sin(radians(lat))*sin(delta) + cos(radians(lat))*cos(delta)*cos(h)))
     if negative:
         if solar_date.hour<=12:

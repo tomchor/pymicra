@@ -55,7 +55,7 @@ def splitData(data, frequency='30Min'):
     
     check it complete at http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
     """
-    res_index=data.resample(frequency).index
+    res_index=data[data.columns[0]].resample(frequency).index
     out=[]
     pdate=res_index[0]
     for date in res_index:

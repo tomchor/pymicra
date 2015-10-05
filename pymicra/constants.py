@@ -117,6 +117,20 @@ greek_alphabet = {
     u'\u03C9': 'omega',
 }
 
+from datetime import datetime
+sumsolstice={
+2010:'21 11:28',
+2011:'21 17:16',
+2012:'20 23:09',
+2013:'21 05:04',
+2014:'21 10:51',
+2015:'21 16:38',
+2016:'20 22:34',
+2017:'21 04:24'
+}
+sumsolstice={ key : datetime.strptime('{0}-06-{1}'.format(key, val), '%Y-%m-%d %H:%M') for key, val in sumsolstice.iteritems() }
+
+ 
 #--------------------------------------
 # CLEAN DUMMY VARIABLES
 #--------------------------------------

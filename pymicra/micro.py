@@ -66,7 +66,7 @@ def get_scales(data, siteConst,
   'specific humidity'   :r"q'",
   'relative humidity'   :'rh'},
   updt={},
-  output_as_df=True):
+  output_as_df=True, include_means=True):
 
 
     """
@@ -112,30 +112,58 @@ def get_scales(data, siteConst,
     
     u_star=np.sqrt(-algs.auxCov( data[[u,w]] ))
     u_mean=data[u].mean()
+    u_std=data[u].std()
 
     theta_v_star=algs.auxCov( data[[theta_v_fluc,w]] )/u_star
     theta_v_mean=data[theta_v].mean()
+    theta_v_std=data[theta_v].std()
 
     q_star=algs.auxCov( data[[q,w]] )/u_star
     q_mean=data[q].mean()
+    q_std=data[q].std()
 
     c_star=algs.auxCov( data[[c,w]] )/u_star
     c_mean=data[c].mean()
+    c_std=data[c].std()
 
     theta_mean=data[theta].mean()
+    theta_std=data[theta].std()
     theta_star=(theta_v_star - 0.61*theta_mean*q_star)/(1.+0.61*q_mean)
 
     Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity, kappa=siteConst.constants.kappa)
     zeta=MonObuSimVar(Lm, siteConst)
     if output_as_df:
         namespace=locals()
-        columns=['zeta', 'Lm', 'u_mean', 'u_star', 'theta_v_mean', 'theta_v_star', 'theta_mean', 'theta_star', 'q_mean', 'q_star', 'c_mean', 'c_star']
+        columns=['zeta', 'Lm', 'u_std', 'u_star', 'theta_v_std', 'theta_v_star', 'theta_std', 'theta_star', 'q_std', 'q_star', 'c_std', 'c_star']
         dic={ col : [namespace[col]] for col in columns }
         out=pd.DataFrame(dic, index=[data.index[0]])
+        if include_means:
+            pass
+        else:
+            out=out[ [col for col in out.columns if 'mean' not in col] ]
         return out
     else:
         return zeta, Lm, (u_mean, u_star), (theta_v_mean, theta_v_star), (theta_mean, theta_star), (q_mean, q_star), (c_mean, c_star)
 
+def ste(data, w_fluctuations="w'"):
+    """
+    Returns the Symmetric Transfer Efficiency in the time domain, ste
+    according to Cancelli, Dias, Chamecki, Dimensionless criteria for the production-dissipation equilibrium
+    of scalar fluctuations and their implications for scalar similarity, Water Resources Research, 2012
+    """
+    from data import bulkCorr
+    wcol=w_fluctuations
+    df=data.copy()
+    w=df[wcol]
+    df=df.drop(wcol, axis=1)
+    a,b=df.columns
+    a,b=df[a],df[b]
+    rwa=bulkCorr([w,a])
+    rwb=bulkCorr([w,b])
+    rwa=np.abs(rwa)
+    rwb=np.abs(rwb)
+    return 1. - np.abs( rwa - rwb )/( rwa + rwb )
+ 
 
 def get_fluxes_DF(data, cp=None, wpl=True):
     """
