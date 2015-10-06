@@ -15,7 +15,7 @@ import pandas as pd
 # INPUT OF DATA
 #-------------------------------------------
 #-------------------------------------------
-def readDataFile(fname, varNames=None, **kwargs):
+def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
     """
     Author: Tomas Chor
 
@@ -32,7 +32,9 @@ def readDataFile(fname, varNames=None, **kwargs):
     ---------
     dataFrame: pandas.DataFrame object
     """
-    data=pd.read_csv(fname, **kwargs)
+    if dates_as_string:
+        dtypes={ i : str for i,key in enumerate(varNames) if r'%' in key }
+    data=pd.read_csv(fname, dtype=dtypes, **kwargs)
     if varNames:
         data.columns=varNames + list(data.columns[len(varNames):])
     return data
@@ -73,20 +75,24 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0, clean=True):
     see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
     """
     from datetime import timedelta,datetime
+    from algs import completeHM
     #------------------------------------
     # joins the names of the columns, which must match the datetime directive (see __doc__)
     #------------------------------------
+    print data
     date_format=connector.join(date_cols)
     auxformat='%Y-%m-%d %H:%M:%S.%f'
+    for col in date_cols:
+        data[col]=data[col].apply(completeHM)
     #-------------------------------------
     # joins the appropriate pandas columns because pandas can read only one column into datetime
     #-------------------------------------
     try:
-        aux=data[date_cols[0]].astype(int).astype(str)
-    except ValueError:
         aux=data[date_cols[0]].astype(str)
+    except ValueError:
+        aux=data[date_cols[0]].astype(int).astype(str)
     for col in date_cols[1:]:
-        aux+=connector + data[col].astype(int).astype(str)
+        aux+=connector + data[col].astype(str)
     dates=pd.to_datetime(aux, format=date_format)
     #-------------------------------------
     # The next steps are there to check if there are fractions that are not expressed in the datetime convention
@@ -95,7 +101,7 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0, clean=True):
     first_date=dates.unique()[1]
     n_fracs=len(dates[dates.values==first_date])
     if n_fracs>1:
-        print 'Warninig! I identified that each timestamp entry contains', n_fracs, 'fractions.\n\
+        print 'Warninig! I identified that there are', n_fracs, ' values (on average) for every timestamp.\n\
 This generally means that the data is sampled at a frequency greater than the frequency of the timestamp.\
 I will then proceed to guess the fractions based of the keyword "first_time_skip" and correct the index.'
     dates=[ date.strftime(auxformat) for date in dates ]
@@ -157,6 +163,7 @@ class dataloggerConf(object):
              header_lines=None,
              first_time_skip=False,
              units=None,
+             filename_format='CSV_?????.fluxo_??m_%Y_%j_%H%M.dat',
              description='generic datalogger configuration file'):
         #-------------------------
         # Makes sure that units is a dictionary type
@@ -176,6 +183,7 @@ class dataloggerConf(object):
         self.first_time_skip=first_time_skip
         self.units=units
         self.description=description
+        self.filename_format=filename_format
 
 
 def timeSeries(flist, datalogger, index_by_date=True):

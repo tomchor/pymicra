@@ -182,3 +182,12 @@ def limitedSubs(data,maxcount=3):
         fill = (df.groupby(grouper)[c].transform('size') <= maxcount)
         df.loc[fill, c] = np.nan
     return df
+
+def completeHM(string):
+    if string.isdigit():
+        pass
+    else:
+        raise TypeError('String passed must contain only digits. Check the argument')
+    if len(string)==3:
+        string='0'+string
+    return string
