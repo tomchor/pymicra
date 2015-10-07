@@ -79,10 +79,9 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0, clean=True):
     #------------------------------------
     # joins the names of the columns, which must match the datetime directive (see __doc__)
     #------------------------------------
-    print data
     date_format=connector.join(date_cols)
     auxformat='%Y-%m-%d %H:%M:%S.%f'
-    for col in date_cols:
+    for col in [ el for el in date_cols if el.count(r'%')>1 ]:
         data[col]=data[col].apply(completeHM)
     #-------------------------------------
     # joins the appropriate pandas columns because pandas can read only one column into datetime
@@ -100,9 +99,10 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0, clean=True):
     #-------------------------------------
     first_date=dates.unique()[1]
     n_fracs=len(dates[dates.values==first_date])
+    print dates[dates.values==first_date]
     if n_fracs>1:
         print 'Warninig! I identified that there are', n_fracs, ' values (on average) for every timestamp.\n\
-This generally means that the data is sampled at a frequency greater than the frequency of the timestamp.\
+This generally means that the data is sampled at a frequency greater than the frequency of the timestamp. \
 I will then proceed to guess the fractions based of the keyword "first_time_skip" and correct the index.'
     dates=[ date.strftime(auxformat) for date in dates ]
     aux=dates[0]
