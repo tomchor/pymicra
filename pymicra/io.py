@@ -59,7 +59,7 @@ def readDataFiles(flist, **kwargs):
         data=pd.concat( [data, subdata], ignore_index=True)
     return data
 
-def parseDates(data, date_cols, connector='-', first_time_skip=0, clean=True):
+def parseDates(data, date_cols, connector='-', first_time_skip=0, clean=True, correct_fracs=None):
     """
     Author: Tomas Chor
     date: 2015-08-10
@@ -99,22 +99,25 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0, clean=True):
     #-------------------------------------
     first_date=dates.unique()[1]
     n_fracs=len(dates[dates.values==first_date])
-    print dates[dates.values==first_date]
-    if n_fracs>1:
+    #print dates[dates.values==first_date]
+    if n_fracs>1 and correct_fracs != True:
         print 'Warninig! I identified that there are', n_fracs, ' values (on average) for every timestamp.\n\
 This generally means that the data is sampled at a frequency greater than the frequency of the timestamp. \
 I will then proceed to guess the fractions based of the keyword "first_time_skip" and correct the index.'
-    dates=[ date.strftime(auxformat) for date in dates ]
-    aux=dates[0]
-    cont=first_time_skip
-    for i,date in enumerate(dates):
-        if date==aux:
-            pass
-        else:
-            cont=0
-            aux=date
-        dates[i]=datetime.strptime(date, auxformat) + timedelta(minutes=cont/float(n_fracs))
-        cont+=1
+    if correct_fracs != False:
+        dates=[ date.strftime(auxformat) for date in dates ]
+        aux=dates[0]
+        cont=first_time_skip
+        for i,date in enumerate(dates):
+            if date==aux:
+                pass
+            else:
+                cont=0
+                aux=date
+            dates[i]=datetime.strptime(date, auxformat) + timedelta(minutes=cont/float(n_fracs))
+            cont+=1
+    else:
+        print '\nWarning: fractions werent corrected. Check your timestamp data and the correct_fracs flag\n'
     #-------------------------------------
     # setting new dates list as the index
     #-------------------------------------
@@ -186,7 +189,7 @@ class dataloggerConf(object):
         self.filename_format=filename_format
 
 
-def timeSeries(flist, datalogger, index_by_date=True):
+def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None):
     """
     Creates a micrometeorological time series from a file or list of files.
 
@@ -201,7 +204,7 @@ def timeSeries(flist, datalogger, index_by_date=True):
     date_cols=datalogger.date_cols
     date_connector=datalogger.date_connector
     series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames)
-    series=parseDates(series, date_cols, connector=date_connector, first_time_skip=datalogger.first_time_skip, clean=True)
+    series=parseDates(series, date_cols, connector=date_connector, first_time_skip=datalogger.first_time_skip, clean=True, correct_fracs=correct_fracs)
     return series
 
 

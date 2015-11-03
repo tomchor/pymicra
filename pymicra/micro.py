@@ -66,11 +66,12 @@ def get_scales(data, siteConst,
   'specific humidity'   :r"q'",
   'relative humidity'   :'rh'},
   updt={},
-  output_as_df=True, include_means=True):
+  output_as_df=True, include_means=True,
+  vunits=None):
 
 
     """
-    Calculates characteristics lengths for data
+    Calculates characteristic lengths for data
 
     Assumes:
     u_*^2 = -mean(u' * w')
@@ -143,7 +144,7 @@ def get_scales(data, siteConst,
             out=out[ [col for col in out.columns if 'mean' not in col] ]
         return out
     else:
-        return zeta, Lm, (u_mean, u_star), (theta_v_mean, theta_v_star), (theta_mean, theta_star), (q_mean, q_star), (c_mean, c_star)
+        return zeta, Lm, (u_std, u_star), (theta_v_std, theta_v_star), (theta_std, theta_star), (q_std, q_star), (c_std, c_star)
 
 def ste(data, w_fluctuations="w'"):
     """
@@ -165,7 +166,7 @@ def ste(data, w_fluctuations="w'"):
     return 1. - np.abs( rwa - rwb )/( rwa + rwb )
  
 
-def get_fluxes_DF(data, cp=None, wpl=True):
+def get_fluxes_DF(data, cp=None, wpl=True, funits=None):
     """
     Get fluxes according to char lengths
     
@@ -193,8 +194,8 @@ def get_fluxes_DF(data, cp=None, wpl=True):
     out['Hv']= rho_mean* cp* u_star* theta_v_star
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
-        out['E']=   (1+mu*rv)*(cov(w,rho_v) + rho_v_mean*(cov(w*theta)/theta_mean))
-        out['F']=   rho_c*(1 + mu*rv)*cov(w,theta)/theta_mean + mu*rc*cov(w,rho_v) + cov(w,rho_c)
+        out['E']=   (1. +mu*rv)*(cov(w,rho_v) + rho_v_mean*(cov(w*theta)/theta_mean))
+        out['F']=   rho_c*(1. + mu*rv)*cov(w,theta)/theta_mean + mu*rc*cov(w,rho_v) + cov(w,rho_c)
     else:
         out['E']=  rho_mean* u_star* q_star
         out['F']=  rho_mean* u_star* c_star
