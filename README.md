@@ -20,3 +20,32 @@ A small list of things this package is designed to do:
   - Interpolate and detrend data in the most common ways (block averages, moving averages and polynominal detrending).
   - Calculate fluxes and characteristic scales
 
+## Notation to be implemented soon
+The next lines describe some general quantities, followed by the name that should be used inside straight brackets, followed by the units that compose it. The names provided are the default names and will be subjected to change by the user.
+ - concentration [conc] - (mass of substance)/(mass of air)
+ - density [rho] - (mass of substance)/(volume of air)
+ - molar density [mrho] - (molar mass of substance)/(volume of air)
+ - mixing ratio [r] - (mass of substance)/(mass of dry air)
+
+We take humidity as the only exception to the rule above, following instead for the concentration of h2o:
+ - specific humidty [q] - (mass of h2o)/(mass of air)
+
+We also assume that the reynolds decomposition of any variable "a" takes the form
+    
+    a = a_mean + a_fluctuation
+
+where the suffixes "\_mean" and "\_fluctuation", as well as other suffixes, are writen within the variables' names as
+ - mean [\_mean] - indicates that the mean was taken on the variable whose name precedes this
+ - fluctuation ['] - indicates that this is the fluctuation of the variable: a' = a - a\_mean
+ - star/asterisc [\_star] - indicates a turbulence scale of the variable: a\_star = mean(u'\*a')
+
+The standard notation for commo variables is 
+ - thermodynamic temperature: [theta] 
+ - virtual temperature: [theta\_v]
+ - pressure: [p]
+
+Some examples of names of variables following the standard notation are (description - [variable name in pymicra]):
+ - u fluctuations: [u']
+ - turbulence scale for virtual temperature: [theta\_v\_star]
+ - fluctuations of water density on air: [rho\_h2o']
+ - mean mixing ratio for carbon dioxide: [r\_co2\_mean]

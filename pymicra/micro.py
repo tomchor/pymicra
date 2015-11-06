@@ -63,6 +63,8 @@ def get_scales(data, siteConst,
   'virtual temperature' :'theta_v',
   'virtual temperature fluctuations'    :"theta_v'",
   'co2 fluctuations':    "co2'",
+  'h2o density fluctuations': r"rho_h2o'",
+  'co2 density fluctuations': r"rho_co2'",
   'specific humidity'   :r"q'",
   'relative humidity'   :'rh'},
   updt={},
@@ -97,6 +99,7 @@ def get_scales(data, siteConst,
         True if you want the output to be a one-line pandas.DataFrame
 
     CHECKLIST:
+    NEEDS BETTER AND MORE GENERAL INTERFACE
     NEEDS IMPROVEMENT IN ORDER TO GET CONSTANTS FROM SITECONST OBJECT
     ADD MIXED-LAYER CONVECTION SCALES FOR VELOCITY (w*) AND TEMPERATURE (t*)
     """
@@ -110,6 +113,8 @@ def get_scales(data, siteConst,
     theta_v_fluc=varDict['virtual temperature fluctuations']
     q=varDict['specific humidity']
     c=varDict["co2 fluctuations"]
+    rho_h2o=varDict['h2o density fluctuations']
+    rho_co2=varDict['co2 density fluctuations']
     
     u_star=np.sqrt(-algs.auxCov( data[[u,w]] ))
     u_mean=data[u].mean()
@@ -151,6 +156,8 @@ def ste(data, w_fluctuations="w'"):
     Returns the Symmetric Transfer Efficiency in the time domain, ste
     according to Cancelli, Dias, Chamecki, Dimensionless criteria for the production-dissipation equilibrium
     of scalar fluctuations and their implications for scalar similarity, Water Resources Research, 2012
+
+    NEEDS TO BE VALIDATED!
     """
     from data import bulkCorr
     wcol=w_fluctuations
@@ -179,26 +186,33 @@ def get_fluxes_DF(data, cp=None, wpl=True, funits=None):
     cp: float (optional)
         value for the specific heat capacity at constant pressure
     """
+    import constants
     if cp==None:
-        from constants import cp_dry
-    cp=cp_dry
-    rho_mean=data['rho_mean']
+        cp=constants.cp_dry
+    mu=1./constants.mu
+    rho_mean=data['rho_air_mean']
     u_star=data['u_star']
     theta_star=data['theta_star']
     theta_v_star=data['theta_v_star']
     q_star=data['q_star']
     c_star=data['c_star']
+    rho_h2o_mean=data['rho_h2o_mean']
+    rho_co2_mean=data['rho_co2_mean']
+    rho_dry_mean=data['rho_dry_mean']
+    theta_mean=data['theta_mean']
+
     out=pd.DataFrame(index=data.index)
     out['tau']=rho_mean* (u_star**2.)
     out['H']=  rho_mean* cp* u_star* theta_star
     out['Hv']= rho_mean* cp* u_star* theta_v_star
+    out['E']=  rho_mean* u_star* q_star
+    out['F']=  rho_mean* u_star* c_star
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
-        out['E']=   (1. +mu*rv)*(cov(w,rho_v) + rho_v_mean*(cov(w*theta)/theta_mean))
-        out['F']=   rho_c*(1. + mu*rv)*cov(w,theta)/theta_mean + mu*rc*cov(w,rho_v) + cov(w,rho_c)
-    else:
-        out['E']=  rho_mean* u_star* q_star
-        out['F']=  rho_mean* u_star* c_star
+        rv=rho_h2o_mean/rho_dry_mean
+        rc=rho_co2_mean/rho_dry_mean
+        out['E']=   (1. +mu*rv)*( out['E'] + rho_h2o_mean*( (theta_star*u_star)/theta_mean))
+        out['F']=   out['F'] + rho_co2_mean*(1. + mu*rv)*(theta_star*u_star)/theta_mean + mu*rc*out['E'] 
     return out
 
 
@@ -299,8 +313,7 @@ class siteConstants(object):
     """
     def __init__(self, variables_height, canopy_height,
              displacement_height=None,
-             variables_units=None,
-             cp=1003.5):
+             variables_units=None):
         # Checks if the variables_height is actually a Dict
 
 #        if not isinstance(variables_height, dict):
@@ -313,6 +326,5 @@ class siteConstants(object):
             self.displacement_height = (2./3.)*self.canopy_height #meters
         else:
             self.displacement_height=displacement_height
-        self.cp = cp     #specific heat for constant pressure J/(kg.K)
 
 
