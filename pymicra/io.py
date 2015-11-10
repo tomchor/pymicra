@@ -59,7 +59,8 @@ def readDataFiles(flist, **kwargs):
         data=pd.concat( [data, subdata], ignore_index=True)
     return data
 
-def parseDates(data, date_cols, connector='-', first_time_skip=0, clean=True, correct_fracs=None):
+def parseDates(data, date_cols, connector='-', first_time_skip=0,
+  clean=True, correct_fracs=None, complete_zeroes=False):
     """
     Author: Tomas Chor
     date: 2015-08-10
@@ -81,8 +82,10 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0, clean=True, co
     #------------------------------------
     date_format=connector.join(date_cols)
     auxformat='%Y-%m-%d %H:%M:%S.%f'
-    for col in [ el for el in date_cols if el.count(r'%')>1 ]:
-        data[col]=data[col].apply(completeHM)
+    if complete_zeroes:
+        #for col in [ el for el in date_cols if el.count(r'%')>1 ]:
+        for col in complete_zeroes:
+            data[col]=data[col].apply(completeHM)
     #-------------------------------------
     # joins the appropriate pandas columns because pandas can read only one column into datetime
     #-------------------------------------
@@ -189,7 +192,7 @@ class dataloggerConf(object):
         self.filename_format=filename_format
 
 
-def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None):
+def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None, complete_zeroes=False):
     """
     Creates a micrometeorological time series from a file or list of files.
 
@@ -204,7 +207,8 @@ def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None):
     date_cols=datalogger.date_cols
     date_connector=datalogger.date_connector
     series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames)
-    series=parseDates(series, date_cols, connector=date_connector, first_time_skip=datalogger.first_time_skip, clean=True, correct_fracs=correct_fracs)
+    series=parseDates(series, date_cols, connector=date_connector,
+      first_time_skip=datalogger.first_time_skip, clean=True, correct_fracs=correct_fracs, complete_zeroes=complete_zeroes)
     return series
 
 
