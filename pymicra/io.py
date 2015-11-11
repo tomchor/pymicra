@@ -293,10 +293,10 @@ def toUnitsCsv(data, units, filename, to_tex=False):
         dictionary containing { nameOfVar : unit }
     filename: string
         path of output file
-    totex: bool
+    to_tex: bool
         whether or not to convert the string of the unit to TeX format (useful for printing)
     """
-    if totex:
+    if to_tex:
         from util import printUnit as pru
         units={ k : pru(v) for k,v in units.iteritems() }
     cols=data.columns
@@ -307,16 +307,16 @@ def toUnitsCsv(data, units, filename, to_tex=False):
     df.to_csv(filename)
     return
 
-def get_printable(data, units, totex_cols=True, totex_units=True):
+def get_printable(data, units, to_tex_cols=True, to_tex_units=True):
     """
     Returns a csv that is pandas-printable. It does so changing the column names to add units to it.
 
     """
-    if totex_cols==True:
+    if to_tex_cols==True:
         from constants import greek_alphabet
         columns=[ u'\\'+c if c in greek_alphabet.values() else c for c in data.columns ]
         units={ u'\\'+ c if c in greek_alphabet.values() else c : v for c,v in units.iteritems() }
-    if totex_units==True:
+    if to_tex_units==True:
         from util import printUnit as pru
         units={ k : pru(v) for k,v in units.iteritems() }
     columns=[ r'$\rm '+fl+r'\, \left({0}\right)$'.format(units[fl]) for fl in columns ]
