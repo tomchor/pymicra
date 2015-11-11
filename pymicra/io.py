@@ -40,7 +40,7 @@ def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
     return data
 
 
-def readDataFiles(flist, **kwargs):
+def readDataFiles(flist, verbose=0, **kwargs):
     """
     Author: Tomas Chor
     ** needs to be tested! **
@@ -55,6 +55,8 @@ def readDataFiles(flist, **kwargs):
         raise ValueError('Passed a list of files of zero length to be read.')
     data=pd.DataFrame()
     for f in flist:
+        if verbose==1:
+            print 'Reading',f
         subdata=readDataFile(f, **kwargs)
         data=pd.concat( [data, subdata], ignore_index=True)
     return data
@@ -192,7 +194,7 @@ class dataloggerConf(object):
         self.filename_format=filename_format
 
 
-def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None, complete_zeroes=False):
+def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None, complete_zeroes=False, verbose=0):
     """
     Creates a micrometeorological time series from a file or list of files.
 
@@ -206,7 +208,7 @@ def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None, comple
     columns_separator=datalogger.columns_separator
     date_cols=datalogger.date_cols
     date_connector=datalogger.date_connector
-    series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames)
+    series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames, verbose=verbose)
     series=parseDates(series, date_cols, connector=date_connector,
       first_time_skip=datalogger.first_time_skip, clean=True, correct_fracs=correct_fracs, complete_zeroes=complete_zeroes)
     return series
@@ -278,9 +280,21 @@ def readUnitsCsv(filename, names=0, units=1):
 #-------------------------------------------
 #-------------------------------------------
 
-def toUnitsCsv(data, units, filename, totex=False):
+def toUnitsCsv(data, units, filename, to_tex=False):
     """
     Writes s csv with the units of the variables as a second line
+
+    Parameters:
+    ----------
+
+    data: pandas.DataFrame
+        dataframe of data
+    units: dict
+        dictionary containing { nameOfVar : unit }
+    filename: string
+        path of output file
+    totex: bool
+        whether or not to convert the string of the unit to TeX format (useful for printing)
     """
     if totex:
         from util import printUnit as pru
