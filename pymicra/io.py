@@ -280,7 +280,7 @@ def readUnitsCsv(filename, names=0, units=1):
 #-------------------------------------------
 #-------------------------------------------
 
-def toUnitsCsv(data, units, filename, to_tex=False):
+def toUnitsCsv(data, units, filename, to_tex=False, **kwargs):
     """
     Writes s csv with the units of the variables as a second line
 
@@ -304,7 +304,7 @@ def toUnitsCsv(data, units, filename, to_tex=False):
     columns=pd.MultiIndex.from_tuples(zip(cols, unts))
     df=data.copy()
     df.columns=columns
-    df.to_csv(filename)
+    df.to_csv(filename, **kwargs)
     return
 
 def get_printable(data, units, to_tex_cols=True, to_tex_units=True):
