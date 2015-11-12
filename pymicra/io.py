@@ -53,12 +53,17 @@ def readDataFiles(flist, verbose=0, **kwargs):
     """
     if len(flist)==0:
         raise ValueError('Passed a list of files of zero length to be read.')
-    data=pd.DataFrame()
+    dflist=[]
     for f in flist:
         if verbose==1:
             print 'Reading',f
         subdata=readDataFile(f, **kwargs)
-        data=pd.concat( [data, subdata], ignore_index=True)
+        dflist.append(subdata)
+    if verbose==1:
+        print 'Concatenating DataFrames...'
+    data=pd.concat(dflist, ignore_index=True)
+    if verbose==1:
+        print 'Done!'
     return data
 
 def parseDates(data, date_cols, connector='-', first_time_skip=0,
@@ -85,7 +90,6 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
     date_format=connector.join(date_cols)
     auxformat='%Y-%m-%d %H:%M:%S.%f'
     if complete_zeroes:
-        #for col in [ el for el in date_cols if el.count(r'%')>1 ]:
         for col in complete_zeroes:
             data[col]=data[col].apply(completeHM)
     #-------------------------------------
@@ -104,25 +108,25 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
     #-------------------------------------
     first_date=dates.unique()[1]
     n_fracs=len(dates[dates.values==first_date])
-    #print dates[dates.values==first_date]
-    if n_fracs>1 and correct_fracs != True:
-        print 'Warninig! I identified that there are', n_fracs, ' values (on average) for every timestamp.\n\
+    if n_fracs>1:
+        if correct_fracs == None:
+            print 'Warning! I identified that there are', n_fracs, ' values (on average) for every timestamp.\n\
 This generally means that the data is sampled at a frequency greater than the frequency of the timestamp. \
 I will then proceed to guess the fractions based of the keyword "first_time_skip" and correct the index.'
-    if correct_fracs != False:
-        dates=[ date.strftime(auxformat) for date in dates ]
-        aux=dates[0]
-        cont=first_time_skip
-        for i,date in enumerate(dates):
-            if date==aux:
-                pass
-            else:
-                cont=0
-                aux=date
-            dates[i]=datetime.strptime(date, auxformat) + timedelta(minutes=cont/float(n_fracs))
-            cont+=1
-    else:
-        print '\nWarning: fractions werent corrected. Check your timestamp data and the correct_fracs flag\n'
+        if (correct_fracs==None) or (correct_fracs==True):
+            dates=[ date.strftime(auxformat) for date in dates ]
+            aux=dates[0]
+            cont=first_time_skip
+            for i,date in enumerate(dates):
+                if date==aux:
+                    pass
+                else:
+                    cont=0
+                    aux=date
+                dates[i]=datetime.strptime(date, auxformat) + timedelta(minutes=cont/float(n_fracs))
+                cont+=1
+        else:
+            print '\nWarning: fractions werent corrected. Check your timestamp data and the correct_fracs flag\n'
     #-------------------------------------
     # setting new dates list as the index
     #-------------------------------------
@@ -131,7 +135,7 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
     # removing the columns used to generate the date
     #-------------------------------------
     if clean:
-        data=data[ [col for col in data.columns if col not in date_cols] ]
+        data=data.drop(date_cols, axis=1)
     return data
 
 
@@ -209,6 +213,8 @@ def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None, comple
     date_cols=datalogger.date_cols
     date_connector=datalogger.date_connector
     series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames, verbose=verbose)
+    if verbose==1:
+        print 'Starting to parse the dates'
     series=parseDates(series, date_cols, connector=date_connector,
       first_time_skip=datalogger.first_time_skip, clean=True, correct_fracs=correct_fracs, complete_zeroes=complete_zeroes)
     return series
