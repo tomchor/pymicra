@@ -105,6 +105,165 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
     else:
         return False
 
+
+
+
+def qcontrol(files, datalogger_config,
+             bdate='2003-01-01 00:00', edate='2023-12-31 20:00',
+             header=None, cut_coef=4.0,
+             interp_limit=3, accepted_percent=1,
+             window_size=900, chunk_size='2Min',
+             trueverbose=0, falseshow=0, trueshow=0, 
+             outdir='quality_controlled', date_format='"%Y-%m-%d %H:%M:%S.%f"',
+             std_limits=None, diff_limits=None, lower_boundaries=None,
+             summary='qcontrol_summary.csv'):
+
+    """Program that applies quality control to a set of datafiles
+
+    Parameters:
+    -----------
+    """
+    numbers={'total': [],
+    'spikes': [],
+    'STD': [],
+    'RAT': [],
+    'difference': [],
+    'successful': []}
+
+    
+    
+    #-------------------------------------
+    # BEGINNING OF MAIN PROGRAM
+    #-------------------------------------
+    filename_format=datalogger_config.filename_format
+    for filepath in files:
+        print
+        filename=os.path.basename(filepath)
+        #--------------------------------
+        # BEGINNING OF DATE CHECK
+        #-------------------------------
+        f=''.join([ s for s,v in izip_longest(filename, filename_format) if v!='?' ])
+        fmt=filename_format.replace('?','')
+        cdate=datetime.strptime(f, fmt)
+        print cdate
+        if cdate<bdate or cdate>edate:
+            print cdate,':', filename, 'discarded because date is not valid'
+            continue
+        else:
+            if trueverbose: print cdate,':', filename, 'included because date is valid'
+            pass
+    
+        #-------------------------------
+        # BEGINNING LINE NUMBERS TEST
+        #-------------------------------
+        result=check_numlines(filepath, numlines=18000)
+        if result == False:
+            print filepath,'was skipped for not having the correct number of lines!'
+            continue
+    
+        # BEGINNING OF FILE READ AND USED VARIABLES SELECTION
+        fin=pd.read_csv(filepath, header=args.header, parse_dates=[0], index_col=0)
+        #
+        # TRY-EXCEPT IS A SAFETY NET BECAUSE OF THE POOR DECODING (2015-06-21 00:00 appears as 2015-06-20 24:00)
+        #
+        try:
+            fin=pm.timeSeries(filepath, config, correct_fracs=True)
+        except ValueError, e:
+            if str(e)=='unconverted data remains: 0':
+                continue
+            else:
+                raise ValueError, e
+        fin=fin[usedvars]      # exclude unnused variables
+        numbers['total'].append(filename)
+    
+        #-------------------------------
+        # BEGINNING OF SPIKES CHECK
+        #-------------------------------
+        chunks=pm.algs.splitData(fin, args.chunk_size)
+        fin,valid_cols=check_spikes(chunks, visualize=False, vis_col='u')
+        chunks_valid= valid_cols >= (1.-(args.acpt_percent/100.))
+        result, failed=testValid(chunks_valid, testname='spikes', trueverbose=trueverbose)
+        if result==False:
+            if falseshow:
+                fin[failed].plot()
+                plt.show()
+            numbers['spikes'].append(filename)
+            continue
+    
+        #----------------------------------
+        # BEGINNING OF STANDARD DEVIATION CHECK
+        #----------------------------------
+        df=fin.copy()
+        df=df-pd.rolling_mean(df,window=args.window_size, center=True)
+        stds_list=df.resample(args.chunk_size, np.std).dropna()
+        for l,stds in enumerate(stds_list.values):
+            std=stds_list.iloc[l]
+            lim=tables.loc['std_limits']
+            chunks_valid=std-lim
+            chunks_valid=chunks_valid>=0
+            result,failed=testValid(chunks_valid, testname='STD', trueverbose=0)
+            if result==False:
+                break
+            else:
+                pass    
+        if result==False:
+            if falseshow:
+                print 'Failed chunk was:'
+                print std
+                fin[failed].plot()
+                plt.show()
+            numbers['STD'].append(filename)
+            continue
+        else:
+            if trueverbose: print filepath,'Passed STD test'
+    
+        #---------------------------------
+        # BEGINNING OF REVERSE ARRANGEMENT TEST
+        #---------------------------------
+        valid_chunks=fin.apply(reverse_arrangement, points_number=360, axis=0, broadcast=False)
+        result,failed=testValid(chunks_valid, testname='reverse arrangement', trueverbose=trueverbose)
+        if result==False:
+            if falseshow:
+                fin[failed].plot()
+                plt.show()
+            numbers['RAT'].append(filename)
+            continue
+    
+        #--------------------------------
+        # BEGINNING OF MAXIMUM DIFFERENCE METHOD
+        #--------------------------------
+        trend=pm.data.trend(fin, mode='linear')
+        maxdif=trend.iloc[0]-trend.iloc[-1]
+        maxdif=maxdif.abs()
+        chunks_valid= tables.loc['dif_limits'] - maxdif
+        chunks_valid=chunks_valid >= 0
+        result,failed=testValid(chunks_valid, testname='maximum difference', trueverbose=trueverbose)
+        if result==False:
+            if falseshow:
+                fin[failed].plot()
+                plt.show()
+            numbers['difference'].append(filename)
+            continue
+    
+        print 'Successful run!'
+        if trueshow:
+            fin.plot()
+            plt.show()
+        numbers['successful'].append(filename)
+        #--------------------------------
+        # FINALLY
+        #--------------------------------
+        print 'Re-writng',filepath
+        fin.to_csv(os.path.join( args.outdir, os.path.basename(filepath) ), header=False, date_format=args.date_format, quoting=3, na_rep='NaN')
+    
+    summary= {k: [len(v)] for k, v in numbers.items()}
+    summary=pd.DataFrame({'numbers': map(len,numbers.values())}, index=numbers.keys())
+    summary['percent']=summary['numbers']/summary.loc['total','numbers']
+    print summary
+    summary.to_csv('qcontrol_summary.csv', na_rep='NaN')
+    return
+ 
+
 def printUnit(string, mode='L', trim=True, greek=True):
     """
     string: string
