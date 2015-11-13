@@ -9,12 +9,8 @@ CHECKLIST
 -INCLUDE MAYBE DECODIFICAION OF DATA
 
 """
-import algs
-import pandas as pd
-import numpy as np
 
-def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
-                 f=lambda x: (abs(x - x.mean()) > abs(x.std()*4.)) ):
+def check_spikes(dfs, visualize=False, vis_col=1):
     '''
     Applies spikes-check accorgin to Vickers and Mart (1997)
 
@@ -31,12 +27,13 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
     valid_cols=pd.Series(0, index=dfs[0].columns)
     for i in range(len(dfs)):
         chunk=dfs[i].copy()
-        if len(chunk)>interp_limit:
-            chunk=algs.limitedSubs(chunk, max_interp=interp_limit, func=f)
+        f=lambda x: abs(x - x.mean()) > abs(x.std()*cut_coef)
+        if len(chunk)>args.int_limit:
+            chunk=limitedSubs(chunk, max_interp=args.int_limit, func=f)
         valid_cols= valid_cols + chunk.count()
 
         if visualize:
-            aux=dfs[i][vis_col]
+            aux=chunks[i][vis_col]
             aux2=(abs(aux - aux.mean()) < abs(aux.std()*cut_coef))
             aux.plot(marker='o', color='green', label='original')
             aux.mask(aux2).plot(marker='o', color='red')
@@ -46,9 +43,9 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
         if visualize:
             chunk[vis_col].plot(marker='', color='blue', label='controled')
             plt.show()
-        dfs[i]=chunk.copy()
+        chunks[i]=chunk.copy()
 
-    fou=pd.concat(dfs)
+    fou=pd.concat(chunks)
     fou=fou.interpolate(method='time', axis=0)
     fou_points=len(fou.index)
     valid_cols=valid_cols/fou_points
@@ -130,7 +127,7 @@ def qcontrol(files, datalogger_config,
              window_size=900, chunk_size='2Min',
              trueverbose=0, falseshow=0, trueshow=0, 
              outdir='quality_controlled', date_format='"%Y-%m-%d %H:%M:%S.%f"',
-             std_limits={}, dif_limits={}, lower_boundaries=None,
+             std_limits=None, diff_limits=None, lower_boundaries=None,
              summary='qcontrol_summary.csv'):
 
     """Program that applies quality control to a set of datafiles
@@ -147,6 +144,7 @@ def qcontrol(files, datalogger_config,
     edate: str
         last date to be considered
     """
+    from algs import testValid, check_numlines, splitData
     from io import timeSeries
     from os.path import basename
     from itertools import izip_longest
@@ -155,9 +153,6 @@ def qcontrol(files, datalogger_config,
 
     bdate=parse(bdate)
     edate=parse(edate)
-
-    tables=pd.DataFrame(dif_limits, index=['dif_limits'])
-    tables.loc['std_limits']=std_limits
 
     numbers={'total': [],
     'spikes': [],
@@ -194,7 +189,7 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         # BEGINNING LINE NUMBERS TEST
         #-------------------------------
-        result=algs.check_numlines(filepath, numlines=18000)
+        result=check_numlines(filepath, numlines=18000)
         if result == False:
             print filepath,'was skipped for not having the correct number of lines!'
             continue
@@ -213,10 +208,10 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         # BEGINNING OF SPIKES CHECK
         #-------------------------------
-        chunks=algs.splitData(fin, chunk_size)
+        chunks=splitData(fin, args.chunk_size)
         fin,valid_cols=check_spikes(chunks, visualize=False, vis_col='u')
-        chunks_valid= valid_cols >= (1.-(accepted_percent/100.))
-        result, failed=algs.testValid(chunks_valid, testname='spikes', trueverbose=trueverbose)
+        chunks_valid= valid_cols >= (1.-(args.acpt_percent/100.))
+        result, failed=testValid(chunks_valid, testname='spikes', trueverbose=trueverbose)
         if result==False:
             if falseshow:
                 fin[failed].plot()
@@ -228,14 +223,14 @@ def qcontrol(files, datalogger_config,
         # BEGINNING OF STANDARD DEVIATION CHECK
         #----------------------------------
         df=fin.copy()
-        df=df-pd.rolling_mean(df,window=window_size, center=True)
-        stds_list=df.resample(chunk_size, np.std).dropna()
+        df=df-pd.rolling_mean(df,window=args.window_size, center=True)
+        stds_list=df.resample(args.chunk_size, np.std).dropna()
         for l,stds in enumerate(stds_list.values):
             std=stds_list.iloc[l]
             lim=tables.loc['std_limits']
             chunks_valid=std-lim
             chunks_valid=chunks_valid>=0
-            result,failed=algs.testValid(chunks_valid, testname='STD', trueverbose=0)
+            result,failed=testValid(chunks_valid, testname='STD', trueverbose=0)
             if result==False:
                 break
             else:
@@ -255,7 +250,7 @@ def qcontrol(files, datalogger_config,
         # BEGINNING OF REVERSE ARRANGEMENT TEST
         #---------------------------------
         valid_chunks=fin.apply(reverse_arrangement, points_number=360, axis=0, broadcast=False)
-        result,failed=algs.testValid(chunks_valid, testname='reverse arrangement', trueverbose=trueverbose)
+        result,failed=testValid(chunks_valid, testname='reverse arrangement', trueverbose=trueverbose)
         if result==False:
             if falseshow:
                 fin[failed].plot()
@@ -271,7 +266,7 @@ def qcontrol(files, datalogger_config,
         maxdif=maxdif.abs()
         chunks_valid= tables.loc['dif_limits'] - maxdif
         chunks_valid=chunks_valid >= 0
-        result,failed=algs.testValid(chunks_valid, testname='maximum difference', trueverbose=trueverbose)
+        result,failed=testValid(chunks_valid, testname='maximum difference', trueverbose=trueverbose)
         if result==False:
             if falseshow:
                 fin[failed].plot()
@@ -288,8 +283,8 @@ def qcontrol(files, datalogger_config,
         # FINALLY
         #--------------------------------
         print 'Re-writng',filepath
-        fin.to_csv(os.path.join( outdir, os.path.basename(filepath) ),
-                   header=datalogger_config.header_lines, date_format=date_format, quoting=3, na_rep='NaN')
+        fin.to_csv(os.path.join( args.outdir, os.path.basename(filepath) ),
+                   header=datalogger_config.header_lines, date_format=args.date_format, quoting=3, na_rep='NaN')
     
     summary= {k: [len(v)] for k, v in numbers.items()}
     summary=pd.DataFrame({'numbers': map(len,numbers.values())}, index=numbers.keys())

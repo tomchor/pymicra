@@ -174,15 +174,6 @@ def inverse_normal_cdf(mu, sigma):
     return f
 
 
-def limitedSubs(data,maxcount=3):
-    df=data.copy()
-    cond = abs(df) > abs(df.std())
-    for c in df.columns:
-        grouper = (cond[c] != cond[c].shift(1)).cumsum() * cond[c]
-        fill = (df.groupby(grouper)[c].transform('size') <= maxcount)
-        df.loc[fill, c] = np.nan
-    return df
-
 def completeHM(string):
     if string.isdigit():
         pass
@@ -191,3 +182,82 @@ def completeHM(string):
     if len(string)==3:
         string='0'+string
     return string
+
+
+def limitedSubs(data, max_interp=3, func=lambda x: abs(x) > abs(x.std()*4.) ):
+    """
+    """
+    df=data.copy()
+    cond=func(df)
+    for c in df.columns:
+        grouper = (cond[c] != cond[c].shift(1)).cumsum() * cond[c]
+        fill = (df.groupby(grouper)[c].transform('size') <= max_interp)
+        df.loc[fill, c] = np.nan
+    return df
+
+
+def testValid(df_valid, testname='', falseverbose=True, trueverbose=True):
+    '''
+    Tests a boolean DataFrane obtained from the test and prints standard output
+
+    Parameters:
+    -----------
+
+    df_valid: pandas.Series
+        series contaning only True or False values for each of the variables, which should be the indexes
+    testname: string
+        the name of the test that generated the True/False values
+    falseverbose: bool
+        whether to return which variables caused a false result
+    trueverbose: bool
+        whether to print something successful cases
+    '''
+    if False in df_valid.values:
+        if falseverbose:
+            failed=df_valid[df_valid==False].index
+            print 'Failed',testname,'test'
+            print 'Failed variable(s):', ', '.join(failed)
+            print
+        return False, failed
+    else:
+        if trueverbose: print filepath,'Passed',testname,'test'
+        return True, None
+
+
+def file_len(fname):
+    """
+    Returns length of a file through piping bash's function wc
+
+    Parameters:
+    -----------
+
+    fname: string
+        path of the file
+    """
+    import subprocess
+    p = subprocess.Popen(['wc', '-l', fname], stdout=subprocess.PIPE, 
+                                              stderr=subprocess.PIPE)
+    result, err = p.communicate()
+    if p.returncode != 0:
+        raise IOError(err)
+    return int(result.strip().split()[0])
+
+def check_numlines(fname, numlines=18000):
+    """
+    Checks length of file against a correct value.
+    Returns False is length is wrong and True if length is right
+
+    Parameters:
+    ----------
+
+    fname: string
+        path of the file to check
+    numlines: int
+        correct number of lines that the file has to have
+    """
+    lines=file_len(fname)
+    if lines==numlines:
+        return True
+    else:
+        return False
+
