@@ -10,6 +10,7 @@ CHECKLIST
 
 """
 import algs
+import data
 import pandas as pd
 import numpy as np
 
@@ -55,74 +56,6 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
     return fou, valid_cols
 
 
-
-
-
-
-def reverse_arrangement(array, points_number=None, alpha=0.05):
-    '''
-    Performs the reverse arrangement test
-    according to Bendat and Piersol - Random Data - 4th edition, page 96
-
-    Parameters
-    ----------
-
-    Array: np.array, list, tuple, generator
-    array which to test for the reverse arrangement test
-
-    points_number: integer
-    number of chunks to consider to the test. Maximum is the length of the array.
-    If it is less, then the number of points will be reduced by application of a mean
-
-    alpha: float
-    Significance level for which to apply the test
-
-    WARNING! This fuction approximates table A.6 from Bendat&Piersol as a normal distribution.
-    This may no be true, since they do not express which distribution they use to construct
-    their table. However, in the range 9<N<101, this approximation is as good as 5% at N=10
-    and 0.1% at N=100.
-    '''
-    if points_number==None:
-        points_number=len(array)
-        mean_Matrix=array
-    elif points_number==len(array):
-        mean_Matrix=array
-    else:
-        pts = len(array)//points_number
-        mean_Matrix = []
-        for j in range(0,points_number):
-            mean_Matrix.append( mean(array[(j*pts):((j+1)*pts)]) ) # Calculo a media de cada um dos 50 intervalos
-    A = []
-    for i in range(len(mean_Matrix)):
-        h = []
-        for j in range(i,len(mean_Matrix)):
-            if(mean_Matrix[i] > mean_Matrix[j]):
-                h.append(1)
-        A.append(sum(h))
-    Atot = sum(A)
-    N=len(mean_Matrix)
-    mu=N*(N-1)/4
-    variance=N*(2*N+5)*(N-1)/72
-    #
-    # USE BELOW FUNCTION
-    def mu_var(N):
-        mu=N*(N-1.)/4.
-        variance=N*(2.*N+5.)*(N-1.)/72.
-        return mu, variance
-
-    f=inverse_normal_cdf(mu, math.sqrt(variance))
-    phi1=1-alpha/2.
-    phi2=alpha/2.
-    A1=f(phi1)
-    A2=f(phi2)
-    if A1 < Atot < A2:
-        return True
-    else:
-        return False
-
-
-
-
 def qcontrol(files, datalogger_config,
              bdate='2003-01-01 00:00', edate='2023-12-31 20:00',
              cut_coef=4.0,
@@ -148,7 +81,7 @@ def qcontrol(files, datalogger_config,
         last date to be considered
     """
     from io import timeSeries
-    from os.path import basename
+    from os.path import basename, join
     from itertools import izip_longest
     from datetime import datetime
     from dateutil.parser import parse
@@ -254,7 +187,7 @@ def qcontrol(files, datalogger_config,
         #---------------------------------
         # BEGINNING OF REVERSE ARRANGEMENT TEST
         #---------------------------------
-        valid_chunks=fin.apply(reverse_arrangement, points_number=360, axis=0, broadcast=False)
+        valid_chunks=fin.apply(data.reverse_arrangement, points_number=360, axis=0, broadcast=False)
         result,failed=algs.testValid(chunks_valid, testname='reverse arrangement', trueverbose=trueverbose)
         if result==False:
             if falseshow:
@@ -266,7 +199,7 @@ def qcontrol(files, datalogger_config,
         #--------------------------------
         # BEGINNING OF MAXIMUM DIFFERENCE METHOD
         #--------------------------------
-        trend=pm.data.trend(fin, mode='linear')
+        trend=data.trend(fin, mode='linear')
         maxdif=trend.iloc[0]-trend.iloc[-1]
         maxdif=maxdif.abs()
         chunks_valid= tables.loc['dif_limits'] - maxdif
@@ -288,7 +221,7 @@ def qcontrol(files, datalogger_config,
         # FINALLY
         #--------------------------------
         print 'Re-writng',filepath
-        fin.to_csv(os.path.join( outdir, os.path.basename(filepath) ),
+        fin.to_csv(join( outdir, basename(filepath) ),
                    header=datalogger_config.header_lines, date_format=date_format, quoting=3, na_rep='NaN')
     
     summary= {k: [len(v)] for k, v in numbers.items()}

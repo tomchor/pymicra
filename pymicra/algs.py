@@ -261,3 +261,12 @@ def check_numlines(fname, numlines=18000):
     else:
         return False
 
+def inverse_normal_cdf(mu, sigma):
+    """
+    """
+    from scipy.special import erfinv
+    def f(phi):
+        Z=np.sqrt(2)*erfinv(-2.*phi+1.)
+        return sigma*Z + mu
+    return f
+
