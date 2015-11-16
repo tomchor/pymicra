@@ -62,7 +62,7 @@ def qcontrol(files, datalogger_config,
              spikes_func=None,
              interp_limit=3, accepted_percent=1,
              window_size=900, chunk_size='2Min',
-             trueverbose=0, falseshow=0, trueshow=0, 
+             trueverbose=False, falseverbose=False, falseshow=0, trueshow=0, 
              outdir='quality_controlled', date_format='"%Y-%m-%d %H:%M:%S.%f"',
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
              summary='qcontrol_summary.csv'):
@@ -154,7 +154,7 @@ def qcontrol(files, datalogger_config,
         # BEGINNING OF LOWEST VALUE CHECK
         #-------------------------------
         valid= ~(fin < tables.loc['low_limits']).any(axis=0)
-        result, failed=algs.testValid(valid, testname='lowest value', trueverbose=trueverbose, filepath=filepath)
+        result, failed=algs.testValid(valid, testname='lowest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='lowest value', filename=filename, falseshow=falseshow)
         if result==False: continue
     
@@ -163,7 +163,7 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         valid= ~(fin > tables.loc['upp_limits']).any(axis=0)
 
-        result, failed=algs.testValid(valid, testname='highest value', trueverbose=trueverbose, filepath=filepath)
+        result, failed=algs.testValid(valid, testname='highest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='highest value', filename=filename, falseshow=falseshow)
         if result==False: continue
 
@@ -174,7 +174,7 @@ def qcontrol(files, datalogger_config,
         fin,valid_cols=check_spikes(chunks, visualize=False, vis_col='u', f=spikes_func)
         valid= valid_cols >= (1.-(accepted_percent/100.))
 
-        result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath)
+        result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
         if result==False: continue
 
@@ -184,35 +184,25 @@ def qcontrol(files, datalogger_config,
         df=fin.copy()
         df=df-pd.rolling_mean(df,window=window_size, center=True)
         stds_list=df.resample(chunk_size, np.std).dropna()
-        for l,stds in enumerate(stds_list.values):
-            std=stds_list.iloc[l]
-            lim=tables.loc['std_limits']
-            chunks_valid=std-lim
-            chunks_valid=chunks_valid>=0
-            result,failed=algs.testValid(chunks_valid, testname='STD', trueverbose=0, filepath=filepath)
-            if result==False:
-                print 'Failed chunk was:'
-                print std
-                print 'Limits were:'
-                print tables.loc['std_limits']
-                break
-            else:
-                pass    
+        valid= ~(stds_list<tables.loc['std_limits']).any(axis=0)
 
+        result,failed=algs.testValid(valid, testname='STD', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+
+        if falseverbose: print (not result)*'The failed variables and times:\n{0}'.format(~(stds_list<tables.loc['std_limits']))
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='STD', filename=filename, falseshow=falseshow)
         if result==False:
             continue
-        else:
-            if trueverbose: print filepath,'Passed STD test'
     
         #---------------------------------
         # BEGINNING OF REVERSE ARRANGEMENT TEST
         #---------------------------------
-        valid_chunks=fin.apply(data.reverse_arrangement, points_number=360, axis=0, broadcast=False)
-        result,failed=algs.testValid(chunks_valid, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
+        valid_chunks= fin[['u','v']].apply(data.reverse_arrangement, axis=0, points_number=50, alpha=0.05)
 
+        result,failed=algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
-        if result==False: continue
+        if result==False:
+            print 'FAILED RAT!:',filepath
+            continue
     
         #--------------------------------
         # BEGINNING OF MAXIMUM DIFFERENCE METHOD
@@ -221,10 +211,7 @@ def qcontrol(files, datalogger_config,
         maxdif=trend.iloc[0]-trend.iloc[-1]
         maxdif=maxdif.abs()
         chunks_valid= tables.loc['dif_limits'] - maxdif
-        print chunks_valid
-        chunks_valid=chunks_valid >= 0
-        print chunks_valid
-        exit()
+        chunks_valid= ~(chunks_valid < 0)
 
         result,failed=algs.testValid(chunks_valid, testname='maximum difference', trueverbose=trueverbose, filepath=filepath)
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='maximum difference', filename=filename, falseshow=falseshow)

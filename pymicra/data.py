@@ -217,7 +217,7 @@ def mu_var(N):
     from Bendat&Piersol
     """
     mu=N*(N-1.)/4.
-    variance=N*(2.*N+5.)*(N-1.)/72.
+    variance=N*(2.*N + 5.)*(N - 1.)/72.
     return mu, variance
 
 
@@ -246,33 +246,37 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
     '''
     if points_number==None:
         points_number=len(array)
-        mean_Matrix=array
+        xarray=array
     elif points_number==len(array):
-        mean_Matrix=array
+        xarray=array
     else:
         pts = len(array)//points_number
-        mean_Matrix = []
+        xarray = []
         for j in range(0,points_number):
-            mean_Matrix.append( np.mean(array[(j*pts):((j+1)*pts)]) ) # Calculo a media de cada um dos 50 intervalos
+            xarray.append( np.mean(array[(j*pts):((j+1)*pts)]) ) # Calculo a media de cada um dos 50 intervalos
+
     A = []
-    for i in range(len(mean_Matrix)):
+    for i in range(len(xarray)-1):
         h = []
-        for j in range(i,len(mean_Matrix)):
-            if(mean_Matrix[i] > mean_Matrix[j]):
+        for j in range(i,len(xarray)):
+            if(xarray[i] > xarray[j]):
                 h.append(1)
         A.append(sum(h))
     Atot = sum(A)
-    N=len(mean_Matrix)
+    N=len(xarray)
     mu,variance=mu_var(N)
     f=algs.inverse_normal_cdf(mu, np.sqrt(variance))
-    phi1=1-alpha/2.
+    phi1=1.-alpha/2.
     phi2=alpha/2.
     A1=f(phi1)
     A2=f(phi2)
+    #print A1
+    #print Atot
+    #print A2
+    #print
     if A1 < Atot < A2:
         return True
     else:
         return False
-
 
 

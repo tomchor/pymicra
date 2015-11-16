@@ -212,9 +212,10 @@ def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepa
     trueverbose: bool
         whether to print something successful cases
     '''
+    
     if False in df_valid.values:
+        failed=df_valid[df_valid==False].index
         if falseverbose:
-            failed=df_valid[df_valid==False].index
             print filepath, 'failed',testname,'test'
             print 'Failed variable(s):', ', '.join(failed)
             print
@@ -289,6 +290,7 @@ def applyResult(result, failed, df, control=None, testname=None, filename=None, 
     falseshow: bool
         whether to show the failed variables or not
     """
+    import matplotlib.pyplot as plt
     if result==False:
         if falseshow:
             df[failed].plot()
