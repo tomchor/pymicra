@@ -72,15 +72,24 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
     Author: Tomas Chor
     date: 2015-08-10
     This routine parses the date from a pandas DataFrame when it is divided into several columns
-    ----------------------------------
 
+    Parameters:
+    -----------
     data: pandas DataFrame
-
+        dataFrame whose dates have to be parsed
     date_cols: list of strings
-    A list of the names of the columns in which the date is divided
-    the naming of the date columns must be in accordance with the datetime directives,
-    so if the first column is only the year, its name must be `%Y` and so forth.
-    see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
+        A list of the names of the columns in which the date is divided
+        the naming of the date columns must be in accordance with the datetime directives,
+        so if the first column is only the year, its name must be `%Y` and so forth.
+        see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
+    connector: string
+    first_time_skip: int
+        the offset (mostly because of the bad converting done by LBA
+    clean: bool
+        remove date columns from data after it is introduced as index
+    correct_fracs: bool
+    complete_zeroes: list
+        list of columns that need to be padded with zeroes
     """
     from datetime import timedelta,datetime
     from algs import completeHM
@@ -90,6 +99,8 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
     date_format=connector.join(date_cols)
     auxformat='%Y-%m-%d %H:%M:%S.%f'
     if complete_zeroes:
+        if type(complete_zeroes) == str:
+            complete_zeroes=[complete_zeroes]
         for col in complete_zeroes:
             data[col]=data[col].apply(completeHM)
     #-------------------------------------

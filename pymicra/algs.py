@@ -196,7 +196,7 @@ def limitedSubs(data, max_interp=3, func=lambda x: abs(x) > abs(x.std()*4.) ):
     return df
 
 
-def testValid(df_valid, testname='', falseverbose=True, trueverbose=True):
+def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepath=None):
     '''
     Tests a boolean DataFrane obtained from the test and prints standard output
 
@@ -215,7 +215,7 @@ def testValid(df_valid, testname='', falseverbose=True, trueverbose=True):
     if False in df_valid.values:
         if falseverbose:
             failed=df_valid[df_valid==False].index
-            print 'Failed',testname,'test'
+            print filepath, 'failed',testname,'test'
             print 'Failed variable(s):', ', '.join(failed)
             print
         return False, failed
@@ -266,7 +266,34 @@ def inverse_normal_cdf(mu, sigma):
     """
     from scipy.special import erfinv
     def f(phi):
-        Z=np.sqrt(2)*erfinv(-2.*phi+1.)
+        Z=np.sqrt(2.)*erfinv(-2.*phi+1.)
         return sigma*Z + mu
     return f
+
+def applyResult(result, failed, df, control=None, testname=None, filename=None, falseshow=False):
+    """
+    Auxiliar function to be used with util.qcontrol
+
+    Parameters:
+    -----------
+    result: bool
+        whether the test failed and succeeded
+    failed: list
+        list of failed variables. None object if the test was successful
+    control: dictionary
+        dictionary whose keys are the names of the tests and items are lists
+    testname: string
+        name of the test (has to match control dict)
+    filename: string
+        name or path or identifier of the file tested
+    falseshow: bool
+        whether to show the failed variables or not
+    """
+    if result==False:
+        if falseshow:
+            df[failed].plot()
+            plt.show()
+        if control:
+            control[testname].append(filename)
+    return control
 
