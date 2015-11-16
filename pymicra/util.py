@@ -59,9 +59,8 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
 
 def qcontrol(files, datalogger_config,
              bdate='2003-01-01 00:00', edate='2023-12-31 20:00',
-             spikes_func=None,
-             interp_limit=3, accepted_percent=1,
-             window_size=900, chunk_size='2Min',
+             spikes_func=None, interp_limit=3, accepted_percent=1,
+             window_size=900, chunk_size='2Min', RATvars=None,
              trueverbose=False, falseverbose=False, falseshow=0, trueshow=0, 
              outdir='quality_controlled', date_format='"%Y-%m-%d %H:%M:%S.%f"',
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
@@ -171,7 +170,7 @@ def qcontrol(files, datalogger_config,
         # BEGINNING OF SPIKES CHECK
         #-------------------------------
         chunks=algs.splitData(fin, chunk_size)
-        fin,valid_cols=check_spikes(chunks, visualize=False, vis_col='u', f=spikes_func)
+        fin,valid_cols=check_spikes(chunks, visualize=False, vis_col='u', f=spikes_func, interp_limit=interp_limit)
         valid= valid_cols >= (1.-(accepted_percent/100.))
 
         result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
@@ -187,8 +186,8 @@ def qcontrol(files, datalogger_config,
         valid= ~(stds_list<tables.loc['std_limits']).any(axis=0)
 
         result,failed=algs.testValid(valid, testname='STD', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-
-        if falseverbose: print (not result)*'The failed variables and times:\n{0}'.format(~(stds_list<tables.loc['std_limits']))
+        if falseverbose:
+            print (not result)*'The failed variables and times:\n{0}'.format(~(stds_list<tables.loc['std_limits']))
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='STD', filename=filename, falseshow=falseshow)
         if result==False:
             continue
@@ -196,12 +195,16 @@ def qcontrol(files, datalogger_config,
         #---------------------------------
         # BEGINNING OF REVERSE ARRANGEMENT TEST
         #---------------------------------
-        valid_chunks= fin[['u','v']].apply(data.reverse_arrangement, axis=0, points_number=50, alpha=0.05)
+        if RATvars:
+            valid_chunks= fin[RATvars].apply(data.reverse_arrangement, axis=0, points_number=50, alpha=.01)
+        elif RATvars==None:
+            valid_chunks= fin.apply(data.reverse_arrangement, axis=0, points_number=50, alpha=.01)
+        else:
+            valid_chunks= fin.any(axis=0)
 
         result,failed=algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
         if result==False:
-            print 'FAILED RAT!:',filepath
             continue
     
         #--------------------------------
@@ -237,7 +240,7 @@ def qcontrol(files, datalogger_config,
     summary['percent']=summary['numbers']/summary.loc['total','numbers']
     print summary
     summary.to_csv('qcontrol_summary.csv', na_rep='NaN')
-    return
+    return summary
  
 
 def printUnit(string, mode='L', trim=True, greek=True):
