@@ -15,7 +15,7 @@ except ImportError:
     _has_setuptools = False
 
 if _has_setuptools:
-    extra_kwargs={'install_requires' : dependencies, zip_safe : False}
+    extra_kwargs={'install_requires' : dependencies}
 else:
     import pkg_resources
     pkg_resources.require(dependencies)
