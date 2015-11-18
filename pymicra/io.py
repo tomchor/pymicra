@@ -162,21 +162,41 @@ class dataloggerConf(object):
     ----------
 
     varNames: list of strings
-    should be a list of strings with the names of the variables. If the variable
-    is part if the date, then it should be provided as a datetime directive,
-    so if the columns is only the year, its name must be `%Y` and so forth. While
-    if it is the date in YYYY/MM/DD format, it should be `%Y/%m/%d`. For more info
-    see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
+        should be a list of strings with the names of the variables. If the variable
+        is part if the date, then it should be provided as a datetime directive,
+        so if the columns is only the year, its name must be `%Y` and so forth. While
+        if it is the date in YYYY/MM/DD format, it should be `%Y/%m/%d`. For more info
+        see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
 
     date_cols: list of strings
-    should be the subset of varNames that corresponds to the variables that compose
-    the timestamp. If it is not provided the program will try to guess by getting
-    all variable names that have a percentage sign.
+        should be the subset of varNames that corresponds to the variables that compose
+        the timestamp. If it is not provided the program will try to guess by getting
+        all variable names that have a percentage sign (%).
 
     date_connector: string
-    generally not really necessary. It is used to join and then parse the date_cols.
+        generally not really necessary. It is used to join and then parse the date_cols.
 
     columns_separator: string
+        used to assemble the date. Should only be used if the default char creates conflict.
+
+    header_lines: int
+        up to which line of the file is a header. See pandas.read_csv header option.
+
+    first_time_skip: int
+        how many units of frequency the first line of the file is offset (generally zero)
+
+    filename_format: string
+        tells the format of the file with the standard notation for date and time and with variable
+        parts as "?". E.g. if the files are 56_20150101.csv, 57_20150102.csv etc filename_format should be:
+            ??_%Y%m%d.csv
+        this is useful primarily for the quality control feature
+
+    units: dictionary
+        very important: a dictionary whose key are the columns of the file and whose items are
+        the units in which they appear.
+
+    description: string
+        brief description of the datalogger configuration file
     """
     def __init__(self, varNames,
              date_cols=None,
@@ -213,8 +233,23 @@ def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None, comple
     """
     Creates a micrometeorological time series from a file or list of files.
 
-    UNDER DEVELOPMENT
-    It needs a dataloggerConf object.
+    Parameters:
+    -----------
+
+    flist: list or string
+        either list or names of files (dataFrame will be one concatenated dataframe) or the name of one file
+    datalogger: pymicra.dataloggerConf object
+        configuration of the datalogger which is from where all the configurations of the file will be taken
+    index_by_date: bool
+        whether or not to index the data by date. Note that if this is False many of the functionalities
+        of pymicra will be lost.
+    correct_fracs: bool
+        set to True if the data is sampled at a frequency higher than the frequency of the timestamp 
+        (i.d. there are repeated timestamps)
+    complete_zeroes: list
+        list of columns which are part of dates and need to be padded with zeroes to be correctly read
+    verbose: int, bool
+        verbose level
     """
     
     if isinstance(flist, str):

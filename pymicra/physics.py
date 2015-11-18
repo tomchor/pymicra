@@ -45,9 +45,22 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
 
     needs validation and needs to work without dr or lon0
 
-    Parameters
-    ---------
+    Parameters:
+    -----------
+    date: datetime object
+        the date and time for which the zenith angle has to be calculated
+    lat: float
+        latitude in degrees
+    lon: float
+        longitude in degrees
+    lon0: float
+        DEFINE IT BETTER
     dr is the julian day of the solstice. Default is to get from dictionary
+
+    Returns:
+    --------
+    zen_ang: float
+        the zenith angle in degrees
     """
     from math import pi,sin,cos,acos,radians,degrees
     from calendar import isleap
