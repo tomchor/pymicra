@@ -84,43 +84,35 @@ def CtoK(T):
     return T + 273.15
 
 
-def get_pressure_with_elevation(h, 
-  Ps=standard_pressure, Ts=standard_temperature, 
-  Tl=temperature_lapse_rate, Hb=0.0, R=R_spec['dry_air'], 
-  g=gravity, M=earth_atmosphere_molar_mass):
+def satWaterPressure(T, unit='kelvin'):
     """
-    This function returns an estimate of the pressure in pascals as a function of
-    elevation above sea level
-    NOTES:" 
-      * This equation is only accurate up to 11000 meters
-      * results might be odd for elevations below 0 (sea level), like Dead Sea.
-    h=elevation relative to sea level (m)
-    Ps= static pressure (pascals)
-    Ts= temperature (kelvin)
-    Tl= temperature lapse rate (kelvin/meter)
-    Hb= height at the bottom of the layer
-    R= universal gas constant for air
-    g= gravitational acceleration
-    M= Molar mass of atmosphere
-    P = Ps * (Ts / ((Ts + Tl) * (h - Hb))) ^ ((g * M)/(R * Tl))
-    returns pressure in pascals
+    Returns the saturated water vapor pressure according eq (3.97) of Wallace and Hobbes, page 99.
+
+    e0, b, T1 and T2 are constants specific for water vapor
+
+    Parameters:
+    -----------
+
+    T: float
+        thermodynamic temperature
+
+    Returns:
+    --------
+        saturated vapor pressure of water (in kPa)
     """
-    if h > 11000.0 :
-          print "Warning: Elevation used exceeds the recommended maximum elevation for this function (11,000m)"
-    return  Ps * (Ts / (Ts + Tl * (h - Hb))) ** ((g * M) / (R * Tl))
-
-
-
-def get_temperature_with_elevation(h, Ts=standard_temperature, Tl=temperature_lapse_rate):
-    """This function returns an estimate of temperature as a function above sea level.
-    NOTES:
-      * This equation is only accurate up to 11,000 meters
-      * results might be odd for elevations below 0 (sea level), like Dead Sea.
-    Ts= temperature (kelvin)
-    Tl= temperature lapse rate (kelvin/meter)
-    returns temp in kelvin
-    """
-    return Ts + h *Tl
+    from math import exp
+    e0=0.61094
+    b=17.2694
+    if unit=='kelvin':
+        T1=273.16
+        T2=35.86
+    elif units=='celsius':
+        T1=0.
+        T2=243.04
+    else:
+        raise TypeError('Check your units')
+    brackets=b*(T-T1)/(T-T2)
+    return e0*exp(brackets)
 
 
 def perfGas(p=None, rho=None, R=None, T=None, gas=None):
@@ -158,5 +150,44 @@ def virtualTemp(T, tpres, ppres):
     """
     virt_temp=temp/(1. -(ppres/tpres)*(1.-mu))
     return virt_temp
+
+
+def get_pressure_with_elevation(h, 
+  Ps=standard_pressure, Ts=standard_temperature, 
+  Tl=temperature_lapse_rate, Hb=0.0, R=R_spec['dry_air'], 
+  g=gravity, M=earth_atmosphere_molar_mass):
+    """
+    This function returns an estimate of the pressure in pascals as a function of
+    elevation above sea level
+    NOTES:" 
+      * This equation is only accurate up to 11000 meters
+      * results might be odd for elevations below 0 (sea level), like Dead Sea.
+    h=elevation relative to sea level (m)
+    Ps= static pressure (pascals)
+    Ts= temperature (kelvin)
+    Tl= temperature lapse rate (kelvin/meter)
+    Hb= height at the bottom of the layer
+    R= universal gas constant for air
+    g= gravitational acceleration
+    M= Molar mass of atmosphere
+    P = Ps * (Ts / ((Ts + Tl) * (h - Hb))) ^ ((g * M)/(R * Tl))
+    returns pressure in pascals
+    """
+    if h > 11000.0 :
+          print "Warning: Elevation used exceeds the recommended maximum elevation for this function (11,000m)"
+    return  Ps * (Ts / (Ts + Tl * (h - Hb))) ** ((g * M) / (R * Tl))
+
+
+
+def get_temperature_with_elevation(h, Ts=standard_temperature, Tl=temperature_lapse_rate):
+    """This function returns an estimate of temperature as a function above sea level.
+    NOTES:
+      * This equation is only accurate up to 11,000 meters
+      * results might be odd for elevations below 0 (sea level), like Dead Sea.
+    Ts= temperature (kelvin)
+    Tl= temperature lapse rate (kelvin/meter)
+    returns temp in kelvin
+    """
+    return Ts + h *Tl
 
 
