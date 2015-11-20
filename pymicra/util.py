@@ -91,10 +91,8 @@ def qcontrol(files, datalogger_config,
 
     tables=pd.DataFrame(dif_limits, index=['dif_limits'])
     tables.loc['std_limits']=std_limits
-    if low_limits:
-        tables.loc['low_limits']=low_limits
-    if upp_limits:
-        tables.loc['upp_limits']=upp_limits
+    tables.loc['low_limits']=low_limits
+    tables.loc['upp_limits']=upp_limits
 
     numbers={'total': [],
     'spikes': [],
@@ -262,3 +260,15 @@ def printUnit(string, mode='L', trim=True, greek=True):
         u=u[3:].strip()
     return u
 
+
+def separateFiles(files, dlConfig, outformat='out_%Y-%m-%d_%H:%M.csv'):
+    """
+    Separates files into (default) 30 minute smaller files
+
+    NEEDS TESTING
+    NEEDS TO ADD CHUNK-GLUEING SO AS NOT TO LOSE ANY DATES
+    """
+    
+    for filename in files:
+        df=pd.read_csv(filename, header=dlConfig.header, index_col=None, columns=dlConfig.varNames)
+    return

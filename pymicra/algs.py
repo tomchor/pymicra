@@ -299,3 +299,89 @@ def applyResult(result, failed, df, control=None, testname=None, filename=None, 
             control[testname].append(filename)
     return control
 
+
+def parseDates(data, date_cols, connector='-', first_time_skip=0,
+  clean=True, correct_fracs=None, complete_zeroes=False):
+    """
+    Author: Tomas Chor
+    date: 2015-08-10
+    This routine parses the date from a pandas DataFrame when it is divided into several columns
+
+    Parameters:
+    -----------
+    data: pandas DataFrame
+        dataFrame whose dates have to be parsed
+    date_cols: list of strings
+        A list of the names of the columns in which the date is divided
+        the naming of the date columns must be in accordance with the datetime directives,
+        so if the first column is only the year, its name must be `%Y` and so forth.
+        see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
+    connector: string
+    first_time_skip: int
+        the offset (mostly because of the bad converting done by LBA
+    clean: bool
+        remove date columns from data after it is introduced as index
+    correct_fracs: bool
+    complete_zeroes: list
+        list of columns that need to be padded with zeroes
+    """
+    from datetime import timedelta,datetime
+    from algs import completeHM
+    #------------------------------------
+    # joins the names of the columns, which must match the datetime directive (see __doc__)
+    #------------------------------------
+    date_format=connector.join(date_cols)
+    auxformat='%Y-%m-%d %H:%M:%S.%f'
+    if complete_zeroes:
+        if type(complete_zeroes) == str:
+            complete_zeroes=[complete_zeroes]
+        for col in complete_zeroes:
+            data[col]=data[col].apply(completeHM)
+    #-------------------------------------
+    # joins the appropriate pandas columns because pandas can read only one column into datetime
+    #-------------------------------------
+    try:
+        aux=data[date_cols[0]].astype(str)
+    except ValueError:
+        aux=data[date_cols[0]].astype(int).astype(str)
+    for col in date_cols[1:]:
+        aux+=connector + data[col].astype(str)
+    dates=pd.to_datetime(aux, format=date_format)
+    #-------------------------------------
+    # The next steps are there to check if there are fractions that are not expressed in the datetime convention
+    # and it assumes that the lowest time period expressed is the minute
+    #-------------------------------------
+    first_date=dates.unique()[1]
+    n_fracs=len(dates[dates.values==first_date])
+    if n_fracs>1:
+        if correct_fracs == None:
+            print 'Warning! I identified that there are', n_fracs, ' values (on average) for every timestamp.\n\
+This generally means that the data is sampled at a frequency greater than the frequency of the timestamp. \
+I will then proceed to guess the fractions based of the keyword "first_time_skip" and correct the index.'
+        if (correct_fracs==None) or (correct_fracs==True):
+            dates=[ date.strftime(auxformat) for date in dates ]
+            aux=dates[0]
+            cont=first_time_skip
+            for i,date in enumerate(dates):
+                if date==aux:
+                    pass
+                else:
+                    cont=0
+                    aux=date
+                dates[i]=datetime.strptime(date, auxformat) + timedelta(minutes=cont/float(n_fracs))
+                cont+=1
+        else:
+            print '\nWarning: fractions werent corrected. Check your timestamp data and the correct_fracs flag\n'
+    #-------------------------------------
+    # setting new dates list as the index
+    #-------------------------------------
+    data=data.set_index([dates])
+    #-------------------------------------
+    # removing the columns used to generate the date
+    #-------------------------------------
+    if clean:
+        data=data.drop(date_cols, axis=1)
+    return data
+
+
+
