@@ -123,16 +123,14 @@ def spectrum(data, window='1min', frequency=10, absolute=True, T=30):
     Parameters
     ----------
 
-    data: pandas DataFrame/ timeSeries
-
+    data: pandas.DataFrame
+        dataframe with one (will return the spectrum) or two (will return to cross-spectrum) columns
     frequency: float
-    frequency of measurement of signal to pass to numpy.fft.rfftfreq
-
+        frequency of measurement of signal to pass to numpy.fft.rfftfreq
     absolute: bool
-    wether or not the results will be given in absolute value
-
-    T: int, float
-    period in minutes
+        wether or not the results will be given in absolute value
+    T: float
+        period in minutes
     """
     T=T*60.
     sig2=None
