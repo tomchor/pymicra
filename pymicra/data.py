@@ -116,7 +116,7 @@ def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
     return df.add_suffix(suffix)
 
 
-def spectrumDF(data, frequency=10, absolute=True, T=30):
+def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency'):
     """
     Calculates the spectrum for a set of data
 
@@ -127,18 +127,14 @@ def spectrumDF(data, frequency=10, absolute=True, T=30):
         dataframe with one (will return the spectrum) or two (will return to cross-spectrum) columns
     frequency: float
         frequency of measurement of signal to pass to numpy.fft.rfftfreq
-    absolute: bool
-        wether or not the results will be given in absolute value
-    T: float
+    T_minutes: float
         period in minutes
     """
-    T=T*60.     # convert from minutes to seconds
+    T=T_minutes*60.     # convert from minutes to seconds
     co=False
     if type(data)==pd.Series:
-        print 'Working with series'
         pass
     elif type(data)==pd.DataFrame:
-        print 'Working with dataframe'
         pass
         if len(data.columns)==1:
             pass
@@ -150,17 +146,21 @@ def spectrumDF(data, frequency=10, absolute=True, T=30):
         raise Exception('Input has to be pandas.DataFrame or pandas.Series')
 
     cols=list(data.columns)
-    spec= np.fft.rfft(data[cols[0]])
-    print spec
-    exit()
-    freq= np.fft.rfftfreq(len(sig), d=1./frequency)
-    if sig2 != None:
-        spec2=np.fft.rfft(sig2)
-        spec=np.real((2./T)*(spec*spec2.conjugate()))
-    elif absolute==True:
-        spec=np.real((2./T)*(spec*spec.conjugate()))
-    aux=pd.DataFrame( data={var1+' spectrum':spec}, index=freq )
-    aux.index.name='frequencies'
+    spec= np.fft.rfft(data.iloc[:,0])
+    freq= np.fft.rfftfreq(len(data), d=1./frequency)
+    if co:
+        varname='cross-spectrum_{}_{}'.format(*cols)
+        corr=np.correlate(data.iloc[:,0], data.iloc[:,1], mode='same')
+        spec=(2./T)*np.fft.rfft(corr)
+    else:
+        varname='spectrum_{}'.format(cols[0])
+        spec=(2./T)*spec
+
+    if out_index=='frequency':
+        aux=pd.DataFrame( data={ varname : spec }, index=freq )
+        aux.index.name='frequencies'
+    else:
+        raise NameError
     return aux
 
 
