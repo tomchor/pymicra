@@ -116,7 +116,55 @@ def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
     return df.add_suffix(suffix)
 
 
-def spectrum(data, window='1min', frequency=10, absolute=True, T=30):
+def spectrumDF(data, frequency=10, absolute=True, T=30):
+    """
+    Calculates the spectrum for a set of data
+
+    Parameters
+    ----------
+
+    data: pandas.DataFrame
+        dataframe with one (will return the spectrum) or two (will return to cross-spectrum) columns
+    frequency: float
+        frequency of measurement of signal to pass to numpy.fft.rfftfreq
+    absolute: bool
+        wether or not the results will be given in absolute value
+    T: float
+        period in minutes
+    """
+    T=T*60.     # convert from minutes to seconds
+    co=False
+    if type(data)==pd.Series:
+        print 'Working with series'
+        pass
+    elif type(data)==pd.DataFrame:
+        print 'Working with dataframe'
+        pass
+        if len(data.columns)==1:
+            pass
+        elif len(data.columns)==2:
+            co=True
+        else:
+            raise Exception('Too many columns of data. Chose one (spectrum) or two (cross-spectrum')
+    else:
+        raise Exception('Input has to be pandas.DataFrame or pandas.Series')
+
+    cols=list(data.columns)
+    spec= np.fft.rfft(data[cols[0]])
+    print spec
+    exit()
+    freq= np.fft.rfftfreq(len(sig), d=1./frequency)
+    if sig2 != None:
+        spec2=np.fft.rfft(sig2)
+        spec=np.real((2./T)*(spec*spec2.conjugate()))
+    elif absolute==True:
+        spec=np.real((2./T)*(spec*spec.conjugate()))
+    aux=pd.DataFrame( data={var1+' spectrum':spec}, index=freq )
+    aux.index.name='frequencies'
+    return aux
+
+
+def spectrum(data, frequency=10, absolute=True, T=30):
     """
     Calculates the spectrum for a set of data
 
@@ -161,40 +209,6 @@ def spectrum(data, window='1min', frequency=10, absolute=True, T=30):
     elif absolute==True:
         spec=np.real((2./T)*(spec*spec.conjugate()))
     aux=pd.DataFrame( data={var1+' spectrum':spec}, index=freq )
-    aux.index.name='frequencies'
-    return aux
-
-
-def spectrum_old(data, variable=None, frequency=10, absolute=True, T=30):
-    """
-    Author: Tomas Chor
-
-    Calculates the spectrum for a set of data
-
-    Parameters
-    ----------
-    SHOULD NOT BE USED - PROBABLY OBSOLETE
-
-    data: pandas DataFrame/ timeSeries
-
-    col: str
-        the column for which to calculate the spectrum
-    frequency: float
-        frequency of measurement of signal to pass to numpy.fft.rfftfreq
-    absolute: bool
-        whether or not the results will be given in absolute value
-    T: int, float
-        period in minutes
-    """
-    T=T*60.
-    if variable==None:
-        variable=data.columns[0]
-    sig=data[variable].values
-    spec= np.fft.rfft(sig)
-    freq= np.fft.rfftfreq(len(sig), d=1./frequency)
-    if absolute==True:
-        spec=map(abs,spec)
-    aux=pd.DataFrame( data={variable+' spectrum':spec}, index=freq )
     aux.index.name='frequencies'
     return aux
 
