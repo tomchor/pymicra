@@ -178,7 +178,10 @@ def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None, comple
     columns_separator=datalogger.columns_separator
     date_cols=datalogger.date_cols
     date_connector=datalogger.date_connector
-    series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames, verbose=verbose)
+    if columns_separator=='whitespace':
+        series=readDataFiles(flist, header=header_lines, delim_whitespace=True, varNames=datalogger.varNames, verbose=verbose)
+    else:
+        series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames, verbose=verbose)
     if verbose==1:
         print 'Starting to parse the dates'
     if index_by_date:
