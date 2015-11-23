@@ -132,10 +132,7 @@ def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency'):
     """
     T=T_minutes*60.     # convert from minutes to seconds
     co=False
-    if type(data)==pd.Series:
-        pass
-    elif type(data)==pd.DataFrame:
-        pass
+    if type(data)==pd.DataFrame:
         if len(data.columns)==1:
             pass
         elif len(data.columns)==2:
@@ -143,18 +140,20 @@ def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency'):
         else:
             raise Exception('Too many columns of data. Chose one (spectrum) or two (cross-spectrum')
     else:
-        raise Exception('Input has to be pandas.DataFrame or pandas.Series')
+        raise Exception('Input has to be pandas.DataFrame')
 
     cols=list(data.columns)
-    spec= np.fft.rfft(data.iloc[:,0])
-    freq= np.fft.rfftfreq(len(data), d=1./frequency)
+    spec = np.fft.rfft(data.iloc[:,0])
+    spec = np.conj(spec)*np.fft.rfft(data.iloc[:,-1])
+    spec*= (2./T)
+    freq = np.fft.rfftfreq(len(data), d=1./frequency)
     if co:
         varname='cross-spectrum_{}_{}'.format(*cols)
-        corr=np.correlate(data.iloc[:,0], data.iloc[:,1], mode='same')
-        spec=(2./T)*np.fft.rfft(corr)
+#        corr=np.correlate(data.iloc[:,0], data.iloc[:,-1], mode='same')
+#        spec=(2./T)*np.fft.rfft(corr)
     else:
         varname='spectrum_{}'.format(cols[0])
-        spec=(2./T)*spec
+#        spec=(2./T)*spec
 
     if out_index=='frequency':
         aux=pd.DataFrame( data={ varname : spec }, index=freq )
