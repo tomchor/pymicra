@@ -153,62 +153,12 @@ def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency'):
 #        spec=(2./T)*np.fft.rfft(corr)
     else:
         varname='spectrum_{}'.format(cols[0])
-#        spec=(2./T)*spec
 
     if out_index=='frequency':
         aux=pd.DataFrame( data={ varname : spec }, index=freq )
         aux.index.name='frequencies'
     else:
         raise NameError
-    return aux
-
-
-def spectrum(data, frequency=10, absolute=True, T=30):
-    """
-    Calculates the spectrum for a set of data
-
-    Parameters
-    ----------
-
-    data: pandas.DataFrame
-        dataframe with one (will return the spectrum) or two (will return to cross-spectrum) columns
-    frequency: float
-        frequency of measurement of signal to pass to numpy.fft.rfftfreq
-    absolute: bool
-        wether or not the results will be given in absolute value
-    T: float
-        period in minutes
-    """
-    T=T*60.
-    sig2=None
-    var1=''
-    if type(data)==pd.Series:
-        sig=data.values
-    elif type(data)==pd.DataFrame:
-        if len(data.columns)==1:
-            var1=data.columns[0]
-        elif len(data.columns)==2:
-            var1,var2=data.columns
-            sig2=data[var2].values
-        else:
-            raise Exception('Too many columns of data. Chose one (spectrum) or two (cross-spectrum')
-        sig=data[var1].values
-    else:
-        if len(data)==1:
-            sig=data
-        elif len(data)==2:
-            sig,sig2=data
-        else:
-            raise Exception('Too many columns of data. Chose one (spectrum) or two (cross-spectrum')
-    spec= np.fft.rfft(sig)
-    freq= np.fft.rfftfreq(len(sig), d=1./frequency)
-    if sig2 != None:
-        spec2=np.fft.rfft(sig2)
-        spec=np.real((2./T)*(spec*spec2.conjugate()))
-    elif absolute==True:
-        spec=np.real((2./T)*(spec*spec.conjugate()))
-    aux=pd.DataFrame( data={var1+' spectrum':spec}, index=freq )
-    aux.index.name='frequencies'
     return aux
 
 
@@ -286,4 +236,19 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
     else:
         return False
 
+def recspe(slow_spec, freqs, T):
+    """
+    Applied a correction factor to the spectrum of a slow-measured variable
+    based on the response-time T
 
+    Parameters:
+    -----------
+    freqs: numpy.array
+        frequencies
+    slow_spec: numpy.array
+        the spectrum
+    T: float
+        the response-time
+    """
+    assert len(slow_spec)==len(freqs)
+    return slow_spec*(1.0 + 4.*(np.pi**2.)*(freqs**2.) * (T**2.))

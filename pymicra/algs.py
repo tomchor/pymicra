@@ -440,8 +440,8 @@ def classlogavg (maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True):
 # ------------------------------------------------------------------------------
 # log increments
 # ------------------------------------------------------------------------------
-    logxmin = log(x[indx[0]])
-    logxmax = log(x[indx[ntotal-1]])
+    logxmin = np.log(x[indx[0]])
+    logxmax = np.log(x[indx[ntotal-1]])
 # ------------------------------------------------------------------------------
 # counts the number of points per class
 # ------------------------------------------------------------------------------
@@ -455,7 +455,7 @@ def classlogavg (maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True):
         alfa = float(classe+1)/float(maxcl)
         assert ( alfa <= 1.0 )
         logxsup = alfa * logxmax + (1.0 - alfa)*logxmin
-        while ( (i < ntotal) and ( log(x[indx[i]]) <= logxsup) ):
+        while ( (i < ntotal) and ( np.log(x[indx[i]]) <= logxsup) ):
             npclass[classe] += 1
             i += 1
         classe += 1
