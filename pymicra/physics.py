@@ -164,43 +164,19 @@ def virtualTemp(T, tpres, ppres):
     virt_temp=temp/(1. -(ppres/tpres)*(1.-mu))
     return virt_temp
 
-
-def get_pressure_with_elevation(h, 
-  Ps=standard_pressure, Ts=standard_temperature, 
-  Tl=temperature_lapse_rate, Hb=0.0, R=R_spec['dry_air'], 
-  g=gravity, M=earth_atmosphere_molar_mass):
+def R_umidAir(q):
     """
-    This function returns an estimate of the pressure in pascals as a function of
-    elevation above sea level
-    NOTES:" 
-      * This equation is only accurate up to 11000 meters
-      * results might be odd for elevations below 0 (sea level), like Dead Sea.
-    h=elevation relative to sea level (m)
-    Ps= static pressure (pascals)
-    Ts= temperature (kelvin)
-    Tl= temperature lapse rate (kelvin/meter)
-    Hb= height at the bottom of the layer
-    R= universal gas constant for air
-    g= gravitational acceleration
-    M= Molar mass of atmosphere
-    P = Ps * (Ts / ((Ts + Tl) * (h - Hb))) ^ ((g * M)/(R * Tl))
-    returns pressure in pascals
+    Calculates the gas constant for umid air from the specific humidity q
+
+    Parameters:
+    -----------
+    q: float
+        the specific humidity in g(water)/g(air)
+
+    Returns:
+    --------
+    R_air: float
+        the specific gas constant for humid air in J/(g*K)
     """
-    if h > 11000.0 :
-          print "Warning: Elevation used exceeds the recommended maximum elevation for this function (11,000m)"
-    return  Ps * (Ts / (Ts + Tl * (h - Hb))) ** ((g * M) / (R * Tl))
-
-
-
-def get_temperature_with_elevation(h, Ts=standard_temperature, Tl=temperature_lapse_rate):
-    """This function returns an estimate of temperature as a function above sea level.
-    NOTES:
-      * This equation is only accurate up to 11,000 meters
-      * results might be odd for elevations below 0 (sea level), like Dead Sea.
-    Ts= temperature (kelvin)
-    Tl= temperature lapse rate (kelvin/meter)
-    returns temp in kelvin
-    """
-    return Ts + h *Tl
-
+    return q* R_spec['h2o'] + (1.0 - q)*R_spec['dry_air']
 
