@@ -4,6 +4,7 @@
 """
 import pandas as pd
 import numpy as np
+import scipy.stats as st
 
 
 def combine(levels, order='Crescent'):
@@ -384,4 +385,125 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
     return data
 
 
+
+def classlogavg (maxcl, indx, x, y, pr_sign=+1.0):
+    '''
+    Class-averages a big array: the abscissas are divided into maxcl
+    classes; then it returns the mean of the abscissas and the ordinates for
+    each class; this function contemplates the possibility that some classes
+    may be empty.
+
+    Parameters:
+    -----------
+    maxcl: int
+        the maximum # of classes desired
+    indx: list, array
+        the index ordering x from smallest to biggest
+    x: list, array
+        the big array of abscissas
+    y: list, array
+        the big array of ordinates
+    pr_sign:
+        prevailing sign 
+
+    Returns:
+    --------
+    nsm: int
+        the number of non-empty classes
+    npclsign:
+        the number of points used for averaging per class
+    xsm: list
+        the smoothed array of abscissas
+    ysm: list
+        the smoothed array of ordinates
+    '''
+    ntotal = len(x)
+# ------------------------------------------------------------------------------
+# number of points per class: will need two of them!
+# ------------------------------------------------------------------------------
+    npclsign = np.zeros(maxcl,int)
+    npclass = np.zeros(maxcl,int)
+# ------------------------------------------------------------------------------
+# the smoothed arrays
+# ------------------------------------------------------------------------------
+    xsm = np.zeros(maxcl,float)
+    ysm = np.zeros(maxcl,float)
+# ------------------------------------------------------------------------------
+# log increments
+# ------------------------------------------------------------------------------
+    logxmin = log(x[indx[0]])
+    logxmax = log(x[indx[ntotal-1]])
+# ------------------------------------------------------------------------------
+# counts the number of points per class
+# ------------------------------------------------------------------------------
+    i = 0
+    classe = 0
+    while ( i < ntotal ):
+        npclass[classe] = 0
+# ------------------------------------------------------------------------------
+# warning! truncation errors?
+# ------------------------------------------------------------------------------
+        alfa = float(classe+1)/float(maxcl)
+        assert ( alfa <= 1.0 )
+        logxsup = alfa * logxmax + (1.0 - alfa)*logxmin
+        while ( (i < ntotal) and ( log(x[indx[i]]) <= logxsup) ):
+            npclass[classe] += 1
+            i += 1
+        classe += 1
+    assert ( classe == maxcl )
+# ------------------------------------------------------------------------------
+# begins averaging
+# ------------------------------------------------------------------------------
+    nsm = 0 
+    first = 0 
+    for classe in range(maxcl): 
+        if ( npclass[classe] > 0 ) :
+# ------------------------------------------------------------------------------
+# needs a local array for storing contiguously the members of a class    
+# ------------------------------------------------------------------------------
+            xlocal = np.zeros( npclass[classe],float) 
+            ylocal = np.zeros( npclass[classe],float)
+# ------------------------------------------------------------------------------
+# contiguous storage
+# ------------------------------------------------------------------------------
+            k = 0 
+            for j in range(npclass[classe]):
+                indlocal = indx[first+j]
+# ------------------------------------------------------------------------------
+# checks index consistency
+# ------------------------------------------------------------------------------
+                if ( indlocal > ntotal - 1 ):
+                    print("stat-->classlogavg: incorrect index in class averaging\n")
+                    exit(1)
+# ------------------------------------------------------------------------------
+# checks signal consistency
+# ------------------------------------------------------------------------------
+                yy = pr_sign * y[indlocal] 
+                if ( yy > 0.0 ) :
+                    xlocal[k] = x[indlocal] 
+                    assert( xlocal[k] <= 10.0)
+                    ylocal[k] = yy 
+                    k += 1
+# ------------------------------------------------------------------------------
+# the VALID number of points per class is now limited to those points having the
+# prevailing sign: calculates the x- and y- averages of each class for non-empty
+# classes
+# ------------------------------------------------------------------------------
+            if ( k > 0 ) :
+                xavg = st.gmean(xlocal)
+                yavg = st.gmean(ylocal)
+                xsm[nsm] = xavg 
+                ysm[nsm] = pr_sign * yavg 
+                npclsign[nsm] = k 
+# ------------------------------------------------------------------------------
+# increments the number of non-empty classes
+# ------------------------------------------------------------------------------
+                nsm += 1
+            pass
+        pass
+# ------------------------------------------------------------------------------
+# increments "first" to be the starting index of the next class
+# ------------------------------------------------------------------------------
+        first += npclass[classe] 
+    return (nsm, npclsign, xsm, ysm)
 
