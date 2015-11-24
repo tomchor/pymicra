@@ -386,12 +386,15 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
 
 
 
-def classlogavg (maxcl, indx, x, y, pr_sign=+1.0):
+def classlogavg (maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True):
     '''
+    Author: Nelson L. Dias
+    Modified by: Tomas L. Chor (2015-11-23) to include arithmetic mean
+
     Class-averages a big array: the abscissas are divided into maxcl
-    classes; then it returns the mean of the abscissas and the ordinates for
-    each class; this function contemplates the possibility that some classes
-    may be empty.
+    classes, then it returns the mean of the abscissas and the ordinates for
+    each class. The classes are log-spaced so as to appear linear in logplot
+    This function contemplates the possibility that some classes may be empty.
 
     Parameters:
     -----------
@@ -405,6 +408,8 @@ def classlogavg (maxcl, indx, x, y, pr_sign=+1.0):
         the big array of ordinates
     pr_sign:
         prevailing sign 
+    geometric_mean: bool
+        whether or not to use geometric mean. If False, arithmetic mean is used
 
     Returns:
     --------
@@ -417,6 +422,10 @@ def classlogavg (maxcl, indx, x, y, pr_sign=+1.0):
     ysm: list
         the smoothed array of ordinates
     '''
+    if geometric_mean:
+        cmean=st.gmean
+    else:
+        cmean=np.mean
     ntotal = len(x)
 # ------------------------------------------------------------------------------
 # number of points per class: will need two of them!
@@ -490,20 +499,16 @@ def classlogavg (maxcl, indx, x, y, pr_sign=+1.0):
 # classes
 # ------------------------------------------------------------------------------
             if ( k > 0 ) :
-                xavg = st.gmean(xlocal)
-                yavg = st.gmean(ylocal)
+                xavg = cmean(xlocal)
+                yavg = cmean(ylocal)
                 xsm[nsm] = xavg 
                 ysm[nsm] = pr_sign * yavg 
                 npclsign[nsm] = k 
-# ------------------------------------------------------------------------------
-# increments the number of non-empty classes
-# ------------------------------------------------------------------------------
+
                 nsm += 1
             pass
         pass
-# ------------------------------------------------------------------------------
-# increments "first" to be the starting index of the next class
-# ------------------------------------------------------------------------------
+
         first += npclass[classe] 
     return (nsm, npclsign, xsm, ysm)
 
