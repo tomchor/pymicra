@@ -247,14 +247,6 @@ def readUnitsCsv(filename, names=0, units=1):
 # OUTPUT OF DATA
 #-------------------------------------------
 #-------------------------------------------
-def to_array(data):
-    """
-    Returns the contents of a timeSeries into an array type
-    """
-    vals=zip(*data.values)
-    return [data.index.to_pydatetime]+vals
-
-
 
 def toUnitsCsv(data, units, filename, to_tex=False, **kwargs):
     """
