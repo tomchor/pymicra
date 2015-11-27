@@ -386,7 +386,7 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
 
 
 
-def classlogavg (maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True):
+def classlogbin (maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True, function=None):
     '''
     Author: Nelson L. Dias
     Modified by: Tomas L. Chor (2015-11-23) to include arithmetic mean
@@ -410,6 +410,9 @@ def classlogavg (maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True):
         prevailing sign 
     geometric_mean: bool
         whether or not to use geometric mean. If False, arithmetic mean is used
+    function: function
+        overwrites argument geometric_mean and uses this function to perform the binning
+    NEEDS TO BE TESTED!
 
     Returns:
     --------
@@ -426,6 +429,9 @@ def classlogavg (maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True):
         cmean=st.gmean
     else:
         cmean=np.mean
+    if function != None:
+        assert hasattr(function, '__call__')
+        cmean=function
     ntotal = len(x)
 # ------------------------------------------------------------------------------
 # number of points per class: will need two of them!
