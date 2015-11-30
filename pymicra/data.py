@@ -116,7 +116,7 @@ def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
     return df.add_suffix(suffix)
 
 
-def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency'):
+def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency', anti_aliasing=False):
     """
     Calculates the spectrum for a set of data
 
@@ -131,6 +131,7 @@ def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency'):
         period in minutes
     """
     T=T_minutes*60.     # convert from minutes to seconds
+    N = len(data)
     co=False
     if type(data)==pd.DataFrame:
         if len(data.columns)==1:
@@ -145,7 +146,7 @@ def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency'):
     cols=list(data.columns)
     spec = np.fft.rfft(data.iloc[:,0])
     spec = np.conj(spec)*np.fft.rfft(data.iloc[:,-1])
-    spec*= (2./T)
+    spec*= 2./(frequency*N)
     freq = np.fft.rfftfreq(len(data), d=1./frequency)
     if co:
         varname='cross-spectrum_{}_{}'.format(*cols)
