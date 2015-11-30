@@ -386,7 +386,7 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
 
 
 
-def classlogbin (maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True, function=None):
+def classlogbin(maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True, function=None):
     '''
     Author: Nelson L. Dias
     Modified by: Tomas L. Chor (2015-11-23) to include arithmetic mean
@@ -505,8 +505,8 @@ def classlogbin (maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True, function=
 # classes
 # ------------------------------------------------------------------------------
             if ( k > 0 ) :
-                xavg = cmean(xlocal)
-                yavg = cmean(ylocal)
+                xavg = cmean(xlocal[0:k])
+                yavg = cmean(ylocal[0:k])
                 xsm[nsm] = xavg 
                 ysm[nsm] = pr_sign * yavg 
                 npclsign[nsm] = k 
