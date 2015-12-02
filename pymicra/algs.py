@@ -385,6 +385,12 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
     return data
 
 
+def classlogbin2(x, y, classes, function=np.mean):
+    indx=np.sort(x)
+    xmin=x[indx[0]]
+    xmax=x[indx[-1]]
+    return None
+
 
 def classlogbin(maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True, function=None):
     '''
@@ -497,7 +503,8 @@ def classlogbin(maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True, function=N
                 if ( yy > 0.0 ) :
                     xlocal[k] = x[indlocal] 
                     assert( xlocal[k] <= 10.0)
-                    ylocal[k] = yy 
+                    # INCLUDED .REAL HERE IN ORDER TO AVOID WARNING
+                    ylocal[k] = yy.real
                     k += 1
 # ------------------------------------------------------------------------------
 # the VALID number of points per class is now limited to those points having the
