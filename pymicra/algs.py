@@ -385,11 +385,33 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
     return data
 
 
-def classlogbin2(x, y, classes, function=np.mean):
-    indx=np.sort(x)
-    xmin=x[indx[0]]
-    xmax=x[indx[-1]]
-    return None
+def classbin(x, y, classes_number=100, function=np.mean, log_scale=True):
+    '''
+    For now this assumes the lists are alredy ordered
+    '''
+    if log_scale:
+        bins=np.logspace(x[0], x[-1], classes_number+1)
+    else:
+        bins=np.linspace(x[0], x[-1], classes_number+1)
+    ybins=[[]]# for i in range(classes_number)]#*classes_number
+    xbins=[[]]#*classes_number
+    i=0
+    for xx, yy in zip(x,y):
+        if ((xx>=bins[i]) and (xx<bins[i+1])) or xx==bins[-1]:
+            pass
+        else:
+            i+=1
+            xbins.append([])
+            ybins.append([])
+        ybins[i].append(yy)
+        xbins[i].append(xx)
+        print ybins
+    xsm = np.array(map(function, xbins))
+    ysm = np.array(map(function, ybins))
+    
+    print bins
+    print x
+    return xsm, ysm
 
 
 def classlogbin(maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True, function=None):
