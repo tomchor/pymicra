@@ -261,14 +261,42 @@ def printUnit(string, mode='L', trim=True, greek=True):
     return u
 
 
-def separateFiles(files, dlConfig, outformat='out_%Y-%m-%d_%H:%M.csv'):
+def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir='',
+                verbose=False, header=0, sep=',', firstflag='first'):
     """
     Separates files into (default) 30 minute smaller files
 
     NEEDS TESTING
     NEEDS TO ADD CHUNK-GLUEING SO AS NOT TO LOSE ANY DATES
     """
-    
+    from os import path
+    varnames=dlconfig.varNames
+    datefmt=' '.join([ el for el in varnames if '%' in el ])
+
+    for fin in files:
+        with open(fin, 'rt') as fin:
+            for i in range(header):
+                fou.write(fin.readline())
+            fou=open('{}/{}.csv'.format(outdir,firstflag), 'wt')
+            pos=fin.tell()
+            outpath=path.join(outdir,)
+            for line in fin:
+                columns=line.split(sep)
+                try:
+                    cdate=dt.datetime.strptime(columns[0], args.format)
+                except:
+                    try:
+                        cdate=parse(columns[0])
+                    except:
+                        cdate=parse(columns[0][1:-1])
+                if all( [cdate.minute % dt ==0, cdate.second==0, cdate.microsecond==0] ):
+                    print cdate
+                    fou.close()
+                    fou=open('{}/{}_{}.csv'.format(subdir,flag,cdate.strftime("%Y-%m-%d_%H:%M")), 'wt')
+                fou.write(line)
+            print 'Done!'
+        
+        
     for filename in files:
         df=pd.read_csv(filename, header=dlConfig.header, index_col=None, columns=dlConfig.varNames)
     return
