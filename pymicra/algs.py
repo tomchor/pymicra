@@ -403,6 +403,7 @@ def classbin(x, y, bins_number=100, function=np.mean, log_scale=True):
     log_scale: boolean
         whether or not to use a log-spaced scale to set the bins
     '''
+    import warnings
     xmin=np.min(x)
     xmax=np.max(x)
     if log_scale:
@@ -411,33 +412,27 @@ def classbin(x, y, bins_number=100, function=np.mean, log_scale=True):
         #-----------
         if (x<=0).any():
             print 'Warning: zero and/or negative values exist in x array about to be log-scaled. Will try to ignore but errors might arise.'
-            y=[ yy for yy, xx in zip(y,x) if xx > 0 ]
-            x=[ el for el in x if el > 0]
+            y=np.array([ yy for yy, xx in zip(y,x) if xx > 0 ])
+            x=np.array([ el for el in x if el > 0])
             xmin=np.min(x)
             xmax=np.max(x)
         bins=np.logspace(np.log(xmin), np.log(xmax), bins_number+1, base=np.e)
     else:
         bins=np.linspace(xmin, xmax, bins_number+1)
-    ybins=[[] for i in range(bins_number)]
-    xbins=[[] for i in range(bins_number)]
+    xsm = np.zeros(bins_number)
+    ysm = np.zeros(bins_number)
     #-----------
     # The following process probably should be optimized
     #-----------
-    for xx, yy in zip(x,y):
-        i=0
-        while i<bins_number:
-            if ((xx>=bins[i]) and (xx<bins[i+1])):
-                ybins[i].append(yy)
-                xbins[i].append(xx)
-                break
-            elif (i==(bins_number-1)) and xx==bins[-1]:
-                ybins[i].append(yy)
-                xbins[i].append(xx)
-                break
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        for i in range(bins_number):
+            if i == bins_number - 1:
+                sel = bins[i] <= x
             else:
-                i+=1
-    xsm = np.array(map(function, xbins))
-    ysm = np.array(map(function, ybins))
+                sel = (bins[i] <= x) & (x < bins[i+1])
+            xsm[i] = function(x[sel])
+            ysm[i] = function(y[sel])
     return xsm, ysm
 
 
