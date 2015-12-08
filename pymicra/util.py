@@ -300,3 +300,5 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
     for filename in files:
         df=pd.read_csv(filename, header=dlConfig.header, index_col=None, columns=dlConfig.varNames)
     return
+
+
