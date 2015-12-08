@@ -214,7 +214,7 @@ def read_dlc(dlcfile):
     return dataloggerConf(**dlcvars)
 
 
-def readUnitsCsv(filename, names=0, units=1):
+def readUnitsCsv(filename, names=0, units=1, **kwargs):
     """
     Reads a csv file in which the first line is the name of the variables
     and the second line contains the units
@@ -235,7 +235,8 @@ def readUnitsCsv(filename, names=0, units=1):
     unitsdic: dictionary
         dictionary with the variable names as keys and the units as values
     """
-    df=pd.read_csv(filename, header=[names, units], index_col=0, parse_dates=[0])
+    df=pd.read_csv(filename, header=[names, units], **kwargs)
+    #df=pd.read_csv(filename, header=[names, units], index_col=0, parse_dates=[0])
     cols,units=zip(*df.columns)
     unitsdic={ k:v for k,v in zip(cols,units) }
     df.columns=cols
