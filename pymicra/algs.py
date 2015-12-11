@@ -436,6 +436,17 @@ def classbin(x, y, bins_number=100, function=np.mean, log_scale=True):
     return xsm, ysm
 
 
+def binwrapper(self, **kwargs):
+    x=self.index.astype(np.float64)
+    out=pd.DataFrame(columns = self.columns)
+    for c in self.columns:
+        xsm, ysm = classbin(self[c].astype(np.float64))
+        out[c] = ysm
+    out.index=xsm
+    return out
+pd.DataFrame.binned=binwrapper
+
+
 def classlogbin(maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True, function=None):
     '''
     Author: Nelson L. Dias
