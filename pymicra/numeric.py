@@ -6,14 +6,17 @@ def integrate_series(self, how='trapz', dateindex=False, **kwargs):
     '''
     Numerically a given series.
 
-    @param how: the method to use (trapz by default)
-    @return 
-
-    Available methods:
-     * trapz - trapezoidal
-     * cumtrapz - cumulative trapezoidal
-     * simps - Simpson's rule
-     * romb - Romberger's rule
+    Parameters:
+    -----------
+    how: string
+        the method to use (trapz by default)
+        Available methods:
+         * trapz - trapezoidal
+         * cumtrapz - cumulative trapezoidal
+         * simps - Simpson's rule
+         * romb - Romberger's rule
+    dateindex: bool
+        whether or not to assume index is sequence of dates
 
     See http://docs.scipy.org/doc/scipy/reference/integrate.html for the method details.
     or the source code
@@ -37,14 +40,17 @@ def integrate_df(self, how='trapz', dateindex=False, **kwargs):
     '''
     Numerically integrate a given dataframe
 
-    @param how: the method to use (trapz by default)
-    @return 
-
-    Available methods:
-     * trapz - trapezoidal
-     * cumtrapz - cumulative trapezoidal
-     * simps - Simpson's rule
-     * romb - Romberger's rule
+    Parameters:
+    -----------
+    how: string
+        the method to use (trapz by default)
+        Available methods:
+         * trapz - trapezoidal
+         * cumtrapz - cumulative trapezoidal
+         * simps - Simpson's rule
+         * romb - Romberger's rule
+    dateindex: bool
+        whether or not to assume index is sequence of dates
 
     See http://docs.scipy.org/doc/scipy/reference/integrate.html for the method details.
     or the source code

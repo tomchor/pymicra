@@ -1,14 +1,16 @@
 """
 This module sets the default options in pymicra
+
+STILL NEEDS TO BE TESTED AND OPTIMIZED
 """
-mean_suffix='_mean'
 mean_preffix=''
+mean_suffix='_mean'
 
-fluctuation_suffix="'"
 fluctuation_preffix=""
+fluctuation_suffix="'"
 
-star_suffix='_star'
 star_preffix=''
+star_suffix='_star'
 
 concentration_preffix='conc_'
 concentration_suffix=''
@@ -25,7 +27,7 @@ mixing_ratio_suffix=''
 u='u'
 v='v'
 w='w'
-therm_temp='theta'
+thermodyn_temp='theta'
 virtual_temp='theta_v'
 pressure='p'
 relative_humidity='rh'
