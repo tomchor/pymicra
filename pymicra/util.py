@@ -280,7 +280,8 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
             df=io.timeSeries(f, dlconfig, parse_dates=True, 
                 parse_dates_kw={'clean' : False}, 
                 read_data_kw={'quoting' : quoting})
-            chunks=algs.splitData(df, frequency)
+            return df.iloc[:100000]
+            chunks, index = algs.splitData(df, frequency, return_index=True)
             for chunk in chunks:
                 out = (chunk.index[0]).strftime(outpath)
                 if verbose: print 'Writting chunk to ',out

@@ -27,7 +27,7 @@ def combine(levels, order='Crescent'):
     return combinations
 
 
-def splitData(data, frequency='30Min'):
+def splitData(data, frequency='30Min', return_index=False):
     """
     Splits a given pandas DataFrame into a series of "frequency"-spaced DataFrames
 
@@ -57,18 +57,25 @@ def splitData(data, frequency='30Min'):
     check it complete at http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
     """
     try:
-        res_index=data[data.columns[0]].resample(frequency).index
-    except pd.core.groupby.DataError:   
-        res_index=data.resample(frequency).index
+        res_index=data[data.columns[0]].resample(frequency).index.to_datetime()
+    except pd.core.groupby.DataError:
+        res_index=data.resample(frequency).index.to_datetime()
+    print res_index
     out=[]
     pdate=res_index[0]
     for date in res_index:
-        aux=data[pdate:date][:-1]
+        aux=data.ix[pdate:date]#[:-1]
+        print aux
+        raw_input()
+        #aux=data[pdate:date][:-1]
         if len(aux.values)>0:
             out.append(aux)
         pdate=date
     out.append(data[pdate:])
-    return out
+    if return_index:
+        return out, res_index
+    else:
+        return out
 
 def fitWrap(x,y,degree=1):
     """
