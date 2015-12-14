@@ -11,6 +11,7 @@ CHECKLIST
 """
 import algs
 import data
+import io
 import pandas as pd
 import numpy as np
 
@@ -262,7 +263,8 @@ def printUnit(string, mode='L', trim=True, greek=True):
 
 
 def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir='',
-                verbose=False, header=0, sep=',', firstflag='first', save_time_over_ram=True):
+                verbose=False, firstflag='first', save_ram=False,
+                frequency='30min', quoting=0):
     """
     Separates files into (default) 30 minute smaller files
 
@@ -271,38 +273,47 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
     """
     from os import path
     varnames=dlconfig.varNames
+    outpath=path.join(outdir, outformat)
 
-    if save_time_over_ram:
-       pass 
+    if save_ram == False:
+        for f in files:
+            df=io.timeSeries(f, dlconfig, parse_dates=True, 
+                parse_dates_kw={'clean' : False}, 
+                read_data_kw={'quoting' : quoting})
+            chunks=algs.splitData(df, frequency)
+            for chunk in chunks:
+                out = (chunk.index[0]).strftime(outpath)
+                if verbose: print 'Writting chunk to ',out
+                chunk.to_csv(out, index=False, header=False)
+        return
 
-    datefmt=' '.join([ el for el in varnames if '%' in el ])
-
-    for fin in files:
-        with open(fin, 'rt') as fin:
-            for i in range(header):
-                fou.write(fin.readline())
-            fou=open('{}/{}.csv'.format(outdir,firstflag), 'wt')
-            pos=fin.tell()
-            outpath=path.join(outdir,)
-            for line in fin:
-                columns=line.split(sep)
-                try:
-                    cdate=dt.datetime.strptime(columns[0], args.format)
-                except:
+    else:
+        datefmt=' '.join([ el for el in varnames if '%' in el ])
+        for fin in files:
+            with open(fin, 'rt') as fin:
+                for i in range(header):
+                    fou.write(fin.readline())
+                fou=open('{}/{}.csv'.format(outdir,firstflag), 'wt')
+                pos=fin.tell()
+                for line in fin:
+                    columns=line.split(sep)
                     try:
-                        cdate=parse(columns[0])
+                        cdate=dt.datetime.strptime(columns[0], args.format)
                     except:
-                        cdate=parse(columns[0][1:-1])
-                if all( [cdate.minute % dt ==0, cdate.second==0, cdate.microsecond==0] ):
-                    print cdate
-                    fou.close()
-                    fou=open('{}/{}_{}.csv'.format(subdir,flag,cdate.strftime("%Y-%m-%d_%H:%M")), 'wt')
-                fou.write(line)
-            print 'Done!'
-        
-        
-    for filename in files:
-        df=pd.read_csv(filename, header=dlConfig.header, index_col=None, columns=dlConfig.varNames)
-    return
+                        try:
+                            cdate=parse(columns[0])
+                        except:
+                            cdate=parse(columns[0][1:-1])
+                    if all( [cdate.minute % dt ==0, cdate.second==0, cdate.microsecond==0] ):
+                        print cdate
+                        fou.close()
+                        fou=open('{}/{}_{}.csv'.format(subdir,flag,cdate.strftime("%Y-%m-%d_%H:%M")), 'wt')
+                    fou.write(line)
+                print 'Done!'
+            
+            
+        for filename in files:
+            df=pd.read_csv(filename, header=dlConfig.header, index_col=None, columns=dlConfig.varNames)
+        return
 
 

@@ -149,7 +149,7 @@ class dataloggerConf(object):
         self.filename_format=filename_format
 
 
-def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, parse_dates_kw={}):
+def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None, complete_zeroes=False, verbose=0, clean=True):
     """
     Creates a micrometeorological time series from a file or list of files.
 
@@ -160,10 +160,14 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, 
         either list or names of files (dataFrame will be one concatenated dataframe) or the name of one file
     datalogger: pymicra.dataloggerConf object
         configuration of the datalogger which is from where all the configurations of the file will be taken
-    parse_date: bool
+    index_by_date: bool
         whether or not to index the data by date. Note that if this is False many of the functionalities
         of pymicra will be lost.
+    correct_fracs: bool
+        set to True if the data is sampled at a frequency higher than the frequency of the timestamp 
         (i.d. there are repeated timestamps)
+    complete_zeroes: list
+        list of columns which are part of dates and need to be padded with zeroes to be correctly read
     verbose: int, bool
         verbose level
     """
@@ -175,16 +179,14 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, 
     date_cols=datalogger.date_cols
     date_connector=datalogger.date_connector
     if columns_separator=='whitespace':
-        series=readDataFiles(flist, header=header_lines, delim_whitespace=True, varNames=datalogger.varNames, **read_data_kw)
+        series=readDataFiles(flist, header=header_lines, delim_whitespace=True, varNames=datalogger.varNames, verbose=verbose)
     else:
-        series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames, **read_data_kw)
-    #------------
-    # THIS WILL BEGIN TO PARSE THE DATES
-    if parse_dates:
-        if verbose:
-            print 'Starting to parse the dates'
+        series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames, verbose=verbose)
+    if verbose==1:
+        print 'Starting to parse the dates'
+    if index_by_date:
         series=algs.parseDates(series, date_cols, connector=date_connector, first_time_skip=datalogger.first_time_skip, 
-                          **parse_dates_kw)
+                          clean=clean, correct_fracs=correct_fracs, complete_zeroes=complete_zeroes)
     return series
 
 

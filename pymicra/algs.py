@@ -56,7 +56,10 @@ def splitData(data, frequency='30Min'):
     
     check it complete at http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
     """
-    res_index=data[data.columns[0]].resample(frequency).index
+    try:
+        res_index=data[data.columns[0]].resample(frequency).index
+    except pd.core.groupby.DataError:   
+        res_index=data.resample(frequency).index
     out=[]
     pdate=res_index[0]
     for date in res_index:
@@ -323,6 +326,7 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
     clean: bool
         remove date columns from data after it is introduced as index
     correct_fracs: bool
+
     complete_zeroes: list
         list of columns that need to be padded with zeroes
     """
