@@ -262,7 +262,7 @@ def printUnit(string, mode='L', trim=True, greek=True):
 
 
 def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir='',
-                verbose=False, header=0, sep=',', firstflag='first'):
+                verbose=False, header=0, sep=',', firstflag='first', save_time_over_ram=True):
     """
     Separates files into (default) 30 minute smaller files
 
@@ -271,6 +271,10 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
     """
     from os import path
     varnames=dlconfig.varNames
+
+    if save_time_over_ram:
+       pass 
+
     datefmt=' '.join([ el for el in varnames if '%' in el ])
 
     for fin in files:

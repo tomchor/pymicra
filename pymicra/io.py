@@ -149,7 +149,7 @@ class dataloggerConf(object):
         self.filename_format=filename_format
 
 
-def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None, complete_zeroes=False, verbose=0):
+def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None, complete_zeroes=False, verbose=0, clean=True):
     """
     Creates a micrometeorological time series from a file or list of files.
 
@@ -186,7 +186,7 @@ def timeSeries(flist, datalogger, index_by_date=True, correct_fracs=None, comple
         print 'Starting to parse the dates'
     if index_by_date:
         series=algs.parseDates(series, date_cols, connector=date_connector, first_time_skip=datalogger.first_time_skip, 
-                          clean=True, correct_fracs=correct_fracs, complete_zeroes=complete_zeroes)
+                          clean=clean, correct_fracs=correct_fracs, complete_zeroes=complete_zeroes)
     return series
 
 
