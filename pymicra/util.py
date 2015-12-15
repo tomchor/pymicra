@@ -338,9 +338,11 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                         #---------
                         # this is in case the data has a big jump of more than the value of the frequency
                         while True:
-                            if cdate>=labeldates[1]:
+                            if (len(labeldates)>1) and (cdate>=labeldates[1]):
                                 labeldates=labeldates.drop(labeldates[0])
                             elif (cdate>=labeldates[0]) and (cdate<labeldates[1]):
+                                break
+                            elif len(labeldates)==1:
                                 break
                             else:
                                 raise ValueError('SOMETHING WRONG')
