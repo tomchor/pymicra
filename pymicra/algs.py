@@ -27,39 +27,39 @@ def combine(levels, order='Crescent'):
     return combinations
 
 
-def splitData(data, frequency='30Min', return_index=False):
+def splitData(data, rule='30min', return_index=False, **kwargs):
     """
-    Splits a given pandas DataFrame into a series of "frequency"-spaced DataFrames
+    Splits a given pandas DataFrame into a series of "rule"-spaced DataFrames
 
     Parameters
     ----------
-
     data: pandas dataframe
-
-    frequency: pandas string offset
-    Some possible values (that should be followed by an integer) are:
-    D   calendar day frequency
-    W   weekly frequency
-    M   month end frequency
-    MS  month start frequency
-    Q   quarter end frequency
-    BQ  business quarter endfrequency
-    QS  quarter start frequency
-    A   year end frequency
-    AS  year start frequency
-    H   hourly frequency
-    T   minutely frequency
-    Min minutely frequency
-    S   secondly frequency
-    L   milliseconds
-    U   microseconds
-    
-    check it complete at http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
-    """
-    try:
-        res_index=data[data.columns[0]].resample(frequency).index.to_datetime()
-    except pd.core.groupby.DataError:
-        res_index=data.resample(frequency).index.to_datetime()
+        data to be split
+    rule: pandas string offset
+        Some possible values (that should be followed by an integer) are:
+        D   calendar day frequency
+        W   weekly frequency
+        M   month end frequency
+        MS  month start frequency
+        Q   quarter end frequency
+        BQ  business quarter endfrequency
+        QS  quarter start frequency
+        A   year end frequency
+        AS  year start frequency
+        H   hourly frequency
+        T   minutely frequency
+        Min minutely frequency
+        S   secondly frequency
+        L   milliseconds
+        U   microseconds
+        
+        check it complete at http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
+        """
+#    try:
+#        res_index=data[data.columns[0]].resample(frequency).index.to_datetime()
+#    except pd.core.groupby.DataError:
+#        res_index=data.resample(frequency).index.to_datetime()
+    res_index = pd.Series(index=data.index).resample(rule, **kwargs).index
     print res_index
     out=[]
     pdate=res_index[0]
@@ -590,4 +590,32 @@ def classlogbin(maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True, function=N
 
         first += npclass[classe] 
     return (nsm, npclsign, xsm, ysm)
+
+
+def get_index(x, y):
+    return np.nonzero([ col in y for col in x ])
+
+def first_last(fname):
+    """
+    Returns first and last lines of a file
+    """
+    with open(fname, 'rb') as fin:
+        first=fin.readline()
+        for line in fin:
+            pass
+        last=line
+    return first, last
+
+
+def line2date(line, dlconfig):
+    import datetime as dt
+    varnames=dlconfig.varNames
+    date_cols = dlconfig.date_cols
+    sep = dlconfig.columns_separator
+
+    datefmt=' '.join(date_cols)
+    indexes = get_index(varnames, date_cols)
+    line=np.array(line.split(sep))
+    s=' '.join(line[indexes])
+    return dt.datetime.strptime(s, datefmt)
 

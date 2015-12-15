@@ -263,58 +263,101 @@ def printUnit(string, mode='L', trim=True, greek=True):
 
 
 def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir='',
-                verbose=False, firstflag='first', save_ram=False,
+                verbose=False, firstflag='.first', lastflag='.last', save_ram=False,
                 frequency='30min', quoting=0):
     """
     Separates files into (default) 30 minute smaller files
 
-    NEEDS TESTING
+    ADD FIRST AND LAST LABELS TO PANDAS METHOD
     NEEDS TO ADD CHUNK-GLUEING SO AS NOT TO LOSE ANY DATES
     """
     from os import path
-    varnames=dlconfig.varNames
+    #-----------------------
+    # First considerations
     outpath=path.join(outdir, outformat)
+    firstpath= path.join(outdir, outformat+firstflag)
+    lastpath = path.join(outdir, outformat+ lastflag)
+    parser = lambda x: algs.line2date(x, dlconfig)
+    #-----------------------
 
+    #------------
+    # if there's no need to save RAM, then I will use pandas, which is faster
     if save_ram == False:
+    #------------
         for f in files:
             df=io.timeSeries(f, dlconfig, parse_dates=True, 
                 parse_dates_kw={'clean' : False}, 
                 read_data_kw={'quoting' : quoting})
-            return df.iloc[:100000]
             chunks, index = algs.splitData(df, frequency, return_index=True)
-            for chunk in chunks:
-                out = (chunk.index[0]).strftime(outpath)
+            for idx, chunk in zip(index,chunks):
+                out = idx.strftime(outpath)
                 if verbose: print 'Writting chunk to ',out
                 chunk.to_csv(out, index=False, header=False)
         return
-
+    
+    #------------
+    # If RAM consumption is an issue, then I won't use pandas, which saves RAM but takes longer
     else:
-        datefmt=' '.join([ el for el in varnames if '%' in el ])
+        header = dlconfig.header_lines
+        if header==None: header=0
+    #------------
         for fin in files:
+            
+            #------------
+            # Creates a sequence of equaly-spaced dates based on the frequency and nicely rounded-up
+            ft, lt = algs.first_last(fin)
+            ft, lt = map(parser, [ft, lt])
+            labeldates = pd.Series(index=pd.date_range(start=ft, end=lt, freq='min')).resample(frequency).index
+            nfiles=len(labeldates)
+            #------------
             with open(fin, 'rt') as fin:
                 for i in range(header):
                     fou.write(fin.readline())
-                fou=open('{}/{}.csv'.format(outdir,firstflag), 'wt')
+                lines=[]
                 pos=fin.tell()
-                for line in fin:
-                    columns=line.split(sep)
-                    try:
-                        cdate=dt.datetime.strptime(columns[0], args.format)
-                    except:
-                        try:
-                            cdate=parse(columns[0])
-                        except:
-                            cdate=parse(columns[0][1:-1])
-                    if all( [cdate.minute % dt ==0, cdate.second==0, cdate.microsecond==0] ):
+                for i, line in enumerate(fin):
+                    cdate=parser(line)
+                    if (cdate>=labeldates[0]) and (cdate<labeldates[1]):
+                        lines.append(line)
+                    elif (cdate>=labeldates[1]):
                         print cdate
+                        print labeldates[0]
+                        print
+                        #------------
+                        # labels first and last runs separately, so they can be identified and put together later
+                        if len(labeldates) == nfiles:
+                            fou = open((labeldates[0]).strftime(firstpath), 'wt')
+                        elif len(labeldates) == 1:
+                            fou = open((labeldates[0]).strftime(lastpath), 'wt')
+                        else:
+                            fou = open((labeldates[0]).strftime(outpath), 'wt')
+                        #------------
+                        fou.writelines(lines)
                         fou.close()
-                        fou=open('{}/{}_{}.csv'.format(subdir,flag,cdate.strftime("%Y-%m-%d_%H:%M")), 'wt')
-                    fou.write(line)
-                print 'Done!'
+                        labeldates=labeldates.drop(labeldates[0])
+                        #---------
+                        # this is in case the data has a big jump of more than the value of the frequency
+                        while True:
+                            if cdate>=labeldates[1]:
+                                labeldates=labeldates.drop(labeldates[0])
+                            elif (cdate>=labeldates[0]) and (cdate<labeldates[1]):
+                                break
+                            else:
+                                raise ValueError('SOMETHING WRONG')
+                        #---------
+
+                        #---------
+                        # Starts over the lines
+                        lines = [line]
+                        #---------
+                fou=open((labeldates[0]).strftime(lastpath), 'wt')
+                fou.writelines(lines)
+                fou.close()
+        print 'Done!'
             
             
-        for filename in files:
-            df=pd.read_csv(filename, header=dlConfig.header, index_col=None, columns=dlConfig.varNames)
+        #for filename in files:
+        #    df=pd.read_csv(filename, header=dlConfig.header, index_col=None, columns=dlConfig.varNames)
         return
 
 
