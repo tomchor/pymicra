@@ -55,18 +55,12 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
         
         check it complete at http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
         """
-#    try:
-#        res_index=data[data.columns[0]].resample(frequency).index.to_datetime()
-#    except pd.core.groupby.DataError:
-#        res_index=data.resample(frequency).index.to_datetime()
     res_index = pd.Series(index=data.index).resample(rule, **kwargs).index
-    print res_index
     out=[]
     pdate=res_index[0]
     for date in res_index:
         aux=data.ix[pdate:date]#[:-1]
         print aux
-        raw_input()
         #aux=data[pdate:date][:-1]
         if len(aux.values)>0:
             out.append(aux)
