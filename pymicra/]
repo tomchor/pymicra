@@ -78,12 +78,6 @@ def integrate_df(self, how='trapz', dateindex=False, **kwargs):
 pd.Series.integrate = integrate_series
 pd.DataFrame.integrate = integrate_df
 
-def diff_df(self, how='findif'):
-    x= self.index.astype(np.float64)
-    dx = np.gradient(x)
-    for c in self.columns:
-        dydx = np.gradient(np.arrray(df[c]))/dx
-    return None
 
 def pcolor():
-    print _notation.pressure
+    print notation._color
