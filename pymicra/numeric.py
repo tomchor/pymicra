@@ -64,10 +64,14 @@ def integrate_df(self, how='trapz', dateindex=False, **kwargs):
         print('Unsupported integration rule: %s' % (how))
         print('Expecting one of these sample-based integration rules: %s' % (str(list(available_rules))))
         raise AttributeError
+    exit()
     if dateindex:
         xaxis=df.index.astype(np.int64)
     else:
-        xaxis=df.index.astype(np.float64)
+        print 'bla'
+        xaxis=np.array( df.index )
+        xaxis=df.index
+        #xaxis=df.index.astype(np.float64)
     for c in df.columns:
         df[c] = rule(df[c].values, xaxis, **kwargs)
     if how in ['trapz', 'simps']:
