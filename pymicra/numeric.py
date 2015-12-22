@@ -1,6 +1,7 @@
 from scipy import integrate
 import pandas as pd
 import numpy as np
+import notation
 
 def integrate_series(self, how='trapz', dateindex=False, **kwargs):
     '''
@@ -77,3 +78,13 @@ def integrate_df(self, how='trapz', dateindex=False, **kwargs):
         return df
 pd.Series.integrate = integrate_series
 pd.DataFrame.integrate = integrate_df
+
+def diff_df(self, how='findif'):
+    x= self.index.astype(np.float64)
+    dx = np.gradient(x)
+    for c in self.columns:
+        dydx = np.gradient(np.arrray(df[c]))/dx
+    return None
+
+def pcolor():
+    print _notation.pressure
