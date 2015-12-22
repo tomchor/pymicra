@@ -68,10 +68,7 @@ def integrate_df(self, how='trapz', dateindex=False, **kwargs):
     if dateindex:
         xaxis=df.index.astype(np.int64)
     else:
-        print 'bla'
-        xaxis=np.array( df.index )
-        xaxis=df.index
-        #xaxis=df.index.astype(np.float64)
+        xaxis=df.index.astype(np.float64)
     for c in df.columns:
         df[c] = rule(df[c].values, xaxis, **kwargs)
     if how in ['trapz', 'simps']:
