@@ -613,3 +613,12 @@ def line2date(line, dlconfig):
     s=' '.join(line[indexes])
     return dt.datetime.strptime(s, datefmt)
 
+def diff_central(x, y):
+    x0 = x[:-2]
+    x1 = x[1:-1]
+    x2 = x[2:]
+    y0 = y[:-2]
+    y1 = y[1:-1]
+    y2 = y[2:]
+    f = (x2 - x1)/(x2 - x0)
+    return (1-f)*(y2 - y1)/(x2 - x1) + f*(y1 - y0)/(x1 - x0)

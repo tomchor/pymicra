@@ -2,6 +2,7 @@ from scipy import integrate
 import pandas as pd
 import numpy as np
 import notation
+import algs
 
 def integrate_series(self, how='trapz', dateindex=False, **kwargs):
     '''
@@ -33,7 +34,8 @@ def integrate_series(self, how='trapz', dateindex=False, **kwargs):
     if dateindex:
         result = rule(self.values, self.index.astype(np.int64), **kwargs)
     else:
-        result = rule(self.values, self.index.astype(np.float64), **kwargs)
+        result = rule(self.values, np.array(self.index), **kwargs)
+        #result = rule(self.values, self.index.astype(np.float64), **kwargs)
     return result
 
 
@@ -65,11 +67,11 @@ def integrate_df(self, how='trapz', dateindex=False, **kwargs):
         print('Unsupported integration rule: %s' % (how))
         print('Expecting one of these sample-based integration rules: %s' % (str(list(available_rules))))
         raise AttributeError
-    exit()
     if dateindex:
         xaxis=df.index.astype(np.int64)
     else:
-        xaxis=df.index.astype(np.float64)
+        xaxis=np.array(df.index)
+        #xaxis=df.index.astype(np.float64)
     for c in df.columns:
         df[c] = rule(df[c].values, xaxis, **kwargs)
     if how in ['trapz', 'simps']:
@@ -79,12 +81,24 @@ def integrate_df(self, how='trapz', dateindex=False, **kwargs):
 pd.Series.integrate = integrate_series
 pd.DataFrame.integrate = integrate_df
 
-def diff_df(self, how='findif'):
-    x= self.index.astype(np.float64)
-    dx = np.gradient(x)
+def diff_df(self, how='central'):
+    x= np.array(self.index)
+    dx = np.diff(x)
+    if how=='central':
+        ix = x[1:-1]
+        diff=algs.diff_central
+    elif how=='fwd':
+        ix=x[:-1]
+        diff=lambda x,y: y/x
+    else:
+        raise NameError
+    out = pd.DataFrame(index=ix, columns=self.columns)
     for c in self.columns:
-        dydx = np.gradient(np.arrray(df[c]))/dx
-    return None
+        dydx = diff(x, np.array(self[c]))
+        out[c] = dydx
+    return out
+
+pd.DataFrame.derivate = diff_df
 
 def pcolor():
     print _notation.pressure
