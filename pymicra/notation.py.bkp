@@ -3,9 +3,20 @@ This module sets the default options in pymicra
 
 STILL NEEDS TO BE TESTED AND OPTIMIZED
 """
+#print locals()
 
-class get_notation:
-    mean_preffix=''
+mean_shit='original'
+
+def set_defaults(color=None):
+#global _notation
+#color=None
+#class _notation(object):
+    global _notation
+    class get_notation:
+        pass
+    _notation=get_notation()
+
+    _notation.mean_preffix=''
     mean_suffix='_mean'
     
     fluctuation_preffix=""
@@ -29,9 +40,10 @@ class get_notation:
     u='u'
     v='v'
     w='w'
-
     thermodyn_temp='theta'
     virtual_temp='theta_v'
     pressure='p'
     relative_humidity='rh'
 
+    if color==None:
+        _color='blue'

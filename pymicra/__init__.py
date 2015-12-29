@@ -22,11 +22,3 @@ import numeric
 import notation
 __version__='0.1.0'
 
-notation.set_defaults()
-
-global _notation
-
-class ab:
-    pass
-_notation=ab()
-_notation.pressure='hj'
