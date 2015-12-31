@@ -26,10 +26,10 @@ class get_notation:
     mixing_ratio_preffix='r_'
     mixing_ratio_suffix=''
     
+
     u='u'
     v='v'
     w='w'
-
     thermodyn_temp='theta'
     virtual_temp='theta_v'
     pressure='p'
