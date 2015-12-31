@@ -35,3 +35,7 @@ class get_notation:
     pressure='p'
     relative_humidity='rh'
 
+    h2o='h2o'
+    co2='co2'
+    ch4='ch4'
+    o3 = 'o3'
