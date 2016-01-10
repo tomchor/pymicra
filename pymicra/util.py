@@ -106,8 +106,8 @@ def qcontrol(files, datalogger_config,
 
     variables_list=datalogger_config.varNames
     usedvars=[v for v in variables_list[1:] if r'%' not in v]
-    
-    
+
+ 
     #-------------------------------------
     # BEGINNING OF MAIN PROGRAM
     #-------------------------------------
@@ -356,10 +356,6 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                 fou.writelines(lines)
                 fou.close()
         print 'Done!'
-            
-            
-        #for filename in files:
-        #    df=pd.read_csv(filename, header=dlConfig.header, index_col=None, columns=dlConfig.varNames)
         return
 
 

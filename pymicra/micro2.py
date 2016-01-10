@@ -85,11 +85,12 @@ def get_scales(data, siteConst, notation_defs=None,
     v=defs.v
     w=defs.w
     p=defs.pressure
-    theta=defs.theta
-    theta_v=varDict['virtual temperature']
-    theta_v_fluc=varDict['virtual temperature fluctuations']
+    theta=defs.thermodyn_temp
+    theta_v=defs.virtual_temp
+    theta_v_fluc = fluctuation_preffix + theta_v + fluctuation_suffix
     q=varDict['specific humidity']
     c=varDict["co2 fluctuations"]
+    solutesf = [ fluctuation_preffix + el + fluctuation_suffix for el in solutes ]
     rho_h2o=varDict['h2o density fluctuations']
     rho_co2=varDict['co2 density fluctuations']
     
