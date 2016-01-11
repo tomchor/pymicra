@@ -264,12 +264,38 @@ def printUnit(string, mode='L', trim=True, greek=True):
 
 def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir='',
                 verbose=False, firstflag='.first', lastflag='.last', save_ram=False,
-                frequency='30min', quoting=0):
+                frequency='30min', quoting=0, use_edges=False):
     """
     Separates files into (default) 30 minute smaller files
 
+    Parameters:
+    -----------
+    files: list
+        list of file paths to be separated
+    dlconfig: pymicra datalogger configuration file
+        to tell how the dates are displayed inside the file
+    outformat: str
+        the format of the file names to output
+    outdir: str
+        the path to the directory in which to output the files
+    verbose: bool
+        whether to print to the screen
+    firstflag: str
+        flag to put after the name of the file for the first file to be created
+    lastflag: str
+        flag to put after the name of the fle for the last file to be created
+    save_ram: bool
+        if you have an amount of files that are to big for pandas to load on your ram this should be set to true
+    frequency:
+        the frequency in which to separate
+    quoting: int
+        for pandas (see read_csv documentation)
+    use edges: bool
+        use this carefully. This concatenates the last few lines of a file to the first few lines
+        of the next file in case they don't finish on a nice round time with respect to the frequency
+
+
     ADD FIRST AND LAST LABELS TO PANDAS METHOD
-    NEEDS TO ADD CHUNK-GLUEING SO AS NOT TO LOSE ANY DATES
     """
     from os import path
     #-----------------------
@@ -320,9 +346,8 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                     if (cdate>=labeldates[0]) and (cdate<labeldates[1]):
                         lines.append(line)
                     elif (cdate>=labeldates[1]):
-                        print cdate
-                        print labeldates[0]
-                        print
+                        if verbose:
+                            print labeldates[0]
                         #------------
                         # labels first and last runs separately, so they can be identified and put together later
                         if len(labeldates) == nfiles:
@@ -340,14 +365,12 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                         while True:
                             if (len(labeldates)>1) and (cdate>=labeldates[1]):
                                 labeldates=labeldates.drop(labeldates[0])
-                            elif (cdate>=labeldates[0]) and (cdate<labeldates[1]):
-                                break
-                            elif len(labeldates)==1:
+                            elif (cdate>=labeldates[0]) or (len(labeldates)==1):
                                 break
                             else:
-                                raise ValueError('SOMETHING WRONG')
+                                raise ValueError('SOMETHING WRONG\nCHECK ALGORITHM')
                         #---------
-
+                        if len(labeldates)==1: break
                         #---------
                         # Starts over the lines
                         lines = [line]
@@ -355,7 +378,30 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                 fou=open((labeldates[0]).strftime(lastpath), 'wt')
                 fou.writelines(lines)
                 fou.close()
-        print 'Done!'
+        #----------------
+        # This feature avoids losing the ends of large files by concatenating the end of a file
+        # with the beginning of the next one (only when either files do not end on a rounded time)
+        if use_edges:
+        #----------------
+            from glob import glob
+            ledges = sorted(glob(path.join(outdir,'*'+lastflag )))
+            fedges = sorted(glob(path.join(outdir,'*'+firstflag)))
+            for last in ledges:
+                root = last[:-len(lastflag)]
+                try:
+                    idx = fedges.index(root+firstflag)
+                except ValueError:
+                    continue
+                last_lines = open(last,'rt').readlines()
+                first = fedges.pop(idx)
+                first_lines = open(first,'rt').readlines()
+                if verbose:
+                    print 'Concatenating ', last, ' and ', first
+                with open(root, 'wt') as fou:
+                    fou.writelines(last_lines)
+                    fou.writelines(first_lines)
+        if verbose:
+            print 'Done!'
         return
 
 
