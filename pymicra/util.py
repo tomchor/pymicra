@@ -428,3 +428,28 @@ def correctAvgs(right, wrong, right_wrong_vars,
     outdf: pandas.DataFrame
         wrong dataset but corrected with right dataset
     """
+    right_wrong_vars = rwvars
+    cors=[]
+    if get_fit:
+        for slw, fst in rwvars.iteritems():
+            slow=right[slw]
+            fast=wrong[fst]
+            if pd.infer_freq(right.index) == pd.infer_freq(wrong.index):
+                slow, fast = map(np.array, [slow_arr, fast_arr] )
+            else:
+                print 'frequencies must be the same'
+            #lims=[pair.min().min(), pair.max().max()]
+            #lims[0]=0
+    
+            coefs, residuals, rank, singular_vals, rcond=np.polyfit(fast, slow, 1, full=True)
+    
+            correc=pd.DataFrame(columns=[ '{}_{}'.format(fst, slw) ], index=['angular', 'linear'], data=coefs).transpose()
+            print(correc)
+            cors.append(correc)
+
+        if write_fit:
+            cors = pd.concat(cors, ignore_index=False)
+            cors.index.name='wrong_right'
+            cors.to_csv(fit_file, index=True)
+    
+
