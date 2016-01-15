@@ -19,11 +19,10 @@ import numpy as np
 def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
                  f=lambda x: (abs(x - x.mean()) > abs(x.std()*4.)) ):
     '''
-    Applies spikes-check accorgin to Vickers and Mart (1997)
+    Applies spikes-check according to Vickers and Mart (1997)
 
     Parameters:
     -----------
-
     dfs: list, tuple
         sequence of pandas.DataFrame objects
     visualize: bool
@@ -71,7 +70,6 @@ def qcontrol(files, datalogger_config,
 
     Parameters:
     -----------
-
     files: list
         list of filepaths to consider
     datalogger_config: pymicra.dataloger_configuration
@@ -370,11 +368,11 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                             else:
                                 raise ValueError('SOMETHING WRONG\nCHECK ALGORITHM')
                         #---------
-                        if len(labeldates)==1: break
                         #---------
                         # Starts over the lines
                         lines = [line]
                         #---------
+                        if len(labeldates)==1: break
                 fou=open((labeldates[0]).strftime(lastpath), 'wt')
                 fou.writelines(lines)
                 fou.close()
@@ -404,4 +402,29 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
             print 'Done!'
         return
 
+def correctAvgs(right, wrong, right_wrong_vars,
+                get_fit=True, write_fit=True, fit_file='correctAvgs_linfit.params', apply_fit=True):
+    """
+    Parameters:
+    -----------
+    right: pandas.DataFrame
+        dataset with the correct averages
+    wrong: pandas.DataFrame
+        dataset with the averages that need to be corrected
+    right_wrong_vars: dict
+        dictionary where every key is a var in the right dataset and 
+        its value is its correspondent in the wrong dataset
+    get_fit: bool
+        whether ot not to fit a linear relation between both datasets. Generally slow. Should only be done once
+    write_fit: bool
+        if get_fit == True, whether or not to write the linear fit to a file (recommended)
+    fit_file: string
+        where to write the linear fit (if one is written) or from where to read the linear fit (if no fit is written)
+    apply_fit: bool
+        whether of not to apply the lineat fit and correct the data (at least get_fit and fit_file must be true)
 
+    Returns:
+    --------
+    outdf: pandas.DataFrame
+        wrong dataset but corrected with right dataset
+    """
