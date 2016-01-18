@@ -428,7 +428,7 @@ def correctAvgs(right, wrong, right_wrong_vars,
     outdf: pandas.DataFrame
         wrong dataset but corrected with right dataset
     """
-    right_wrong_vars = rwvars
+    rwvars = right_wrong_vars
     cors=[]
     if get_fit:
         for slw, fst in rwvars.iteritems():

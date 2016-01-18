@@ -86,6 +86,7 @@ def fitWrap(x,y,degree=1):
     yy=np.polyval(coefs,x)
     return yy
 
+
 def fitByDate(data, degree=1, rule=None):
     """
     Given a pandas DataFrame with the index as datetime, this routine
@@ -131,7 +132,6 @@ def auxCov(data):
         return np.mean( data[data.columns[0]]*data[data.columns[1]] )
     else:
         raise TypeError('Datset with more than two columns')
-
 
 
 def lenYear(year):
@@ -622,3 +622,5 @@ def diff_central(x, y):
     y2 = y[2:]
     f = (x2 - x1)/(x2 - x0)
     return (1-f)*(y2 - y1)/(x2 - x1) + f*(y1 - y0)/(x1 - x0)
+
+
