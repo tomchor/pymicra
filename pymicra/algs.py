@@ -60,7 +60,7 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
     pdate=res_index[0]
     for date in res_index:
         aux=data.ix[pdate:date]#[:-1]
-        print aux
+        #print aux
         #aux=data[pdate:date][:-1]
         if len(aux.values)>0:
             out.append(aux)

@@ -167,6 +167,7 @@ def qcontrol(files, datalogger_config,
         # BEGINNING OF SPIKES CHECK
         #-------------------------------
         chunks=algs.splitData(fin, chunk_size)
+
         fin,valid_cols=check_spikes(chunks, visualize=False, vis_col='u', f=spikes_func, interp_limit=interp_limit)
         valid= valid_cols >= (1.-(accepted_percent/100.))
 
