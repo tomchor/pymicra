@@ -137,7 +137,7 @@ def qcontrol(files, datalogger_config,
     
         # TRY-EXCEPT IS A SAFETY NET BECAUSE OF THE POOR DECODING (2015-06-21 00:00 appears as 2015-06-20 24:00)
         try:
-            fin=timeSeries(filepath, datalogger_config, correct_fracs=True, complete_zeroes='%H%M')
+            fin=timeSeries(filepath, datalogger_config, parse_dates_kw={'correct_fracs':True})
         except ValueError, e:
             if str(e)=='unconverted data remains: 0' and cdate.hour==23:
                 continue

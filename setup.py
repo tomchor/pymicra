@@ -4,7 +4,7 @@
 Python Micrometeorological Analysis tool - Pymicra
 """
 
-dependencies=['Pandas>=0.15', 'Numpy']
+dependencies=['Pandas>=0.13', 'Numpy']
 
 try:
     from setuptools import setup
