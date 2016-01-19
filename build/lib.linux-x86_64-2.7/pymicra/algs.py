@@ -59,7 +59,9 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
     out=[]
     pdate=res_index[0]
     for date in res_index:
-        aux=data.ix[pdate:date][:-1]
+        aux=data.ix[pdate:date]#[:-1]
+        print aux
+        #aux=data[pdate:date][:-1]
         if len(aux.values)>0:
             out.append(aux)
         pdate=date
@@ -194,8 +196,7 @@ def limitedSubs(data, max_interp=3, func=lambda x: abs(x) > abs(x.std()*4.) ):
     cond=func(df)
     for c in df.columns:
         grouper = (cond[c] != cond[c].shift(1)).cumsum() * cond[c]
-        fill = (df.groupby(grouper)[c].transform(lambda x: x.size) <= max_interp)
-        #fill = (df.groupby(grouper)[c].transform('size') <= max_interp)
+        fill = (df.groupby(grouper)[c].transform('size') <= max_interp)
         df.loc[fill, c] = np.nan
     return df
 
@@ -381,7 +382,6 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
     # setting new dates list as the index
     #-------------------------------------
     data=data.set_index([dates])
-    data.index.name = date_format
     #-------------------------------------
     # removing the columns used to generate the date
     #-------------------------------------

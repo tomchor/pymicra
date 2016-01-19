@@ -89,10 +89,9 @@ def qcontrol(files, datalogger_config,
     edate=parse(edate)
 
     tables=pd.DataFrame(dif_limits, index=['dif_limits'])
-    tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
-    tables = tables.append( pd.DataFrame(low_limits, index=['low_limits']) )
-    tables = tables.append( pd.DataFrame(upp_limits, index=['upp_limits']) )
-    tables = tables.fillna(value=np.nan)
+    tables.loc['std_limits']=std_limits
+    tables.loc['low_limits']=low_limits
+    tables.loc['upp_limits']=upp_limits
 
     numbers={'total': [],
     'spikes': [],
@@ -151,7 +150,6 @@ def qcontrol(files, datalogger_config,
         # BEGINNING OF LOWEST VALUE CHECK
         #-------------------------------
         valid= ~(fin < tables.loc['low_limits']).any(axis=0)
-
         result, failed=algs.testValid(valid, testname='lowest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='lowest value', filename=filename, falseshow=falseshow)
         if result==False: continue
