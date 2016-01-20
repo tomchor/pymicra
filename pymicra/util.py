@@ -215,8 +215,8 @@ def qcontrol(files, datalogger_config,
         chunks_valid= tables.loc['dif_limits'] - maxdif
         chunks_valid= ~(chunks_valid < 0)
 
-        result,failed=algs.testValid(chunks_valid, testname='maximum difference', trueverbose=trueverbose, filepath=filepath)
-        numbers=algs.applyResult(result, failed, fin, control=numbers, testname='maximum difference', filename=filename, falseshow=falseshow)
+        result,failed=algs.testValid(chunks_valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
+        numbers=algs.applyResult(result, failed, fin, control=numbers, testname='difference', filename=filename, falseshow=falseshow)
         if result==False: continue
     
         #--------------------------------
