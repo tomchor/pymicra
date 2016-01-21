@@ -142,13 +142,14 @@ def qcontrol(files, datalogger_config,
         # OPENNING OF THE FILE HAPPENS HERE
         # TRY-EXCEPT IS A SAFETY NET BECAUSE OF THE POOR DECODING (2015-06-21 00:00 appears as 2015-06-20 24:00)
         try:
-            fin=timeSeries(filepath, datalogger_config, parse_dates_kw={'correct_fracs':True})
+            fin=timeSeries(filepath, datalogger_config, parse_dates_kw={'correct_fracs':True, 'clean':False})
         except ValueError, e:
             if str(e)=='unconverted data remains: 0' and cdate.hour==23:
                 continue
             else:
                 raise ValueError, e
         #-------------------------------
+        fullfin=fin.copy()
         fin=fin[usedvars]      # exclude unnused variables
         numbers['total'].append(filename)
 
@@ -236,8 +237,11 @@ def qcontrol(files, datalogger_config,
         # FINALLY
         #--------------------------------
         print 'Re-writng',filepath
-        fin.to_csv(join( outdir, basename(filepath) ),
-                   header=datalogger_config.header_lines, date_format=date_format, quoting=3, na_rep='NaN')
+        fullfin[usedvars] = fin[usedvars]
+        fullfin.to_csv(join( outdir, basename(filepath) ),
+                   header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
+        #fin.to_csv(join( outdir, basename(filepath) ),
+                   #header=datalogger_config.header_lines, date_format=date_format, quoting=3, na_rep='NaN')
     
     summary= {k: [len(v)] for k, v in numbers.items()}
     summary=pd.DataFrame({'numbers': map(len,numbers.values())}, index=numbers.keys())
