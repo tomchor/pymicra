@@ -309,6 +309,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
     firstpath= path.join(outdir, outformat+firstflag)
     lastpath = path.join(outdir, outformat+ lastflag)
     parser = lambda x: algs.line2date(x, dlconfig)
+    badfiles = []
     #-----------------------
 
     #------------
@@ -340,6 +341,9 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
             ft, lt = map(parser, [ft, lt])
             labeldates = pd.Series(index=pd.date_range(start=ft, end=lt, freq='min')).resample(frequency).index
             nfiles=len(labeldates)
+            if nfiles == 0:
+                badfiles.append(fin)
+                continue
             #------------
 
             with open(fin, 'rt') as fin:
@@ -411,6 +415,8 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                 with open(root, 'wt') as fou:
                     fou.writelines(last_lines)
                     fou.writelines(first_lines)
+
+        print 'List of bad files:', badfiles
         if verbose:
             print 'Done!'
         return
