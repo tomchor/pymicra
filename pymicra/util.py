@@ -357,8 +357,8 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                         # labels first and last runs separately, so they can be identified and put together later
                         if len(labeldates) == nfiles:
                             fou = open((labeldates[0]).strftime(firstpath), 'wt')
-                        elif len(labeldates) == 1:
-                            fou = open((labeldates[0]).strftime(lastpath), 'wt')
+#                        elif len(labeldates) == 1:
+#                            fou = open((labeldates[0]).strftime(lastpath), 'wt')
                         else:
                             fou = open((labeldates[0]).strftime(outpath), 'wt')
                         #------------
@@ -380,10 +380,16 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                         # Starts over the lines
                         lines = [line]
                         #---------
-#                        if len(labeldates)==1: break
-#                fou=open((labeldates[0]).strftime(lastpath), 'wt')
-#                fou.writelines(lines)
-#                fou.close()
+                #---------
+                # This prints the last lines of the file
+                        if len(labeldates)==1: break
+                for line in fin:
+                    lines.append(line)
+                fou=open((labeldates[0]).strftime(lastpath), 'wt')
+                fou.writelines(lines)
+                fou.close()
+                #---------
+
         #----------------
         # This feature avoids losing the ends of large files by concatenating the end of a file
         # with the beginning of the next one (only when either files do not end on a rounded time)
