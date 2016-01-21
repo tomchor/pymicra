@@ -328,7 +328,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
         if header==None: header=0
     #------------
         for fin in files:
-            
+            print 'Now opening',fin
             #------------
             # Creates a sequence of equaly-spaced dates based on the frequency and nicely rounded-up
             ft, lt = algs.first_last(fin)
@@ -370,14 +370,15 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                             else:
                                 raise ValueError('SOMETHING WRONG\nCHECK ALGORITHM')
                         #---------
+
                         #---------
                         # Starts over the lines
                         lines = [line]
                         #---------
-                        if len(labeldates)==1: break
-                fou=open((labeldates[0]).strftime(lastpath), 'wt')
-                fou.writelines(lines)
-                fou.close()
+#                        if len(labeldates)==1: break
+#                fou=open((labeldates[0]).strftime(lastpath), 'wt')
+#                fou.writelines(lines)
+#                fou.close()
         #----------------
         # This feature avoids losing the ends of large files by concatenating the end of a file
         # with the beginning of the next one (only when either files do not end on a rounded time)
