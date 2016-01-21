@@ -341,6 +341,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
             labeldates = pd.Series(index=pd.date_range(start=ft, end=lt, freq='min')).resample(frequency).index
             nfiles=len(labeldates)
             #------------
+
             with open(fin, 'rt') as fin:
                 for i in range(header):
                     fou.write(fin.readline())
@@ -357,8 +358,6 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                         # labels first and last runs separately, so they can be identified and put together later
                         if len(labeldates) == nfiles:
                             fou = open((labeldates[0]).strftime(firstpath), 'wt')
-#                        elif len(labeldates) == 1:
-#                            fou = open((labeldates[0]).strftime(lastpath), 'wt')
                         else:
                             fou = open((labeldates[0]).strftime(outpath), 'wt')
                         #------------
