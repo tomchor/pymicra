@@ -59,8 +59,8 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
 
 def qcontrol(files, datalogger_config,
              bdate='2003-01-01 00:00', edate='2023-12-31 20:00',
-             spikes_func=None, interp_limit=3, accepted_percent=1,
-             window_size=900, chunk_size='2Min', RATvars=None,
+             spikes_func=None, interp_limit=3, accepted_percent=1.,
+             window_size=900, chunk_size='2Min', RATvars=None, file_lines=1800,
              trueverbose=False, falseverbose=False, falseshow=0, trueshow=0, 
              outdir='quality_controlled', date_format='"%Y-%m-%d %H:%M:%S.%f"',
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
@@ -78,6 +78,8 @@ def qcontrol(files, datalogger_config,
         first date to be considered
     edate: str
         last date to be considered
+
+    TODO: WRITE FILE IN THE SAME FORMAT AS IT IS READ
     """
     from io import timeSeries
     from os.path import basename, join
@@ -130,12 +132,14 @@ def qcontrol(files, datalogger_config,
     
         #-------------------------------
         # BEGINNING LINE NUMBERS TEST
-        #-------------------------------
-        result=algs.check_numlines(filepath, numlines=18000)
+        result=algs.check_numlines(filepath, numlines=file_lines)
         if result == False:
             print filepath,'was skipped for not having the correct number of lines!'
             continue
+        #-------------------------------
     
+        #-------------------------------
+        # OPENNING OF THE FILE HAPPENS HERE
         # TRY-EXCEPT IS A SAFETY NET BECAUSE OF THE POOR DECODING (2015-06-21 00:00 appears as 2015-06-20 24:00)
         try:
             fin=timeSeries(filepath, datalogger_config, parse_dates_kw={'correct_fracs':True})
@@ -144,30 +148,30 @@ def qcontrol(files, datalogger_config,
                 continue
             else:
                 raise ValueError, e
+        #-------------------------------
         fin=fin[usedvars]      # exclude unnused variables
         numbers['total'].append(filename)
 
         #-------------------------------
         # BEGINNING OF LOWEST VALUE CHECK
-        #-------------------------------
         valid= ~(fin < tables.loc['low_limits']).any(axis=0)
 
         result, failed=algs.testValid(valid, testname='lowest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='lowest value', filename=filename, falseshow=falseshow)
         if result==False: continue
+        #-------------------------------
     
         #-------------------------------
         # BEGINNING OF HIGHEST VALUE CHECK
-        #-------------------------------
         valid= ~(fin > tables.loc['upp_limits']).any(axis=0)
 
         result, failed=algs.testValid(valid, testname='highest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='highest value', filename=filename, falseshow=falseshow)
         if result==False: continue
+        #-------------------------------
 
         #-------------------------------
         # BEGINNING OF SPIKES CHECK
-        #-------------------------------
         chunks=algs.splitData(fin, chunk_size)
         fin,valid_cols=check_spikes(chunks, visualize=False, vis_col='u', f=spikes_func, interp_limit=interp_limit)
         valid= valid_cols >= (1.-(accepted_percent/100.))
@@ -175,6 +179,7 @@ def qcontrol(files, datalogger_config,
         result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
         if result==False: continue
+        #-------------------------------
 
         #----------------------------------
         # BEGINNING OF STANDARD DEVIATION CHECK
@@ -431,6 +436,7 @@ def correctAvgs(right, wrong, right_wrong_vars,
     outdf: pandas.DataFrame
         wrong dataset but corrected with right dataset
     """
+    from matplotlib import pyplot as plt
     rwvars = right_wrong_vars
     cors=[]
     if get_fit:
@@ -438,21 +444,33 @@ def correctAvgs(right, wrong, right_wrong_vars,
             slow=right[slw]
             fast=wrong[fst]
             if pd.infer_freq(right.index) == pd.infer_freq(wrong.index):
-                slow, fast = map(np.array, [slow_arr, fast_arr] )
+                slow, fast = map(np.array, [slow, fast] )
             else:
                 print 'frequencies must be the same'
-            #lims=[pair.min().min(), pair.max().max()]
-            #lims[0]=0
     
-            coefs, residuals, rank, singular_vals, rcond=np.polyfit(fast, slow, 1, full=True)
+            #----------------
+            # Does the 1D fitting filtering for NaN values (very important apparently)
+            idx = np.isfinite(slow) & np.isfinite(fast)
+            coefs, residuals, rank, singular_vals, rcond = np.polyfit(fast[idx], slow[idx], 1, full=True)
+            #----------------
+            plt.plot(fast[idx], slow[idx], marker='o', linestyle='')
+            plt.plot(fast[idx], np.poly1d(coefs)(fast[idx]), '^-')
+            plt.show()
     
             correc=pd.DataFrame(columns=[ '{}_{}'.format(fst, slw) ], index=['angular', 'linear'], data=coefs).transpose()
-            print(correc)
             cors.append(correc)
+        cors = pd.concat(cors, join='outer')
+        print cors
 
         if write_fit:
-            cors = pd.concat(cors, ignore_index=False)
             cors.index.name='wrong_right'
             cors.to_csv(fit_file, index=True)
+    else:
+        print 'Implement here the retrieval of fit parameters gigven that fit_file exists'
     
 
+    if apply_fit:
+        for slw, fst in rwvars.iteritems():
+            print 'from {} to {}'.format(slw,fst)
+
+    return
