@@ -7,17 +7,21 @@ This package was designed at Lemma, at the Federal University of Parana (UFPR), 
 
 ## Required Packages
 * Pandas
+* Numpy
 
 ## License
 This package is licensed under GNU General Public License V3.0 (http://choosealicense.com/licenses/gpl-3.0/)
 
 ## Main Features
-A small list of things this package is designed to do:
+Currently, this is what pymicra does:
 
-  - Automatically read and understand micrometeorological data in virtually any column-separated ASCII format (thanks to pandas).
-  - Automatically rotate the coordinates given wind data, so that the v and w averages are null.
-  - Interpolate and detrend data in the most common ways (block averages, moving averages and polynominal detrending).
-  - Calculate fluxes and characteristic scales
+  - Reading and understanding micrometeorological data in virtually any column-separated ASCII format (thanks to pandas).
+  - Quality control methods (max and min values check, spikes, reverse-arrangement test and etc).
+  - Rotation of coordinates (2D).
+  - Detrending of data in the most common ways (block averages, moving averages and polynominal detrending).
+  - Calculation of spectra and cross-spectra.
+  - Calculation fluxes and characteristic scales.
+  - Plus all native features of Pandas (interpolation, resampling, grouping, statistical tests, slicing, handling of missing data and etc.)
 
 ## Notation to be implemented soon
 The next lines describe some general quantities, followed by the name that should be used inside straight brackets, followed by the units that compose it. The names provided are the default names and will be subjected to change by the user.
