@@ -292,3 +292,9 @@ def get_printable(data, units, to_tex_cols=True, to_tex_units=True):
     return df
 
 
+def write_as_dlc(df, dlc):
+    cols=dlc.columns
+    df = df[ cols ]
+
+
+
