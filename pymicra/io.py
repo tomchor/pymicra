@@ -234,7 +234,6 @@ def readUnitsCsv(filename, names=0, units=1, **kwargs):
         dictionary with the variable names as keys and the units as values
     """
     df=pd.read_csv(filename, header=[names, units], **kwargs)
-    #df=pd.read_csv(filename, header=[names, units], index_col=0, parse_dates=[0])
     cols,units=zip(*df.columns)
     unitsdic={ k:v for k,v in zip(cols,units) }
     df.columns=cols
@@ -267,7 +266,7 @@ def toUnitsCsv(data, units, filename, to_tex=False, **kwargs):
         from util import printUnit as pru
         units={ k : pru(v) for k,v in units.iteritems() }
     cols=data.columns
-    unts=[ units[c] for c in cols ]
+    unts=[ units[c] if c in units.keys() else ' ' for c in cols ]
     columns=pd.MultiIndex.from_tuples(zip(cols, unts))
     df=data.copy()
     df.columns=columns
