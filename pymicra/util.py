@@ -425,18 +425,18 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
             print 'Done!'
         return
 
-def correctAvgs(right, wrong, right_wrong_vars,
-                get_fit=True, write_fit=True, fit_file='correctAvgs_linfit.params', apply_fit=True):
+def correctDrift(right, drifted, right_drifted_vars,
+                get_fit=True, write_fit=True, fit_file='correctDrift_linfit.params', apply_fit=True):
     """
     Parameters:
     -----------
     right: pandas.DataFrame
         dataset with the correct averages
-    wrong: pandas.DataFrame
+    drifted: pandas.DataFrame
         dataset with the averages that need to be corrected
-    right_wrong_vars: dict
+    right_drifted_vars: dict
         dictionary where every key is a var in the right dataset and 
-        its value is its correspondent in the wrong dataset
+        its value is its correspondent in the drifted dataset
     get_fit: bool
         whether ot not to fit a linear relation between both datasets. Generally slow. Should only be done once
     write_fit: bool
@@ -449,16 +449,16 @@ def correctAvgs(right, wrong, right_wrong_vars,
     Returns:
     --------
     outdf: pandas.DataFrame
-        wrong dataset but corrected with right dataset
+        drifted dataset corrected with right dataset
     """
     from matplotlib import pyplot as plt
-    rwvars = right_wrong_vars
+    rwvars = right_drifted_vars
     cors=[]
     if get_fit:
         for slw, fst in rwvars.iteritems():
             slow=right[slw]
-            fast=wrong[fst]
-            if pd.infer_freq(right.index) == pd.infer_freq(wrong.index):
+            fast=drifted[fst]
+            if pd.infer_freq(right.index) == pd.infer_freq(drifted.index):
                 slow, fast = map(np.array, [slow, fast] )
             else:
                 print 'frequencies must be the same'
@@ -478,7 +478,7 @@ def correctAvgs(right, wrong, right_wrong_vars,
         print cors
 
         if write_fit:
-            cors.index.name='wrong_right'
+            cors.index.name='drifted_right'
             cors.to_csv(fit_file, index=True)
     else:
         print 'Implement here the retrieval of fit parameters gigven that fit_file exists'
