@@ -414,21 +414,20 @@ def classbin(x, y, bins_number=100, function=np.mean, log_scale=True):
     if log_scale:
         #-----------
         # The following if statement gets rid of negative or zero values in the x array, since we are using log-scale
-        #-----------
         if (x<=0).any():
             print 'Warning: zero and/or negative values exist in x array about to be log-scaled. Will try to ignore but errors might arise.'
             y=np.array([ yy for yy, xx in zip(y,x) if xx > 0 ])
             x=np.array([ el for el in x if el > 0])
             xmin=np.min(x)
             xmax=np.max(x)
+        #-----------
         bins=np.logspace(np.log(xmin), np.log(xmax), bins_number+1, base=np.e)
     else:
         bins=np.linspace(xmin, xmax, bins_number+1)
     xsm = np.zeros(bins_number)
     ysm = np.zeros(bins_number)
     #-----------
-    # The following process probably should be optimized
-    #-----------
+    # The following process is what actually bins the data using numpy
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
         for i in range(bins_number):
@@ -438,6 +437,7 @@ def classbin(x, y, bins_number=100, function=np.mean, log_scale=True):
                 sel = (bins[i] <= x) & (x < bins[i+1])
             xsm[i] = function(x[sel])
             ysm[i] = function(y[sel])
+    #-----------
     return xsm, ysm
 
 
@@ -452,142 +452,9 @@ def binwrapper(self, **kwargs):
 pd.DataFrame.binned=binwrapper
 
 
-def classlogbin(maxcl, indx, x, y, pr_sign=+1.0, geometric_mean=True, function=None):
-    '''
-    Author: Nelson L. Dias
-    Modified by: Tomas L. Chor (2015-11-23) to include arithmetic mean
-
-    Class-averages a big array: the abscissas are divided into maxcl
-    classes, then it returns the mean of the abscissas and the ordinates for
-    each class. The classes are log-spaced so as to appear linear in logplot
-    This function contemplates the possibility that some classes may be empty.
-
-    Parameters:
-    -----------
-    maxcl: int
-        the maximum # of classes desired
-    indx: list, array
-        the index ordering x from smallest to biggest
-    x: list, array
-        the big array of abscissas
-    y: list, array
-        the big array of ordinates
-    pr_sign:
-        prevailing sign 
-    geometric_mean: bool
-        whether or not to use geometric mean. If False, arithmetic mean is used
-    function: function
-        overwrites argument geometric_mean and uses this function to perform the binning
-    NEEDS TO BE TESTED!
-
-    Returns:
-    --------
-    nsm: int
-        the number of non-empty classes
-    npclsign:
-        the number of points used for averaging per class
-    xsm: list
-        the smoothed array of abscissas
-    ysm: list
-        the smoothed array of ordinates
-    '''
-    if geometric_mean:
-        cmean=st.gmean
-    else:
-        cmean=np.mean
-    if function != None:
-        assert hasattr(function, '__call__')
-        cmean=function
-    ntotal = len(x)
-# ------------------------------------------------------------------------------
-# number of points per class: will need two of them!
-# ------------------------------------------------------------------------------
-    npclsign = np.zeros(maxcl,int)
-    npclass = np.zeros(maxcl,int)
-# ------------------------------------------------------------------------------
-# the smoothed arrays
-# ------------------------------------------------------------------------------
-    xsm = np.zeros(maxcl,float)
-    ysm = np.zeros(maxcl,float)
-# ------------------------------------------------------------------------------
-# log increments
-# ------------------------------------------------------------------------------
-    logxmin = np.log(x[indx[0]])
-    logxmax = np.log(x[indx[ntotal-1]])
-# ------------------------------------------------------------------------------
-# counts the number of points per class
-# ------------------------------------------------------------------------------
-    i = 0
-    classe = 0
-    while ( i < ntotal ):
-        npclass[classe] = 0
-# ------------------------------------------------------------------------------
-# warning! truncation errors?
-# ------------------------------------------------------------------------------
-        alfa = float(classe+1)/float(maxcl)
-        assert ( alfa <= 1.0 )
-        logxsup = alfa * logxmax + (1.0 - alfa)*logxmin
-        while ( (i < ntotal) and ( np.log(x[indx[i]]) <= logxsup) ):
-            npclass[classe] += 1
-            i += 1
-        classe += 1
-    assert ( classe == maxcl )
-# ------------------------------------------------------------------------------
-# begins averaging
-# ------------------------------------------------------------------------------
-    nsm = 0 
-    first = 0 
-    for classe in range(maxcl): 
-        if ( npclass[classe] > 0 ) :
-# ------------------------------------------------------------------------------
-# needs a local array for storing contiguously the members of a class    
-# ------------------------------------------------------------------------------
-            xlocal = np.zeros( npclass[classe],float) 
-            ylocal = np.zeros( npclass[classe],float)
-# ------------------------------------------------------------------------------
-# contiguous storage
-# ------------------------------------------------------------------------------
-            k = 0 
-            for j in range(npclass[classe]):
-                indlocal = indx[first+j]
-# ------------------------------------------------------------------------------
-# checks index consistency
-# ------------------------------------------------------------------------------
-                if ( indlocal > ntotal - 1 ):
-                    print("stat-->classlogavg: incorrect index in class averaging\n")
-                    exit(1)
-# ------------------------------------------------------------------------------
-# checks signal consistency
-# ------------------------------------------------------------------------------
-                yy = pr_sign * y[indlocal] 
-                if ( yy > 0.0 ) :
-                    xlocal[k] = x[indlocal] 
-                    assert( xlocal[k] <= 10.0)
-                    # INCLUDED .REAL HERE IN ORDER TO AVOID WARNING
-                    ylocal[k] = yy.real
-                    k += 1
-# ------------------------------------------------------------------------------
-# the VALID number of points per class is now limited to those points having the
-# prevailing sign: calculates the x- and y- averages of each class for non-empty
-# classes
-# ------------------------------------------------------------------------------
-            if ( k > 0 ) :
-                xavg = cmean(xlocal[0:k])
-                yavg = cmean(ylocal[0:k])
-                xsm[nsm] = xavg 
-                ysm[nsm] = pr_sign * yavg 
-                npclsign[nsm] = k 
-
-                nsm += 1
-            pass
-        pass
-
-        first += npclass[classe] 
-    return (nsm, npclsign, xsm, ysm)
-
-
 def get_index(x, y):
     return np.nonzero([ col in y for col in x ])
+
 
 def first_last(fname):
     """

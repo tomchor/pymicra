@@ -426,7 +426,8 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
         return
 
 def correctDrift(right, drifted, right_drifted_vars,
-                get_fit=True, write_fit=True, fit_file='correctDrift_linfit.params', apply_fit=True):
+                get_fit=True, write_fit=True, fit_file='correctDrift_linfit.params',
+                apply_fit=True, show_plot=False):
     """
     Parameters:
     -----------
@@ -468,11 +469,12 @@ def correctDrift(right, drifted, right_drifted_vars,
             idx = np.isfinite(slow) & np.isfinite(fast)
             coefs, residuals, rank, singular_vals, rcond = np.polyfit(fast[idx], slow[idx], 1, full=True)
             #----------------
-            plt.plot(fast[idx], slow[idx], marker='o', linestyle='')
-            plt.plot(fast[idx], np.poly1d(coefs)(fast[idx]), '^-')
-            plt.show()
+            if show_plot:
+                plt.plot(fast[idx], slow[idx], marker='o', linestyle='')
+                plt.plot(fast[idx], np.poly1d(coefs)(fast[idx]), '^-')
+                plt.show()
     
-            correc=pd.DataFrame(columns=[ '{}_{}'.format(fst, slw) ], index=['angular', 'linear'], data=coefs).transpose()
+            correc=pd.DataFrame(columns=[ '{}_{}'.format(slw, fst) ], index=['angular', 'linear'], data=coefs).transpose()
             cors.append(correc)
         cors = pd.concat(cors, join='outer')
         print cors
@@ -481,11 +483,16 @@ def correctDrift(right, drifted, right_drifted_vars,
             cors.index.name='drifted_right'
             cors.to_csv(fit_file, index=True)
     else:
-        print 'Implement here the retrieval of fit parameters gigven that fit_file exists'
-    
+        cors=pd.read_csv(fit_file, index_col=0, header=0)
 
+    #------------
+    # Applies the fit column by column
     if apply_fit:
+        corrected=drifted.copy()
         for slw, fst in rwvars.iteritems():
-            print 'from {} to {}'.format(slw,fst)
+            coefs = np.array(cors.loc['{}_{}'.format(slw,fst), ['angular','linear']])
+            print coefs
+            corrected[ fst ] = np.poly1d(coefs)(drifted[ fst ])
+    #------------
 
-    return
+    return corrected
