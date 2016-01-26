@@ -491,8 +491,10 @@ def correctDrift(right, drifted, right_drifted_vars,
         corrected=drifted.copy()
         for slw, fst in rwvars.iteritems():
             coefs = np.array(cors.loc['{}_{}'.format(slw,fst), ['angular','linear']])
-            print coefs
             corrected[ fst ] = np.poly1d(coefs)(drifted[ fst ])
+    else:
+        corrected=drifted.copy()
+        print corrected
     #------------
 
     return corrected
