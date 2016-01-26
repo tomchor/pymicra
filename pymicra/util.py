@@ -494,7 +494,6 @@ def correctDrift(right, drifted, right_drifted_vars,
             corrected[ fst ] = np.poly1d(coefs)(drifted[ fst ])
     else:
         corrected=drifted.copy()
-        print corrected
     #------------
 
     return corrected
