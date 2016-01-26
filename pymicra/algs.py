@@ -442,6 +442,9 @@ def classbin(x, y, bins_number=100, function=np.mean, log_scale=True):
 
 
 def binwrapper(self, **kwargs):
+    """
+    Method to return binned data from a dataframe using the function classbin
+    """
     x=self.index.astype(np.float64)
     out=pd.DataFrame(columns = self.columns)
     for c in self.columns:
@@ -453,6 +456,9 @@ pd.DataFrame.binned=binwrapper
 
 
 def get_index(x, y):
+    """
+    Just like the .index method of lists, except it works for multiple values
+    """
     return np.nonzero([ col in y for col in x ])
 
 
@@ -469,6 +475,16 @@ def first_last(fname):
 
 
 def line2date(line, dlconfig):
+    """
+    Gets a date from a line of file according to datalogger config file
+
+    Parameters:
+    -----------
+    line: string
+        line of file with date inside
+    dlconfig: pymicra.dataloggerConfig
+        configuration of the datalogger
+    """
     import datetime as dt
     varnames=dlconfig.varNames
     date_cols = dlconfig.date_cols
@@ -480,7 +496,23 @@ def line2date(line, dlconfig):
     s=' '.join(line[indexes])
     return dt.datetime.strptime(s, datefmt)
 
+
 def diff_central(x, y):
+    """
+    Applies the central finite difference scheme
+
+    Parameters:
+    -----------
+    x: array
+        independent variable
+    y: array
+        dependent variable
+
+    Returns:
+    --------
+    dydx: array
+        the dependent variable differentiated
+    """
     x0 = x[:-2]
     x1 = x[1:-1]
     x2 = x[2:]
@@ -489,5 +521,20 @@ def diff_central(x, y):
     y2 = y[2:]
     f = (x2 - x1)/(x2 - x0)
     return (1-f)*(y2 - y1)/(x2 - x1) + f*(y1 - y0)/(x1 - x0)
+
+
+def find_nearest(array, value):
+    """
+    Smart and small function to find the index of the nearest value, in an array, of some other value
+
+    Parameters:
+    -----------
+    array: array
+        list or array
+    value: float
+        value to look for in the array
+    """
+    idx = (np.abs(array-value)).argmin()
+    return idx
 
 
