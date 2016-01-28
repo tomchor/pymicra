@@ -20,5 +20,6 @@ import util
 import constants
 import numeric
 import notation
+import spectra
 __version__='0.1.0'
 

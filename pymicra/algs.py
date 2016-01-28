@@ -445,10 +445,10 @@ def binwrapper(self, **kwargs):
     """
     Method to return binned data from a dataframe using the function classbin
     """
-    x=self.index.astype(np.float64)
+    x=np.array(self.index)#.astype(np.float64)
     out=pd.DataFrame(columns = self.columns)
     for c in self.columns:
-        xsm, ysm = classbin(self[c].astype(np.float64))
+        xsm, ysm = classbin(x, self[c].astype(np.float64), **kwargs)
         out[c] = ysm
     out.index=xsm
     return out

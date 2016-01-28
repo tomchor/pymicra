@@ -116,7 +116,7 @@ def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
     return df.add_suffix(suffix)
 
 
-def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency', anti_aliasing=False):
+def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency', anti_aliasing=False, outname=None):
     """
     Calculates the spectrum for a set of data
 
@@ -154,6 +154,9 @@ def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency', anti_ali
 #        spec=(2./T)*np.fft.rfft(corr)
     else:
         varname='spectrum_{}'.format(cols[0])
+
+    if varname != None:
+        varname = outname
 
     if out_index=='frequency':
         aux=pd.DataFrame( data={ varname : spec }, index=freq )
@@ -237,19 +240,3 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
     else:
         return False
 
-def recspe(slow_spec, freqs, T):
-    """
-    Applied a correction factor to the spectrum of a slow-measured variable
-    based on the response-time T
-
-    Parameters:
-    -----------
-    freqs: numpy.array
-        frequencies
-    slow_spec: numpy.array
-        the spectrum
-    T: float
-        the response-time
-    """
-    assert len(slow_spec)==len(freqs)
-    return slow_spec*(1.0 + 4.*(np.pi**2.)*(freqs**2.) * (T**2.))
