@@ -459,10 +459,14 @@ def correctDrift(right, drifted, right_drifted_vars,
         for slw, fst in rwvars.iteritems():
             slow=right[slw]
             fast=drifted[fst]
-            if pd.infer_freq(right.index) == pd.infer_freq(drifted.index):
+            try:
+                if pd.infer_freq(right.index) == pd.infer_freq(drifted.index):
+                    slow, fast = map(np.array, [slow, fast] )
+                else:
+                    print 'Frequencies must be the same, however, inferred frequencies appear to be different. Plese check.'
+            except TypeError:
+                print 'Cannot determine if frequencies are the same. We will continue but you should check'
                 slow, fast = map(np.array, [slow, fast] )
-            else:
-                print 'frequencies must be the same'
     
             #----------------
             # Does the 1D fitting filtering for NaN values (very important apparently)
