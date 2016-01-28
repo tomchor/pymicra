@@ -474,6 +474,7 @@ def correctDrift(right, drifted, right_drifted_vars,
             coefs, residuals, rank, singular_vals, rcond = np.polyfit(fast[idx], slow[idx], 1, full=True)
             #----------------
             if show_plot:
+                plt.title('{} vs {}'.format(fst, slw))
                 plt.plot(fast[idx], slow[idx], marker='o', linestyle='')
                 plt.plot(fast[idx], np.poly1d(coefs)(fast[idx]), '^-')
                 plt.show()

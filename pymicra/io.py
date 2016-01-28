@@ -31,6 +31,9 @@ def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
     Returns
     ---------
     dataFrame: pandas.DataFrame object
+
+    TODO:
+    ACCEPT DICT AS VARNAMES (BECAUSE OF FILES WITH MANY COLUMNS)
     """
     if dates_as_string:
         dtypes={ i : str for i,key in enumerate(varNames) if r'%' in key }
