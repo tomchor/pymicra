@@ -121,10 +121,12 @@ def get_scales(data, siteConst, notation_defs=None,
     if output_as_df:
         namespace=locals()
         columns=['zeta', 'Lm', 'u_std', 'u_star', 'theta_v_std', 'theta_v_star', 'theta_std', 'theta_star', 'q_std', 'q_star']
-        for c_star, c_std in zip(c_stars, c_stds):
-                columns += [ 'c_std', 'c_star']
         dic={ col : [namespace[col]] for col in columns }
         out=pd.DataFrame(dic, index=[data.index[0]])
+        # We have to input the solutes separately
+        for solute, c_star, c_std in zip(solutes, c_stars, c_stds):
+                out[ '{}_std'.format(solute) ] = c_std
+                out[ '{}_star'.format(solute)] = c_star
         return out
     else:
         return zeta, Lm, (u_std, u_star), (theta_v_std, theta_v_star), (theta_std, theta_star), (q_std, q_star), (c_std, c_star)
@@ -151,7 +153,8 @@ def ste(data, w_fluctuations="w'"):
     return 1. - np.abs( rwa - rwb )/( rwa + rwb )
  
 
-def get_fluxes_DF(data, cp=None, wpl=True, funits=None):
+def get_fluxes_DF(data, cp=None, wpl=True,
+        funits=None, notation_defs=None):
     """
     Get fluxes according to char lengths
     
@@ -167,6 +170,18 @@ def get_fluxes_DF(data, cp=None, wpl=True, funits=None):
     import constants
     if cp==None:
         cp=constants.cp_dry
+
+    if notation_defs==None:
+        defs=notation.get_notation()
+    else:
+        defs=notation_defs
+    p       =   defs.pressure
+    theta   =   defs.thermodyn_temp
+    theta_v =   defs.virtual_temp
+    theta_v_fluc= flup + defs.virtual_temp + flus
+    q           = defs.specific_humidity
+
+
     mu=1./constants.mu
     rho_mean=data['rho_air_mean']
     u_star=data['u_star']
