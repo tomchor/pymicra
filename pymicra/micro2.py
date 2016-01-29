@@ -18,6 +18,7 @@ import pandas as pd
 import numpy as np
 import physics
 import algs
+import notation
 
 def MonObuSimVar(L_m, siteConst):
     """
@@ -81,34 +82,34 @@ def get_scales(data, siteConst, notation_defs=None,
         defs=notation.get_notation()
     else:
         defs=notation_defs
-    u=defs.u
-    v=defs.v
-    w=defs.w
-    p=defs.pressure
-    theta=defs.thermodyn_temp
-    theta_v=defs.virtual_temp
-    theta_v_fluc = fluctuation_preffix + theta_v + fluctuation_suffix
-    q=varDict['specific humidity']
-    c=varDict["co2 fluctuations"]
-    solutesf = [ fluctuation_preffix + el + fluctuation_suffix for el in solutes ]
-    rho_h2o=varDict['h2o density fluctuations']
-    rho_co2=varDict['co2 density fluctuations']
+    flup, flus = defs.fluctuation_preffix, defs.fluctuation_suffix
+    u       =   flup + defs.u + flus
+    v       =   flup + defs.v + flus
+    w       =   flup + defs.w + flus
+    p       =   defs.pressure
+    theta   =   defs.thermodyn_temp
+    theta_v =   defs.virtual_temp
+    theta_v_fluc= flup + defs.virtual_temp + flus
+    q           = defs.specific_humidity
+    qfluct      = flup + defs.specific_humidity + flus
+    solutesf    = [ flup + el + flus for el in solutes ]
     
     u_star=np.sqrt(-algs.auxCov( data[[u,w]] ))
-    u_mean=data[u].mean()
     u_std=data[u].std()
 
     theta_v_star=algs.auxCov( data[[theta_v_fluc,w]] )/u_star
     theta_v_mean=data[theta_v].mean()
     theta_v_std=data[theta_v].std()
 
-    q_star=algs.auxCov( data[[q,w]] )/u_star
+    q_star=algs.auxCov( data[[qfluct,w]] ) / u_star
     q_mean=data[q].mean()
-    q_std=data[q].std()
+    q_std=data[qfluct].std()
 
-    c_star=algs.auxCov( data[[c,w]] )/u_star
-    c_mean=data[c].mean()
-    c_std=data[c].std()
+    c_stars=[]
+    c_stds =[]
+    for c in solutesf:
+        c_stars.append( algs.auxCov( data[[c,w]] ) / u_star )
+        c_stds.append( data[c].std() )
 
     theta_mean=data[theta].mean()
     theta_std=data[theta].std()
@@ -116,15 +117,14 @@ def get_scales(data, siteConst, notation_defs=None,
 
     Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity, kappa=siteConst.constants.kappa)
     zeta=MonObuSimVar(Lm, siteConst)
+
     if output_as_df:
         namespace=locals()
-        columns=['zeta', 'Lm', 'u_std', 'u_star', 'theta_v_std', 'theta_v_star', 'theta_std', 'theta_star', 'q_std', 'q_star', 'c_std', 'c_star']
+        columns=['zeta', 'Lm', 'u_std', 'u_star', 'theta_v_std', 'theta_v_star', 'theta_std', 'theta_star', 'q_std', 'q_star']
+        for c_star, c_std in zip(c_stars, c_stds):
+                columns += [ 'c_std', 'c_star']
         dic={ col : [namespace[col]] for col in columns }
         out=pd.DataFrame(dic, index=[data.index[0]])
-        if include_means:
-            pass
-        else:
-            out=out[ [col for col in out.columns if 'mean' not in col] ]
         return out
     else:
         return zeta, Lm, (u_std, u_star), (theta_v_std, theta_v_star), (theta_std, theta_star), (q_std, q_star), (c_std, c_star)

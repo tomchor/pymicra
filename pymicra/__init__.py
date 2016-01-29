@@ -21,5 +21,6 @@ import constants
 import numeric
 import notation
 import spectra
+import micro2
 __version__='0.1.0'
 

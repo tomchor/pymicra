@@ -34,6 +34,7 @@ class get_notation:
     virtual_temp='theta_v'
     pressure='p'
     relative_humidity='rh'
+    specific_humidity='q'
 
     h2o='h2o'
     co2='co2'
