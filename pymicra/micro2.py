@@ -153,8 +153,8 @@ def ste(data, w_fluctuations="w'"):
     return 1. - np.abs( rwa - rwb )/( rwa + rwb )
  
 
-def get_fluxes_DF(data, cp=None, wpl=True,
-        funits=None, notation_defs=None):
+def get_fluxes_DF(data, wpl=True,
+        notation_defs=None, solutes=[]):
     """
     Get fluxes according to char lengths
     
@@ -168,31 +168,31 @@ def get_fluxes_DF(data, cp=None, wpl=True,
         value for the specific heat capacity at constant pressure
     """
     import constants
-    if cp==None:
-        cp=constants.cp_dry
+    cp=constants.cp_dry
 
     if notation_defs==None:
         defs=notation.get_notation()
     else:
         defs=notation_defs
-    p       =   defs.pressure
-    theta   =   defs.thermodyn_temp
-    theta_v =   defs.virtual_temp
-    theta_v_fluc= flup + defs.virtual_temp + flus
-    q           = defs.specific_humidity
 
+    stap, stas = defs.star_preffix, defs.star_suffix
+
+    p       =   defs.pressure
+    theta_mean   =   defs.mean_preffix + defs.thermodyn_temp + defs.mean_suffix
+    theta_v =   defs.virtual_temp
+    theta_star= stap + defs.thermodyn_temp + stas
+    theta_v_star= stap + defs.virtual_temp + stas
+    u_star  =   stap + defs.u + stas
+    q_star  = stap + defs.specific_humidity + stas
 
     mu=1./constants.mu
     rho_mean=data['rho_air_mean']
-    u_star=data['u_star']
-    theta_star=data['theta_star']
-    theta_v_star=data['theta_v_star']
-    q_star=data['q_star']
-    c_star=data['c_star']
     rho_h2o_mean=data['rho_h2o_mean']
     rho_co2_mean=data['rho_co2_mean']
     rho_dry_mean=data['rho_dry_mean']
-    theta_mean=data['theta_mean']
+    c_stars = []
+    for solute in solutes:
+        c_stars.append( stap + solute + stas )
 
     out=pd.DataFrame(index=data.index)
     out['tau']=rho_mean* (u_star**2.)
@@ -200,12 +200,14 @@ def get_fluxes_DF(data, cp=None, wpl=True,
     out['Hv']= rho_mean* cp* u_star* theta_v_star
     out['E']=  rho_mean* u_star* q_star
     out['F']=  rho_mean* u_star* c_star
+    #------------------------
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
         rv=rho_h2o_mean/rho_dry_mean
         rc=rho_co2_mean/rho_dry_mean
         out['E']=   (1. +mu*rv)*( out['E'] + rho_h2o_mean*( (theta_star*u_star)/theta_mean))
         out['F']=   out['F'] + rho_co2_mean*(1. + mu*rv)*(theta_star*u_star)/theta_mean + mu*rc*out['E'] 
+    #------------------------
     return out
 
 
