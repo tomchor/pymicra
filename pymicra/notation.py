@@ -1,7 +1,7 @@
 """
 This module sets the default options in pymicra
 
-STILL NEEDS TO BE TESTED AND OPTIMIZED
+STILL NEEDS TO BE OPTIMIZED
 """
 
 class get_notation:
@@ -34,8 +34,11 @@ class get_notation:
     virtual_temp='theta_v'
     pressure='p'
     relative_humidity='rh'
+    specific_humidity='q'
 
     h2o='h2o'
     co2='co2'
     ch4='ch4'
     o3 = 'o3'
+    moist_air = 'air'
+    dry_air   = 'dry'

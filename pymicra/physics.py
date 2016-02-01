@@ -135,13 +135,13 @@ def perfGas(p=None, rho=None, R=None, T=None, gas=None):
     if gas==None and R==None:
         R=R_spec[gas]
 
-    if p == None:
+    if type(p) == type(None):
         return rho*R*T
-    elif rho == None:
+    elif type(rho) == type(None):
         return p / (R*T)
-    elif T == None:
+    elif type(T) == type(None):
         return p / (R*rho)
-    elif R == None:
+    elif type(R) == type(None):
         return p / (rho*T)
     return
 

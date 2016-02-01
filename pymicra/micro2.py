@@ -18,6 +18,7 @@ import pandas as pd
 import numpy as np
 import physics
 import algs
+import notation
 
 def MonObuSimVar(L_m, siteConst):
     """
@@ -81,34 +82,34 @@ def get_scales(data, siteConst, notation_defs=None,
         defs=notation.get_notation()
     else:
         defs=notation_defs
-    u=defs.u
-    v=defs.v
-    w=defs.w
-    p=defs.pressure
-    theta=defs.thermodyn_temp
-    theta_v=defs.virtual_temp
-    theta_v_fluc = fluctuation_preffix + theta_v + fluctuation_suffix
-    q=varDict['specific humidity']
-    c=varDict["co2 fluctuations"]
-    solutesf = [ fluctuation_preffix + el + fluctuation_suffix for el in solutes ]
-    rho_h2o=varDict['h2o density fluctuations']
-    rho_co2=varDict['co2 density fluctuations']
+    flup, flus = defs.fluctuation_preffix, defs.fluctuation_suffix
+    u       =   flup + defs.u + flus
+    v       =   flup + defs.v + flus
+    w       =   flup + defs.w + flus
+    p       =   defs.pressure
+    theta   =   defs.thermodyn_temp
+    theta_v =   defs.virtual_temp
+    theta_v_fluc= flup + defs.virtual_temp + flus
+    q           = defs.specific_humidity
+    qfluct      = flup + defs.specific_humidity + flus
+    solutesf    = [ flup + el + flus for el in solutes ]
     
     u_star=np.sqrt(-algs.auxCov( data[[u,w]] ))
-    u_mean=data[u].mean()
     u_std=data[u].std()
 
     theta_v_star=algs.auxCov( data[[theta_v_fluc,w]] )/u_star
     theta_v_mean=data[theta_v].mean()
     theta_v_std=data[theta_v].std()
 
-    q_star=algs.auxCov( data[[q,w]] )/u_star
+    q_star=algs.auxCov( data[[qfluct,w]] ) / u_star
     q_mean=data[q].mean()
-    q_std=data[q].std()
+    q_std=data[qfluct].std()
 
-    c_star=algs.auxCov( data[[c,w]] )/u_star
-    c_mean=data[c].mean()
-    c_std=data[c].std()
+    c_stars=[]
+    c_stds =[]
+    for c in solutesf:
+        c_stars.append( algs.auxCov( data[[c,w]] ) / u_star )
+        c_stds.append( data[c].std() )
 
     theta_mean=data[theta].mean()
     theta_std=data[theta].std()
@@ -116,15 +117,16 @@ def get_scales(data, siteConst, notation_defs=None,
 
     Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity, kappa=siteConst.constants.kappa)
     zeta=MonObuSimVar(Lm, siteConst)
+
     if output_as_df:
         namespace=locals()
-        columns=['zeta', 'Lm', 'u_std', 'u_star', 'theta_v_std', 'theta_v_star', 'theta_std', 'theta_star', 'q_std', 'q_star', 'c_std', 'c_star']
+        columns=['zeta', 'Lm', 'u_std', 'u_star', 'theta_v_std', 'theta_v_star', 'theta_std', 'theta_star', 'q_std', 'q_star']
         dic={ col : [namespace[col]] for col in columns }
         out=pd.DataFrame(dic, index=[data.index[0]])
-        if include_means:
-            pass
-        else:
-            out=out[ [col for col in out.columns if 'mean' not in col] ]
+        # We have to input the solutes separately
+        for solute, c_star, c_std in zip(solutes, c_stars, c_stds):
+                out[ '{}_std'.format(solute) ] = c_std
+                out[ '{}_star'.format(solute)] = c_star
         return out
     else:
         return zeta, Lm, (u_std, u_star), (theta_v_std, theta_v_star), (theta_std, theta_star), (q_std, q_star), (c_std, c_star)
@@ -151,7 +153,8 @@ def ste(data, w_fluctuations="w'"):
     return 1. - np.abs( rwa - rwb )/( rwa + rwb )
  
 
-def get_fluxes_DF(data, cp=None, wpl=True, funits=None):
+def get_fluxes_DF(data, wpl=True,
+        notation_defs=None, solutes=[]):
     """
     Get fluxes according to char lengths
     
@@ -165,19 +168,31 @@ def get_fluxes_DF(data, cp=None, wpl=True, funits=None):
         value for the specific heat capacity at constant pressure
     """
     import constants
-    if cp==None:
-        cp=constants.cp_dry
+    cp=constants.cp_dry
+
+    if notation_defs==None:
+        defs=notation.get_notation()
+    else:
+        defs=notation_defs
+
+    stap, stas = defs.star_preffix, defs.star_suffix
+
+    p       =   defs.pressure
+    theta_mean   =   defs.mean_preffix + defs.thermodyn_temp + defs.mean_suffix
+    theta_v =   defs.virtual_temp
+    theta_star= stap + defs.thermodyn_temp + stas
+    theta_v_star= stap + defs.virtual_temp + stas
+    u_star  =   stap + defs.u + stas
+    q_star  = stap + defs.specific_humidity + stas
+
     mu=1./constants.mu
     rho_mean=data['rho_air_mean']
-    u_star=data['u_star']
-    theta_star=data['theta_star']
-    theta_v_star=data['theta_v_star']
-    q_star=data['q_star']
-    c_star=data['c_star']
     rho_h2o_mean=data['rho_h2o_mean']
     rho_co2_mean=data['rho_co2_mean']
     rho_dry_mean=data['rho_dry_mean']
-    theta_mean=data['theta_mean']
+    c_stars = []
+    for solute in solutes:
+        c_stars.append( stap + solute + stas )
 
     out=pd.DataFrame(index=data.index)
     out['tau']=rho_mean* (u_star**2.)
@@ -185,12 +200,14 @@ def get_fluxes_DF(data, cp=None, wpl=True, funits=None):
     out['Hv']= rho_mean* cp* u_star* theta_v_star
     out['E']=  rho_mean* u_star* q_star
     out['F']=  rho_mean* u_star* c_star
+    #------------------------
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
         rv=rho_h2o_mean/rho_dry_mean
         rc=rho_co2_mean/rho_dry_mean
         out['E']=   (1. +mu*rv)*( out['E'] + rho_h2o_mean*( (theta_star*u_star)/theta_mean))
         out['F']=   out['F'] + rho_co2_mean*(1. + mu*rv)*(theta_star*u_star)/theta_mean + mu*rc*out['E'] 
+    #------------------------
     return out
 
 
