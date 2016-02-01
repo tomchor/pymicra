@@ -196,18 +196,21 @@ def eddyCov(data, wpl=True,
         c_stars.append( stap + solute + stas )
 
     out=pd.DataFrame(index=data.index)
-    out['tau']=rho_mean* (u_star**2.)
-    out['H']=  rho_mean* cp* u_star* theta_star
-    out['Hv']= rho_mean* cp* u_star* theta_v_star
-    out['E']=  rho_mean* u_star* q_star
-    out['F']=  rho_mean* u_star* c_star
+    out['tau']=rho_mean* ( data[u_star]**2.)
+    out['H']=  rho_mean* cp* data[u_star]* data[theta_star]
+    out['Hv']= rho_mean* cp* data[u_star]* data[theta_v_star]
+    out['E']=  rho_mean* data[u_star]* data[q_star]
+    for solute, c_star in zip(solutes, c_stars):
+        out[ 'F_{}'.format(solute) ] =  rho_mean* data[u_star]* data[c_star]
     #------------------------
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
         rv=rho_h2o_mean/rho_dry_mean
         rc=rho_co2_mean/rho_dry_mean
-        out['E']=   (1. +mu*rv)*( out['E'] + rho_h2o_mean*( (theta_star*u_star)/theta_mean))
-        out['F']=   out['F'] + rho_co2_mean*(1. + mu*rv)*(theta_star*u_star)/theta_mean + mu*rc*out['E'] 
+        out['E']=   (1. +mu*rv)*( out['E'] + rho_h2o_mean * 
+                ( (data[theta_star]*data[u_star])/data[theta_mean]) )
+        for solute, c_star in zip(solutes, c_stars):
+            out[ 'F_{}'.format(solute) ]=   out[ 'F_{}'.format(solute) ] + rho_co2_mean*(1. + mu*rv)*(data[theta_star]*data[u_star])/data[theta_mean] + mu*rc*out['E'] 
     #------------------------
     return out
 
