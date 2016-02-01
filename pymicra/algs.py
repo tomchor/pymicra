@@ -474,6 +474,30 @@ def first_last(fname):
     return first, last
 
 
+def name2date(filename, dlconfig):
+    """
+    Gets a date from a the name of the file according to a datalogger config object
+
+    Parameters:
+    -----------
+    filename: string
+        the (base) name of the file
+    dlconfig: pymicra.dataloggerConfig
+        configuration of the datalogger
+
+    Returns:
+    --------
+    cdate: datetime object
+    """
+    from itertools import izip_longest
+    filename_format=dlconfig.filename_format
+    f=''.join([ s for s,v in izip_longest(filename, filename_format) if v!='?' ])
+    fmt=filename_format.replace('?','')
+    cdate=datetime.strptime(f, fmt)
+    return cdate
+
+
+
 def line2date(line, dlconfig):
     """
     Gets a date from a line of file according to datalogger config file

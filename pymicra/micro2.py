@@ -55,14 +55,12 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=9.81, kappa=0.4):
 
 
 def get_scales(data, siteConst, notation_defs=None,
-  updt={}, output_as_df=True,
-  vunits=None, solutes=[]):
+  output_as_df=True, solutes=[]):
     """
     Calculates characteristic lengths for data
 
     The names of the variables are retrived out the dictionary. You can update the dictionary
-    and change the names by using the updt keyword with the keys
-    u,v,w,pressure, temperature, temperature fluctuations, specific humidity, relative humidity
+    and change the names by using the notation_defs keyworkd, which is a notation object
 
     Parameters:
     -----------
@@ -131,6 +129,8 @@ def get_scales(data, siteConst, notation_defs=None,
     else:
         return zeta, Lm, (u_std, u_star), (theta_v_std, theta_v_star), (theta_std, theta_star), (q_std, q_star), (c_std, c_star)
 
+
+
 def ste(data, w_fluctuations="w'"):
     """
     Returns the Symmetric Transfer Efficiency in the time domain, ste
@@ -153,7 +153,7 @@ def ste(data, w_fluctuations="w'"):
     return 1. - np.abs( rwa - rwb )/( rwa + rwb )
  
 
-def get_fluxes_DF(data, wpl=True,
+def eddyCov(data, wpl=True,
         notation_defs=None, solutes=[]):
     """
     Get fluxes according to char lengths
@@ -211,7 +211,7 @@ def get_fluxes_DF(data, wpl=True,
     return out
 
 
-def phi_H(zeta):
+def phi_H(zeta, squared=False):
     """
     Currently using Businger-Dyer eqs.
 
@@ -229,6 +229,7 @@ def phi_H(zeta):
 def Cx(x, za, zb, d, z0, Lm, Psif=None):
     """
     Get Cx for gradient-flux method.
+    In this code, zb means tau and za means anything else
 
     Parameters:
     -----------
@@ -249,20 +250,24 @@ def Cx(x, za, zb, d, z0, Lm, Psif=None):
         deviation function Psi=log(abs(zeta)) - Phi(zeta)
     """
     from constants import kappa
+    #--------
+    # Checks for Psi and if it's a function
     if Psif==None:
         print 'Should get a repository for functions'
     elif hasattr(Psif, '__call__')==False:
         raise TypeError('Psi argument has to be a function')
     else:
-        pass
+        Psif = Psi
+    #--------
+
     if x=='tau':
-        cx=1./(auxLogMinPsi(zb,d,z0,Psif,Lm))**2.
+        cx=1./(auxLogMinPsi(zb, d, z0, Psif=Psif, Lm))**2.
     elif x=='H':
         pass
     elif x=='E':
         pass
     elif x=='F':
-        pass
+        cx = 1./( auxLogMinPsi(zb, d, z0, Psif, Lm) * auxLogMinPsi(za, d, z0, Psif=Psif, Lm) )
     else:
         raise NameError('x is not on the list. See help(Cx) for more information')
     cx*=kappa**2
@@ -270,7 +275,7 @@ def Cx(x, za, zb, d, z0, Lm, Psif=None):
 
 
 
-def auxLogMinPsi(za, d, z0, Psi, Lm):
+def auxLogMinPsi(z_i, d, z0, Psif=Psi, Lm):
     """
     Auxiliar function that is used in the denominator of the C_tau-like coefficients
 
@@ -281,9 +286,46 @@ def auxLogMinPsi(za, d, z0, Psi, Lm):
     """
     if hasattr(Psi, '__call__')==False:
         raise TypeError('Psi argument has to be a function')
-    a=np.log((za-d)/z0)
-    b=Psi((za-d)/Lm)
+    a=np.log((z_i-d)/z0)
+    b=Psi((z_i-d)/Lm)
     return a-b
+
+
+
+def Psi(zeta, x='tau', zeta0=0.):
+    """
+    Integral Monin-Obukhov scale or deviation function, which is the deviation of a
+    variable (x) in relation nto their logarithmic profiles due the stability zeta != 0
+
+    Parameters:
+    -----------
+    zeta: float
+        the stability variable
+    x: string
+        the variable. Options are 'tau', 'H', 'E', 'F'
+    zeta0: float
+        value of zeta_{0 x}. Only used for the stable case
+    """
+    #---------
+    # For unstable conditions
+    if zeta < 0:
+        b = (1. - 16.*zeta)**(1./4.)
+        if x=='tau':
+            psi = np.log((b*b + 1.)/2.) + 2.*np.log((b+1.)/2.) - 2.*np.arctan(b) + np.pi/2.
+        if any([ x == var for var in ['H', 'E', 'F'] ]):
+            psi = 2.*np.log((b*b + 1.)/2.)
+        return psi
+    #---------
+
+    #---------
+    # For stable conditions
+    else:
+        return -5.*(zeta - zeta0)
+    #---------
+
+
+
+
 
 #------------------------------------
 #

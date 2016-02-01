@@ -131,14 +131,15 @@ def satWaterPressure(T, unit='kelvin'):
 def perfGas(p=None, rho=None, R=None, T=None, gas=None):
     """
     Returns the only value that is not provided in the ideal gas law
-
-    P.S.: I'm using type to identify None objects because this way it works
-    againt pandas objects
     """
     if gas==None and R==None:
         R=R_spec[gas]
+<<<<<<< HEAD
 
+    if p == None:
+=======
     if type(p) == type(None):
+>>>>>>> 262a6435903d9f79b64ef18ece4f69b8518d3d81
         return rho*R*T
     elif type(rho) == type(None):
         return p / (R*T)
