@@ -197,11 +197,12 @@ def eddyCov(data, wpl=True,
 
     out=pd.DataFrame(index=data.index)
     out['tau']=rho_mean* ( data[u_star]**2.)
-    out['H']=  rho_mean* cp* data[u_star]* data[theta_star]
+    out['H'] = rho_mean* cp* data[u_star]* data[theta_star]
     out['Hv']= rho_mean* cp* data[u_star]* data[theta_v_star]
-    out['E']=  rho_mean* data[u_star]* data[q_star]
+    out['E'] = rho_mean* data[u_star]* data[q_star]
     for solute, c_star in zip(solutes, c_stars):
         out[ 'F_{}'.format(solute) ] =  rho_mean* data[u_star]* data[c_star]
+
     #------------------------
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
