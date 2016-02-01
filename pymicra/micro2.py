@@ -165,8 +165,10 @@ def eddyCov(data, wpl=True,
     -----------
     data: pandas.DataFrame
         dataframe with the characteristic lengths calculated
-    cp: float (optional)
-        value for the specific heat capacity at constant pressure
+    notation_defs: pymicra.notation
+        object that holds the notation used in the dataframe
+    solutes: list
+        list that holds every solute considered for flux
     """
     import constants
     cp=constants.cp_dry
