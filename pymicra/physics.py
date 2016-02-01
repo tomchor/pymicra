@@ -134,6 +134,7 @@ def perfGas(p=None, rho=None, R=None, T=None, gas=None):
     """
     if gas==None and R==None:
         R=R_spec[gas]
+
     if p == None:
         return rho*R*T
     elif rho == None:
