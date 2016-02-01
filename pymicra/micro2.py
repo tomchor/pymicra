@@ -131,6 +131,7 @@ def get_scales(data, siteConst, notation_defs=None,
 
 
 
+
 def ste(data, w_fluctuations="w'"):
     """
     Returns the Symmetric Transfer Efficiency in the time domain, ste
@@ -211,25 +212,26 @@ def eddyCov(data, wpl=True,
     return out
 
 
-def phi_H(zeta, squared=False):
+def phi(zeta, x=None):
     """
     Currently using Businger-Dyer eqs.
-
-    TO-DO LIST:
-    include more types
     """
     if zeta<0:
-        return np.sqrt(1. - 16.*zeta)
+        if x=='tau':
+            return (1. - 16.*zeta)**(1./4.)
+        else:
+            return np.sqrt(1. - 16.*zeta)
     if zeta>0:
         return 1. + 5.*zeta
 
 
 
 
-def Cx(x, za, zb, d, z0, Lm, Psif=None):
+def _Cx(x, za, zb, d, z0, Lm, Psif=None):
     """
     Get Cx for gradient-flux method.
-    In this code, zb means tau and za means anything else
+    In this code, zb means tau and za means anything else and the bottom level
+    is the ground (height zero)
 
     Parameters:
     -----------
@@ -261,13 +263,13 @@ def Cx(x, za, zb, d, z0, Lm, Psif=None):
     #--------
 
     if x=='tau':
-        cx=1./(auxLogMinPsi(zb, d, z0, Psif=Psif, Lm))**2.
+        cx=1./(auxLogMinPsi(zb, d, z0, Psif, Lm))**2.
     elif x=='H':
         pass
     elif x=='E':
         pass
     elif x=='F':
-        cx = 1./( auxLogMinPsi(zb, d, z0, Psif, Lm) * auxLogMinPsi(za, d, z0, Psif=Psif, Lm) )
+        cx = 1./( auxLogMinPsi(zb, d, z0, Psif, Lm) * auxLogMinPsi(za, d, z0, Psif, Lm) )
     else:
         raise NameError('x is not on the list. See help(Cx) for more information')
     cx*=kappa**2
@@ -275,7 +277,7 @@ def Cx(x, za, zb, d, z0, Lm, Psif=None):
 
 
 
-def auxLogMinPsi(z_i, d, z0, Psif=Psi, Lm):
+def _auxLogMinPsi(z_i, d, z0, Psi, Lm):
     """
     Auxiliar function that is used in the denominator of the C_tau-like coefficients
 
