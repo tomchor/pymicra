@@ -25,25 +25,48 @@ def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
         dictionary with kwargs of pandas' read_csv function
         see http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html for more detail
 
-    varNames: list
-        list containing the names of each variable in the file.
+    varNames: list or dict
+        list or dictionary containing the names of each variable in the file (if dict, the keys must be ints)
         
     Returns
     ---------
     dataFrame: pandas.DataFrame object
-
-    TODO:
-    ACCEPT DICT AS VARNAMES (BECAUSE OF FILES WITH MANY COLUMNS)
     """
-    if dates_as_string:
-        dtypes={ i : str for i,key in enumerate(varNames) if r'%' in key }
+    #------------
+    # Read only used columns if possible
+    if type(varNames) == dict:
+        usedcols = sorted(varNames.keys())
+        #------------
+        # This makes it easier to read dates
+        if dates_as_string:
+            dtypes={ i : str for i,key in enumerate(varNames.values()) if r'%' in key }
+        else:
+            dtypes=None
+        #------------
+    else:
+        usedcols = None
+        #------------
+        # This makes it easier to read dates
+        if dates_as_string:
+            dtypes={ i : str for i,key in enumerate(varNames) if r'%' in key }
+        else:
+            dtypes=None
+        #------------
+    #------------
+
+    #------------
+    # Should work, but just in case it doesn't
     try:
-        data=pd.read_csv(fname, dtype=dtypes, **kwargs)
+        data=pd.read_csv(fname, usecols=usedcols, dtype=dtypes, **kwargs)
     except ValueError:
         print 'WARNING: Ignoring dtypes for date columns. This may cause problems parsing dates'
-        data=pd.read_csv(fname, **kwargs)
-    if varNames:
+        data=pd.read_csv(fname, usecols=usedcols, **kwargs)
+    #------------
+
+    if type(varNames) == list:
         data.columns=varNames + list(data.columns[len(varNames):])
+    elif type(varNames) == dict:
+        data.columns = [ varNames[el] for el in data.columns ]
     return data
 
 
@@ -122,15 +145,16 @@ class dataloggerConf(object):
         brief description of the datalogger configuration file
     """
     def __init__(self, varNames,
-             date_cols=None,
-             frequency=None,
-             date_connector='-', 
-             columns_separator=',',
-             header_lines=None,
-             first_time_skip=False,
-             units=None,
-             filename_format='CSV_?????.fluxo_??m_%Y_%j_%H%M.dat',
-             description='generic datalogger configuration file'):
+            date_cols=None,
+            frequency=None,
+            date_connector='-', 
+            columns_separator=',',
+            header_lines=None,
+            first_time_skip=False,
+            units=None,
+            skiprows=None,
+            filename_format='CSV_?????.fluxo_??m_%Y_%j_%H%M.dat',
+            description='generic datalogger configuration file'):
         #-------------------------
         # Makes sure that units is a dictionary type
         #-------------------------
@@ -146,6 +170,7 @@ class dataloggerConf(object):
         self.date_connector=date_connector
         self.columns_separator=columns_separator
         self.header_lines=header_lines
+        self.skiprows=skiprows
         self.first_time_skip=first_time_skip
         self.units=units
         self.description=description
@@ -174,13 +199,14 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, 
     if isinstance(flist, str):
         flist=[flist]
     header_lines=datalogger.header_lines
+    skiprows=datalogger.skiprows
     columns_separator=datalogger.columns_separator
     date_cols=datalogger.date_cols
     date_connector=datalogger.date_connector
     if columns_separator=='whitespace':
-        series=readDataFiles(flist, header=header_lines, delim_whitespace=True, varNames=datalogger.varNames, **read_data_kw)
+        series=readDataFiles(flist, header=header_lines, skiprows=skiprows, delim_whitespace=True, varNames=datalogger.varNames, **read_data_kw)
     else:
-        series=readDataFiles(flist, header=header_lines, sep=columns_separator, varNames=datalogger.varNames, **read_data_kw)
+        series=readDataFiles(flist, header=header_lines, skiprows=skiprows, sep=columns_separator, varNames=datalogger.varNames, **read_data_kw)
     #------------
     # THIS WILL BEGIN TO PARSE THE DATES
     if parse_dates:
