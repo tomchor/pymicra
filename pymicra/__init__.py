@@ -22,5 +22,6 @@ import numeric
 import notation
 import spectra
 import micro2
+#import genalgs
 __version__='0.1.0'
 

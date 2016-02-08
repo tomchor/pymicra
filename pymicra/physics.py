@@ -39,11 +39,22 @@ def gradients(data, levels, order='Crescent'):
     return flux
 
 
+#def solarZen2(date, lat=-3.1300, lon=-60.016667, negative=False):
+#    sin = lambda x: np.sin(np.radians(x))
+#    cos = lambda x: np.cos(np.radians(x))
+#    t_vernal_equi = 240.
+#    T_year = 365.24
+#    earth_tiltv = 23.5
+#    lamb = 360.*(t_vernal_equi / T_year)
+#    sin_delta = sin(earth_tilt)*sin(lamb)
+#    cos_zen = sin(latitude)*sin_delta + cos(latitude)*cos(delta)*None
+#    return 
+
 def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, dr=None):
     """
     Calculates the solar zenith angle at any given day
 
-    needs validation and needs to work without dr or lon0
+    needs validation and needs to work without lon0
 
     Parameters:
     -----------
@@ -55,6 +66,7 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
         longitude in degrees
     lon0: float
         DEFINE IT BETTER
+
     dr is the julian day of the solstice. Default is to get from dictionary
 
     Returns:
