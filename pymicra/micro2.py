@@ -26,14 +26,14 @@ def MonObuSimVar(L_m, siteConst):
     according to:
 
     GARRAT, 
-    zeta = z/L
+    zeta = (z-d)/Lm
     """
     z=siteConst.variables_height
     d=siteConst.displacement_height
     return (z-d)/L_m
 
 
-def MonObuLen(theta_v_star, theta_v_mean, u_star, g=9.81, kappa=0.4):
+def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
     """
     Calculates the Monin-Obukhov Length
     according to:
@@ -50,6 +50,9 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=9.81, kappa=0.4):
     STULL, An introduction to Boundary layer meteorology, 1988 (eq. 5.7b, p. 181)
     L = - ( theta_v * u_star^3 ) / ( kappa *g* cov(w',theta_v') )
     """
+    if g==None:
+        g = pm.constants.gravity
+    kappa = pm.constants.kappa
     Lm= - ( (u_star**2) * theta_v_mean) / (kappa *g* theta_v_star)
     return Lm
 
@@ -113,7 +116,7 @@ def get_scales(data, siteConst, notation_defs=None,
     theta_std=data[theta].std()
     theta_star=(theta_v_star - 0.61*theta_mean*q_star)/(1.+0.61*q_mean)
 
-    Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity, kappa=siteConst.constants.kappa)
+    Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity)
     zeta=MonObuSimVar(Lm, siteConst)
 
     if output_as_df:
