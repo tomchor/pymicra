@@ -81,8 +81,8 @@ def trend(data, mode='moving average', rule=None, window=None, **kwargs):
             return data.resample(rule, how='mean', **kwargs).resample(freq, fill_method='pad')
     elif any(w in mode for w in ['linear', 'polynomial', 'fit']):
         # performs a polynomial fit on the data in blocks of "rule"
-        from algs import fitByDate
-        return fitByDate(data, rule=rule, **kwargs)
+        #from algs import fitByDate
+        return algs.fitByDate(data, rule=rule, **kwargs)
     else:
         # if no mode can be identified
         raise KeyError('Mode defined is not correct. Options are "moving" and "block".')
@@ -103,9 +103,9 @@ def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
     suffix: string
         suffix to add to variable names after fluctuation is extracted
     """
-    from algs import stripDown
+    #from algs import stripDown
     from scipy import signal
-    mode=stripDown(mode.lower(), args='-_')
+    mode=algs.stripDown(mode.lower(), args='-_')
     df=data.copy()
     if mode=='linear' or mode=='constant':
         df=df.apply(signal.detrend, axis=0, type=mode)

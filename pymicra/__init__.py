@@ -10,7 +10,7 @@
  analysis so these are required packages.
 """
 from io import dataloggerConf, timeSeries, read_dlc, toUnitsCsv, readUnitsCsv
-from micro import *
+from micro2 import *
 from data import *
 
 import io
@@ -18,10 +18,10 @@ import physics
 import algs
 import util
 import constants
-import numeric
+#import numeric
 import notation
 import spectra
 import micro2
-#import genalgs
+import genalgs
 __version__='0.1.0'
 
