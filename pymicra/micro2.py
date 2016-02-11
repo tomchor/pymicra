@@ -16,7 +16,7 @@ http://www.licor.com/env/help/EddyPro3/Content/Topics/Calculating_Micromet_Varia
 """
 import pandas as pd
 import numpy as np
-import algs
+from genalgs import auxiliar as algs
 import notation
 import constants
 
@@ -59,7 +59,7 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
     print 'theta_vm', theta_v_mean
     print 'theta_v*', theta_v_star
     Lm = - ( (u_star**2) * theta_v_mean) / (kappa *g* theta_v_star)
-    print 'Lm', Lm
+#    print 'Lm', Lm
     return Lm
 
 
@@ -124,6 +124,10 @@ def get_scales(data, siteConst, notation_defs=None,
 
     Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity)
     zeta=MonObuSimVar(Lm, siteConst)
+    #if zeta<-10:
+    #    raw_input()
+    #else:
+    #    pass
 
     if output_as_df:
         namespace=locals()

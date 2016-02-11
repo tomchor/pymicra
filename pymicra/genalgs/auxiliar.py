@@ -125,10 +125,8 @@ def auxCov(data):
         the data whose covariance you want to obtain. Maximum number of columns is 2
     """
     colnum=len(data.columns)
-    if colnum==1:
-        return np.mean( data[data.columns[0]]*data[data.columns[0]] )
-    elif colnum==2:
-        return np.mean( data[data.columns[0]]*data[data.columns[1]] )
+    if colnum<=2:
+        return np.mean( data.iloc[:, 0] * data.iloc[:,-1] )
     else:
         raise TypeError('Datset with more than two columns')
 
@@ -332,7 +330,7 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
         list of columns that need to be padded with zeroes
     """
     from datetime import timedelta,datetime
-    from ../algs import completeHM
+    from ..algs import completeHM
     #------------------------------------
     # joins the names of the columns, which must match the datetime directive (see __doc__)
     #------------------------------------
