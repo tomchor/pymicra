@@ -16,9 +16,9 @@ http://www.licor.com/env/help/EddyPro3/Content/Topics/Calculating_Micromet_Varia
 """
 import pandas as pd
 import numpy as np
-import physics
 import algs
 import notation
+import constants
 
 def MonObuSimVar(L_m, siteConst):
     """
@@ -30,7 +30,9 @@ def MonObuSimVar(L_m, siteConst):
     """
     z=siteConst.variables_height
     d=siteConst.displacement_height
-    return (z-d)/L_m
+    zeta = (z-d)/L_m
+    print 'zeta', zeta
+    return zeta
 
 
 def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
@@ -51,9 +53,13 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
     L = - ( theta_v * u_star^3 ) / ( kappa *g* cov(w',theta_v') )
     """
     if g==None:
-        g = pm.constants.gravity
-    kappa = pm.constants.kappa
-    Lm= - ( (u_star**2) * theta_v_mean) / (kappa *g* theta_v_star)
+        g = constants.gravity
+    kappa = constants.kappa
+    print 'u*', u_star
+    print 'theta_vm', theta_v_mean
+    print 'theta_v*', theta_v_star
+    Lm = - ( (u_star**2) * theta_v_mean) / (kappa *g* theta_v_star)
+    print 'Lm', Lm
     return Lm
 
 
@@ -95,19 +101,19 @@ def get_scales(data, siteConst, notation_defs=None,
     qfluct      = flup + defs.specific_humidity + flus
     solutesf    = [ flup + el + flus for el in solutes ]
     
-    u_star=np.sqrt(-algs.auxCov( data[[u,w]] ))
-    u_std=data[u].std()
+    u_star  = np.sqrt(-algs.auxCov( data[[u,w]] ))
+    u_std   = data[u].std()
 
-    theta_v_star=algs.auxCov( data[[theta_v_fluc,w]] )/u_star
-    theta_v_mean=data[theta_v].mean()
-    theta_v_std=data[theta_v].std()
+    theta_v_star    = algs.auxCov( data[[theta_v_fluc,w]] )/u_star
+    theta_v_mean    = data[theta_v].mean()
+    theta_v_std     = data[theta_v].std()
 
-    q_star=algs.auxCov( data[[qfluct,w]] ) / u_star
-    q_mean=data[q].mean()
-    q_std=data[qfluct].std()
+    q_star  = algs.auxCov( data[[qfluct,w]] ) / u_star
+    q_mean  = data[q].mean()
+    q_std   = data[qfluct].std()
 
-    c_stars=[]
-    c_stds =[]
+    c_stars =[]
+    c_stds  =[]
     for c in solutesf:
         c_stars.append( algs.auxCov( data[[c,w]] ) / u_star )
         c_stds.append( data[c].std() )
@@ -124,10 +130,12 @@ def get_scales(data, siteConst, notation_defs=None,
         columns=['zeta', 'Lm', 'u_std', 'u_star', 'theta_v_std', 'theta_v_star', 'theta_std', 'theta_star', 'q_std', 'q_star']
         dic={ col : [namespace[col]] for col in columns }
         out=pd.DataFrame(dic, index=[data.index[0]])
+        #-----------
         # We have to input the solutes separately
         for solute, c_star, c_std in zip(solutes, c_stars, c_stds):
                 out[ '{}_std'.format(solute) ] = c_std
                 out[ '{}_star'.format(solute)] = c_star
+        #-----------
         return out
     else:
         return zeta, Lm, (u_std, u_star), (theta_v_std, theta_v_star), (theta_std, theta_star), (q_std, q_star), (c_std, c_star)
@@ -173,7 +181,6 @@ def eddyCov(data, wpl=True,
     solutes: list
         list that holds every solute considered for flux
     """
-    import constants
     cp=constants.cp_dry
 
     if notation_defs==None:
@@ -260,7 +267,6 @@ def _Cx(x, za, zb, d, z0, Lm, Psif=None):
     Psif: function (optional)
         deviation function Psi=log(abs(zeta)) - Phi(zeta)
     """
-    from constants import kappa
     #--------
     # Checks for Psi and if it's a function
     if Psif==None:
@@ -366,7 +372,6 @@ class siteConstants(object):
 
 #        if not isinstance(variables_height, dict):
 #            raise TypeError('variables_height should be a dictionary. Ex.: {"u" : 10, "v" : 10, "theta" : 12 }')
-        import constants
         self.constants=constants
         self.variables_height = variables_height #meters
         self.canopy_height = canopy_height         #meters

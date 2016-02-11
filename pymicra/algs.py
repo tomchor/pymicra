@@ -125,10 +125,9 @@ def auxCov(data):
         the data whose covariance you want to obtain. Maximum number of columns is 2
     """
     colnum=len(data.columns)
-    if colnum==1:
-        return np.mean( data[data.columns[0]]*data[data.columns[0]] )
-    elif colnum==2:
-        return np.mean( data[data.columns[0]]*data[data.columns[1]] )
+    if colnum<=2:
+        #return np.mean( data[data.columns[0]]*data[data.columns[-1]] )
+        return np.mean( data.iloc[:, 0] * data.iloc[:, -1] )
     else:
         raise TypeError('Datset with more than two columns')
 
