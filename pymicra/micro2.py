@@ -238,9 +238,9 @@ def phi(zeta, x=None):
     """
     if zeta<0:
         if x=='tau':
-            return (1. - 16.*zeta)**(1./4.)
+            return (1. - 16.*zeta)**(-1./4.)
         else:
-            return np.sqrt(1. - 16.*zeta)
+            return (1. - 16.*zeta)**(-1./2.)
     if zeta>0:
         return 1. + 5.*zeta
 

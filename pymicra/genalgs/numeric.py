@@ -86,9 +86,19 @@ pd.DataFrame.integrate = _integrate_df
 
 #----------
 # Definition of the .differentiate method for dataframes
-def _diff_df(self, how='central'):
-    x= np.array(self.index)
+def _diff_df(self, how='central', axis=0):
+    #---------
+    # Choose x axis by column or index, considering axis keyword
+    if axis==0:
+        x = np.array(self.index)
+    if axis==1:
+        x = np.array(self.transpose().index)
+    else:
+        raise ValueError('Axis must be 0 or 1')
     dx = np.diff(x)
+    #---------
+
+    #---------
     if how=='central':
         ix = x[1:-1]
         diff=algs.diff_central
@@ -97,10 +107,24 @@ def _diff_df(self, how='central'):
         diff=lambda x,y: y/x
     else:
         raise NameError
-    out = pd.DataFrame(index=ix, columns=self.columns)
-    for c in self.columns:
-        dydx = diff(x, np.array(self[c]))
-        out[c] = dydx
+    #---------
+
+    #---------
+    # Choose what to iterate based on axis argument
+    if axis==0:
+        out = pd.DataFrame(index=ix, columns=self.columns)
+        for c in self.columns:
+            dydx = diff(x, np.array(self[c]))
+            out[c] = dydx
+    elif axis==1:
+        out = pd.DataFrame(columns=self.index, index=ix)
+        for c in self.transpose().columns:
+            dydx = diff(x, np.array(self.transpose()[c]))
+            out[c] = dydx
+        out = out.transpose()
+    else:
+        raise ValueError('Axis must be 0 or 1')
+    #---------
     return out
 pd.DataFrame.differentiate = _diff_df
 #----------

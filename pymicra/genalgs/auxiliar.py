@@ -562,4 +562,9 @@ def find_nearest(array, value):
     idx = (np.abs(array-value)).argmin()
     return idx
 
-
+#--------
+# Define xplot method for pandas dataframes
+def _xplot(self, xcol, **kwargs):
+    return self.sort(xcol).plot(x=xcol, xlim=[self[xcol].min(), self[xcol].max()], **kwargs)
+pd.DataFrame.xplot = _xplot
+#--------
