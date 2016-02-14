@@ -1,7 +1,6 @@
 """
 This module sets the default options in pymicra
 
-STILL NEEDS TO BE OPTIMIZED
 """
 
 class get_notation:
