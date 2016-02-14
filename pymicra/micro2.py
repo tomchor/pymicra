@@ -31,7 +31,7 @@ def MonObuSimVar(L_m, siteConst):
     z=siteConst.variables_height
     d=siteConst.displacement_height
     zeta = (z-d)/L_m
-    print 'zeta', zeta
+    #print 'zeta', zeta
     return zeta
 
 
@@ -55,9 +55,9 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
     if g==None:
         g = constants.gravity
     kappa = constants.kappa
-    print 'u*', u_star
-    print 'theta_vm', theta_v_mean
-    print 'theta_v*', theta_v_star
+    #print 'u*', u_star
+    #print 'theta_vm', theta_v_mean
+    #print 'theta_v*', theta_v_star
     Lm = - ( (u_star**2) * theta_v_mean) / (kappa *g* theta_v_star)
 #    print 'Lm', Lm
     return Lm
