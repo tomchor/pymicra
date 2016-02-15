@@ -9,7 +9,7 @@ units={}    # creates units dictionary so it can be updated everytime a constant
 #---------------------------------------
 # Gas constants
 #---------------------------------------
-molar_mass={'dry_air' : 28.9645,
+molar_mass={'dry' : 28.9645,
             'o3'  : 47.99820,
             'h2o' : 18.0153,
             'co2' : 44.0095,
@@ -28,7 +28,7 @@ for key, val in molar_mass.iteritems():
     R_spec.update( {key : R/val} )
 units.update({'R_spec' : 'J/(g * K)'})
 
-mu=R_spec['dry_air']/R_spec['h2o']
+#mu=R_spec['dry']/R_spec['h2o']
 units.update({'mu':'1'})
 
 cp_dry=1.0035  # specific heat of dry air at constant pressure

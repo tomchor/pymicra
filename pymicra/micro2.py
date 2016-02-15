@@ -172,9 +172,10 @@ def ste(data, w_fluctuations="w'"):
 def eddyCov(data, wpl=True,
         notation_defs=None, solutes=[]):
     """
-    Get fluxes according to char lengths
+    Get fluxes according to characteristic lengths
     
-    add more concentrations to the variables
+    WARNING!
+        if using wpl=True, be sure that the units for q and solutes are kg/kg
 
     Parameters:
     -----------
@@ -182,6 +183,8 @@ def eddyCov(data, wpl=True,
         dataframe with the characteristic lengths calculated
     notation_defs: pymicra.notation
         object that holds the notation used in the dataframe
+    wpl: boolean
+        whether or not to apply WPL correction on the latent heat flux and solutes flux
     solutes: list
         list that holds every solute considered for flux
     """
@@ -202,7 +205,7 @@ def eddyCov(data, wpl=True,
     u_star  =   stap + defs.u + stas
     q_star  = stap + defs.specific_humidity + stas
 
-    mu=1./constants.mu
+    mu=constants.R_spec['h2o']/constants.R_spec['dry']
     rho_mean=data['rho_air_mean']
     rho_h2o_mean=data['rho_h2o_mean']
     rho_co2_mean=data['rho_co2_mean']
@@ -224,10 +227,12 @@ def eddyCov(data, wpl=True,
     if wpl:
         rv=rho_h2o_mean/rho_dry_mean
         rc=rho_co2_mean/rho_dry_mean
-        out['E']=   (1. +mu*rv)*( out['E'] + rho_h2o_mean * 
-                ( (data[theta_star]*data[u_star])/data[theta_mean]) )
+        out['E'] = (1. +mu*rv)*( out['E'] + rho_h2o_mean * (data[theta_star]*data[u_star]/data[theta_mean]) )
         for solute, c_star in zip(solutes, c_stars):
-            out[ 'F_{}'.format(solute) ]=   out[ 'F_{}'.format(solute) ] + rho_co2_mean*(1. + mu*rv)*(data[theta_star]*data[u_star])/data[theta_mean] + mu*rc*out['E'] 
+            out[ 'F_{}'.format(solute) ] = \
+                out[ 'F_{}'.format(solute) ] + \
+                rho_co2_mean*(1. + mu*rv)*(data[theta_star]*data[u_star])/data[theta_mean] + \
+                mu*rc*out['E']
     #------------------------
     return out
 
