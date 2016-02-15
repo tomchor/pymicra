@@ -174,8 +174,12 @@ def eddyCov(data, wpl=True,
     """
     Get fluxes according to characteristic lengths
     
-    WARNING!
-        if using wpl=True, be sure that the units for q and solutes are kg/kg
+    WARNING! If using wpl=True, be sure that all masses are consistent!
+        For example, if q = [g/g], rho_h2o = [g/m3] and rho_co2 = [g/m3] and so on.
+        Avoid mixing kg/m3 with g/m3 (e.g. for co2 and h2o) and mg/kg with g/g (e.g. for
+        co2 and h2o).
+
+    TODO: add support for pint units
 
     Parameters:
     -----------
@@ -197,13 +201,13 @@ def eddyCov(data, wpl=True,
 
     stap, stas = defs.star_preffix, defs.star_suffix
 
-    p       =   defs.pressure
-    theta_mean   =   defs.mean_preffix + defs.thermodyn_temp + defs.mean_suffix
-    theta_v =   defs.virtual_temp
-    theta_star= stap + defs.thermodyn_temp + stas
-    theta_v_star= stap + defs.virtual_temp + stas
-    u_star  =   stap + defs.u + stas
-    q_star  = stap + defs.specific_humidity + stas
+    p           =   defs.pressure
+    theta_mean  =   defs.mean_preffix + defs.thermodyn_temp + defs.mean_suffix
+    theta_v     =   defs.virtual_temp
+    theta_star  =   stap + defs.thermodyn_temp + stas
+    theta_v_star=   stap + defs.virtual_temp + stas
+    u_star      =   stap + defs.u + stas
+    q_star      =   stap + defs.specific_humidity + stas
 
     mu=constants.R_spec['h2o']/constants.R_spec['dry']
     rho_mean=data['rho_air_mean']
