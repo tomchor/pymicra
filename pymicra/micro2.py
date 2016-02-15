@@ -254,6 +254,18 @@ def phi(zeta, x=None):
         return 1. + 5.*zeta
 
 
+def phi_c(zeta, x=None):
+    """
+    From zahn.ea
+    """
+    if zeta<0:
+        if x=='u':
+            return 1.25*(1. - 3.*zeta)**(1./3.)
+        else:
+            zeta = abs(zeta)
+            return 2.*(1. + 9.5*zeta)**(-1./3.)
+    else:
+        pass 
 
 
 def _Cx(x, za, zb, d, z0, Lm, Psif=None):
