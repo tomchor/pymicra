@@ -564,12 +564,28 @@ def find_nearest(array, value):
 
 #--------
 # Define xplot method for pandas dataframes
-def _xplot(self, xcol, reverse_x=False, **kwargs):
+def _xplot(self, xcol, reverse_x=False, return_ax=False, **kwargs):
+    df = self.copy()
+
     if reverse_x:
         newx = '-'+str(xcol)
-        self[newx] = -self[xcol]
-        self = self.drop(xcol, axis=1)
+        df[newx] = -df[xcol]
+        df = df.drop(xcol, axis=1)
         xcol = newx
-    return self.sort(xcol).plot(x=xcol, xlim=[self[xcol].min(), self[xcol].max()], **kwargs)
+
+    #--------
+    # Checks for double xlim kwarg
+    if kwargs.has_key('xlim'):
+        xlim = kwargs['xlim']
+        kwargs.pop('xlim')
+    else:
+        xlim=[df[xcol].min(), df[xcol].max()]
+    #--------
+
+    if return_ax:
+        return df.sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
+    else:
+        df.sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
+        return
 pd.DataFrame.xplot = _xplot
 #--------
