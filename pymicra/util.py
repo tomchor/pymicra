@@ -425,7 +425,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
             print 'Done!'
         return
 
-def correctDrift(correct, drifted, correct_drifted_vars,
+def correctDrift(drifted, correct_drifted_vars, correct=None,
                 get_fit=True, write_fit=True, fit_file='correctDrift_linfit.params',
                 apply_fit=True, show_plot=False, units={}, return_index=False):
     """
