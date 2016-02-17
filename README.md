@@ -19,6 +19,7 @@ Currently, this is what pymicra does:
   - Quality control methods (max and min values check, spikes, reverse-arrangement test and etc).
   - Rotation of coordinates (2D).
   - Detrending of data in the most common ways (block averages, moving averages and polynominal detrending).
+  - Correction of sensor drift.
   - Calculation of spectra and cross-spectra.
   - Calculation fluxes and characteristic scales.
   - Plus all native features of Pandas (interpolation, resampling, grouping, statistical tests, slicing, handling of missing data and etc.)
