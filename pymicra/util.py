@@ -425,17 +425,17 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
             print 'Done!'
         return
 
-def correctDrift(right, drifted, right_drifted_vars,
+def correctDrift(correct, drifted, correct_drifted_vars,
                 get_fit=True, write_fit=True, fit_file='correctDrift_linfit.params',
-                apply_fit=True, show_plot=False):
+                apply_fit=True, show_plot=False, units={}, return_index=False):
     """
     Parameters:
     -----------
-    right: pandas.DataFrame
+    correct: pandas.DataFrame
         dataset with the correct averages
     drifted: pandas.DataFrame
         dataset with the averages that need to be corrected
-    right_drifted_vars: dict
+    correct_drifted_vars: dict
         dictionary where every key is a var in the right dataset and 
         its value is its correspondent in the drifted dataset
     get_fit: bool
@@ -453,14 +453,14 @@ def correctDrift(right, drifted, right_drifted_vars,
         drifted dataset corrected with right dataset
     """
     from matplotlib import pyplot as plt
-    rwvars = right_drifted_vars
+    rwvars = correct_drifted_vars
     cors=[]
     if get_fit:
         for slw, fst in rwvars.iteritems():
-            slow=right[slw]
+            slow=correct[slw]
             fast=drifted[fst]
             try:
-                if pd.infer_freq(right.index) == pd.infer_freq(drifted.index):
+                if pd.infer_freq(correct.index) == pd.infer_freq(drifted.index):
                     slow, fast = map(np.array, [slow, fast] )
                 else:
                     print 'Frequencies must be the same, however, inferred frequencies appear to be different. Plese check.'
@@ -485,7 +485,7 @@ def correctDrift(right, drifted, right_drifted_vars,
         print cors
 
         if write_fit:
-            cors.index.name='drifted_right'
+            cors.index.name='correct_drifted'
             cors.to_csv(fit_file, index=True)
     else:
         cors=pd.read_csv(fit_file, index_col=0, header=0)
@@ -501,4 +501,7 @@ def correctDrift(right, drifted, right_drifted_vars,
         corrected=drifted.copy()
     #------------
 
-    return corrected
+    if return_index:
+        return corrected, idx
+    else:
+        return corrected
