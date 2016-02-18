@@ -4,9 +4,8 @@ Author: Tomas Chor
 Date: 2015-08-07
 -------------------------
 
-Modifications:
-CHECKLIST
--INCLUDE MAYBE DECODIFICAION OF DATA
+TODO LIST
+-INCLUDE DECODIFICAION OF DATA
 
 """
 import algs
@@ -33,22 +32,31 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
     valid_cols=pd.Series(0, index=dfs[0].columns)
     for i in range(len(dfs)):
         chunk=dfs[i].copy()
+        #-------------------------------
+        # This substitutes the spikes to NaNs so it can be interpolated later
         if len(chunk)>interp_limit:
             chunk=algs.limitedSubs(chunk, max_interp=interp_limit, func=f)
         valid_cols= valid_cols + chunk.count()
+        #-------------------------------
 
         if visualize:
             aux=dfs[i][vis_col]
             aux2=(abs(aux - aux.mean()) < abs(aux.std()*cut_coef))
             aux.plot(marker='o', color='green', label='original')
             aux.mask(aux2).plot(marker='o', color='red')
+
+        #-------------------------------
         #Interpolation takes place here
         chunk=chunk.interpolate(method='time', axis=0)
-        #
+        #-------------------------------
+
+        #-------------------------------
+        # Visualize what you're doing to see if it's correct
         if visualize:
             chunk[vis_col].plot(marker='', color='blue', label='controled')
             plt.show()
         dfs[i]=chunk.copy()
+        #-------------------------------
 
     fou=pd.concat(dfs)
     fou=fou.interpolate(method='time', axis=0)
@@ -118,7 +126,6 @@ def qcontrol(files, datalogger_config,
         filename=basename(filepath)
         #--------------------------------
         # BEGINNING OF DATE CHECK
-        #-------------------------------
         f=''.join([ s for s,v in izip_longest(filename, filename_format) if v!='?' ])
         fmt=filename_format.replace('?','')
         cdate=datetime.strptime(f, fmt)
@@ -129,6 +136,7 @@ def qcontrol(files, datalogger_config,
         else:
             if trueverbose: print cdate,':', filename, 'included because date is valid'
             pass
+        #-------------------------------
     
         #-------------------------------
         # BEGINNING LINE NUMBERS TEST
@@ -184,7 +192,6 @@ def qcontrol(files, datalogger_config,
 
         #----------------------------------
         # BEGINNING OF STANDARD DEVIATION CHECK
-        #----------------------------------
         df=fin.copy()
         df=df-pd.rolling_mean(df,window=window_size, center=True)
         stds_list=df.resample(chunk_size, np.std).dropna()
@@ -196,10 +203,10 @@ def qcontrol(files, datalogger_config,
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='STD', filename=filename, falseshow=falseshow)
         if result==False:
             continue
+        #----------------------------------
     
         #---------------------------------
         # BEGINNING OF REVERSE ARRANGEMENT TEST
-        #---------------------------------
         if RATvars:
             valid_chunks= fin[RATvars].apply(data.reverse_arrangement, axis=0, points_number=50, alpha=.01)
         elif RATvars==None:
@@ -211,10 +218,10 @@ def qcontrol(files, datalogger_config,
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
         if result==False:
             continue
+        #---------------------------------
     
         #--------------------------------
         # BEGINNING OF MAXIMUM DIFFERENCE METHOD
-        #--------------------------------
         trend=data.trend(fin, mode='linear')
         maxdif=trend.iloc[0]-trend.iloc[-1]
         maxdif=maxdif.abs()
@@ -224,24 +231,26 @@ def qcontrol(files, datalogger_config,
         result,failed=algs.testValid(chunks_valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
         numbers=algs.applyResult(result, failed, fin, control=numbers, testname='difference', filename=filename, falseshow=falseshow)
         if result==False: continue
+        #--------------------------------
     
         #--------------------------------
         # END OF TESTS
-        #--------------------------------
         print 'Successful run!'
         if trueshow:
             fin.plot()
             plt.show()
         numbers['successful'].append(filename)
         #--------------------------------
-        # FINALLY
+
         #--------------------------------
+        # FINALLY
         print 'Re-writng',filepath
         fullfin[usedvars] = fin[usedvars]
         fullfin.to_csv(join( outdir, basename(filepath) ),
                    header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
         #fin.to_csv(join( outdir, basename(filepath) ),
                    #header=datalogger_config.header_lines, date_format=date_format, quoting=3, na_rep='NaN')
+        #--------------------------------
     
     summary= {k: [len(v)] for k, v in numbers.items()}
     summary=pd.DataFrame({'numbers': map(len,numbers.values())}, index=numbers.keys())
@@ -455,10 +464,14 @@ def correctDrift(drifted, correct_drifted_vars, correct=None,
     from matplotlib import pyplot as plt
     rwvars = correct_drifted_vars
     cors=[]
+    #----------------
+    # This options is activated if we provide a correct dataset from which to withdraw the correction parameters
     if get_fit:
         for slw, fst in rwvars.iteritems():
             slow=correct[slw]
             fast=drifted[fst]
+            #----------------
+            # Check to see if the frequency in both datasets are the same. Otherwise we are comparing different things
             try:
                 if pd.infer_freq(correct.index) == pd.infer_freq(drifted.index):
                     slow, fast = map(np.array, [slow, fast] )
@@ -467,6 +480,7 @@ def correctDrift(drifted, correct_drifted_vars, correct=None,
             except TypeError:
                 print 'Cannot determine if frequencies are the same. We will continue but you should check'
                 slow, fast = map(np.array, [slow, fast] )
+            #----------------
     
             #----------------
             # Does the 1D fitting filtering for NaN values (very important apparently)
@@ -476,19 +490,27 @@ def correctDrift(drifted, correct_drifted_vars, correct=None,
             if show_plot:
                 plt.title('{} vs {}'.format(fst, slw))
                 plt.plot(fast[idx], slow[idx], marker='o', linestyle='')
-                plt.plot(fast[idx], np.poly1d(coefs)(fast[idx]), '^-')
+                plt.plot(fast[idx], np.poly1d(coefs)(fast[idx]), '-', linewidth=2)
                 plt.show()
     
             correc=pd.DataFrame(columns=[ '{}_{}'.format(slw, fst) ], index=['angular', 'linear'], data=coefs).transpose()
             cors.append(correc)
         cors = pd.concat(cors, join='outer')
         print cors
+    #----------------
 
+        #----------------
+        # Writes the fir parameters in a file to be used later
         if write_fit:
             cors.index.name='correct_drifted'
             cors.to_csv(fit_file, index=True)
+        #----------------
+
+    #----------------
+    # If you do not want to correct from an existing correct dataset. A file with the parameters must be read
     else:
         cors=pd.read_csv(fit_file, index_col=0, header=0)
+    #----------------
 
     #------------
     # Applies the fit column by column
@@ -501,7 +523,10 @@ def correctDrift(drifted, correct_drifted_vars, correct=None,
         corrected=drifted.copy()
     #------------
 
+    #----------------
+    # The returning of the index idx is done mainly for checking purposes
     if return_index:
         return corrected, idx
     else:
         return corrected
+    #----------------
