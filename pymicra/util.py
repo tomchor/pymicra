@@ -504,6 +504,10 @@ def correctDrift(drifted, correct_drifted_vars, correct=None,
         if write_fit:
             cors.index.name='correct_drifted'
             cors.to_csv(fit_file, index=True)
+            if units:
+                with open(fit_file+'.units', 'wt') as fou:
+                    for key, item in units.iteritems():
+                        fou.write('{"%s":"%s"}\n' % (key,item))
         #----------------
 
     #----------------
