@@ -250,8 +250,11 @@ def phi(zeta, x=None):
             return (1. - 16.*zeta)**(-1./4.)
         else:
             return (1. - 16.*zeta)**(-1./2.)
-    if zeta>0:
-        return 1. + 5.*zeta
+    if zeta>=0:
+        if zeta<1.:
+            return 1. + 5.*zeta
+        if zeta>=1.:
+            return 6.
 
 
 def phi_c(zeta, x=None):
