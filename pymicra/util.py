@@ -74,7 +74,8 @@ def qcontrol(files, datalogger_config,
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
              summary='qcontrol_summary.csv'):
 
-    """Program that applies quality control to a set of datafiles
+    """
+    Program that applies quality control to a set of datafiles
 
     Parameters:
     -----------
@@ -262,10 +263,16 @@ def qcontrol(files, datalogger_config,
 
 def printUnit(string, mode='L', trim=True, greek=True):
     """
+    Returns string formatted for LaTeX or other uses.
+
     string: string
         string (unambiguous) that represents the unit
     mode: string
         {'L' : 'latex', 'P' : 'pretty', 'H' : 'html' }
+    trim: bool
+        if true it trims the output
+    greek: bool
+        yet to be implemented
     """
     try:
         from pint.unit import UnitRegistry
@@ -312,8 +319,8 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
         use this carefully. This concatenates the last few lines of a file to the first few lines
         of the next file in case they don't finish on a nice round time with respect to the frequency
 
-
-    ADD FIRST AND LAST LABELS TO PANDAS METHOD
+    Returns:
+    None
     """
     from os import path
     #-----------------------
@@ -455,6 +462,13 @@ def correctDrift(drifted, correct_drifted_vars, correct=None,
         where to write the linear fit (if one is written) or from where to read the linear fit (if no fit is written)
     apply_fit: bool
         whether of not to apply the lineat fit and correct the data (at least get_fit and fit_file must be true)
+    show_plot: bool
+        whether or not to show drifted vs correct plot, to see if it's a good fit
+    units: dict
+        if given, it creates a {file_file}.units file, to tell write down in which units data has to be in
+        order to be correctly corrected
+    return_index: bool
+        whether to return the indexes of the used points for the calculation. Serves to check the regression
 
     Returns:
     --------
