@@ -268,7 +268,10 @@ def phi_c(zeta, x=None):
             zeta = abs(zeta)
             return 2.*(1. + 9.5*zeta)**(-1./3.)
     else:
-        pass 
+        if x=='u':
+            return 1.25
+        else:
+            return 2. 
 
 
 def _Cx(x, za, zb, d, z0, Lm, Psif=None):
