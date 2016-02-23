@@ -583,9 +583,15 @@ def _xplot(self, xcol, reverse_x=False, xline=False, return_ax=False, **kwargs):
     #--------
 
     if return_ax:
-        return df.sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
+        try:
+            return df.sort_values(xcol, axis=0).plot(x=xcol, xlim=xlim, **kwargs)
+        except:
+            return df.sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
     else:
-        df.sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
+        try:
+            df.sort_values(xcol, axis=0).plot(x=xcol, xlim=xlim, **kwargs)
+        except:
+            df.sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
         return
 pd.DataFrame.xplot = _xplot
 #--------
