@@ -124,10 +124,6 @@ def get_scales(data, siteConst, notation_defs=None,
 
     Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity)
     zeta=MonObuSimVar(Lm, siteConst)
-    #if zeta<-10:
-    #    raw_input()
-    #else:
-    #    pass
 
     if output_as_df:
         namespace=locals()
