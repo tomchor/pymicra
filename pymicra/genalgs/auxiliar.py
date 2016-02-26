@@ -564,7 +564,7 @@ def find_nearest(array, value):
 
 #--------
 # Define xplot method for pandas dataframes
-def _xplot(self, xcol, reverse_x=False, xline=False, return_ax=False, **kwargs):
+def _xplot(self, xcol, reverse_x=False, xline=False, return_ax=False, fixed_cols=[], fcols_styles=[], **kwargs):
     df = self.copy()
 
     if reverse_x:
@@ -573,6 +573,7 @@ def _xplot(self, xcol, reverse_x=False, xline=False, return_ax=False, **kwargs):
         df = df.drop(xcol, axis=1)
         xcol = newx
 
+    subcols = df.columns.drop(fixed_cols)
     #--------
     # Checks for double xlim kwarg
     if kwargs.has_key('xlim'):
@@ -582,16 +583,33 @@ def _xplot(self, xcol, reverse_x=False, xline=False, return_ax=False, **kwargs):
         xlim=[df[xcol].min(), df[xcol].max()]
     #--------
 
+    #--------
+    # Here we actually plot the dataFrame
+    try:
+        axes = df[subcols].sort_values(xcol, axis=0).plot(x=xcol, xlim=xlim, **kwargs)
+    except:
+        axes = df[subcols].sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
+
+    #-------
+    # Plot the fixed cols in each of the subplots
+    if fixed_cols:
+        #-------
+        # The code wont work without style string
+        if len(fcols_styles) == len(fixed_cols):
+            pass
+        else:
+            fcols_styles = ['b-']*len(fixed_cols)
+        #-------
+
+        for fcol, fstyle in zip(fixed_cols, fcols_styles):
+            df2 = df.sort_values(fcol, axis=0)
+            for ax in axes[0]:
+                ax.plot(df2[xcol], df2[fcol], fstyle, label=xcol)
+    #-------
+
     if return_ax:
-        try:
-            return df.sort_values(xcol, axis=0).plot(x=xcol, xlim=xlim, **kwargs)
-        except:
-            return df.sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
+        return axes
     else:
-        try:
-            df.sort_values(xcol, axis=0).plot(x=xcol, xlim=xlim, **kwargs)
-        except:
-            df.sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
         return
 pd.DataFrame.xplot = _xplot
 #--------
