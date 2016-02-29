@@ -443,7 +443,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
 
 def correctDrift(drifted, correct_drifted_vars, correct=None,
                 get_fit=True, write_fit=True, fit_file='correctDrift_linfit.params',
-                apply_fit=True, show_plot=False, units={}, return_index=False):
+                apply_fit=True, show_plot=False, return_plot=False, units={}, return_index=False):
     """
     Parameters:
     -----------
@@ -505,7 +505,13 @@ def correctDrift(drifted, correct_drifted_vars, correct=None,
                 plt.title('{} vs {}'.format(fst, slw))
                 plt.plot(fast[idx], slow[idx], marker='o', linestyle='')
                 plt.plot(fast[idx], np.poly1d(coefs)(fast[idx]), '-', linewidth=2)
+                plt.xlabel(fst)
+                plt.ylabel(slw)
+                plt.grid(True)
+                fig = plt.gcf()
                 plt.show()
+                if return_plot:
+                    return fig
     
             correc=pd.DataFrame(columns=[ '{}_{}'.format(slw, fst) ], index=['angular', 'linear'], data=coefs).transpose()
             cors.append(correc)
@@ -514,7 +520,7 @@ def correctDrift(drifted, correct_drifted_vars, correct=None,
     #----------------
 
         #----------------
-        # Writes the fir parameters in a file to be used later
+        # Writes the fit parameters in a file to be used later
         if write_fit:
             cors.index.name='correct_drifted'
             cors.to_csv(fit_file, index=True)
