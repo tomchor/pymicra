@@ -117,20 +117,6 @@ def stripDown(str, final='', args=['_', '-']):
     return str
         
 
-def auxCov(data):
-    """
-    Auxiliar function to obtain covariances in a pandas.DataFrame
-
-    data: pandas.DataFrame, pandas.Series
-        the data whose covariance you want to obtain. Maximum number of columns is 2
-    """
-    colnum=len(data.columns)
-    if colnum<=2:
-        return np.mean( data.iloc[:, 0] * data.iloc[:,-1] )
-    else:
-        raise TypeError('Datset with more than two columns')
-
-
 def lenYear(year):
     """
     Calculates the length of a year in days
