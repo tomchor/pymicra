@@ -31,7 +31,6 @@ def MonObuSimVar(L_m, siteConst):
     z=siteConst.variables_height
     d=siteConst.displacement_height
     zeta = (z-d)/L_m
-    #print 'zeta', zeta
     return zeta
 
 
@@ -55,11 +54,7 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
     if g==None:
         g = constants.gravity
     kappa = constants.kappa
-    #print 'u*', u_star
-    #print 'theta_vm', theta_v_mean
-    #print 'theta_v*', theta_v_star
     Lm = - ( (u_star**2) * theta_v_mean) / (kappa *g* theta_v_star)
-#    print 'Lm', Lm
     return Lm
 
 
@@ -83,12 +78,15 @@ def get_scales(data, siteConst, notation_defs=None,
         True if you want the output to be a one-line pandas.DataFrame
 
     CHECKLIST:
-    ADD MIXED-LAYER CONVECTION SCALES FOR VELOCITY (w*) AND TEMPERATURE (t*)
+    ADD MIXED-LAYER CONVECTION SCALES FOR VELOCITY (w*) AND TEMPERATURE (t*) MAYBE
     """
     if notation_defs==None:
         defs=notation.get_notation()
     else:
         defs=notation_defs
+
+    #---------
+    # First we define the names of the columns according to notation
     flup, flus = defs.fluctuation_preffix, defs.fluctuation_suffix
     u       =   flup + defs.u + flus
     v       =   flup + defs.v + flus
@@ -100,31 +98,47 @@ def get_scales(data, siteConst, notation_defs=None,
     q           = defs.specific_humidity
     qfluct      = flup + defs.specific_humidity + flus
     solutesf    = [ flup + el + flus for el in solutes ]
+    #---------
+
+    #-----------
+    # Then we create the covariances matrix
+    cov = data[[u,w,theta_v_fluc, qfluct] + solutesf ].cov()
+    #-----------
     
-    u_star  = np.sqrt(-algs.auxCov( data[[u,w]] ))
+    #---------
+    # Now to calculate the characteristic lengths, scales and etc
+    u_star  = np.sqrt(-cov.loc[u,w])
     u_std   = data[u].std()
 
-    theta_v_star    = algs.auxCov( data[[theta_v_fluc,w]] )/u_star
+    theta_v_star    = cov.loc[theta_v_fluc, w] / u_star
     theta_v_mean    = data[theta_v].mean()
     theta_v_std     = data[theta_v].std()
 
-    q_star  = algs.auxCov( data[[qfluct,w]] ) / u_star
+    q_star  = cov.loc[qfluct,w] / u_star
     q_mean  = data[q].mean()
     q_std   = data[qfluct].std()
 
     c_stars =[]
     c_stds  =[]
+      #---------
+      # The solutes have to be calculated separately
     for c in solutesf:
-        c_stars.append( algs.auxCov( data[[c,w]] ) / u_star )
+        c_stars.append( cov.loc[c, w] / u_star )
         c_stds.append( data[c].std() )
-
+      #---------
     theta_mean=data[theta].mean()
     theta_std=data[theta].std()
     theta_star=(theta_v_star - 0.61*theta_mean*q_star)/(1.+0.61*q_mean)
+    #---------
 
+    #---------
+    # Now we calculate the obukhov length and the similarity variable
     Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=siteConst.constants.gravity)
     zeta=MonObuSimVar(Lm, siteConst)
+    #---------
 
+    #---------
+    # Finally we construct the output dataframe
     if output_as_df:
         namespace=locals()
         columns=['zeta', 'Lm', 'u_std', 'u_star', 'theta_v_std', 'theta_v_star', 'theta_std', 'theta_star', 'q_std', 'q_star']
@@ -139,6 +153,7 @@ def get_scales(data, siteConst, notation_defs=None,
         return out
     else:
         return zeta, Lm, (u_std, u_star), (theta_v_std, theta_v_star), (theta_std, theta_star), (q_std, q_star), (c_std, c_star)
+    #---------
 
 
 
