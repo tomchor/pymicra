@@ -73,13 +73,20 @@ def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
 def readDataFiles(flist, verbose=0, **kwargs):
     """
     Author: Tomas Chor
-    ** needs to be tested! **
+    Reads data from a list of files
 
-    -------------------------------------
+    Parameters:
+    -----------
+    flist: sequence of strings
+        files to be parsed
+    verbose: bool
+        whether to print
+    **kwargs:
+        readDataFile kwargs
 
-    * kwargs are readDataFile kwargs
-
-    * returns one pandas.DataFrame
+    Returns:
+    --------
+    data: pandas.DataFrame
     """
     if len(flist)==0:
         raise ValueError('Passed a list of files of zero length to be read.')
@@ -89,10 +96,10 @@ def readDataFiles(flist, verbose=0, **kwargs):
             print 'Reading',f
         subdata=readDataFile(f, **kwargs)
         dflist.append(subdata)
-    if verbose==1:
+    if verbose:
         print 'Concatenating DataFrames...'
     data=pd.concat(dflist, ignore_index=True)
-    if verbose==1:
+    if verbose:
         print 'Done!'
     return data
 
@@ -102,17 +109,17 @@ def readDataFiles(flist, verbose=0, **kwargs):
 class dataloggerConf(object):
     """
     This class defines a specific configuration of a datalogger output file
-    --------------------------
 
     Parameters:
     ----------
-
-    varNames: list of strings
-        should be a list of strings with the names of the variables. If the variable
+    varNames: list of strings or dict
+        If a list: should be a list of strings with the names of the variables. If the variable
         is part if the date, then it should be provided as a datetime directive,
         so if the columns is only the year, its name must be `%Y` and so forth. While
         if it is the date in YYYY/MM/DD format, it should be `%Y/%m/%d`. For more info
         see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
+        If a dict: the keys should be the numbers of the columns and the items should follow
+        the rules for a list.
 
     date_cols: list of strings
         should be the subset of varNames that corresponds to the variables that compose
@@ -123,7 +130,8 @@ class dataloggerConf(object):
         generally not really necessary. It is used to join and then parse the date_cols.
 
     columns_separator: string
-        used to assemble the date. Should only be used if the default char creates conflict.
+        used to assemble the date. Should only be used if the default char creates conflict. If
+        the file is tabular-separated then this should be "whitespace"
 
     header_lines: int
         up to which line of the file is a header. See pandas.read_csv header option.
@@ -138,7 +146,7 @@ class dataloggerConf(object):
         this is useful primarily for the quality control feature
 
     units: dictionary
-        very important: a dictionary whose key are the columns of the file and whose items are
+        very important: a dictionary whose keys are the columns of the file and whose items are
         the units in which they appear.
 
     description: string
@@ -157,15 +165,24 @@ class dataloggerConf(object):
             description='generic datalogger configuration file'):
         #-------------------------
         # Makes sure that units is a dictionary type
-        #-------------------------
         if units is not None:
             if not isinstance(units, dict):
                 raise TypeError('units should be a dictionary. Ex.: {"u" : "m/s", "v" : "m/s", "theta" : "K" }')
+        #-------------------------
+
         self.varNames=varNames
+        #-------------------------
+        # If date_cols is not provided, this will try to guess the date columns
+        # by assuming that no other columns has a % sign on their name
         if date_cols:
             self.date_cols=date_cols
-        else:    #tries to guess the date columns by assuming that no other columns has a % sign on their name
-            self.date_cols=[ el for el in varNames if '%' in el ]
+        else:
+            if type(varNames) == list:
+                self.date_cols = [ el for el in varNames if '%' in el ]
+            if type(varNames) == dict:
+                self.date_cols = { k : it for (k, it) in varNames.iteritems() if '%' in it }
+        #-------------------------
+
         self.frequency=frequency
         self.date_connector=date_connector
         self.columns_separator=columns_separator
