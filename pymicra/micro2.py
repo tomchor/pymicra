@@ -356,6 +356,8 @@ def Psi(zeta, x='tau', zeta0=0.):
     Integral Monin-Obukhov scale or deviation function, which is the deviation of a
     variable (x) in relation nto their logarithmic profiles due the stability zeta != 0
 
+    Taken from Simpson.ea1998--the.validity.of.similarity.theory;.in.the.roughness.sublayer
+
     Parameters:
     -----------
     zeta: float
