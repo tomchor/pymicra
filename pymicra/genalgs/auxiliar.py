@@ -375,7 +375,7 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
     return data
 
 
-def classbin(x, y, bins_number=100, function=np.mean, log_scale=True):
+def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscale=True):
     '''
     Separates x and y inputs into bins based on the x array.
     x and y do not have to be ordered.
@@ -390,13 +390,13 @@ def classbin(x, y, bins_number=100, function=np.mean, log_scale=True):
         number of classes (or bins) desired
     function: callable
         funtion to be applied to both x and y-bins in order to smooth the data
-    log_scale: boolean
+    logscale: boolean
         whether or not to use a log-spaced scale to set the bins
     '''
     import warnings
     xmin=np.min(x)
     xmax=np.max(x)
-    if log_scale:
+    if logscale:
         #-----------
         # The following if statement gets rid of negative or zero values in the x array, since we are using log-scale
         if (x<=0).any():
@@ -420,7 +420,7 @@ def classbin(x, y, bins_number=100, function=np.mean, log_scale=True):
                 sel = bins[i] <= x
             else:
                 sel = (bins[i] <= x) & (x < bins[i+1])
-            xsm[i] = function(x[sel])
+            xsm[i] = xfunction(x[sel])
             ysm[i] = function(y[sel])
     #-----------
     return xsm, ysm
