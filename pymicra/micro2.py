@@ -252,9 +252,17 @@ def eddyCov(data, wpl=True,
     return out
 
 
-def phi(zeta, x=None):
+def phi(zeta, x=None, C_unstable=None, C_stable=None):
     """
+    The nondimensional gradients, defined as:
+
+    phi_F(zeta) = kappa*(z-d)*dCdz/c_star
+    phi_H(zeta) = kappa*(z-d)*dTdz/T_star
+    phi_E(zeta) = kappa*(z-d)*dqdz/q_star
+
     Currently using Businger-Dyer eqs.
+
+    TODO: generalize coefficients
     """
     if zeta<0:
         if x=='tau':
