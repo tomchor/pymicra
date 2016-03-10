@@ -550,14 +550,57 @@ def find_nearest(array, value):
 
 #--------
 # Define xplot method for pandas dataframes
-def _xplot(self, xcol, reverse_x=False, xline=False, return_ax=False, fixed_cols=[], fcols_styles=[], **kwargs):
+def _xplot(self, xcol, reverse_x=False, return_ax=False, 
+            fixed_cols=[], fcols_styles=[], latexfy=False, **kwargs):
+    """
+    A smarter way to plot things with the x axis being one of the columns. Very useful for
+    comparison of models and results
+
+    Parameters:
+    -----------
+    xcol: str
+        the name of the column you want in the x axis
+    reverse_x: bool
+        whether to plot -xcol instead of xcol in the x-axis
+    return_ax: bool
+        whther to return pyplot's axis object for the plot
+    fixed_cols: list of strings
+        columns to plot in every subplot (only if you use subplot=True on keywords)
+    fcols_styles: list of string
+        styles to use for fixed_cols
+    latexfy: cool
+        whether to attempt to transform names of columns into latex format
+    **kwargs:
+        kwargs to poss to pandas.plot method
+
+    LATEXFY IS STILL BUGGY
+    """
     df = self.copy()
 
+    #-----------
+    # Try to display letters in the latex mathematical environment
+    if latexfy:
+        from ..constants import greek_alphabet
+        cols2 = []
+        for i, col in enumerate(df.columns):
+            cols2.append(col)
+            for code, letter in greek_alphabet.iteritems():
+                cols2[-1] = cols2[-1].replace(letter,code)
+            cols2[-1] = "$"+cols2[-1]+"$"
+        df.columns = cols2
+        for code, letter in greek_alphabet.iteritems():
+            xcol = xcol.replace(letter,code)
+        xcol = "$"+xcol+"$"
+    #-----------
+
+    #-----------
+    # If you want ti plot against -xcol instead of xcol (useful for log plots)
     if reverse_x:
         newx = '-'+str(xcol)
         df[newx] = -df[xcol]
         df = df.drop(xcol, axis=1)
         xcol = newx
+    #-----------
 
     subcols = df.columns.drop(fixed_cols)
     #--------
@@ -575,12 +618,13 @@ def _xplot(self, xcol, reverse_x=False, xline=False, return_ax=False, fixed_cols
         axes = df[subcols].sort_values(xcol, axis=0).plot(x=xcol, xlim=xlim, **kwargs)
     except:
         axes = df[subcols].sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
+    #--------
 
     #-------
     # Plot the fixed cols in each of the subplots
     if fixed_cols:
         #-------
-        # The code wont work without style string
+        # The code won't work without style string
         if len(fcols_styles) == len(fixed_cols):
             pass
         else:
