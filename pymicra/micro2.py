@@ -278,6 +278,10 @@ def phi(zeta, x=None, C_unstable=None, C_stable=None):
 
 def phi_c(zeta, x=None):
     """
+    The nondimensional standard deviation function, defined as:
+
+    phi_c(zeta) = sigma_c / c_star
+
     From zahn.ea
     """
     if zeta<0:
