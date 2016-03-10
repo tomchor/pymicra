@@ -72,7 +72,7 @@ def qcontrol(files, datalogger_config,
              trueverbose=False, falseverbose=False, falseshow=0, trueshow=0, 
              outdir='quality_controlled', date_format='"%Y-%m-%d %H:%M:%S.%f"',
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
-             summary='qcontrol_summary.csv'):
+             summary_file='qcontrol_summary.csv'):
 
     """
     Program that applies quality control to a set of datafiles
@@ -88,7 +88,6 @@ def qcontrol(files, datalogger_config,
     edate: str
         last date to be considered
 
-    TODO: WRITE FILE IN THE SAME FORMAT AS IT IS READ
     """
     from io import timeSeries
     from os.path import basename, join
@@ -121,6 +120,7 @@ def qcontrol(files, datalogger_config,
     #-------------------------------------
     # BEGINNING OF MAIN PROGRAM
     #-------------------------------------
+
     filename_format=datalogger_config.filename_format
     for filepath in files:
         print
@@ -249,15 +249,13 @@ def qcontrol(files, datalogger_config,
         fullfin[usedvars] = fin[usedvars]
         fullfin.to_csv(join( outdir, basename(filepath) ),
                    header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
-        #fin.to_csv(join( outdir, basename(filepath) ),
-                   #header=datalogger_config.header_lines, date_format=date_format, quoting=3, na_rep='NaN')
         #--------------------------------
     
     summary= {k: [len(v)] for k, v in numbers.items()}
     summary=pd.DataFrame({'numbers': map(len,numbers.values())}, index=numbers.keys())
     summary['percent']=summary['numbers']/summary.loc['total','numbers']
     print summary
-    summary.to_csv('qcontrol_summary.csv', na_rep='NaN')
+    summary.to_csv(summary_file, na_rep='NaN')
     return summary
  
 
