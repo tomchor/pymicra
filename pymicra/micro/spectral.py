@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import algs
+from ..genalgs import auxiliar as algs
 
 def hfc_Dias_ea_16(cross_spec, T):
     Co = cross_spec.apply(np.real)
@@ -11,6 +11,7 @@ def hfc_Dias_ea_16(cross_spec, T):
 def hfc_Massman_Ibrom_08(df):
     pass
     return
+
 
 def hfc_zeroQuad(slow_spec, freqs, T):
     """
@@ -33,7 +34,6 @@ def hfc_zeroQuad(slow_spec, freqs, T):
     """
     assert len(slow_spec)==len(freqs)
     return slow_spec*(1.0 + 4.*(np.pi**2.)*(freqs**2.) * (T**2.))
-
 
 
 def Ogive(df, no_nan=True):

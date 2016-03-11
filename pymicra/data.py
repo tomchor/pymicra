@@ -12,12 +12,13 @@ Modifications:
 
 
 """
-import algs
+from genalgs import algs
 import physics
 import pandas as pd
 import numpy as np
 
-def rotCoor(data, wind_vars=['u','v','w'], verbose=0):
+
+def rotCoor(data, wind_vars=['u','v','w'], notation_defs=None):
     """
     Rotates the coordinates of wind data
     ----------------------
@@ -31,47 +32,67 @@ def rotCoor(data, wind_vars=['u','v','w'], verbose=0):
     """
     from numpy import cos,sin,zeros,dot
     from math import atan2, sqrt
-    DC= np.zeros((3,3))
+
+    #-------
+    # Getting the names for u, v, w
+    if notation_defs==None:
+        defs=notation.get_notation()
+    else:
+        defs=notation_defs
+    #wind_vars = defs.u, defs.v, defs.w
+    #-------
+
+    #-------
+    # Definition of the coefficients used to created the rotation matrix
     wind_vec = data[wind_vars].mean().values
     m_u, m_v, m_w = wind_vec
     alpha = atan2(m_v,m_u)
     beta =-atan2(m_w, sqrt((m_u**2.)+(m_v**2.)))
-    if verbose:
-        print "alpha: ",alpha,"\nbeta: ",beta
-    # definition of rotation matrix
+    #-------
+
+    #-------
+    # Definition of rotation matrix
+    DC= np.zeros((3,3))
     DC[0,0],DC[0,1],DC[0,2] = np.cos(alpha)*np.cos(beta), np.cos(beta)*np.sin(alpha),-np.sin(beta)
     DC[1,0],DC[1,1],DC[1,2] =-np.sin(alpha)          , np.cos(alpha)          , 0.
     DC[2,0],DC[2,1],DC[2,2] = np.cos(alpha)*np.sin(beta), np.sin(alpha)*np.sin(beta), np.cos(beta)
-    if verbose:
-        print "Rotation matrix is:\n", DC
-    # application of rotation as a matrix product
+    #-------
+
+    #-------
+    # Application of rotation as a matrix product
     data[wind_vars] = np.dot(DC, data[wind_vars].values.T).T
+    #-------
+
     return data
 
 
 def trend(data, mode='moving average', rule=None, window=None, **kwargs):
     """
     Wrapper to return the trend given data. Can be achieved using a moving avg, block avg or polynomial fitting
-    -------------
 
     Parameters
     ----------
-
     data: pandas DataFrame 
-        the dataFrame to be rotated
+        the dataFrame to be trended
     mode: string
-        mode of average to apply. Currently {'moving', 'block'}.
+        mode of average to apply. Currently {'moving', 'block', 'linear'}.
     rule: string
         pandas offset string to define the block in the block average. Default is "10min".
+    window: pandas date offset string
+        if moving average is chosen, this tells us the window size
     """
     mode=mode.lower().replace('_',' ').replace('-','').replace(' ','')
     if any(w==mode for w in ['moving', 'movingaverage']):
+        #-------
         # performs moving average on the data with window equivalent to the rule
         if window==None:
             print('warning: approximating window size for moving average')
             window=int(len(data)/len(data.resample(rule)))
         return pd.rolling_mean(data, window=window, **kwargs)
+        #-------
+
     elif any(w==mode for w in ['block', 'blockaverage']):
+        #-------
         # performs block average on the data with the window being the rule. Assumes that frequency is constant
         if rule==None:
             return data.apply(lambda x: [np.mean(x)]*len(x), axis=0)
@@ -79,13 +100,19 @@ def trend(data, mode='moving average', rule=None, window=None, **kwargs):
             print 'Warning. Might be bugged. Check results.'
             freq=data.index.inferred_freq
             return data.resample(rule, how='mean', **kwargs).resample(freq, fill_method='pad')
+        #-------
+
     elif any(w in mode for w in ['linear', 'polynomial', 'fit']):
+        #-------
         # performs a polynomial fit on the data in blocks of "rule"
-        #from algs import fitByDate
         return algs.fitByDate(data, rule=rule, **kwargs)
+        #-------
+
     else:
+        #-------
         # if no mode can be identified
         raise KeyError('Mode defined is not correct. Options are "moving" and "block".')
+        #-------
 
 def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
     """
@@ -93,9 +120,8 @@ def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
 
     Parameters
     ----------
-
     data: pandas.DataFrame, pandas.Series
-
+        dataset to be detrended
     mode: string
         what method to use in order to identify the trend
     rule: pandas offset string
@@ -103,16 +129,19 @@ def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
     suffix: string
         suffix to add to variable names after fluctuation is extracted
     """
-    #from algs import stripDown
     from scipy import signal
     mode=algs.stripDown(mode.lower(), args='-_')
     df=data.copy()
+
     if mode=='linear' or mode=='constant':
         df=df.apply(signal.detrend, axis=0, type=mode)
+
     elif mode=='block':
         df=df.apply(signal.detrend, axis=0, type='constant')
+
     else:
         df=df-trend(df, mode=mode, rule=rule, **kwargs)
+
     return df.add_suffix(suffix)
 
 
@@ -122,13 +151,18 @@ def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency', anti_ali
 
     Parameters
     ----------
-
     data: pandas.DataFrame
         dataframe with one (will return the spectrum) or two (will return to cross-spectrum) columns
     frequency: float
         frequency of measurement of signal to pass to numpy.fft.rfftfreq
     T_minutes: float
-        period in minutes
+        period in minutes (currently not used)
+    out_index: str
+        only accepting 'frequency' as keyword
+    anti_aliasing: bool
+        not working at the moment
+    outname: str
+        name of the output column
     """
     T=T_minutes*60.     # convert from minutes to seconds
     N = len(data)
@@ -139,34 +173,53 @@ def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency', anti_ali
         elif len(data.columns)==2:
             co=True
         else:
-            raise Exception('Too many columns of data. Chose one (spectrum) or two (cross-spectrum')
+            raise Exception('Too many columns of data. Chose one (spectrum) or two (cross-spectrum)')
     else:
         raise Exception('Input has to be pandas.DataFrame')
 
     cols=list(data.columns)
+    #---------
+    # This works if there's two columns or just one column
     spec = np.fft.rfft(data.iloc[:,0])
     spec = np.conj(spec)*np.fft.rfft(data.iloc[:,-1])
+    #---------
+
+    #---------
+    # Now we normalize the spectrum and calculate their frequency
     spec*= 2./(frequency*N)
     freq = np.fft.rfftfreq(len(data), d=1./frequency)
+    #---------
+
+    #---------
+    # names it cross-spectrum for cross-spectrum or spectrum
     if co:
         varname='cross-spectrum_{}_{}'.format(*cols)
-#        corr=np.correlate(data.iloc[:,0], data.iloc[:,-1], mode='same')
-#        spec=(2./T)*np.fft.rfft(corr)
     else:
         varname='spectrum_{}'.format(cols[0])
+    #---------
 
+    #---------
     if varname != None:
         varname = outname
+    #---------
 
     if out_index=='frequency':
         aux=pd.DataFrame( data={ varname : spec }, index=freq )
         aux.index.name='frequencies'
     else:
         raise NameError
+
     return aux
 
 
 def bulkCorr(data):
+    """
+    Bulk correlation coefficient according to
+    Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
+    doi:10.1029/2012WR012127
+
+    NEEDS TO BE ADAPTED FOR DATAFRAMES
+    """
     if type(data)==pd.DataFrame:
         a,b=data.columns
         a,b=data[a], data[b]

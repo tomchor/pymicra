@@ -15,7 +15,7 @@ TO DO LIST:
 from constants import *
 from datetime import timedelta
 
-def gradients(data, levels, order='Crescent'):
+def _gradients(data, levels, order='Crescent'):
     """
     Calculates the gradients for data considering the levels provided.
     UNDER DEVELOPMENT
@@ -196,3 +196,11 @@ def R_umidAir(q):
     """
     return q* R_spec['h2o'] + (1.0 - q)*R_spec['dry_air']
 
+def dewPointTemp(theta, e):
+    """
+    Calculates the dew point temperature.
+    theta has to be in Kelvin and e in kPa
+    """
+    ln = np.log(e / 0.611)
+    coef = ln / (17.502 - ln)
+    return 240.97*coef + 273.16
