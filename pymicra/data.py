@@ -12,7 +12,7 @@ Modifications:
 
 
 """
-from genalgs import algs
+from genalgs import auxiliar as algs
 import physics
 import pandas as pd
 import numpy as np

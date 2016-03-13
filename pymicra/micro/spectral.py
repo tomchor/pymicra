@@ -3,6 +3,16 @@ import pandas as pd
 from ..genalgs import auxiliar as algs
 
 def hfc_Dias_ea_16(cross_spec, T):
+    """
+    Applies correction to high frequencies using the quadrature
+
+    Parameters:
+    -----------
+    cross_spec: series of dataframe
+        the cross spectrum whose coespectrum you'd like to correct
+    T: float
+        response time to use
+    """
     Co = cross_spec.apply(np.real)
     Qu = cross_spec.apply(np.imag)
     n = np.array(cross_spec.index)
@@ -20,10 +30,10 @@ def hfc_zeroQuad(slow_spec, freqs, T):
 
     Parameters:
     -----------
+    slow_spec: numpy.array or series
+        the spectrum to be corrected (not cross-spectrum!)
     freqs: numpy.array
         frequencies
-    slow_spec: numpy.array
-        the spectrum
     T: float
         the response-time
 
@@ -39,6 +49,11 @@ def hfc_zeroQuad(slow_spec, freqs, T):
 def Ogive(df, no_nan=True):
     """
     Integrates the Ogive from Coespectra
+
+    Parameters:
+    -----------
+    df: dataframe
+        cospectrum to be integrated
     """
     import scipy as sp
     if no_nan:

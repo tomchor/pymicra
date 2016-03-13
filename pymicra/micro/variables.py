@@ -188,13 +188,17 @@ def eddyCov(data, wpl=True,
     """
     cp=constants.cp_dry
 
+    #---------
+    # Define useful notation to look for
     if notation_defs==None:
         defs=notation.get_notation()
     else:
         defs=notation_defs
-
     stap, stas = defs.star_preffix, defs.star_suffix
+    #---------
 
+    #---------
+        # Define name of variables to look for based on the notation
     p           =   defs.pressure
     theta_mean  =   defs.mean_preffix + defs.thermodyn_temp + defs.mean_suffix
     theta_v     =   defs.virtual_temp
@@ -202,7 +206,10 @@ def eddyCov(data, wpl=True,
     theta_v_star=   stap + defs.virtual_temp + stas
     u_star      =   stap + defs.u + stas
     q_star      =   stap + defs.specific_humidity + stas
+    #---------
 
+    #---------
+    # Define auxiliar variables
     mu=constants.R_spec['h2o']/constants.R_spec['dry']
     rho_mean=data['rho_air_mean']
     rho_h2o_mean=data['rho_h2o_mean']
@@ -211,7 +218,10 @@ def eddyCov(data, wpl=True,
     c_stars = []
     for solute in solutes:
         c_stars.append( stap + solute + stas )
+    #---------
 
+    #---------
+    # Calculate the fluxes
     out=pd.DataFrame(index=data.index)
     out['tau']=rho_mean* ( data[u_star]**2.)
     out['H'] = rho_mean* cp* data[u_star]* data[theta_star]
@@ -219,6 +229,7 @@ def eddyCov(data, wpl=True,
     out['E'] = rho_mean* data[u_star]* data[q_star]
     for solute, c_star in zip(solutes, c_stars):
         out[ 'F_{}'.format(solute) ] =  rho_mean* data[u_star]* data[c_star]
+    #---------
 
     #------------------------
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
@@ -233,7 +244,6 @@ def eddyCov(data, wpl=True,
                 mu*rc*out['E']
     #------------------------
     return out
-
 
 
 

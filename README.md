@@ -1,6 +1,6 @@
 # PyMicrA - Python Micrometeorological Analysis tool
 
-This package was designed at Lemma, at the Federal University of Parana (UFPR), to make it easier to work with micrometeorological data. Pymicra is currently fully writen in python and it's aimed towards agregating all of the functionality commonly needed to process, read, and extract fluxes and etc from micrometeorological data. This leaves Pandas in charge of the optimization. In a near future we will also focus on our own kinds of optimization.
+This package was designed to make it easier to work with micrometeorological data. Pymicra is currently fully writen in python and it's aimed towards agregating all of the commonly needed functionality to read, process and analyse data, extract fluxes and etc from micrometeorological data. The package is extensivaly based on Pandas, which itself is based on Numpy.
 
 
 *This package is still under construction. More will come soon.*
@@ -13,9 +13,9 @@ This package was designed at Lemma, at the Federal University of Parana (UFPR), 
 This package is licensed under GNU General Public License V3.0 (http://choosealicense.com/licenses/gpl-3.0/)
 
 ## Main Features
-Currently, this is what pymicra does:
+Currently, this is a sum up of what pymicra does:
 
-  - Reading and understanding micrometeorological data in virtually any column-separated ASCII format (thanks to pandas).
+  - Reading, separating and understanding micrometeorological data in virtually any column-separated ASCII format (thanks to pandas).
   - Quality control methods (max and min values check, spikes, reverse-arrangement test and etc).
   - Rotation of coordinates (2D).
   - Detrending of data in the most common ways (block averages, moving averages and polynominal detrending).
@@ -47,10 +47,19 @@ So that, in the Pymicra standard notation, the Reynolds decomposition is written
 
     a = a_mean + a'
 
-The standard notation for commo variables is 
+The standard notation for common meteorological variables is 
  - thermodynamic temperature: [theta] 
  - virtual temperature: [theta\_v]
  - pressure: [p]
+
+The standard notation for micrometeorological variables currently is
+ - Monin-Obukhov similarity variable: [zeta]
+ - Monin-Obukhov length: [L\_m]
+ - momentum flux: [tau]
+ - sensible heat flux: [H]
+ - virtual sensible heat flux: [Hv]
+ - latent heat flux: [E]
+ - solute s flux: [F\_s]
 
 Some examples of names of variables following the standard notation are (description - [variable name in pymicra]):
  - u fluctuations: [u']
