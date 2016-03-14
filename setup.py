@@ -21,6 +21,9 @@ except ImportError:
 #-----------
 # Being sure to find every submodule within pymicra and set up the kwargs
 packages = find_packages()
+#-----------
+
+#-----------
 if _has_setuptools:
     extra_kwargs={'install_requires' : dependencies}
 else:
