@@ -8,7 +8,7 @@ Modifications:
 
 """
 import pandas as pd
-import algs
+from genalgs import auxiliar as algs
 
 #-------------------------------------------
 #-------------------------------------------

@@ -8,7 +8,7 @@ TODO LIST
 -INCLUDE DECODIFICAION OF DATA
 
 """
-import algs
+from genalgs import auxiliar as algs
 import data
 import io
 import pandas as pd
