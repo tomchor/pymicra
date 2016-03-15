@@ -258,6 +258,32 @@ def read_dlc(dlcfile):
     return dataloggerConf(**dlcvars)
 
 
+
+def read_site(sitefile):
+    """
+    Reads .site configuration file, which holds siteConstants definitions
+
+    The .site should have definitions as regular python syntax (in meters!):
+        variables_height    = 10
+        canopy_height       = 5
+        displacement_height = 3
+        z0                  = 1.0
+
+    """
+    from micro.variables import siteConstants
+    globs={}
+    sitevars={}
+    try:
+        execfile(sitefile, globs, sitevars)
+    except NameError:
+        print '''This version of python does not have an execfile function. This workaround should work but is yet to be fully tested'''
+        with open(sitefile) as f:
+            code=compile(f.read(), sitefile, 'exec')
+            exec(code, globs, sitevars)
+    return siteConstants(**sitevars)
+
+
+
 def readUnitsCsv(filename, names=0, units=1, **kwargs):
     """
     Reads a csv file in which the first line is the name of the variables
