@@ -316,7 +316,6 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
         list of columns that need to be padded with zeroes
     """
     from datetime import timedelta,datetime
-    from ..algs import completeHM
     #------------------------------------
     # joins the names of the columns, which must match the datetime directive (see __doc__)
     #------------------------------------

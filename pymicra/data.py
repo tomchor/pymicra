@@ -16,7 +16,7 @@ from genalgs import auxiliar as algs
 import physics
 import pandas as pd
 import numpy as np
-
+import notation
 
 def rotCoor(data, wind_vars=['u','v','w'], notation_defs=None):
     """
