@@ -27,7 +27,7 @@ def phi_c(zeta, x=None):
     From zahn.ea
     """
     if zeta<0:
-        if x=='u':
+        if x=='u' or x=='w':
             return 1.25*(1. - 3.*zeta)**(1./3.)
         else:
             zeta = abs(zeta)
