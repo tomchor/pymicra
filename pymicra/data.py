@@ -221,9 +221,8 @@ def bulkCorr(data):
     """
     a, b = data.columns
     cov = data.cov()
-    #a, b = data.iloc[:, 0], data.iloc[:,-1]
-    r = cov[a,b]
-    r = r / (np.sqrt(cov[a,a])*np.sqrt(cov[b,b]))
+    r = cov.loc[a,b]
+    r = r / (np.sqrt(cov.loc[a,a])*np.sqrt(cov.loc[b,b]))
     return r
 
 

@@ -106,21 +106,47 @@ def ste(data, w_fluctuations="w'"):
     according to Cancelli, Dias, Chamecki. Dimensionless criteria for the production-dissipation equilibrium
     of scalar fluctuations and their implications for scalar similarity, Water Resources Research, 2012
 
-    NEEDS TO BE VALIDATED!
+    Parameters:
+    -----------
+    data: pandas dataframe
+        a three-columns dataframe, where one of them should be the vertical velocity fluctuations
+    w_fluctuations: str
+        the name of the vertical velocity fluctuations
     """
-    from data import bulkCorr
-    wcol=w_fluctuations
+    from ..data import bulkCorr
+    w=w_fluctuations
     df=data.copy()
-    w=df[wcol]
-    df=df.drop(wcol, axis=1)
-    a,b=df.columns
-    a,b=df[a],df[b]
-    rwa=bulkCorr([w,a])
-    rwb=bulkCorr([w,b])
+    if False:
+        w=df[w]
+        df=df.drop(wcol, axis=1)
+        a,b=df.columns
+        a,b=df[a],df[b]
+        rwa=bulkCorr([w,a])
+        rwb=bulkCorr([w,b])
+    else:
+        a, b = df.columns.drop(w)
+        rwa=bulkCorr(df[[w,a]])
+        rwb=bulkCorr(df[[w,b]])
     rwa=np.abs(rwa)
     rwb=np.abs(rwb)
     return 1. - np.abs( rwa - rwb )/( rwa + rwb )
  
+
+def rte(data, w_fluctuations="w'"):
+    """
+    Returns the Relative Transfer Efficiency in the time domain, rte
+    according to Cancelli, Dias, Chamecki. Dimensionless criteria for the production-dissipation equilibrium
+    of scalar fluctuations and their implications for scalar similarity, Water Resources Research, 2012
+
+    NEEDS TO BE VALIDATED!
+    """
+    from ..data import bulkCorr
+    wcol=w_fluctuations
+    df=data.copy()
+    a, b = df.columns.drop(wcol)
+    rwa=bulkCorr(data[[w,a]])
+    rwb=bulkCorr(data[[w,b]])
+    return rwa/rwb
 
 
 
