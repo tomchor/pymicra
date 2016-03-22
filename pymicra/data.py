@@ -218,6 +218,21 @@ def bulkCorr(data):
     Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
     doi:10.1029/2012WR012127
 
+    """
+    a, b = data.columns
+    cov = data.cov()
+    #a, b = data.iloc[:, 0], data.iloc[:,-1]
+    r = cov[a,b]
+    r = r / (np.sqrt(cov[a,a])*np.sqrt(cov[b,b]))
+    return r
+
+
+def bulkCorr2(data):
+    """
+    Bulk correlation coefficient according to
+    Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
+    doi:10.1029/2012WR012127
+
     NEEDS TO BE ADAPTED FOR DATAFRAMES
     """
     if type(data)==pd.DataFrame:
