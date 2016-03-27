@@ -1,8 +1,6 @@
 #!/usr/bin/python
 """
-Author: Tomas Chor
-
-Defines some useful constants for physical calculations
+Defines some useful constants
 """
 units={}    # creates units dictionary so it can be updated everytime a constant is added
 

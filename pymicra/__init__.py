@@ -15,7 +15,6 @@ from data import *
 
 import io
 import physics
-#import algs
 import util
 import constants
 import notation
