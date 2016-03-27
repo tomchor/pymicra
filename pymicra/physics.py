@@ -76,13 +76,21 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
     """
     from math import pi,sin,cos,acos,radians,degrees
     from calendar import isleap
+    #----------
+    # Finds out which is the day of the solstice for that year and puts it into dr variable
     if dr==None:
         from constants import sumsolstice
         dr=sumsolstice[date.year].timetuple().tm_yday
-    if isleap(date.year):   # checks if its a leapyear
+    #----------
+
+    #------------
+    # Checks if it's a leapyear and defines the da (days in year)
+    if isleap(date.year):
         da=366
     else:
         da=365
+    #------------
+
     tt=date.timetuple()
     j_day=tt.tm_yday
     gamma = 2.*pi/365.*(j_day - 1.)
@@ -94,6 +102,9 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
     Hsv = solar_date.hour + solar_date.minute/60. + solar_date.second/3600.
     h = 2.*pi/24.*(Hsv - 12.)
     zen_ang = degrees(acos(sin(radians(lat))*sin(delta) + cos(radians(lat))*cos(delta)*cos(h)))
+
+    #----------
+    # If negative==True then the angles before noon will be negative
     if negative:
         if solar_date.hour<=12:
             return zen_ang
@@ -101,6 +112,7 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
             return -zen_ang
     else:
         return zen_ang
+    #----------
 
 def CtoK(T):
     """

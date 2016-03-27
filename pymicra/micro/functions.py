@@ -17,6 +17,8 @@ http://www.licor.com/env/help/EddyPro3/Content/Topics/Calculating_Micromet_Varia
 import numpy as np
 from .. import notation
 
+def nondimensionalSTD(zeta, **kwargs):
+    return phi_c(zeta, **kwargs)
 
 def phi_c(zeta, x=None):
     """
@@ -30,8 +32,7 @@ def phi_c(zeta, x=None):
         if x=='u' or x=='w':
             return 1.25*(1. - 3.*zeta)**(1./3.)
         else:
-            zeta = abs(zeta)
-            return 2.*(1. + 9.5*zeta)**(-1./3.)
+            return 2.*(1. - 9.5*zeta)**(-1./3.)
     else:
         if x=='u' or x=='w':
             return 1.25
@@ -39,6 +40,8 @@ def phi_c(zeta, x=None):
             return 2. 
 
 
+def nondimensionalGrads(zeta, **kwargs):
+    return phi(zeta, **kwargs)
 
 
 def phi(zeta, x=None, C_unstable=None, C_stable=None):
@@ -132,18 +135,26 @@ def ste(data, w_fluctuations="w'"):
     return 1. - np.abs( rwa - rwb )/( rwa + rwb )
  
 
-def rte(data, w_fluctuations="w'"):
+def rte(data, w_fluctuations="w'", order=None):
     """
     Returns the Relative Transfer Efficiency in the time domain, rte
     according to Cancelli, Dias, Chamecki. Dimensionless criteria for the production-dissipation equilibrium
     of scalar fluctuations and their implications for scalar similarity, Water Resources Research, 2012
+
+    Parameters:
+    -----------
+    order: 2-elements list
+        order of variables: if its rte_ab should be [a,b], if its rte_ba should [b,a]
 
     NEEDS TO BE VALIDATED!
     """
     from ..data import bulkCorr
     wcol=w_fluctuations
     df=data.copy()
-    a, b = df.columns.drop(wcol)
+    if order:
+        a, b = order
+    else:
+        a, b = df.columns.drop(wcol)
     rwa=bulkCorr(data[[w,a]])
     rwb=bulkCorr(data[[w,b]])
     return rwa/rwb

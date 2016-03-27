@@ -53,7 +53,7 @@ The standard notation for common meteorological variables is
 
 The standard notation for micrometeorological variables currently is
  - Monin-Obukhov similarity variable: [zeta]
- - Monin-Obukhov length: [L\_m]
+ - Monin-Obukhov length: [Lm]
  - momentum flux: [tau]
  - sensible heat flux: [H]
  - virtual sensible heat flux: [Hv]

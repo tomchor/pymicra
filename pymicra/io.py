@@ -364,6 +364,10 @@ def get_printable(data, units, to_tex_cols=True, to_tex_units=True):
 
 
 def write_as_dlc(df, dlc):
+    """
+    Still to be writen:
+    should write a DataFrame in the exact format described by a dataloggerConfiguration object
+    """
     cols=dlc.columns
     df = df[ cols ]
 
