@@ -40,7 +40,10 @@ def phi_c(zeta, x=None):
             return 2. 
 
 
-def nondimensionalGrads(zeta, **kwargs):
+def nondimensionalGrad(zeta, **kwargs):
+    """
+    Redirects to phi, but is preferred
+    """
     return phi(zeta, **kwargs)
 
 
