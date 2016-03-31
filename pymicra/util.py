@@ -477,7 +477,7 @@ def correctDrift(drifted, correct_drifted_vars, correct=None,
     rwvars = correct_drifted_vars
     cors=[]
     #----------------
-    # This options is activated if we provide a correct dataset from which to withdraw the correction parameters
+    # This option is activated if we provide a correct dataset from which to withdraw the correction parameters
     if get_fit:
         for slw, fst in rwvars.iteritems():
             slow=correct[slw]
