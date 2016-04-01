@@ -9,6 +9,7 @@ This module works with micrometeorological data using pandas, numpy, datetime an
 -------------------------
 
 TO-DO LIST
+add direct EddyCov method (without stars)
 
 Maybe add all these variables that EddyPro calculates:
 http://www.licor.com/env/help/EddyPro3/Content/Topics/Calculating_Micromet_Variables.htm
@@ -268,7 +269,6 @@ class siteConstants(object):
     def __init__(self, variables_height, canopy_height,
              displacement_height=None, z0=None, description=None):
 
-        #self.constants=constants
         self.description=description
         self.variables_height = variables_height    #meters
         self.canopy_height = canopy_height          #meters
