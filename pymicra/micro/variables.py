@@ -211,7 +211,6 @@ def eddyCov(data, wpl=True,
 
     #---------
     # Define auxiliar variables
-    mu=constants.R_spec['h2o']/constants.R_spec['dry']
     rho_mean=data['rho_air_mean']
     rho_h2o_mean=data['rho_h2o_mean']
     rho_co2_mean=data['rho_co2_mean']
@@ -230,6 +229,110 @@ def eddyCov(data, wpl=True,
     out['E'] = rho_mean* data[u_star]* data[q_star]
     for solute, c_star in zip(solutes, c_stars):
         out[ 'F_{}'.format(solute) ] =  rho_mean* data[u_star]* data[c_star]
+    #---------
+
+    #------------------------
+    # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
+    if wpl:
+        mu=constants.R_spec['h2o']/constants.R_spec['dry']
+        rv=rho_h2o_mean/rho_dry_mean
+        rc=rho_co2_mean/rho_dry_mean
+        out['E'] = (1. +mu*rv)*( out['E'] + rho_h2o_mean * (data[theta_star]*data[u_star]/data[theta_mean]) )
+        for solute, c_star in zip(solutes, c_stars):
+            out[ 'F_{}'.format(solute) ] = \
+                out[ 'F_{}'.format(solute) ] + \
+                rho_co2_mean*(1. + mu*rv)*(data[theta_star]*data[u_star])/data[theta_mean] + \
+                mu*rc*out['E']
+    #------------------------
+    return out
+
+
+
+def eddyCov2(data, wpl=True,
+        notation2_defs=None, solutes=[]):
+    """
+    Get fluxes according to characteristic lengths
+    
+    WARNING! If using wpl=True, be sure that all masses are consistent!
+        For example, if q = [g/g], rho_h2o = [g/m3] and rho_co2 = [g/m3] and so on.
+        Avoid mixing kg/m3 with g/m3 (e.g. for co2 and h2o) and mg/kg with g/g (e.g. for
+        co2 and h2o).
+
+    TODO: add support for pint units
+
+    Parameters:
+    -----------
+    data: pandas.DataFrame
+        dataframe with the characteristic lengths calculated
+    notation_defs: pymicra.notation
+        object that holds the notation used in the dataframe
+    wpl: boolean
+        whether or not to apply WPL correction on the latent heat flux and solutes flux
+    solutes: list
+        list that holds every solute considered for flux
+    """
+    cp=constants.cp_dry
+
+    #---------
+    # Define useful notation to look for
+    if notation2_defs==None:
+        defs=notation.get_notation2()
+    else:
+        defs=notation_defs2
+    fluct = defs.fluctuation
+    mean = defs.mean
+    #---------
+
+    #---------
+    # Define name of variables to look for based on the notation
+    u               =   fluct % defs.u
+    w               =   fluct % defs.w
+    p               =   defs.pressure
+    q_fluc          =   fluct % defs.specific_humidity
+    theta_mean      =   mean % defs.thermodyn_temp
+    theta_v_fluc    =   fluct % defs.virtual_temp
+    solutesf        = [ fluct % solute for solute in solutes ]
+    #---------
+
+    #---------
+    # Now we try to calculate or identify the fluctuations of theta
+    try:
+        theta_fluc  =   fluct % defs.thermodyn_temp
+    except:
+        #---------
+        # We need the mean of the specific humidity
+        try:
+            data_q_mean  =   data[ mean % defs.specific_humidity ]
+        except:
+            data_q_mean  =   data[ defs.specific_humidity ].mean()
+        #---------
+
+        data_theta_fluc  =   ( data[theta_v_fluc] - 0.61*data[theta_mean]*data[q_fluc])/(1.+0.61*data_q_mean)
+    #---------
+
+    #---------
+    # First we construct the covariance matrix
+    cov = data[[u,w,theta_v_fluc, q_fluc] + solutesf ].cov()
+    #---------
+
+    #---------
+    # Define auxiliar variables
+    mu=constants.R_spec['h2o']/constants.R_spec['dry']
+    rho_air_mean    =   defs.mean % defs.density % defs.moist_air
+    rho_h2o_mean    =   defs.mean % defs.density % defs.h2o
+    rho_co2_mean    =   defs.mean % defs.density % defs.co2
+    rho_dry_mean    =   defs.mean % defs.density % defs.dry_air
+    #---------
+
+    #---------
+    # Calculate the fluxes
+    out=pd.DataFrame(index=data.index)
+    out['tau']  = rho_air_mean* cov[u, w]
+    out['H']    = rho_air_mean* cp* cov[theta_fluc, w]
+    out['Hv']   = rho_air_mean* cp* cov[theta_v_fluc, w]
+    out['E']    = rho_air_mean* cov[q_fluc, w]
+    for solute, solutef in zip(solutes, solutesf):
+        out[ 'F_{}'.format(solute) ] =  rho_air_mean* cov[solutef, w]
     #---------
 
     #------------------------
