@@ -114,6 +114,15 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
         return zen_ang
     #----------
 
+def latent_heat_water(T):
+    """
+    Calculates the latent heat of evaporation for water
+
+    Receives T in Kelvin and returns the latent heat in J/g
+    """
+    return 2500.827 -2.360*(T-273.15)
+
+
 def CtoK(T):
     """
     Return temp in Kelvin given temp T in Celsius

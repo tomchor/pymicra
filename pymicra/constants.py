@@ -26,7 +26,6 @@ for key, val in molar_mass.iteritems():
     R_spec.update( {key : R/val} )
 units.update({'R_spec' : 'J/(g * K)'})
 
-#mu=R_spec['dry']/R_spec['h2o']
 units.update({'mu':'1'})
 
 cp_dry=1.0035  # specific heat of dry air at constant pressure
@@ -35,6 +34,8 @@ units.update({'cp_dry' : 'J/(g * K)'})
 cp_h2o=4.1813  # specific heat of water vapor at constant pressure
 units.update({'cp_water' : 'J/(g * K)'})
 
+from physics import latent_heat_water
+units.update({'latent_heat_water' : 'J/g'})
 #---------------------------------------
 # physical constants
 #---------------------------------------
