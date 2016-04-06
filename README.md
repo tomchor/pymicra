@@ -57,7 +57,8 @@ The standard notation for micrometeorological variables currently is
  - momentum flux: [tau]
  - sensible heat flux: [H]
  - virtual sensible heat flux: [Hv]
- - latent heat flux: [E]
+ - water vapor flux: [E]
+ - latent heat flux: [LE]
  - solute s flux: [F\_s]
 
 Some examples of names of variables following the standard notation are (description - [variable name in pymicra]):

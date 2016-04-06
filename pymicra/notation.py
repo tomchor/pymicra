@@ -34,31 +34,25 @@ class get_notation2:
     momentum_flux = 'tau'
     sensible_heat_flux = 'H'
     virtual_sensible_heat_flux = 'Hv'
-    latent_heat_flux = 'E'
+    water_vapor_flux = 'E'
+    latent_heat_flux = 'LE'
     flux_of = 'F_%s'
 
 class get_notation:
     mean_preffix=''
     mean_suffix='_mean'
-    
     fluctuation_preffix=""
     fluctuation_suffix="'"
-    
     star_preffix=''
     star_suffix='_star'
-    
     concentration_preffix='conc_'
     concentration_suffix=''
-    
     density_preffix='rho_'
     density_suffix=''
-    
     molar_density_preffix='mrho_'
     molar_density_suffix=''
-    
     mixing_ratio_preffix='r_'
     mixing_ratio_suffix=''
-    
 
     u='u'
     v='v'
@@ -81,5 +75,6 @@ class get_notation:
     momentum_flux = 'tau'
     sensible_heat_flux = 'H'
     virtual_sensible_heat_flux = 'Hv'
-    latent_heat_flux = 'E'
+    water_vapor_flux = 'E'
+    latent_heat_flux = 'LE'
     solute_flux = 'F_{}'
