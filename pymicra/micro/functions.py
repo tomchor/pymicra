@@ -232,5 +232,3 @@ def _auxLogMinPsi(z_i, d, z0, Psi, Lm):
     return a-b
 
 
-
-

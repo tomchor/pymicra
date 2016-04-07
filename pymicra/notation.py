@@ -5,6 +5,17 @@ This module sets the default notation options in pymicra
 
 
 class get_notation2:
+    """
+    This creates an object that holds the default notation for pymicra.
+    Example of usage:
+
+    notation = get_notation()
+
+    fluctuation_of_co2_conc = notation.concentration % notation.fluctuation % notation.co2
+
+    You should be careful with the order. The last argument should not have any '%' symbols
+    or you'll get a "TypeError: not all arguments converted during string formatting" message.
+    """
     mean='%s_mean'
     fluctuation="%s'"
     star='%s_star'

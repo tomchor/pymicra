@@ -36,6 +36,9 @@ units.update({'cp_water' : 'J/(g * K)'})
 
 from physics import latent_heat_water
 units.update({'latent_heat_water' : 'J/g'})
+
+from physics import satWaterPressure
+units['satWaterPressure'] = 'kPa'
 #---------------------------------------
 # physical constants
 #---------------------------------------

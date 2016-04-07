@@ -181,6 +181,7 @@ def perfGas(p=None, rho=None, R=None, T=None, gas=None):
         return p / (rho*T)
     return
 
+
 def wetAirDens(p=None, T=None, q=None):
     """
     From R. S. Davis, Equation for the Determination of the Density of Moist Air (1981/91).
@@ -193,6 +194,7 @@ def wetAirDens(p=None, T=None, q=None):
     rho_wet=(p/(R_dry*T)) * (1. - q*(1. - R_dry/R_h2o))
     return rho_wet
 
+
 def virtualTemp(T, tpres, ppres):
     """
     Gets virtual temperature from thermodynamic temperature, total pressure and water vapor pressure
@@ -200,6 +202,7 @@ def virtualTemp(T, tpres, ppres):
     """
     virt_temp=temp/(1. -(ppres/tpres)*(1.-mu))
     return virt_temp
+
 
 def R_umidAir(q):
     """
@@ -216,6 +219,7 @@ def R_umidAir(q):
         the specific gas constant for humid air in J/(g*K)
     """
     return q* R_spec['h2o'] + (1.0 - q)*R_spec['dry_air']
+
 
 def dewPointTemp(theta, e):
     """

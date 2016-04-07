@@ -271,7 +271,8 @@ def eddyCov2(data, wpl=True,
     solutes: list
         list that holds every solute considered for flux
     """
-    cp=constants.cp_dry
+    cp = constants.cp_dry
+    lamb = constants.latent_heat_water
 
     #---------
     # Define useful notation to look for
@@ -287,7 +288,6 @@ def eddyCov2(data, wpl=True,
     # Define name of variables to look for based on the notation
     u               =   fluct % defs.u
     w               =   fluct % defs.w
-    p               =   defs.pressure
     q_fluc          =   fluct % defs.specific_humidity
     theta_mean      =   mean % defs.thermodyn_temp
     theta_v_fluc    =   fluct % defs.virtual_temp
@@ -327,12 +327,13 @@ def eddyCov2(data, wpl=True,
     #---------
     # Calculate the fluxes
     out=pd.DataFrame(index=data.index)
-    out['tau']  = rho_air_mean* cov[u, w]
-    out['H']    = rho_air_mean* cp* cov[theta_fluc, w]
-    out['Hv']   = rho_air_mean* cp* cov[theta_v_fluc, w]
-    out['E']    = rho_air_mean* cov[q_fluc, w]
+    out[ defs.momentum_flux ]               = rho_air_mean * cov[u, w]
+    out[ defs.sensible_heat_flux ]          = rho_air_mean * cp * cov[theta_fluc, w]
+    out[ defs.virtual_sensible_heat_flux ]  = rho_air_mean * cp * cov[theta_v_fluc, w]
+    out[ defs.water_vapor_flux ]            = rho_air_mean * cov[q_fluc, w]
+    out[ defs.latent_heat_flux ]            = lamb( data[theta_mean] ) * rho_air_mean * cov[q_fluc, w]
     for solute, solutef in zip(solutes, solutesf):
-        out[ 'F_{}'.format(solute) ] =  rho_air_mean* cov[solutef, w]
+        out[ defs.flux_of % solute ] =  rho_air_mean * cov[solutef, w]
     #---------
 
     #------------------------
@@ -340,12 +341,12 @@ def eddyCov2(data, wpl=True,
     if wpl:
         rv=rho_h2o_mean/rho_dry_mean
         rc=rho_co2_mean/rho_dry_mean
-        out['E'] = (1. +mu*rv)*( out['E'] + rho_h2o_mean * (data[theta_star]*data[u_star]/data[theta_mean]) )
+        out[ defs.water_vapor_flux ] = (1. +mu*rv)*( out[ defs.water_vapor_flux ] + rho_h2o_mean * (data[theta_star]*data[u_star]/data[theta_mean]) )
         for solute, c_star in zip(solutes, c_stars):
-            out[ 'F_{}'.format(solute) ] = \
-                out[ 'F_{}'.format(solute) ] + \
+            out[ defs.flux_of % solute ] = \
+                out[ defs.flux_of % solute ] + \
                 rho_co2_mean*(1. + mu*rv)*(data[theta_star]*data[u_star])/data[theta_mean] + \
-                mu*rc*out['E']
+                mu*rc*out[ defs.water_vapor_flux ]
     #------------------------
     return out
 
