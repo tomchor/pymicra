@@ -39,6 +39,8 @@ units.update({'latent_heat_water' : 'J/g'})
 
 from physics import satWaterPressure
 units['satWaterPressure'] = 'kPa'
+
+
 #---------------------------------------
 # physical constants
 #---------------------------------------
@@ -62,6 +64,7 @@ units.update({'temperature_lapse_rate' : 'K/m'})
 
 earth_atmosphere_molar_mass =28.9644 # g/mol
 units.update({'earth_atmosphere_molar_mass' : 'g/mol' })
+
 
 #---------------------------------------
 # OTHER CONSTANTS
