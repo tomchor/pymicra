@@ -24,6 +24,9 @@ Currently, this is a sum up of what pymicra does:
   - Provide all the common constants generally used in micrometeorology.
   - Plus all native features of Pandas (interpolation, resampling, grouping, statistical tests, slicing, handling of missing data and etc.)
 
+## Instalation
+Download the package an unpack in somewhere. Then open a terminal and move to the directory created, whose name should be `pymicra`. Then run `sudo python setup.py install`. This should be enough to install the package.
+
 ## Suggested notation (already default)
 To work with Pandas (and hence Pymicra) each column of data preferably has to have its own name, so it is important that the names the user uses for columns match the ones that Pymicra uses (although a different-from-default notation can be passed to pymicra). The next lines describe some general quantities, followed by the name that should be used inside straight brackets, followed by the units that compose it. The names provided are the default names and will be subjected to change by the user.
  - concentration [conc] - (mass of substance)/(mass of air)

@@ -15,29 +15,6 @@ TO DO LIST:
 from constants import *
 from datetime import timedelta
 
-def _gradients(data, levels, order='Crescent'):
-    """
-    Calculates the gradients for data considering the levels provided.
-    UNDER DEVELOPMENT
-    
-    Parameters
-    ----------
-
-    data: pandas DataFrame/ timeSeries
-    the data for which the gradients should be calculated
-
-    levels: list
-    the columns considered to calculate the gradients
-
-    """
-    from algs import combine
-    flux=pd.DataFrame(index=data.index)
-    for pair in combine(levels, order=order):
-        a,b=pair
-        grad=data[a]-data[b]
-        flux[str(a)+'-'+str(b)]= rho_mean* C_f* u_mean* grad
-    return flux
-
 
 #def solarZen2(date, lat=-3.1300, lon=-60.016667, negative=False):
 #    sin = lambda x: np.sin(np.radians(x))

@@ -60,7 +60,7 @@ def phi(zeta, x=None, C_unstable=None, C_stable=None):
     TODO: generalize coefficients
     """
     if zeta<0:
-        if x=='tau':
+        if x=='tau' or x=='M':
             return (1. - 16.*zeta)**(-1./4.)
         else:
             return (1. - 16.*zeta)**(-1./2.)
