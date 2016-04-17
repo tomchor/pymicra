@@ -129,3 +129,14 @@ def _diff_df(self, how='central', axis=0):
 pd.DataFrame.differentiate = _diff_df
 #----------
 
+#----------
+# Define a median standard deviation as a method for pandas DFs
+def _median_std(self):
+    """
+    Defines a "median" standard deviation, which is less affected
+    by spikes than regular standard deviation
+    """
+    df = self.copy()
+    return np.sqrt(((df-df.median())**2.).apply(np.nanmedian))
+pd.DataFrame.median_std = _median_std
+#----------
