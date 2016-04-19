@@ -65,8 +65,8 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
     return Lm
 
 
-def get_scales(data, siteConst, notation_defs=None,
-  output_as_df=True, solutes=[]):
+def get_scales(dataframw, siteConst, notation_defs=None,
+  output_as_df=True, theta_from_theta_v=True, solutes=[]):
     """
     Calculates characteristic lengths for data
 
@@ -91,7 +91,8 @@ def get_scales(data, siteConst, notation_defs=None,
         defs=notation.get_notation()
     else:
         defs=notation_defs
-
+    data = dataframe.copy()
+    
     #---------
     # First we define the names of the columns according to notation
     flup, flus = defs.fluctuation_preffix, defs.fluctuation_suffix
@@ -127,15 +128,21 @@ def get_scales(data, siteConst, notation_defs=None,
 
     c_stars =[]
     c_stds  =[]
+
       #---------
       # The solutes have to be calculated separately
     for c in solutesf:
         c_stars.append( cov.loc[c, w] / u_star )
         c_stds.append( data[c].std() )
       #---------
+
     theta_mean=data[theta].mean()
-    theta_std=data[theta].std()
-    theta_star=(theta_v_star - 0.61*theta_mean*q_star)/(1.+0.61*q_mean)
+    if theta_from_theta_v:
+        theta_star  = (theta_v_star - 0.61*theta_mean*q_star)/(1.+0.61*q_mean)
+        theta_std   = (theta_v_std - 0.61*theta_mean*q_std)/(1.+0.61*q_mean)
+    else:
+        theta_star  = cov.loc[theta_fluc, w] / u_star
+        theta_std   = data[theta].std()
     #---------
 
     #---------
