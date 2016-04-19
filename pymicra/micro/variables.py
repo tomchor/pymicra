@@ -65,7 +65,7 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
     return Lm
 
 
-def get_scales(dataframw, siteConst, notation_defs=None,
+def get_scales(dataframe, siteConst, notation_defs=None,
   output_as_df=True, theta_from_theta_v=True, solutes=[]):
     """
     Calculates characteristic lengths for data
