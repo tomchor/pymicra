@@ -8,11 +8,8 @@ TO DO LIST:
 
 * ADD GENERAL SOLAR ZENITH CALCULATION
 * MAYBE ADD PINT FUNCTIONALITY
-* ADD FOOTPRINT CALCULATION
-
+* ADD FOOTPRINT CALCULATION?
 """
-from constants import *
-from datetime import timedelta
 
 
 def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, dr=None):
@@ -41,6 +38,8 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
     """
     from math import pi,sin,cos,acos,radians,degrees
     from calendar import isleap
+    from datetime import timedelta
+
     #----------
     # Finds out which is the day of the solstice for that year and puts it into dr variable
     if dr==None:
@@ -134,8 +133,13 @@ def perfGas(p=None, rho=None, R=None, T=None, gas=None):
     P.S.: I'm using type to identify None objects because this way it works
     againt pandas objects
     """
-    if gas==None and R==None:
-        R=R_spec[gas]
+    from constants import R_spec
+    
+    if R==None:
+        if gas != None:
+            R=R_spec[gas]
+        elif gas==None:
+            R=R_spec['dry']
 
     if type(p) == type(None):
         return rho*R*T
@@ -153,24 +157,27 @@ def wetAirDens(p=None, T=None, q=None):
     From R. S. Davis, Equation for the Determination of the Density of Moist Air (1981/91).
     Available at http://www.nist.gov/calibrations/upload/metv29i1p67-2.pdf
     """
-    aux=constants()
-    R_spec=aux.R_spec
-    R_dry=R_spec['dry_air']
+    from constants import R_spec
+
+    R_dry=R_spec['dry']
     R_h2o=R_spec['h2o']
     rho_wet=(p/(R_dry*T)) * (1. - q*(1. - R_dry/R_h2o))
     return rho_wet
 
 
-def virtualTemp(T, tpres, ppres):
+def virtualTemp(T, total_pres, water_pres):
     """
     Gets virtual temperature from thermodynamic temperature, total pressure and water vapor pressure
     mu=R_dry/R_water_vapor is approx 0.622
     """
-    virt_temp=temp/(1. -(ppres/tpres)*(1.-mu))
+    from constants import R_spec
+
+    mu = R_spec['dry']/R_spec['h2o']
+    virt_temp = T /(1. -(water_pres/total_pres)*(1.-mu))
     return virt_temp
 
 
-def R_umidAir(q):
+def R_humidAir(q):
     """
     Calculates the gas constant for umid air from the specific humidity q
 
@@ -184,6 +191,7 @@ def R_umidAir(q):
     R_air: float
         the specific gas constant for humid air in J/(g*K)
     """
+    from constants import R_spec
     return q* R_spec['h2o'] + (1.0 - q)*R_spec['dry_air']
 
 
@@ -192,6 +200,7 @@ def dewPointTemp(theta, e):
     Calculates the dew point temperature.
     theta has to be in Kelvin and e in kPa
     """
+    import numpy as np
     ln = np.log(e / 0.611)
     coef = ln / (17.502 - ln)
     return 240.97*coef + 273.16

@@ -289,7 +289,11 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
     This may no be true, since they do not express which distribution they use to construct
     their table. However, in the range 9<N<101, this approximation is as good as 5% at N=10
     and 0.1% at N=100.
+
+    Still not adapted for dataframes
     '''
+    import genalgs
+    import numpy as np
 
     #-----------
     # Definition of function that determines the mean and variance
@@ -323,7 +327,7 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
     Atot = sum(A)
     N=len(xarray)
     mu,variance=mu_var(N)
-    f=algs.inverse_normal_cdf(mu, np.sqrt(variance))
+    f=genalgs.inverse_normal_cdf(mu, np.sqrt(variance))
     phi1=1.-alpha/2.
     phi2=alpha/2.
     A1=f(phi1)

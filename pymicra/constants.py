@@ -24,6 +24,7 @@ units.update({'R' : 'J/(mol * K)'})
 R_spec={}
 for key, val in molar_mass.iteritems():
     R_spec.update( {key : R/val} )
+del key, val
 units.update({'R_spec' : 'J/(g * K)'})
 
 units.update({'mu':'1'})
@@ -139,4 +140,7 @@ sumsolstice={ key : datetime.strptime('{0}-06-{1}'.format(key, val), '%Y-%m-%d %
 #--------------------------------------
 # CLEAN DUMMY VARIABLES
 #--------------------------------------
-del val, key
+try:
+    del val, key
+except:
+    pass
