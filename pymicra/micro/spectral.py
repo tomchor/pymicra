@@ -1,6 +1,3 @@
-import numpy as np
-import pandas as pd
-from ..genalgs import auxiliar as algs
 
 def hfc_Dias_ea_16(cross_spec, T):
     """
@@ -13,6 +10,8 @@ def hfc_Dias_ea_16(cross_spec, T):
     T: float
         response time to use
     """
+    import numpy as np
+
     Co = cross_spec.apply(np.real)
     Qu = cross_spec.apply(np.imag)
     n = np.array(cross_spec.index)
@@ -42,6 +41,8 @@ def hfc_zeroQuad(slow_spec, freqs, T):
     spec: numpy.array
         the recovered array
     """
+    import numpy as np 
+
     assert len(slow_spec)==len(freqs)
     return slow_spec*(1.0 + 4.*(np.pi**2.)*(freqs**2.) * (T**2.))
 
@@ -56,6 +57,9 @@ def Ogive(df, no_nan=True):
         cospectrum to be integrated
     """
     import scipy as sp
+    import numpy as np
+    import pandas as pd
+
     if no_nan:
         x=np.array(df.index)
         out=pd.DataFrame(index=x)
@@ -91,6 +95,8 @@ def recspe(slow_spec, freqs, T):
     T: float
         the response-time
     """
+    import numpy as np
+
     assert len(slow_spec)==len(freqs)
     return slow_spec*(1.0 + 4.*(np.pi**2.)*(freqs**2.) * (T**2.))
 
@@ -99,6 +105,8 @@ def recspeAux(df, T):
     """
     Wrapper to make recspe work in a pandas.DataFrame
     """
+    import numpy as np
+
     freqs=np.array(df.index)
     for c in df.columns:
         spec =np.array(df[c])

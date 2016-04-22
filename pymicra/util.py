@@ -8,11 +8,6 @@ TODO LIST
 -INCLUDE DECODIFICAION OF DATA
 
 """
-from genalgs import auxiliar as algs
-import data
-import io
-import pandas as pd
-import numpy as np
 
 
 def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
@@ -29,6 +24,9 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
     vis_col: str, int or list
         the column(s) to visualize when seeing the interpolation (only effective if visualize==True)
     '''
+    import pandas as pd
+    import genalgs as algs
+
     valid_cols=pd.Series(0, index=dfs[0].columns)
     for i in range(len(dfs)):
         chunk=dfs[i].copy()
@@ -94,6 +92,10 @@ def qcontrol(files, datalogger_config,
     from itertools import izip_longest
     from datetime import datetime
     from dateutil.parser import parse
+    import data
+    import pandas as pd
+    import numpy as np
+    from genalgs import auxiliar as algs
 
     bdate=parse(bdate)
     edate=parse(edate)
@@ -321,6 +323,10 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
     None
     """
     from os import path
+    import io
+    import pandas as pd
+    from genalgs import auxiliar as algs
+
     #-----------------------
     # First considerations
     outpath=path.join(outdir, outformat)
@@ -474,6 +480,9 @@ def correctDrift(drifted, correct_drifted_vars, correct=None,
         drifted dataset corrected with right dataset
     """
     from matplotlib import pyplot as plt
+    import pandas as pd
+    import numpy as np
+
     rwvars = correct_drifted_vars
     cors=[]
     #----------------

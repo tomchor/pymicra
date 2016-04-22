@@ -7,7 +7,6 @@ Date: 2015-08-07
 Modifications:
 
 """
-import pandas as pd
 
 #-------------------------------------------
 #-------------------------------------------
@@ -31,6 +30,8 @@ def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
     ---------
     dataFrame: pandas.DataFrame object
     """
+    import pandas as pd
+
     #------------
     # Read only used columns if possible
     if type(varNames) == dict:
@@ -87,6 +88,8 @@ def readDataFiles(flist, verbose=0, **kwargs):
     --------
     data: pandas.DataFrame
     """
+    import pandas as pd
+
     if len(flist)==0:
         raise ValueError('Passed a list of files of zero length to be read.')
     dflist=[]
@@ -305,6 +308,8 @@ def readUnitsCsv(filename, names=0, units=1, **kwargs):
     unitsdic: dictionary
         dictionary with the variable names as keys and the units as values
     """
+    import pandas as pd
+
     df=pd.read_csv(filename, header=[names, units], **kwargs)
     cols,units=zip(*df.columns)
     unitsdic={ k:v for k,v in zip(cols,units) }
@@ -334,6 +339,8 @@ def toUnitsCsv(data, units, filename, to_tex=False, **kwargs):
     to_tex: bool
         whether or not to convert the string of the unit to TeX format (useful for printing)
     """
+    import pandas as pd
+
     if to_tex:
         from util import printUnit as pru
         units={ k : pru(v) for k,v in units.iteritems() }

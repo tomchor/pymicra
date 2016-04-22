@@ -22,4 +22,3 @@ from micro import spectral
 import micro
 import genalgs
 __version__='0.1.0'
-
