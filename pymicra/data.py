@@ -4,21 +4,17 @@ Author: Tomas Chor
 Date: 2015-08-07
 -------------------------
 
-This module works with micrometeorological data using pandas, numpy, datetime and several other packages
-
--------------------------
-
-Modifications:
-
+This module works with micrometeorological data using pandas,
+numpy, datetime and several other packages.
 
 """
-from genalgs import auxiliar as algs
-import physics
-import pandas as pd
-import numpy as np
-import notation
+#from genalgs import auxiliar as algs
+#import physics
+#import pandas as pd
+#import numpy as np
+#import notation
 
-def rotCoor(data, wind_vars=['u','v','w'], notation_defs=None):
+def rotCoor(data, notation_defs=None):
     """
     Rotates the coordinates of wind data
     ----------------------
@@ -27,19 +23,20 @@ def rotCoor(data, wind_vars=['u','v','w'], notation_defs=None):
     ----------
     data: pandas DataFrame 
         the dataFrame to be rotated
-    wind_vars: list
-        a list with the names of columns which define the wind speed, typically ['u','v','w']
+    notation_defs: notations object
+        a notation object to know which are the wind variables
     """
-    from numpy import cos,sin,zeros,dot
     from math import atan2, sqrt
+    import numpy as np
 
     #-------
     # Getting the names for u, v, w
     if notation_defs==None:
-        defs=notation.get_notation()
+        from notation import get_notation
+        defs=get_notation()
     else:
         defs=notation_defs
-    #wind_vars = defs.u, defs.v, defs.w
+    wind_vars = [ defs.u, defs.v, defs.w ]
     #-------
 
     #-------
@@ -66,7 +63,7 @@ def rotCoor(data, wind_vars=['u','v','w'], notation_defs=None):
     return data
 
 
-def trend(data, mode='moving average', rule=None, window=None, **kwargs):
+def trend(data, mode='moving average', rule=None, window=None, how='mean', **kwargs):
     """
     Wrapper to return the trend given data. Can be achieved using a moving avg, block avg or polynomial fitting
 
@@ -80,7 +77,14 @@ def trend(data, mode='moving average', rule=None, window=None, **kwargs):
         pandas offset string to define the block in the block average. Default is "10min".
     window: pandas date offset string
         if moving average is chosen, this tells us the window size
+    how: str, function
+        how to resample in block type. Default is mean but it can be any numpy function
+        that returns a float. E.g, median.
     """
+    import pandas as pd
+    import genalgs
+    import numpy as np
+
     mode=mode.lower().replace('_',' ').replace('-','').replace(' ','')
     if any(w==mode for w in ['moving', 'movingaverage']):
         #-------
@@ -91,21 +95,22 @@ def trend(data, mode='moving average', rule=None, window=None, **kwargs):
         return pd.rolling_mean(data, window=window, **kwargs)
         #-------
 
-    elif any(w==mode for w in ['block', 'blockaverage']):
+    elif any(w==mode for w in ['block']):
         #-------
         # performs block average on the data with the window being the rule. Assumes that frequency is constant
         if rule==None:
             return data.apply(lambda x: [np.mean(x)]*len(x), axis=0)
         else:
-            print 'Warning. Might be bugged. Check results.'
             freq=data.index.inferred_freq
-            return data.resample(rule, how='mean', **kwargs).resample(freq, fill_method='pad')
+            aux = data.resample(rule, how=how, **kwargs)
+            aux.loc[ data.index[-1] ] = np.nan
+            return aux.resample(freq, fill_method='pad')
         #-------
 
-    elif any(w in mode for w in ['linear', 'polynomial', 'fit']):
+    elif any(w in mode for w in ['linear', 'polynomial']):
         #-------
         # performs a polynomial fit on the data in blocks of "rule"
-        return algs.fitByDate(data, rule=rule, **kwargs)
+        return genalgs.fitByDate(data, rule=rule, **kwargs)
         #-------
 
     else:
@@ -130,22 +135,31 @@ def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
         suffix to add to variable names after fluctuation is extracted
     """
     from scipy import signal
-    mode=algs.stripDown(mode.lower(), args='-_')
+    import genalgs
+
+    mode=genalgs.stripDown(mode.lower(), args='-_')
     df=data.copy()
 
-    if mode=='linear' or mode=='constant':
+    #-----------
+    # If possible, try to use scipy's optimized functions
+    if mode=='linear' and rule==None:
         df=df.apply(signal.detrend, axis=0, type=mode)
 
-    elif mode=='block':
+    elif mode=='block' and rule==None:
         df=df.apply(signal.detrend, axis=0, type='constant')
+    #-----------
 
+    #-----------
+    # If not, use our trending function
     else:
         df=df-trend(df, mode=mode, rule=rule, **kwargs)
+    #-----------
 
     return df.add_suffix(suffix)
 
 
-def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency', anti_aliasing=False, outname=None):
+
+def spectrum(data, frequency=10, out_index='frequency', anti_aliasing=False, outname=None):
     """
     Calculates the spectrum for a set of data
 
@@ -155,18 +169,23 @@ def spectrumDF(data, frequency=10, T_minutes=30, out_index='frequency', anti_ali
         dataframe with one (will return the spectrum) or two (will return to cross-spectrum) columns
     frequency: float
         frequency of measurement of signal to pass to numpy.fft.rfftfreq
-    T_minutes: float
-        period in minutes (currently not used)
     out_index: str
         only accepting 'frequency' as keyword
     anti_aliasing: bool
         not working at the moment
     outname: str
         name of the output column
+
+    Returns:
+    --------
+    spectrum: dataframe
+        whose column is the spectrum or coespectrum of the input dataframe
     """
-    T=T_minutes*60.     # convert from minutes to seconds
+    import numpy as np
+    import pandas as pd
+
     N = len(data)
-    co=False
+    co = False
     if type(data)==pd.DataFrame:
         if len(data.columns)==1:
             pass
@@ -218,39 +237,37 @@ def bulkCorr(data):
     Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
     doi:10.1029/2012WR012127
 
+    Parameters:
+    -----------
+    data: pandas.dataframe
+        a two-columns dataframe
     """
-    a, b = data.columns
+    import numpy as np
+
+    a, b = data.columns[0], data.columns[-1]
     cov = data.cov()
     r = cov.loc[a,b]
     r = r / (np.sqrt(cov.loc[a,a])*np.sqrt(cov.loc[b,b]))
     return r
 
-
-def bulkCorr2(data):
-    """
-    Bulk correlation coefficient according to
-    Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
-    doi:10.1029/2012WR012127
-
-    NEEDS TO BE ADAPTED FOR DATAFRAMES
-    """
-    if type(data)==pd.DataFrame:
-        a,b=data.columns
-        a,b=data[a], data[b]
-    else:
-        a,b=data
-    r=np.mean(a*b)
-    r/=np.sqrt(np.nanmean(a*a))*np.sqrt(np.nanmean(b*b))
-    return r
-
-
-def mu_var(N):
-    """
-    from Bendat&Piersol
-    """
-    mu=N*(N-1.)/4.
-    variance=N*(2.*N + 5.)*(N - 1.)/72.
-    return mu, variance
+#----------
+# Definition of bulk_correlation according to
+# Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
+# doi:10.1029/2012WR012127
+def _bulk_corr(self):
+    import numpy as np
+    df = self.copy()
+    cov = df.cov()
+    out = cov.copy()
+    for c in out.columns:
+        out.loc[:, c] = out.loc[:, c]/np.sqrt(cov.loc[c, c])
+    for idx in out.index:
+        out.loc[idx, :] = out.loc[idx, :]/np.sqrt(cov.loc[idx, idx])
+    return out
+import pandas as pd
+pd.DataFrame.bulk_corr = _bulk_corr
+del pd      # prevents pandas to being pre-loaded in data.py
+#----------
 
 
 def reverse_arrangement(array, points_number=None, alpha=0.05):
@@ -260,22 +277,31 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
 
     Parameters
     ----------
-
-    Array: np.array, list, tuple, generator
-    array which to test for the reverse arrangement test
-
+    array: np.array, list, tuple, generator
+        array which to test for the reverse arrangement test
     points_number: integer
-    number of chunks to consider to the test. Maximum is the length of the array.
-    If it is less, then the number of points will be reduced by application of a mean
-
+        number of chunks to consider to the test. Maximum is the length of the array.
+        If it is less, then the number of points will be reduced by application of a mean
     alpha: float
-    Significance level for which to apply the test
+        Significance level for which to apply the test
 
     WARNING! This fuction approximates table A.6 from Bendat&Piersol as a normal distribution.
     This may no be true, since they do not express which distribution they use to construct
     their table. However, in the range 9<N<101, this approximation is as good as 5% at N=10
     and 0.1% at N=100.
     '''
+
+    #-----------
+    # Definition of function that determines the mean and variance
+    def mu_var(N):
+        """
+        from Bendat&Piersol
+        """
+        mu=N*(N-1.)/4.
+        variance=N*(2.*N + 5.)*(N - 1.)/72.
+        return mu, variance
+    #-----------
+
     if points_number==None:
         points_number=len(array)
         xarray=array

@@ -99,7 +99,7 @@ def fitByDate(data, degree=1, rule=None):
     if rule==None:
         dflist=[data]
     else:
-        dflist=splitData(data, frequency=rule)
+        dflist=splitData(data, rule=rule)
     out=pd.DataFrame()
     for data in dflist:
         xx=data.index.to_julian_date()

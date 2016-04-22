@@ -7,25 +7,13 @@ Module that contains physical functions for general use
 TO DO LIST:
 
 * ADD GENERAL SOLAR ZENITH CALCULATION
-* ADD PINT FUNCTIONALITY
+* MAYBE ADD PINT FUNCTIONALITY
 * ADD FOOTPRINT CALCULATION
-
 
 """
 from constants import *
 from datetime import timedelta
 
-
-#def solarZen2(date, lat=-3.1300, lon=-60.016667, negative=False):
-#    sin = lambda x: np.sin(np.radians(x))
-#    cos = lambda x: np.cos(np.radians(x))
-#    t_vernal_equi = 240.
-#    T_year = 365.24
-#    earth_tiltv = 23.5
-#    lamb = 360.*(t_vernal_equi / T_year)
-#    sin_delta = sin(earth_tilt)*sin(lamb)
-#    cos_zen = sin(latitude)*sin_delta + cos(latitude)*cos(delta)*None
-#    return 
 
 def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, dr=None):
     """
@@ -90,6 +78,7 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
     else:
         return zen_ang
     #----------
+
 
 def latent_heat_water(T):
     """
@@ -206,3 +195,4 @@ def dewPointTemp(theta, e):
     ln = np.log(e / 0.611)
     coef = ln / (17.502 - ln)
     return 240.97*coef + 273.16
+
