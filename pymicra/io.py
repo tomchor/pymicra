@@ -4,8 +4,6 @@ Author: Tomas Chor
 Date: 2015-08-07
 -------------------------
 
-Modifications:
-
 """
 
 #-------------------------------------------
@@ -108,93 +106,93 @@ def readDataFiles(flist, verbose=0, **kwargs):
 #------------------------------------
 #
 #------------------------------------
-class dataloggerConf(object):
-    """
-    This class defines a specific configuration of a datalogger output file
-
-    Parameters:
-    ----------
-    varNames: list of strings or dict
-        If a list: should be a list of strings with the names of the variables. If the variable
-        is part if the date, then it should be provided as a datetime directive,
-        so if the columns is only the year, its name must be `%Y` and so forth. While
-        if it is the date in YYYY/MM/DD format, it should be `%Y/%m/%d`. For more info
-        see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
-        If a dict: the keys should be the numbers of the columns and the items should follow
-        the rules for a list.
-
-    date_cols: list of strings
-        should be the subset of varNames that corresponds to the variables that compose
-        the timestamp. If it is not provided the program will try to guess by getting
-        all variable names that have a percentage sign (%).
-
-    date_connector: string
-        generally not really necessary. It is used to join and then parse the date_cols.
-
-    columns_separator: string
-        used to assemble the date. Should only be used if the default char creates conflict. If
-        the file is tabular-separated then this should be "whitespace"
-
-    header_lines: int
-        up to which line of the file is a header. See pandas.read_csv header option.
-
-    first_time_skip: int
-        how many units of frequency the first line of the file is offset (generally zero)
-
-    filename_format: string
-        tells the format of the file with the standard notation for date and time and with variable
-        parts as "?". E.g. if the files are 56_20150101.csv, 57_20150102.csv etc filename_format should be:
-            ??_%Y%m%d.csv
-        this is useful primarily for the quality control feature
-
-    units: dictionary
-        very important: a dictionary whose keys are the columns of the file and whose items are
-        the units in which they appear.
-
-    description: string
-        brief description of the datalogger configuration file
-    """
-    def __init__(self, varNames,
-            date_cols=None,
-            frequency=None,
-            date_connector='-', 
-            columns_separator=',',
-            header_lines=None,
-            first_time_skip=False,
-            units=None,
-            skiprows=None,
-            filename_format='CSV_?????.fluxo_??m_%Y_%j_%H%M.dat',
-            description='generic datalogger configuration file'):
-        #-------------------------
-        # Makes sure that units is a dictionary type
-        if units is not None:
-            if not isinstance(units, dict):
-                raise TypeError('units should be a dictionary. Ex.: {"u" : "m/s", "v" : "m/s", "theta" : "K" }')
-        #-------------------------
-
-        self.varNames=varNames
-        #-------------------------
-        # If date_cols is not provided, this will try to guess the date columns
-        # by assuming that no other columns has a % sign on their name
-        if date_cols:
-            self.date_cols=date_cols
-        else:
-            if type(varNames) == list:
-                self.date_cols = [ el for el in varNames if '%' in el ]
-            if type(varNames) == dict:
-                self.date_cols = { k : it for (k, it) in varNames.iteritems() if '%' in it }
-        #-------------------------
-
-        self.frequency=frequency
-        self.date_connector=date_connector
-        self.columns_separator=columns_separator
-        self.header_lines=header_lines
-        self.skiprows=skiprows
-        self.first_time_skip=first_time_skip
-        self.units=units
-        self.description=description
-        self.filename_format=filename_format
-
+#class dataloggerConf(object):
+#    """
+#    This class defines a specific configuration of a datalogger output file
+#
+#    Parameters:
+#    ----------
+#    varNames: list of strings or dict
+#        If a list: should be a list of strings with the names of the variables. If the variable
+#        is part if the date, then it should be provided as a datetime directive,
+#        so if the columns is only the year, its name must be `%Y` and so forth. While
+#        if it is the date in YYYY/MM/DD format, it should be `%Y/%m/%d`. For more info
+#        see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
+#        If a dict: the keys should be the numbers of the columns and the items should follow
+#        the rules for a list.
+#
+#    date_cols: list of strings
+#        should be the subset of varNames that corresponds to the variables that compose
+#        the timestamp. If it is not provided the program will try to guess by getting
+#        all variable names that have a percentage sign (%).
+#
+#    date_connector: string
+#        generally not really necessary. It is used to join and then parse the date_cols.
+#
+#    columns_separator: string
+#        used to assemble the date. Should only be used if the default char creates conflict. If
+#        the file is tabular-separated then this should be "whitespace"
+#
+#    header_lines: int
+#        up to which line of the file is a header. See pandas.read_csv header option.
+#
+#    first_time_skip: int
+#        how many units of frequency the first line of the file is offset (generally zero)
+#
+#    filename_format: string
+#        tells the format of the file with the standard notation for date and time and with variable
+#        parts as "?". E.g. if the files are 56_20150101.csv, 57_20150102.csv etc filename_format should be:
+#            ??_%Y%m%d.csv
+#        this is useful primarily for the quality control feature
+#
+#    units: dictionary
+#        very important: a dictionary whose keys are the columns of the file and whose items are
+#        the units in which they appear.
+#
+#    description: string
+#        brief description of the datalogger configuration file
+#    """
+#    def __init__(self, varNames,
+#            date_cols=None,
+#            frequency=None,
+#            date_connector='-', 
+#            columns_separator=',',
+#            header_lines=None,
+#            first_time_skip=False,
+#            units=None,
+#            skiprows=None,
+#            filename_format='CSV_?????.fluxo_??m_%Y_%j_%H%M.dat',
+#            description='generic datalogger configuration file'):
+#        #-------------------------
+#        # Makes sure that units is a dictionary type
+#        if units is not None:
+#            if not isinstance(units, dict):
+#                raise TypeError('units should be a dictionary. Ex.: {"u" : "m/s", "v" : "m/s", "theta" : "K" }')
+#        #-------------------------
+#
+#        self.varNames=varNames
+#        #-------------------------
+#        # If date_cols is not provided, this will try to guess the date columns
+#        # by assuming that no other columns has a % sign on their name
+#        if date_cols:
+#            self.date_cols=date_cols
+#        else:
+#            if type(varNames) == list:
+#                self.date_cols = [ el for el in varNames if '%' in el ]
+#            if type(varNames) == dict:
+#                self.date_cols = { k : it for (k, it) in varNames.iteritems() if '%' in it }
+#        #-------------------------
+#
+#        self.frequency=frequency
+#        self.date_connector=date_connector
+#        self.columns_separator=columns_separator
+#        self.header_lines=header_lines
+#        self.skiprows=skiprows
+#        self.first_time_skip=first_time_skip
+#        self.units=units
+#        self.description=description
+#        self.filename_format=filename_format
+#
 
 def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, parse_dates_kw={}):
     """
@@ -249,6 +247,8 @@ def read_dlc(dlcfile):
     Then the .dlc should have: varNames=['%Y-%m-%d %H:%M:%S','u','v']. This is the default csv format of
     CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
     """
+    from core import dataloggerConf
+
     globs={}
     dlcvars={}
     try:
@@ -273,7 +273,8 @@ def read_site(sitefile):
         z0                  = 1.0
 
     """
-    from micro.variables import siteConstants
+    from core import siteConstants
+
     globs={}
     sitevars={}
     try:

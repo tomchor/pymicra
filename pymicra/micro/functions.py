@@ -14,8 +14,6 @@ Maybe add all these variables that EddyPro calculates:
 http://www.licor.com/env/help/EddyPro3/Content/Topics/Calculating_Micromet_Variables.htm
 
 """
-import numpy as np
-from .. import notation
 
 def nondimensionalSTD(zeta, **kwargs):
     return phi_c(zeta, **kwargs)
@@ -88,6 +86,8 @@ def Psi(zeta, x='tau', zeta0=0.):
     zeta0: float
         value of zeta_{0 x}. Only used for the stable case
     """
+    import numpy as np
+
     #---------
     # For unstable conditions
     if zeta < 0:
@@ -120,6 +120,8 @@ def ste(data, w_fluctuations="w'"):
         the name of the vertical velocity fluctuations
     """
     from ..data import bulkCorr
+    import numpy as np
+
     w=w_fluctuations
     df=data.copy()
     if False:
@@ -225,6 +227,8 @@ def _auxLogMinPsi(z_i, d, z0, Psi, Lm):
 
     CONSIDER TAKING THIS SOMEWHERE ELSE!
     """
+    import numpy as np
+
     if hasattr(Psi, '__call__')==False:
         raise TypeError('Psi argument has to be a function')
     a=np.log((z_i-d)/z0)

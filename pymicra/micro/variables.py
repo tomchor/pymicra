@@ -15,10 +15,6 @@ Maybe add all these variables that EddyPro calculates:
 http://www.licor.com/env/help/EddyPro3/Content/Topics/Calculating_Micromet_Variables.htm
 
 """
-import pandas as pd
-import numpy as np
-from .. import notation
-from .. import constants
 
 def MonObuVar(L_m, siteConst):
     """
@@ -58,6 +54,8 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
     STULL, An introduction to Boundary layer meteorology, 1988 (eq. 5.7b, p. 181)
     L = - ( theta_v * u_star^3 ) / ( kappa *g* cov(w',theta_v') )
     """
+    from .. import constants
+
     if g==None:
         g = constants.gravity
     kappa = constants.kappa
@@ -87,25 +85,30 @@ def get_scales(dataframe, siteConst, notation_defs=None,
     CHECKLIST:
     ADD MIXED-LAYER CONVECTION SCALES FOR VELOCITY (w*) AND TEMPERATURE (t*) MAYBE
     """
+    from ..core import get_notation
+    from .. import constants
+    import pandas as pd
+    import numpy as np
+
     if notation_defs==None:
-        defs=notation.get_notation()
+        defs=get_notation()
     else:
         defs=notation_defs
     data = dataframe.copy()
     
     #---------
     # First we define the names of the columns according to notation
-    flup, flus = defs.fluctuation_preffix, defs.fluctuation_suffix
-    u       =   flup + defs.u + flus
-    v       =   flup + defs.v + flus
-    w       =   flup + defs.w + flus
+    fluc = defs.fluctuation
+    u       =   fluc % defs.u
+    v       =   fluc % defs.v
+    w       =   fluc % defs.w
     p       =   defs.pressure
     theta   =   defs.thermodyn_temp
     theta_v =   defs.virtual_temp
-    theta_v_fluc= flup + defs.virtual_temp + flus
+    theta_v_fluc= fluc % defs.virtual_temp
     q           = defs.specific_humidity
-    qfluct      = flup + defs.specific_humidity + flus
-    solutesf    = [ flup + el + flus for el in solutes ]
+    qfluct      = fluc % defs.specific_humidity
+    solutesf    = [ fluc % el for el in solutes ]
     #---------
 
     #-----------
@@ -194,27 +197,31 @@ def eddyCov(data, wpl=True,
     solutes: list
         list that holds every solute considered for flux
     """
+    from .. import constants
+    from ..core import get_notation
+    import pandas as pd
+
     cp=constants.cp_dry
     lamb = constants.latent_heat_water
 
     #---------
     # Define useful notation to look for
     if notation_defs==None:
-        defs=notation.get_notation()
+        defs=get_notation()
     else:
         defs=notation_defs
-    stap, stas = defs.star_preffix, defs.star_suffix
+    star = defs.star
     #---------
 
     #---------
     # Define name of variables to look for based on the notation
     p           =   defs.pressure
-    theta_mean  =   defs.mean_preffix + defs.thermodyn_temp + defs.mean_suffix
+    theta_mean  =   defs.mean % defs.thermodyn_temp
     theta_v     =   defs.virtual_temp
-    theta_star  =   stap + defs.thermodyn_temp + stas
-    theta_v_star=   stap + defs.virtual_temp + stas
-    u_star      =   stap + defs.u + stas
-    q_star      =   stap + defs.specific_humidity + stas
+    theta_star  =   star % defs.thermodyn_temp
+    theta_v_star=   star % defs.virtual_temp
+    u_star      =   star % defs.u
+    q_star      =   star % defs.specific_humidity
     #---------
 
     #---------
@@ -225,7 +232,7 @@ def eddyCov(data, wpl=True,
     rho_dry_mean=data['rho_dry_mean']
     c_stars = []
     for solute in solutes:
-        c_stars.append( stap + solute + stas )
+        c_stars.append( star % solute )
     #---------
 
     #---------
@@ -280,13 +287,17 @@ def eddyCov2(data, wpl=True,
     solutes: list
         list that holds every solute considered for flux
     """
+    from .. import constants
+    from ..core import get_notation
+    import pandas as pd
+
     cp = constants.cp_dry
     lamb = constants.latent_heat_water
 
     #---------
     # Define useful notation to look for
     if notation2_defs==None:
-        defs=notation.get_notation2()
+        defs=get_notation()
     else:
         defs=notation_defs2
     fluct = defs.fluctuation
@@ -362,36 +373,5 @@ def eddyCov2(data, wpl=True,
     return out
 
 
-
-
-
-#------------------------------------
-# CLASSES
-#------------------------------------
-class siteConstants(object):
-    """
-    Keeper of the characteristics and constants of an experiment.
-
-    Attributes:
-    -----------
-        variables_height: float
-            the main height of the instruments in meters. Generally the height of the sonic anemometer
-        canopy height: float
-            the mean height of the vegetation meters
-        displacement_height: float
-            also called zero-plane displacement. Will be estimated as 2/3*canopy_height if not given.
-    """
-    def __init__(self, variables_height, canopy_height,
-             displacement_height=None, z0=None, description=None):
-
-        self.description=description
-        self.variables_height = variables_height    #meters
-        self.canopy_height = canopy_height          #meters
-        self.z0 = z0
-        self.description = description
-        if displacement_height==None:
-            self.displacement_height = (2./3.)*self.canopy_height #meters
-        else:
-            self.displacement_height=displacement_height
 
 

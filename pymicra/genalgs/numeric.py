@@ -1,7 +1,4 @@
-from scipy import integrate
 import pandas as pd
-import numpy as np
-from .. import notation
 import auxiliar as algs
 
 def _integrate_series(self, how='trapz', dateindex=False, **kwargs):
@@ -24,6 +21,9 @@ def _integrate_series(self, how='trapz', dateindex=False, **kwargs):
     or the source code
     https://github.com/scipy/scipy/blob/master/scipy/integrate/quadrature.py
     '''
+    import numpy as np
+    from scipy import integrate
+
     available_rules = set(['trapz', 'cumtrapz', 'simps', 'romb'])
     if how in available_rules:
         rule = integrate.__getattribute__(how)
@@ -61,6 +61,9 @@ def _integrate_df(self, how='trapz', dateindex=False, **kwargs):
     or the source code
     https://github.com/scipy/scipy/blob/master/scipy/integrate/quadrature.py
     '''
+    import numpy as np
+    from scipy import integrate
+
     df=self.copy()
     available_rules = set(['trapz', 'cumtrapz', 'simps', 'romb'])
     if how in available_rules:
@@ -87,6 +90,11 @@ pd.DataFrame.integrate = _integrate_df
 #----------
 # Definition of the .differentiate method for dataframes
 def _diff_df(self, how='central', axis=0):
+    """
+    Differentiates self
+    """
+    import numpy as np
+
     #---------
     # Choose x axis by column or index, considering axis keyword
     if axis==0:
@@ -129,14 +137,4 @@ def _diff_df(self, how='central', axis=0):
 pd.DataFrame.differentiate = _diff_df
 #----------
 
-#----------
-# Define a median standard deviation as a method for pandas DFs
-#def _median_std(self):
-#    """
-#    Defines a "median" standard deviation, which is less affected
-#    by spikes than regular standard deviation
-#    """
-#    df = self.copy()
-#    return np.sqrt(((df-df.median())**2.).apply(np.nanmedian))
-#pd.DataFrame.median_std = _median_std
-#----------
+del pd

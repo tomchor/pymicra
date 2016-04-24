@@ -4,8 +4,7 @@
 """
 import pandas as pd
 import numpy as np
-import scipy.stats as st
-import datetime as dt
+#import scipy.stats as st
 
 
 def combine(levels, order='Crescent'):
@@ -477,6 +476,8 @@ def name2date(filename, dlconfig):
     Needs to be optimized in order to read question markers also after the date
     """
     from itertools import izip_longest
+    import datetime as dt
+    
     filename_format=dlconfig.filename_format
     f=''.join([ s for s,v in izip_longest(filename, filename_format) if v!='?' ])
     fmt=filename_format.replace('?','')
@@ -496,6 +497,8 @@ def line2date(line, dlconfig):
     dlconfig: pymicra.dataloggerConfig
         configuration of the datalogger
     """
+    import datetime as dt
+
     varnames=dlconfig.varNames
     date_cols = dlconfig.date_cols
     sep = dlconfig.columns_separator

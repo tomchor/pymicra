@@ -8,11 +8,6 @@ This module works with micrometeorological data using pandas,
 numpy, datetime and several other packages.
 
 """
-#from genalgs import auxiliar as algs
-#import physics
-#import pandas as pd
-#import numpy as np
-#import notation
 
 def rotCoor(data, notation_defs=None):
     """
@@ -32,7 +27,7 @@ def rotCoor(data, notation_defs=None):
     #-------
     # Getting the names for u, v, w
     if notation_defs==None:
-        from notation import get_notation
+        from core import get_notation
         defs=get_notation()
     else:
         defs=notation_defs
