@@ -80,6 +80,8 @@ def fitWrap(x,y,degree=1):
     y: array, list
     degree: int
     """
+    import numpy as np
+
     coefs=np.polyfit(x,y,degree)
     yy=np.polyval(coefs,x)
     return yy
@@ -173,14 +175,34 @@ def completeHM(string):
 
 def limitedSubs(data, max_interp=3, func=lambda x: abs(x) > abs(x.std()*4.) ):
     """
+    Substitute elements for NaNs if a certain conditions given by fund is met at 
+    a maximum of max_interp times in a row.
+    If there are more than that number in a row, then they are not substituted.
+
+    Parameters:
+    -----------
+    data: pandas.dataframe
+        data to be interpolated
+    max_interp: int
+        number of maximum NaNs in a row to interpolate
+    func: function
+        function of x only that determines the which elements become NaNs. Should return
+        only True or False.
+
+    Returns:
+    --------
+    df: pandas.dataframe
+        dataframe with the elements substituted
     """
+    import numpy as np
+
     df=data.copy()
     cond=func(df)
     for c in df.columns:
         grouper = (cond[c] != cond[c].shift(1)).cumsum() * cond[c]
-        fill = (df.groupby(grouper)[c].transform(lambda x: x.size) <= max_interp)
+        fill = df.groupby(grouper)[c].transform(lambda x: x.size) <= max_interp
         #fill = (df.groupby(grouper)[c].transform('size') <= max_interp)
-        df.loc[fill, c] = np.nan
+        df.loc[fill & cond[c], c] = np.nan
     return df
 
 
@@ -190,7 +212,6 @@ def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepa
 
     Parameters:
     -----------
-
     df_valid: pandas.Series
         series contaning only True or False values for each of the variables, which should be the indexes
     testname: string
@@ -254,6 +275,8 @@ def inverse_normal_cdf(mu, sigma):
     """
     """
     from scipy.special import erfinv
+    import numpy as np
+
     def f(phi):
         Z=np.sqrt(2.)*erfinv(-2.*phi+1.)
         return sigma*Z + mu
@@ -392,6 +415,8 @@ def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscal
         whether or not to use a log-spaced scale to set the bins
     '''
     import warnings
+    import numpy as np
+
     xmin=np.min(x)
     xmax=np.max(x)
     if logscale:
@@ -428,6 +453,8 @@ def binwrapper(self, **kwargs):
     """
     Method to return binned data from a dataframe using the function classbin
     """
+    import numpy as np
+
     x=np.array(self.index)#.astype(np.float64)
     out=pd.DataFrame(columns = self.columns)
     for c in self.columns:
@@ -442,6 +469,8 @@ def get_index(x, y):
     """
     Just like the .index method of lists, except it works for multiple values
     """
+    import numpy as np
+
     return np.nonzero([ col in y for col in x ])
 
 
@@ -498,6 +527,7 @@ def line2date(line, dlconfig):
         configuration of the datalogger
     """
     import datetime as dt
+    import numpy as np
 
     varnames=dlconfig.varNames
     date_cols = dlconfig.date_cols
@@ -547,6 +577,8 @@ def find_nearest(array, value):
     value: float
         value to look for in the array
     """
+    import numpy as np
+
     idx = (np.abs(array-value)).argmin()
     return idx
 

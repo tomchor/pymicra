@@ -129,9 +129,10 @@ def qcontrol(files, datalogger_config,
         filename=basename(filepath)
         #--------------------------------
         # BEGINNING OF DATE CHECK
-        f=''.join([ s for s,v in izip_longest(filename, filename_format) if v!='?' ])
-        fmt=filename_format.replace('?','')
-        cdate=datetime.strptime(f, fmt)
+        #f=''.join([ s for s,v in izip_longest(filename, filename_format) if v!='?' ])
+        #fmt=filename_format.replace('?','')
+        #cdate=datetime.strptime(f, fmt)
+        cdate = algs.name2date(filename, datalogger_config)
         print cdate
         if cdate<bdate or cdate>edate:
             print cdate,':', filename, 'discarded because date is not valid'
@@ -444,6 +445,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
         if verbose:
             print 'Done!'
         return
+
 
 def correctDrift(drifted, correct_drifted_vars, correct=None,
                 get_fit=True, write_fit=True, fit_file='correctDrift_linfit.params',

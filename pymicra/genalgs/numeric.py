@@ -1,5 +1,4 @@
 import pandas as pd
-import auxiliar as algs
 
 def _integrate_series(self, how='trapz', dateindex=False, **kwargs):
     '''
@@ -57,6 +56,8 @@ def _integrate_df(self, how='trapz', dateindex=False, **kwargs):
     dateindex: bool
         whether or not to assume index is sequence of dates
 
+    If you get a ValueError when using cumtrapz scheme, use the initial keyword.
+
     See http://docs.scipy.org/doc/scipy/reference/integrate.html for the method details.
     or the source code
     https://github.com/scipy/scipy/blob/master/scipy/integrate/quadrature.py
@@ -94,12 +95,14 @@ def _diff_df(self, how='central', axis=0):
     Differentiates self
     """
     import numpy as np
+    import auxiliar as aux
+    import pandas as pd
 
     #---------
     # Choose x axis by column or index, considering axis keyword
     if axis==0:
         x = np.array(self.index)
-    if axis==1:
+    elif axis==1:
         x = np.array(self.transpose().index)
     else:
         raise ValueError('Axis must be 0 or 1')
@@ -109,7 +112,7 @@ def _diff_df(self, how='central', axis=0):
     #---------
     if how=='central':
         ix = x[1:-1]
-        diff=algs.diff_central
+        diff=aux.diff_central
     elif how=='fwd':
         ix=x[:-1]
         diff=lambda x,y: y/x
