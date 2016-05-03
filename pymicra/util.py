@@ -75,6 +75,10 @@ def qcontrol(files, datalogger_config,
     """
     Program that applies quality control to a set of datafiles
 
+    TODO:
+    Update parameters
+    Add check_spikes = True feature for simplicity
+
     Parameters:
     -----------
     files: list
