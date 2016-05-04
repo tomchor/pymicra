@@ -64,32 +64,98 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
 
 
 def qcontrol(files, datalogger_config,
-             bdate='2003-01-01 00:00', edate='2023-12-31 20:00',
-             spikes_func=None, interp_limit=3, accepted_percent=1.,
-             window_size=900, chunk_size='2Min', RATvars=None, file_lines=1800,
-             trueverbose=False, falseverbose=False, falseshow=0, trueshow=0, 
-             outdir='quality_controlled', date_format='"%Y-%m-%d %H:%M:%S.%f"',
+             file_lines=1800, bdate='1950-01-01 00:00', edate='2050-01-01 00:00',
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
+             spikes_func=None, interp_limit=3, accepted_percent=1.,
+             window_size=900, chunk_size='2Min', RATvars=None,
+             trueverbose=False, falseverbose=False, falseshow=0, trueshow=0, 
+             outdir='quality_controlled',
              summary_file='qcontrol_summary.csv'):
 
     """
-    Program that applies quality control to a set of datafiles
+    Program that applies various tests quality control to a set of datafiles and re-writes
+    the successful files in another directory. A list of currently-applied tests is found below.
 
     TODO:
-    Update parameters
     Add check_spikes = True feature for simplicity
+
+    Trivial tests:
+    -------------
+    date test:
+        files outside a date_range are left out
+    number-of-lines test:
+        files with a number of lines that is different from the correct number are out.
+
+    Non-trivial tests:
+    --------------
+    lowest value test:
+        runs with values in any column lower then a pre-determined value are left out.
+    highest value test:
+        runs with values in any column higher then a pre-determined value are left out.
+    spikes check:
+        runs with more than a certain percetage of spikes are left out. The definition
+        of a spike is set with the spikes_func keyword.
+    standard deviation check:
+        runs with a standard deviation lower than a pre-determined value (generally close to the
+        sensor precision) are left out.
+    reverse arrangement test:
+        runs that fail the reverse arrangement test for any variable are left out.
+    maximum difference test:
+        runs whose trend have a maximum different greater than a certain value are left out.
+        This excludes non-stationary runs.
 
     Parameters:
     -----------
     files: list
-        list of filepaths to consider
-    datalogger_config: pymicra.dataloger_configuration
-        configuration used for all files in files
+        list of filepaths
+    datalogger_config: pymicra.datalogerConf object
+        datalogger configuration object used for all files in the list of files
+    file_lines: int
+        number of line a "good" file must have. Fails if the run has any other number of lines.
     bdate: str
-        first date to be considered
+        dates before this automatically fail
     edate: str
-        last date to be considered
+        dates after this automatically fail
+    std_limits: dict
+        keys must be names of variables and values must be upper limits for the standard deviation.
+    dif_limits: dict
+        keys must be names of variables and values must be upper limits for the maximum difference
+        of values that the linear trend of the run must have.
+    low_limits: dict
+        keys must be names of variables and values must be lower absolute limits for the values of each var.
+    upp_limits: dict
+        keys must be names of variables and values must be upper absolute limits for the values of each var.
+    spikes_func: function
+        function used to look for spikes. Can be defined used numpy/pandas notation for methods with lambda functions.
+        Default is: lambda x: (abs(x - x.mean()) > abs(x.std()*4.))
+    interp_limit: int
+        limit of consecutive spike points to be interpolated. After this spikes are left as they are in the output.
+    accepted_percent: float
+        limit percentage of spike points in the data. If spike points represent a higher percentage
+        than the run fails the spikes check.
+    chunk_size: str
+        string representing time length of chunks used in the spikes and standard deviation check. Default is "2Min".
+    window_size: int
+        window size for rolling mean used in the standard deviation test.
+    RATvars: list
+        list containing the name of variables to go through the reverse arrangement test.
+    trueverbose: bool
+        whether or not to show details on the successful runs
+    falseverbose: bool
+        whether or not to show details on the failed runs
+    trueshow: bool
+        whether of not to plot the successful runs on screen
+    falseshow: bool
+        whether of not to plot the failed runs on screen
+    outdir: str
+        name of directory in which to write the successful runs. Directory must already exist.
+    summary_file: str
+        path of file to be created with the summary of the runs. Will be overwriten if already exists.
 
+    Returns:
+    --------
+    summary: pandas.DataFrame
+        dataframe with the summary of the non-trivial tests
     """
     from io import timeSeries
     from os.path import basename, join
@@ -133,9 +199,6 @@ def qcontrol(files, datalogger_config,
         filename=basename(filepath)
         #--------------------------------
         # BEGINNING OF DATE CHECK
-        #f=''.join([ s for s,v in izip_longest(filename, filename_format) if v!='?' ])
-        #fmt=filename_format.replace('?','')
-        #cdate=datetime.strptime(f, fmt)
         cdate = algs.name2date(filename, datalogger_config)
         print cdate
         if cdate<bdate or cdate>edate:
@@ -296,7 +359,8 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                 verbose=False, firstflag='.first', lastflag='.last', save_ram=False,
                 frequency='30min', quoting=0, use_edges=False):
     """
-    Separates files into (default) 30 minute smaller files
+    Separates files into (default) 30-minute smaller files. Useful for output files such
+    as the ones by Campbell Sci, that can have days of data in one single file.
 
     Parameters:
     -----------
@@ -325,6 +389,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
         of the next file in case they don't finish on a nice round time with respect to the frequency
 
     Returns:
+    --------
     None
     """
     from os import path
