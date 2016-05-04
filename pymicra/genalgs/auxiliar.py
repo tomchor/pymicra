@@ -7,26 +7,6 @@ import numpy as np
 #import scipy.stats as st
 
 
-def combine(levels, order='Crescent'):
-    """ Combines the elements of the levels in non-repeting pairs
-    for a n length array, gives n*(n-1)/2 combinations
-
-    Parameters
-    ----------
-    levels: list
-    list whose elements should be combined
-    """
-    print order
-    if order.lower()=='decrescent':
-        levels=levels[::-1]
-    combinations=[]
-    for i in range(0, len(levels)):
-        for j in range(i+1, len(levels)):
-            if j>i:
-                combinations.append([levels[j],levels[i]])
-    return combinations
-
-
 def splitData(data, rule='30min', return_index=False, **kwargs):
     """
     Splits a given pandas DataFrame into a series of "rule"-spaced DataFrames
@@ -55,6 +35,8 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
         
         check it complete at http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
         """
+    import pandas as pd
+
     res_index = pd.Series(index=data.index).resample(rule, **kwargs).index
     out=[]
     pdate=res_index[0]
@@ -97,6 +79,8 @@ def fitByDate(data, degree=1, rule=None):
     data: pd.DataFrame, pd.Series
         dataframe whose columns have to be fitted
     """
+    import pandas as pd
+
     if rule==None:
         dflist=[data]
     else:
@@ -338,6 +322,8 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
         list of columns that need to be padded with zeroes
     """
     from datetime import timedelta,datetime
+    import pandas as pd
+
     #------------------------------------
     # joins the names of the columns, which must match the datetime directive (see __doc__)
     #------------------------------------
@@ -455,6 +441,7 @@ def binwrapper(self, **kwargs):
     Method to return binned data from a dataframe using the function classbin
     """
     import numpy as np
+    import pandas as pd
 
     x=np.array(self.index)#.astype(np.float64)
     out=pd.DataFrame(columns = self.columns)
@@ -601,6 +588,11 @@ def find_nearest(array, value):
 
     idx = (np.abs(array-value)).argmin()
     return idx
+
+
+def mad(data, axis=None):
+    import numpy as np
+    return np.median(np.absolute(data - np.median(data, axis)), axis)
 
 #--------
 # Define xplot method for pandas dataframes
