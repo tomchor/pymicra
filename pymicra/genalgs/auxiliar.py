@@ -322,8 +322,8 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
     -----------
     data: pandas DataFrame
         dataFrame whose dates have to be parsed
-    date_cols: list of strings
-        A list of the names of the columns in which the date is divided
+    date_cols: list of ints
+        A list of the index of the columns in which the date is divided
         the naming of the date columns must be in accordance with the datetime directives,
         so if the first column is only the year, its name must be `%Y` and so forth.
         see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
@@ -341,7 +341,8 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
     #------------------------------------
     # joins the names of the columns, which must match the datetime directive (see __doc__)
     #------------------------------------
-    date_format=connector.join(date_cols)
+    date_col_names = data.columns[ date_cols ]
+    date_format=connector.join(date_col_names)
     auxformat='%Y-%m-%d %H:%M:%S.%f'
     if complete_zeroes:
         if type(complete_zeroes) == str:
@@ -352,10 +353,10 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
     # joins the appropriate pandas columns because pandas can read only one column into datetime
     #-------------------------------------
     try:
-        aux=data[date_cols[0]].astype(str)
+        aux=data[date_col_names[0]].astype(str)
     except ValueError:
-        aux=data[date_cols[0]].astype(int).astype(str)
-    for col in date_cols[1:]:
+        aux=data[date_col_names[0]].astype(int).astype(str)
+    for col in date_col_names[1:]:
         aux+=connector + data[col].astype(str)
     dates=pd.to_datetime(aux, format=date_format)
     #-------------------------------------
@@ -392,7 +393,7 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
     # removing the columns used to generate the date
     #-------------------------------------
     if clean:
-        data=data.drop(date_cols, axis=1)
+        data=data.drop(date_col_names, axis=1)
     return data
 
 
@@ -468,6 +469,12 @@ pd.DataFrame.binned=binwrapper
 def get_index(x, y):
     """
     Just like the .index method of lists, except it works for multiple values
+
+    Parameter:
+    x: list or array
+        the main array
+    y: list of array
+        the subset of the main whose indexes are desired
     """
     import numpy as np
 
@@ -517,7 +524,7 @@ def name2date(filename, dlconfig):
 
 def line2date(line, dlconfig):
     """
-    Gets a date from a line of file according to datalogger config file
+    Gets a date from a line of file according to dataloggerConf object.
 
     Parameters:
     -----------
@@ -525,18 +532,31 @@ def line2date(line, dlconfig):
         line of file with date inside
     dlconfig: pymicra.dataloggerConfig
         configuration of the datalogger
+
+    Returns:
+    --------
+    timestamp: datetime object
     """
     import datetime as dt
     import numpy as np
+    import re
 
     varnames=dlconfig.varNames
+    connector = dlconfig.date_connector
+    date_col_names = dlconfig.date_col_names
     date_cols = dlconfig.date_cols
     sep = dlconfig.columns_separator
 
-    datefmt=' '.join(date_cols)
-    indexes = get_index(varnames, date_cols)
-    line=np.array(line.split(sep))
-    s=' '.join(line[indexes])
+    datefmt=connector.join(date_col_names)
+
+    #-------
+    # Dealing with whitespace as delimiter using regex
+    if sep=='whitespace':
+        sep = r"\s*"
+    #-------
+
+    line = np.array( re.split(sep, line.strip()) )
+    s    = connector.join(line[ date_cols ])
     return dt.datetime.strptime(s, datefmt)
 
 

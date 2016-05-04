@@ -357,7 +357,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
         return
     
     #------------
-    # If RAM consumption is an issue, then I won't use pandas, which saves RAM but takes longer
+    # If RAM consumption is an issue, then I won't use pandas. This saves RAM but takes a lot longer.
     else:
         header = dlconfig.header_lines
         if header==None: header=0

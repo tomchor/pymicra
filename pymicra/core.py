@@ -17,8 +17,8 @@ class dataloggerConf(object):
         If a dict: the keys should be the numbers of the columns and the items should follow
         the rules for a list.
 
-    date_cols: list of strings
-        should be the subset of varNames that corresponds to the variables that compose
+    date_cols: list of ints
+        should be indexes of the subset of varNames that corresponds to the variables that compose
         the timestamp. If it is not provided the program will try to guess by getting
         all variable names that have a percentage sign (%).
 
@@ -48,6 +48,8 @@ class dataloggerConf(object):
     description: string
         brief description of the datalogger configuration file
     """
+    from genalgs import auxiliar as aux
+
     def __init__(self, varNames,
             date_cols=None,
             frequency=None,
@@ -71,12 +73,17 @@ class dataloggerConf(object):
         # If date_cols is not provided, this will try to guess the date columns
         # by assuming that no other columns has a % sign on their name
         if date_cols:
+            import numpy as np
             self.date_cols=date_cols
+            self.date_col_names = [ varNames[ idx ] for idx in date_cols ]
         else:
             if type(varNames) == list:
-                self.date_cols = [ el for el in varNames if '%' in el ]
+                self.date_col_names = [ el for el in varNames if '%' in el ]
+                self.date_cols = aux.get_index(varNames, self.date_cols)
             if type(varNames) == dict:
-                self.date_cols = { k : it for (k, it) in varNames.iteritems() if '%' in it }
+                date_cols = { k : it for (k, it) in varNames.iteritems() if '%' in it }
+                self.date_col_names = date_cols.values()
+                self.date_cols = date_cols.keys()
         #-------------------------
 
         self.frequency=frequency
