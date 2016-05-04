@@ -5,7 +5,7 @@ Date: 2015-08-07
 -------------------------
 
 TODO LIST
--INCLUDE DECODIFICAION OF DATA
+-INCLUDE DECODIFICAION OF DATA?
 
 """
 
