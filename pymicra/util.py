@@ -64,10 +64,12 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
 
 
 def qcontrol(files, datalogger_config,
-             file_lines=1800, bdate='1950-01-01 00:00', edate='2050-01-01 00:00',
+             file_lines=None, bdate=None, edate=None,
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
-             spikes_func=None, interp_limit=3, accepted_percent=1.,
-             window_size=900, chunk_size='2Min', RATvars=None,
+             spikes_check=True, spikes_func = lambda x: (abs(x - x.mean()) > 3.*abs(x.std())), 
+             interp_limit=3, accepted_percent=1.,
+             window_size=900, chunk_size='2Min',
+             RAT_check = False, RATvars = None,
              trueverbose=False, falseverbose=False, falseshow=0, trueshow=0, 
              outdir='quality_controlled',
              summary_file='qcontrol_summary.csv'):
@@ -81,9 +83,9 @@ def qcontrol(files, datalogger_config,
 
     Trivial tests:
     -------------
-    date test:
+    date check:
         files outside a date_range are left out
-    number-of-lines test:
+    lines test:
         files with a number of lines that is different from the correct number are out.
 
     Non-trivial tests:
@@ -125,6 +127,8 @@ def qcontrol(files, datalogger_config,
         keys must be names of variables and values must be lower absolute limits for the values of each var.
     upp_limits: dict
         keys must be names of variables and values must be upper absolute limits for the values of each var.
+    spikes_check: bool
+        whether or not to check for spikes
     spikes_func: function
         function used to look for spikes. Can be defined used numpy/pandas notation for methods with lambda functions.
         Default is: lambda x: (abs(x - x.mean()) > abs(x.std()*4.))
@@ -137,8 +141,10 @@ def qcontrol(files, datalogger_config,
         string representing time length of chunks used in the spikes and standard deviation check. Default is "2Min".
     window_size: int
         window size for rolling mean used in the standard deviation test.
+    RAT_check: bool
+        whether or not to perform the reverse arrangement test on data
     RATvars: list
-        list containing the name of variables to go through the reverse arrangement test.
+        list containing the name of variables to go through the reverse arrangement test. If None, all variables are tested.
     trueverbose: bool
         whether or not to show details on the successful runs
     falseverbose: bool
@@ -167,26 +173,52 @@ def qcontrol(files, datalogger_config,
     import numpy as np
     from genalgs import auxiliar as algs
 
-    bdate=parse(bdate)
-    edate=parse(edate)
+    if bdate: bdate=parse(bdate)
+    if edate: edate=parse(edate)
 
-    tables=pd.DataFrame(dif_limits, index=['dif_limits'])
-    tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
-    tables = tables.append( pd.DataFrame(low_limits, index=['low_limits']) )
-    tables = tables.append( pd.DataFrame(upp_limits, index=['upp_limits']) )
+    #--------------
+    # We first create the dataframe to hols our limit values and the numbers dict, which
+    # is what we use to produce our summary
+    #tables=pd.DataFrame(dif_limits, index=['dif_limits'])
+    tables=pd.DataFrame()
+    numbers = {'total': [], 'successful': []}
+    #--------------
+
+    #--------------
+    # We update numbers and tables based on the tests we will perform
+    if bdate or edate:
+        numbers['dates'] = []
+    if spikes_check:
+        numbers['spikes'] = []
+    if file_lines:
+        numbers['lines'] = []
+    if std_limits:
+        tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
+        numbers['STD'] = []
+    if low_limits:
+        tables = tables.append( pd.DataFrame(low_limits, index=['low_limits']) )
+        numbers['lowest value' ] = []
+    if upp_limits:
+        tables = tables.append( pd.DataFrame(upp_limits, index=['upp_limits']) )
+        numbers['highest value' ] = []
+    if dif_limits:
+        tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
+        numbers['difference'] = []
+    if RAT_check:
+        numbers['RAT'] = []
     tables = tables.fillna(value=np.nan)
+    #--------------
 
-    numbers={'total': [],
-    'spikes': [],
-    'STD': [],
-    'RAT': [],
-    'difference': [],
-    'lowest value': [],
-    'highest value': [],
-    'successful': []}
-
+    #-------------------------------------
+    # Removing datetime columns
     variables_list=datalogger_config.varNames
-    usedvars=[v for v in variables_list[1:] if r'%' not in v]
+    if type(variables_list) == dict:
+        usedvars=[ v for v in variables_list.values() if r'%' not in v ]
+    elif type(variables_list) == list:
+        usedvars=[v for v in variables_list[1:] if r'%' not in v]
+    else:
+        raise TypeError('Check varNames of the dataloggerConf object.')
+    #-------------------------------------
 
  
     #-------------------------------------
@@ -197,24 +229,32 @@ def qcontrol(files, datalogger_config,
     for filepath in files:
         print
         filename=basename(filepath)
+        numbers['total'].append(filename)
         #--------------------------------
         # BEGINNING OF DATE CHECK
-        cdate = algs.name2date(filename, datalogger_config)
-        print cdate
-        if cdate<bdate or cdate>edate:
-            print cdate,':', filename, 'discarded because date is not valid'
-            continue
-        else:
-            if trueverbose: print cdate,':', filename, 'included because date is valid'
-            pass
+        if bdate or edate:
+            cdate = algs.name2date(filename, datalogger_config)
+            print cdate
+            if bdate:
+                if cdate<bdate:
+                    print cdate,':', filename, 'Failed dates check'
+                    continue
+            if edate: 
+                if cdate>edate:
+                    print cdate,':', filename, 'Failed dates check'
+                    continue
+            else:
+                if trueverbose: print cdate,':', filename, 'Passed dates check'
+                pass
         #-------------------------------
     
         #-------------------------------
         # BEGINNING LINE NUMBERS TEST
-        result=algs.check_numlines(filepath, numlines=file_lines)
-        if result == False:
-            print filepath,'was skipped for not having the correct number of lines!'
-            continue
+        if file_lines:
+            result=algs.check_numlines(filepath, numlines=file_lines)
+            if result == False:
+                print filepath,'was skipped for not having the correct number of lines!'
+                continue
         #-------------------------------
     
         #-------------------------------
@@ -228,37 +268,44 @@ def qcontrol(files, datalogger_config,
             else:
                 raise ValueError, e
         #-------------------------------
+
+        #-------------------------------
+        # We save the full input for writting it later
         fullfin=fin.copy()
         fin=fin[usedvars]      # exclude unnused variables
-        numbers['total'].append(filename)
+        #numbers['total'].append(filename)
+        #-------------------------------
 
         #-------------------------------
         # BEGINNING OF LOWEST VALUE CHECK
-        valid= ~(fin < tables.loc['low_limits']).any(axis=0)
+        if low_limits:
+            valid= ~(fin < tables.loc['low_limits']).any(axis=0)
 
-        result, failed=algs.testValid(valid, testname='lowest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-        numbers=algs.applyResult(result, failed, fin, control=numbers, testname='lowest value', filename=filename, falseshow=falseshow)
-        if result==False: continue
+            result, failed=algs.testValid(valid, testname='lowest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='lowest value', filename=filename, falseshow=falseshow)
+            if result==False: continue
         #-------------------------------
     
         #-------------------------------
         # BEGINNING OF HIGHEST VALUE CHECK
-        valid= ~(fin > tables.loc['upp_limits']).any(axis=0)
+        if upp_limits:
+            valid= ~(fin > tables.loc['upp_limits']).any(axis=0)
 
-        result, failed=algs.testValid(valid, testname='highest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-        numbers=algs.applyResult(result, failed, fin, control=numbers, testname='highest value', filename=filename, falseshow=falseshow)
-        if result==False: continue
+            result, failed=algs.testValid(valid, testname='highest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='highest value', filename=filename, falseshow=falseshow)
+            if result==False: continue
         #-------------------------------
 
         #-------------------------------
         # BEGINNING OF SPIKES CHECK
-        chunks=algs.splitData(fin, chunk_size)
-        fin,valid_cols=check_spikes(chunks, visualize=False, vis_col='u', f=spikes_func, interp_limit=interp_limit)
-        valid= valid_cols >= (1.-(accepted_percent/100.))
+        if spikes_check:
+            chunks=algs.splitData(fin, chunk_size)
+            fin,valid_cols=check_spikes(chunks, visualize=False, vis_col='u', f=spikes_func, interp_limit=interp_limit)
+            valid= valid_cols >= (1.-(accepted_percent/100.))
 
-        result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-        numbers=algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
-        if result==False: continue
+            result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
+            if result==False: continue
         #-------------------------------
 
         #----------------------------------
@@ -278,17 +325,18 @@ def qcontrol(files, datalogger_config,
     
         #---------------------------------
         # BEGINNING OF REVERSE ARRANGEMENT TEST
-        if RATvars:
-            valid_chunks= fin[RATvars].apply(data.reverse_arrangement, axis=0, points_number=50, alpha=.01)
-        elif RATvars==None:
-            valid_chunks= fin.apply(data.reverse_arrangement, axis=0, points_number=50, alpha=.01)
-        else:
-            valid_chunks= fin.any(axis=0)
+        if RAT_check:
+            if RATvars:
+                valid_chunks= fin[RATvars].apply(data.reverse_arrangement, axis=0, points_number=50, alpha=.05)
+            elif RATvars==None:
+                valid_chunks= fin.apply(data.reverse_arrangement, axis=0, points_number=50, alpha=.05)
+            else:
+                valid_chunks= fin.any(axis=0)
 
-        result,failed=algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
-        numbers=algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
-        if result==False:
-            continue
+            result,failed=algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
+            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
+            if result==False:
+                continue
         #---------------------------------
     
         #--------------------------------

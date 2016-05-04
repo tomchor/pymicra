@@ -10,6 +10,7 @@
  analysis so these are required packages.
 """
 from io import timeSeries, read_dlc, read_site, toUnitsCsv, readUnitsCsv
+from util import qcontrol, separateFiles, correctDrift
 from micro import *
 from data import *
 from core import *
