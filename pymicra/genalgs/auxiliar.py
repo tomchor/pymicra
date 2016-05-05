@@ -37,7 +37,17 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
         """
     import pandas as pd
 
+    #---------
+    # Do not separate the data if rule is None
+    if rule == None:
+        return [ data ]
+    #---------
+
+    #---------
+    # We first create the index in which we base our separation
     res_index = pd.Series(index=data.index).resample(rule, **kwargs).index
+    #---------
+
     out=[]
     pdate=res_index[0]
     for date in res_index:

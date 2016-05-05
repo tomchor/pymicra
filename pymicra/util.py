@@ -11,7 +11,7 @@ TODO LIST
 
 
 def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
-                 f=lambda x: (abs(x - x.mean()) > abs(x.std()*4.)) ):
+                 cut_func=lambda x: (abs(x - x.mean()) > 4.*abs(x.std())) ):
     '''
     Applies spikes-check according to Vickers and Mart (1997)
 
@@ -23,9 +23,14 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
         whether of not to visualize the interpolation ocurring
     vis_col: str, int or list
         the column(s) to visualize when seeing the interpolation (only effective if visualize==True)
+    interp_limit: int
+        limit of consecutive spikes to interpolate
+    cut_func: function
+        function used to define spikes
     '''
     import pandas as pd
     import genalgs as algs
+    import matplotlib.pyplot as plt
 
     valid_cols=pd.Series(0, index=dfs[0].columns)
     for i in range(len(dfs)):
@@ -33,15 +38,9 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
         #-------------------------------
         # This substitutes the spikes to NaNs so it can be interpolated later
         if len(chunk)>interp_limit:
-            chunk=algs.limitedSubs(chunk, max_interp=interp_limit, func=f)
-        valid_cols= valid_cols + chunk.count()
+            chunk=algs.limitedSubs(chunk, max_interp=interp_limit, func=cut_func)
+        valid_cols = valid_cols + chunk.count()
         #-------------------------------
-
-        if visualize:
-            aux=dfs[i][vis_col]
-            aux2=(abs(aux - aux.mean()) < abs(aux.std()*cut_coef))
-            aux.plot(marker='o', color='green', label='original')
-            aux.mask(aux2).plot(marker='o', color='red')
 
         #-------------------------------
         #Interpolation takes place here
@@ -51,8 +50,16 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
         #-------------------------------
         # Visualize what you're doing to see if it's correct
         if visualize:
-            chunk[vis_col].plot(marker='', color='blue', label='controled')
+            aux = dfs[i][vis_col]
+            aux.plot(style='g-', label='original')
+            #aux.mask(aux2).plot(marker='o', linestyle='', color='red', label='spikes')
+            #aux[ cut_func(aux) ].plot(style='ro-', label='spikes')
+            chunk[vis_col].plot(marker='', color='blue', label='final')
+
+            plt.title('Column: {}'.format(vis_col))
+            plt.legend()
             plt.show()
+            plt.close()
         dfs[i]=chunk.copy()
         #-------------------------------
 
@@ -66,11 +73,12 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
 def qcontrol(files, datalogger_config,
              file_lines=None, bdate=None, edate=None,
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
-             spikes_check=True, spikes_func = lambda x: (abs(x - x.mean()) > 3.*abs(x.std())), 
+             spikes_check=True, visualize_spikes = False, spikes_vis_col = 'u',
+             spikes_func = lambda x: (abs(x - x.mean()) > 3.*abs(x.std())), 
              interp_limit=3, accepted_percent=1.,
              window_size=900, chunk_size='2Min',
              RAT_check = False, RATvars = None,
-             trueverbose=False, falseverbose=False, falseshow=0, trueshow=0, 
+             trueverbose=False, falseverbose=True, falseshow=0, trueshow=0, 
              outdir='quality_controlled',
              summary_file='qcontrol_summary.csv'):
 
@@ -115,9 +123,9 @@ def qcontrol(files, datalogger_config,
     file_lines: int
         number of line a "good" file must have. Fails if the run has any other number of lines.
     bdate: str
-        dates before this automatically fail
+        dates before this automatically fail.
     edate: str
-        dates after this automatically fail
+        dates after this automatically fail.
     std_limits: dict
         keys must be names of variables and values must be upper limits for the standard deviation.
     dif_limits: dict
@@ -128,7 +136,12 @@ def qcontrol(files, datalogger_config,
     upp_limits: dict
         keys must be names of variables and values must be upper absolute limits for the values of each var.
     spikes_check: bool
-        whether or not to check for spikes
+        whether or not to check for spikes.
+    visualize_spikes: bool
+        whether or not to plot the spikes identification and interpolation (useful for calibration of spikes_func). Only
+        one column is visualized at each time. This is set with the spikes_vis_col keyword.
+    spikes_vis_col: str
+        column to use to visualize spikes.
     spikes_func: function
         function used to look for spikes. Can be defined used numpy/pandas notation for methods with lambda functions.
         Default is: lambda x: (abs(x - x.mean()) > abs(x.std()*4.))
@@ -139,6 +152,7 @@ def qcontrol(files, datalogger_config,
         than the run fails the spikes check.
     chunk_size: str
         string representing time length of chunks used in the spikes and standard deviation check. Default is "2Min".
+        Putting None will not separate in chunks. It's recommended to use rolling functions in this case.
     window_size: int
         window size for rolling mean used in the standard deviation test.
     RAT_check: bool
@@ -236,17 +250,17 @@ def qcontrol(files, datalogger_config,
             print cdate
             if bdate:
                 if cdate<bdate:
-                    print cdate,':', filename, 'Failed dates check'
+                    if falseverbose: print filename, 'failed dates check'
                     numbers['dates'].append(filename)
                     continue
             if edate: 
                 if cdate>edate:
-                    print cdate,':', filename, 'Failed dates check'
+                    if falseverbose: print filename, 'failed dates check'
                     numbers['dates'].append(filename)
                     continue
             #-----------------
             # If we get here, then test is successful
-            if trueverbose: print cdate,':', filename, 'Passed dates check'
+            if trueverbose: print filename, 'passed dates check'
             #-----------------
         #-------------------------------
     
@@ -255,8 +269,11 @@ def qcontrol(files, datalogger_config,
         if file_lines:
             result=algs.check_numlines(filepath, numlines=file_lines)
             if result == False:
-                print filepath,'was skipped for not having the correct number of lines!'
+                if falseverbose: print filepath,'failed lines test'
+                numbers['lines'].append(filename)
                 continue
+            else:
+                if trueverbose: print filename, 'passed lines check'
         #-------------------------------
     
         #-------------------------------
@@ -275,7 +292,6 @@ def qcontrol(files, datalogger_config,
         # We save the full input for writting it later
         fullfin=fin.copy()
         fin=fin[usedvars]      # exclude unnused variables
-        #numbers['total'].append(filename)
         #-------------------------------
 
         #-------------------------------
@@ -301,8 +317,9 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         # BEGINNING OF SPIKES CHECK
         if spikes_check:
-            chunks=algs.splitData(fin, chunk_size)
-            fin,valid_cols=check_spikes(chunks, visualize=False, vis_col='u', f=spikes_func, interp_limit=interp_limit)
+            chunks = algs.splitData(fin, chunk_size)
+            fin,valid_cols=check_spikes(chunks, visualize=visualize_spikes, vis_col=spikes_vis_col, cut_func=spikes_func, interp_limit=interp_limit)
+
             valid= valid_cols >= (1.-(accepted_percent/100.))
 
             result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
