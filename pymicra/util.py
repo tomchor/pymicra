@@ -174,13 +174,11 @@ def qcontrol(files, datalogger_config,
 
     Returns:
     --------
-    summary: pandas.DataFrame
-        dataframe with the summary of the non-trivial tests
+    ext_summary: pandas.DataFrame
+        dict with the extended summary, which has the path of the files that got "stuck" in each test along with the successful ones
     """
     from io import timeSeries
     from os.path import basename, join
-    from itertools import izip_longest
-    from datetime import datetime
     from dateutil.parser import parse
     import data
     import pandas as pd
@@ -329,17 +327,17 @@ def qcontrol(files, datalogger_config,
 
         #----------------------------------
         # BEGINNING OF STANDARD DEVIATION CHECK
-        df=fin.copy()
-        df=df-pd.rolling_mean(df,window=window_size, center=True)
-        stds_list=df.resample(chunk_size, np.std).dropna()
-        valid= ~(stds_list<tables.loc['std_limits']).any(axis=0)
+        if std_limits:
+            df=fin.copy()
+            df=df-pd.rolling_mean(df,window=window_size, center=True)
+            stds_list=df.resample(chunk_size, np.std).dropna()
+            valid= ~(stds_list<tables.loc['std_limits']).any(axis=0)
 
-        result,failed=algs.testValid(valid, testname='STD', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-        if falseverbose:
-            print (not result)*'The failed variables and times:\n{0}'.format(~(stds_list<tables.loc['std_limits']))
-        numbers=algs.applyResult(result, failed, fin, control=numbers, testname='STD', filename=filename, falseshow=falseshow)
-        if result==False:
-            continue
+            result,failed=algs.testValid(valid, testname='STD', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            if falseverbose:
+                print (not result)*'The failed variables and times:\n{0}'.format(~(stds_list<tables.loc['std_limits']))
+            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='STD', filename=filename, falseshow=falseshow)
+            if result==False: continue
         #----------------------------------
     
         #---------------------------------
@@ -354,21 +352,21 @@ def qcontrol(files, datalogger_config,
 
             result,failed=algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
             numbers=algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
-            if result==False:
-                continue
+            if result==False: continue
         #---------------------------------
     
         #--------------------------------
         # BEGINNING OF MAXIMUM DIFFERENCE METHOD
-        trend=data.trend(fin, mode='linear')
-        maxdif=trend.iloc[0]-trend.iloc[-1]
-        maxdif=maxdif.abs()
-        chunks_valid= tables.loc['dif_limits'] - maxdif
-        chunks_valid= ~(chunks_valid < 0)
+        if dif_limits:
+            trend=data.trend(fin, mode='linear')
+            maxdif=trend.iloc[0]-trend.iloc[-1]
+            maxdif=maxdif.abs()
+            chunks_valid= tables.loc['dif_limits'] - maxdif
+            chunks_valid= ~(chunks_valid < 0)
 
-        result,failed=algs.testValid(chunks_valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
-        numbers=algs.applyResult(result, failed, fin, control=numbers, testname='difference', filename=filename, falseshow=falseshow)
-        if result==False: continue
+            result,failed=algs.testValid(chunks_valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
+            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='difference', filename=filename, falseshow=falseshow)
+            if result==False: continue
         #--------------------------------
     
         #--------------------------------
@@ -382,18 +380,22 @@ def qcontrol(files, datalogger_config,
 
         #--------------------------------
         # FINALLY
-        print 'Re-writng',filepath
+        print 'Re-writing',filepath
         fullfin[usedvars] = fin[usedvars]
         fullfin.to_csv(join( outdir, basename(filepath) ),
                    header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
         #--------------------------------
     
+    #-------------
+    # We create the summary datafrme
     summary= {k: [len(v)] for k, v in numbers.items()}
     summary=pd.DataFrame({'numbers': map(len,numbers.values())}, index=numbers.keys())
     summary['percent']=summary['numbers']/summary.loc['total','numbers']
+    #-------------
+
     print summary
     summary.to_csv(summary_file, na_rep='NaN')
-    return summary
+    return numbers
  
 
 def printUnit(string, mode='L', trim=True, greek=True):
