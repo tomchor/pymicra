@@ -32,6 +32,7 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
     import genalgs as algs
     import matplotlib.pyplot as plt
 
+    original = pd.concat(dfs)
     valid_cols=pd.Series(0, index=dfs[0].columns)
     for i in range(len(dfs)):
         chunk=dfs[i].copy()
@@ -62,11 +63,15 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
             plt.close()
         dfs[i]=chunk.copy()
         #-------------------------------
-
     fou=pd.concat(dfs)
     fou=fou.interpolate(method='time', axis=0)
     fou_points=len(fou.index)
     valid_cols=valid_cols/fou_points
+
+    original[vis_col].plot(style='g-', label='original')
+    fou[vis_col].plot(style='b-', label='final')
+    plt.show()
+    plt.close()
     return fou, valid_cols
 
 
@@ -77,42 +82,49 @@ def qcontrol(files, datalogger_config,
              spikes_func = lambda x: (abs(x - x.mean()) > 3.*abs(x.std())), 
              interp_limit=3, accepted_percent=1.,
              window_size=900, chunk_size='2Min',
-             RAT_check = False, RATvars = None,
+             rev_arrang_test = False, RATvars = None,
+             RAT_points = 50, RAT_significance = 0.01,
              trueverbose=False, falseverbose=True, falseshow=0, trueshow=0, 
              outdir='quality_controlled',
              summary_file='qcontrol_summary.csv'):
 
     """
-    Program that applies various tests quality control to a set of datafiles and re-writes
-    the successful files in another directory. A list of currently-applied tests is found below.
+    Function that applies various tests quality control to a set of datafiles and re-writes
+    the successful files in another directory. A list of currently-applied tests is found 
+    below in order of application. The only test available by default is the spikes test.
+    All others depend on their respective keywords.
 
-    TODO:
-    Add check_spikes = True feature for simplicity
 
     Trivial tests:
-    -------------
+    --------------
     date check:
-        files outside a date_range are left out
+        files outside a date_range are left out (edate and bdate keywords)
     lines test:
         files with a number of lines that is different from the correct number are out.
 
     Non-trivial tests:
-    --------------
+    ------------------
     lowest value test:
         runs with values in any column lower then a pre-determined value are left out.
+        Activate it by passing a low_limits keyword.
     highest value test:
         runs with values in any column higher then a pre-determined value are left out.
-    spikes check:
-        runs with more than a certain percetage of spikes are left out. The definition
-        of a spike is set with the spikes_func keyword.
+        Activate it by passing a upp_limits keyword.
+    spikes test:
+        runs with more than a certain percetage of spikes are left out. 
+        Activate it by passing a spikes_check keyword. Adjust the test with the spikes_func
+        visualize_spikes, spikes_vis_col, interp_limit, accepted_percent and chunk_size keywords.
     standard deviation check:
         runs with a standard deviation lower than a pre-determined value (generally close to the
         sensor precision) are left out.
+        Activate it by passing a std_limits keyword.
     reverse arrangement test:
         runs that fail the reverse arrangement test for any variable are left out.
+        Activate it by passing a rev_arrang_test keyword.
     maximum difference test:
         runs whose trend have a maximum different greater than a certain value are left out.
         This excludes non-stationary runs.
+        Activate it by passing a dif_limits keyword.
 
     Parameters:
     -----------
@@ -155,18 +167,22 @@ def qcontrol(files, datalogger_config,
         Putting None will not separate in chunks. It's recommended to use rolling functions in this case.
     window_size: int
         window size for rolling mean used in the standard deviation test.
-    RAT_check: bool
-        whether or not to perform the reverse arrangement test on data
+    rev_arrang_test: bool
+        whether or not to perform the reverse arrangement test on data.
     RATvars: list
         list containing the name of variables to go through the reverse arrangement test. If None, all variables are tested.
+    RAT_points: int
+        number of final points to apply the RAT. If 50, the run will be averaged to a 50-points run.
+    RAT_significance:
+        significance level to apply the RAT.
     trueverbose: bool
-        whether or not to show details on the successful runs
+        whether or not to show details on the successful runs.
     falseverbose: bool
-        whether or not to show details on the failed runs
+        whether or not to show details on the failed runs.
     trueshow: bool
-        whether of not to plot the successful runs on screen
+        whether of not to plot the successful runs on screen.
     falseshow: bool
-        whether of not to plot the failed runs on screen
+        whether of not to plot the failed runs on screen.
     outdir: str
         name of directory in which to write the successful runs. Directory must already exist.
     summary_file: str
@@ -215,28 +231,26 @@ def qcontrol(files, datalogger_config,
     if dif_limits:
         tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
         numbers['difference'] = []
-    if RAT_check:
+    if rev_arrang_test:
         numbers['RAT'] = []
     tables = tables.fillna(value=np.nan)
     #--------------
 
     #-------------------------------------
-    # Removing datetime columns
+    # Identifying columns that are not part of the datetime
     variables_list=datalogger_config.varNames
     if type(variables_list) == dict:
         usedvars=[ v for v in variables_list.values() if r'%' not in v ]
     elif type(variables_list) == list:
-        usedvars=[v for v in variables_list[1:] if r'%' not in v]
+        usedvars=[ v for v in variables_list[1:] if r'%' not in v ]
     else:
         raise TypeError('Check varNames of the dataloggerConf object.')
     #-------------------------------------
 
- 
     #-------------------------------------
     # BEGINNING OF MAIN PROGRAM
     #-------------------------------------
 
-    filename_format=datalogger_config.filename_format
     for filepath in files:
         print
         filename=basename(filepath)
@@ -289,7 +303,7 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         # We save the full input for writting it later
         fullfin=fin.copy()
-        fin=fin[usedvars]      # exclude unnused variables
+        fin=fin[usedvars]      # Exclude unnused variables
         #-------------------------------
 
         #-------------------------------
@@ -342,11 +356,11 @@ def qcontrol(files, datalogger_config,
     
         #---------------------------------
         # BEGINNING OF REVERSE ARRANGEMENT TEST
-        if RAT_check:
+        if rev_arrang_test:
             if RATvars:
-                valid_chunks= fin[RATvars].apply(data.reverse_arrangement, axis=0, points_number=50, alpha=.05)
+                valid_chunks= fin[RATvars].apply(data.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
             elif RATvars==None:
-                valid_chunks= fin.apply(data.reverse_arrangement, axis=0, points_number=50, alpha=.05)
+                valid_chunks= fin.apply(data.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
             else:
                 valid_chunks= fin.any(axis=0)
 
@@ -369,28 +383,29 @@ def qcontrol(files, datalogger_config,
             if result==False: continue
         #--------------------------------
     
-        #--------------------------------
+        #-----------------
         # END OF TESTS
         print 'Successful run!'
         if trueshow:
             fin.plot()
             plt.show()
         numbers['successful'].append(filename)
-        #--------------------------------
+        #-----------------
 
-        #--------------------------------
-        # FINALLY
+        #-----------------
+        # FINALLY, we write the result in the output directory in the same format
         print 'Re-writing',filepath
-        fullfin[usedvars] = fin[usedvars]
-        fullfin.to_csv(join( outdir, basename(filepath) ),
+        fullfin[usedvars] = fin[usedvars]       # This is because some spikes were during the process
+        fullfin.to_csv(
+                   join(outdir, basename(filepath)),
                    header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
-        #--------------------------------
+        #-----------------
     
     #-------------
-    # We create the summary datafrme
+    # We create the summary dataframe
     summary= {k: [len(v)] for k, v in numbers.items()}
     summary=pd.DataFrame({'numbers': map(len,numbers.values())}, index=numbers.keys())
-    summary['percent']=summary['numbers']/summary.loc['total','numbers']
+    summary['percent']=100.*summary['numbers']/summary.loc['total','numbers']
     #-------------
 
     print summary
