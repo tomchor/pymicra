@@ -179,7 +179,6 @@ def qcontrol(files, datalogger_config,
     #--------------
     # We first create the dataframe to hols our limit values and the numbers dict, which
     # is what we use to produce our summary
-    #tables=pd.DataFrame(dif_limits, index=['dif_limits'])
     tables=pd.DataFrame()
     numbers = {'total': [], 'successful': []}
     #--------------
@@ -238,14 +237,17 @@ def qcontrol(files, datalogger_config,
             if bdate:
                 if cdate<bdate:
                     print cdate,':', filename, 'Failed dates check'
+                    numbers['dates'].append(filename)
                     continue
             if edate: 
                 if cdate>edate:
                     print cdate,':', filename, 'Failed dates check'
+                    numbers['dates'].append(filename)
                     continue
-            else:
-                if trueverbose: print cdate,':', filename, 'Passed dates check'
-                pass
+            #-----------------
+            # If we get here, then test is successful
+            if trueverbose: print cdate,':', filename, 'Passed dates check'
+            #-----------------
         #-------------------------------
     
         #-------------------------------
