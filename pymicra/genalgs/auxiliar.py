@@ -15,49 +15,54 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
     ----------
     data: pandas dataframe
         data to be split
-    rule: pandas string offset
-        Some possible values (that should be followed by an integer) are:
-        D   calendar day frequency
-        W   weekly frequency
-        M   month end frequency
-        MS  month start frequency
-        Q   quarter end frequency
-        BQ  business quarter endfrequency
-        QS  quarter start frequency
-        A   year end frequency
-        AS  year start frequency
-        H   hourly frequency
-        T   minutely frequency
-        Min minutely frequency
-        S   secondly frequency
-        L   milliseconds
-        U   microseconds
+    rule: str or int 
+        If it is a string, it should be a pandas string offset.
+            Some possible values (that should be followed by an integer) are:
+            D   calendar day frequency
+            W   weekly frequency
+            M   month end frequency
+            MS  month start frequency
+            Q   quarter end frequency
+            BQ  business quarter endfrequency
+            QS  quarter start frequency
+            A   year end frequency
+            AS  year start frequency
+            H   hourly frequency
+            T   minutely frequency
+            Min minutely frequency
+            S   secondly frequency
+            L   milliseconds
+            U   microseconds
+
+        If it is a int, it should be the number of lines desired in each separated piece.
+
+        If it is None, then the dataframe isn't separated and a list containing only the
+        full dataframe is returned.
         
         check it complete at http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
         """
     import pandas as pd
 
     #---------
-    # Do not separate the data if rule is None
+    # Choose how to separate the data
     if rule == None:
-        return [ data ]
+        out = [ data ]
+    elif type(rule) == int:
+        out = [ data.iloc[ rule*i : rule*(i+1) ] for i in range(0, len(data)/rule) ]
+    else:
+        from itertools import izip_longest as izip
+        #---------
+        # We first create the index in which we base our separation
+        # THIS STEP CAN PROBABLY BE IMPROVED
+        res_dates = pd.Series(index=data.index).resample(rule, **kwargs).index
+        intervals = izip(res_dates, res_dates[1:], fillvalue=data.index[-1] + pd.DateOffset(microseconds=2))
+        #---------
+
+        out = [ data.loc[ bdate:edate - pd.DateOffset(microseconds=1) ] for bdate, edate in intervals ]
     #---------
 
-    #---------
-    # We first create the index in which we base our separation
-    res_index = pd.Series(index=data.index).resample(rule, **kwargs).index
-    #---------
-
-    out=[]
-    pdate=res_index[0]
-    for date in res_index:
-        aux=data.ix[pdate:date][:-1]
-        if len(aux.values)>0:
-            out.append(aux)
-        pdate=date
-    out.append(data[pdate:])
     if return_index:
-        return out, res_index
+        return out, res_dates
     else:
         return out
 
@@ -472,6 +477,11 @@ def get_index(x, y):
         the main array
     y: list of array
         the subset of the main whose indexes are desired
+
+    Returns:
+    --------
+    indexes: np.array
+        array with the indexes of each element in y
     """
     import numpy as np
 

@@ -34,8 +34,13 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
 
     original = pd.concat(dfs)
     valid_cols=pd.Series(0, index=dfs[0].columns)
+
     for i in range(len(dfs)):
+        #-------------------------------
+        # We make a copy of the original df just in case
         chunk=dfs[i].copy()
+        #-------------------------------
+
         #-------------------------------
         # This substitutes the spikes to NaNs so it can be interpolated later
         if len(chunk)>interp_limit:
@@ -49,29 +54,27 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
         #-------------------------------
 
         #-------------------------------
-        # Visualize what you're doing to see if it's correct
-        if visualize:
-            aux = dfs[i][vis_col]
-            aux.plot(style='g-', label='original')
-            #aux.mask(aux2).plot(marker='o', linestyle='', color='red', label='spikes')
-            #aux[ cut_func(aux) ].plot(style='ro-', label='spikes')
-            chunk[vis_col].plot(marker='', color='blue', label='final')
-
-            plt.title('Column: {}'.format(vis_col))
-            plt.legend()
-            plt.show()
-            plt.close()
+        # We change the chunk in the original list of dfs to concatenate later
         dfs[i]=chunk.copy()
         #-------------------------------
+
     fou=pd.concat(dfs)
     fou=fou.interpolate(method='time', axis=0)
     fou_points=len(fou.index)
     valid_cols=valid_cols/fou_points
 
-    original[vis_col].plot(style='g-', label='original')
-    fou[vis_col].plot(style='b-', label='final')
-    plt.show()
-    plt.close()
+    #-------------------------------
+    # Visualize what you're doing to see if it's correct
+    if visualize:
+        original[vis_col].plot(style='g-', label='original')
+        #aux[ cut_func(aux) ].plot(style='ro-', label='spikes')
+        fou[vis_col].plot(style='b-', label='final')
+        plt.title('Column: {}'.format(vis_col))
+        plt.legend()
+        plt.show()
+        plt.close()
+    #-------------------------------
+
     return fou, valid_cols
 
 
