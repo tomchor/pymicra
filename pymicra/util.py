@@ -66,6 +66,7 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
     #-------------------------------
     # Visualize what you're doing to see if it's correct
     if visualize:
+        print 'Plotting de-spikes...'
         original[vis_col].plot(style='g-', label='original')
         #aux[ cut_func(aux) ].plot(style='ro-', label='spikes')
         fou[vis_col].plot(style='b-', label='final')
@@ -257,12 +258,12 @@ def qcontrol(files, datalogger_config,
     for filepath in files:
         print
         filename=basename(filepath)
+        print filename
         numbers['total'].append(filename)
-        #--------------------------------
+        #---------------
         # BEGINNING OF DATE CHECK
         if bdate or edate:
             cdate = algs.name2date(filename, datalogger_config)
-            print cdate
             if bdate:
                 if cdate<bdate:
                     if falseverbose: print filename, 'failed dates check'
@@ -277,7 +278,7 @@ def qcontrol(files, datalogger_config,
             # If we get here, then test is successful
             if trueverbose: print filename, 'passed dates check'
             #-----------------
-        #-------------------------------
+        #----------------
     
         #-------------------------------
         # BEGINNING LINE NUMBERS TEST
@@ -329,19 +330,6 @@ def qcontrol(files, datalogger_config,
             if result==False: continue
         #-------------------------------
 
-        #-------------------------------
-        # BEGINNING OF SPIKES CHECK
-        if spikes_check:
-            chunks = algs.splitData(fin, chunk_size)
-            fin,valid_cols=check_spikes(chunks, visualize=visualize_spikes, vis_col=spikes_vis_col, cut_func=spikes_func, interp_limit=interp_limit)
-
-            valid= valid_cols >= (1.-(accepted_percent/100.))
-
-            result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
-            if result==False: continue
-        #-------------------------------
-
         #----------------------------------
         # BEGINNING OF STANDARD DEVIATION CHECK
         if std_limits:
@@ -350,9 +338,12 @@ def qcontrol(files, datalogger_config,
             stds_list=df.resample(chunk_size, np.std).dropna()
             valid= ~(stds_list<tables.loc['std_limits']).any(axis=0)
 
-            result,failed=algs.testValid(valid, testname='STD', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            if falseverbose:
+            result, failed = algs.testValid(valid, testname='STD', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            #--------------
+            # This specifies which part of the run failed on this test
+            if falseverbose and (result==False):
                 print (not result)*'The failed variables and times:\n{0}'.format(~(stds_list<tables.loc['std_limits']))
+            #--------------
             numbers=algs.applyResult(result, failed, fin, control=numbers, testname='STD', filename=filename, falseshow=falseshow)
             if result==False: continue
         #----------------------------------
@@ -367,7 +358,7 @@ def qcontrol(files, datalogger_config,
             else:
                 valid_chunks= fin.any(axis=0)
 
-            result,failed=algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
+            result, failed = algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
             numbers=algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
             if result==False: continue
         #---------------------------------
@@ -381,11 +372,24 @@ def qcontrol(files, datalogger_config,
             chunks_valid= tables.loc['dif_limits'] - maxdif
             chunks_valid= ~(chunks_valid < 0)
 
-            result,failed=algs.testValid(chunks_valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
+            result, failed = algs.testValid(chunks_valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
             numbers=algs.applyResult(result, failed, fin, control=numbers, testname='difference', filename=filename, falseshow=falseshow)
             if result==False: continue
         #--------------------------------
-    
+ 
+        #-------------------------------
+        # BEGINNING OF SPIKES CHECK
+        if spikes_check:
+            chunks = algs.splitData(fin, chunk_size)
+            fin,valid_cols=check_spikes(chunks, visualize=visualize_spikes, vis_col=spikes_vis_col, cut_func=spikes_func, interp_limit=interp_limit)
+
+            valid= valid_cols >= (1.-(accepted_percent/100.))
+
+            result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
+            if result==False: continue
+        #-------------------------------
+   
         #-----------------
         # END OF TESTS
         print 'Successful run!'
