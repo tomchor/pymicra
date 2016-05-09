@@ -1,0 +1,25 @@
+description='example of a datalogger configuration file for a grassland'
+varNames={
+0:'%Y-%m-%d %H:%M:%S.%f',
+1:'u',
+2:'v',
+3:'w',
+4:'theta_v',
+5:'h2o',
+6:'co2'}
+date_cols = [0]
+
+frequency=20
+date_connector='-'
+columns_separator=','
+header_lines=None
+first_time_skip=False
+units={
+'u':'m/s',
+'v':'m/s',
+'w':'m/s',
+'theta_v':'celsius',
+'co2':'mmol/m**3',
+'h2o':'mmol/m**3',
+}
+filename_format = '1H_%Y%m%d_%Hh.csv'

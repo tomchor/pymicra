@@ -1,0 +1,5 @@
+description         = "Example of a site configuration for a grassland"
+variables_height    = 2.0  # m
+canopy_height       = 0.1  # m
+displacement_height = 0.6  # m
+z0                  = .01  # m
