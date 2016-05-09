@@ -134,8 +134,8 @@ def qcontrol(files, datalogger_config,
     -----------
     files: list
         list of filepaths
-    datalogger_config: pymicra.datalogerConf object
-        datalogger configuration object used for all files in the list of files
+    datalogger_config: pymicra.datalogerConf object or str
+        datalogger configuration object used for all files in the list of files or path to a dlc file.
     file_lines: int
         number of line a "good" file must have. Fails if the run has any other number of lines.
     bdate: str
@@ -209,6 +209,13 @@ def qcontrol(files, datalogger_config,
     if edate: edate=parse(edate)
 
     #--------------
+    # If the path to the dlc is provided, we read it as a dataloggerConf object
+    if isinstance(datalogger_config, str):
+        from io import read_dlc
+        datalogger_config = read_dlc(datalogger_config)
+    #--------------
+
+    #--------------
     # We first create the dataframe to hols our limit values and the numbers dict, which
     # is what we use to produce our summary
     tables=pd.DataFrame()
@@ -216,7 +223,8 @@ def qcontrol(files, datalogger_config,
     #--------------
 
     #--------------
-    # We update numbers and tables based on the tests we will perform
+    # We update numbers and tables based on the tests we will perform.
+    # If a test is not marked to be perform, it will not be on this list.
     if bdate or edate:
         numbers['dates'] = []
     if spikes_check:

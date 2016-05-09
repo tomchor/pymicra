@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import print_function
 """
 Author: Tomas Chor
 Date: 2015-08-07
@@ -196,7 +197,7 @@ def _Cx(x, za, zb, d, z0, Lm, Psif=None):
     #--------
     # Checks for Psi and if it's a function
     if Psif==None:
-        print 'Should get a repository for functions'
+        print('Should get a repository for functions')
     elif hasattr(Psif, '__call__')==False:
         raise TypeError('Psi argument has to be a function')
     else:

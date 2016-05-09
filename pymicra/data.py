@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import print_function
 """
 Author: Tomas Chor
 Date: 2015-08-07
