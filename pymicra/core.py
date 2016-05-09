@@ -8,6 +8,10 @@ class dataloggerConf(object):
 
     Parameters:
     ----------
+    from_file: str
+        path of .dlc file (datalogger configuration file) to read from. This will ignore all other
+        keywords.
+
     varNames: list of strings or dict
         If a list: should be a list of strings with the names of the variables. If the variable
         is part if the date, then it should be provided as a datetime directive,
@@ -27,40 +31,46 @@ class dataloggerConf(object):
 
     columns_separator: string
         used to assemble the date. Should only be used if the default char creates conflict. If
-        the file is tabular-separated then this should be "whitespace"
+        the file is tabular-separated then this should be "whitespace".
 
     header_lines: int
         up to which line of the file is a header. See pandas.read_csv header option.
 
     first_time_skip: int
-        how many units of frequency the first line of the file is offset (generally zero)
+        how many units of frequency the first line of the file is offset (generally zero).
 
     filename_format: string
         tells the format of the file with the standard notation for date and time and with variable
         parts as "?". E.g. if the files are 56_20150101.csv, 57_20150102.csv etc filename_format should be:
             ??_%Y%m%d.csv
-        this is useful primarily for the quality control feature
+        this is useful primarily for the quality control feature.
 
     units: dictionary
         very important: a dictionary whose keys are the columns of the file and whose items are
         the units in which they appear.
 
     description: string
-        brief description of the datalogger configuration file
+        brief description of the datalogger configuration file.
     """
-    from algs import auxiliar as aux
 
-    def __init__(self, varNames,
+    def __init__(self,
+            from_file=None,
+            varNames=None,
             date_cols=None,
             frequency=None,
-            date_connector='-', 
-            columns_separator=',',
+            date_connector=None,
+            columns_separator=None,
             header_lines=None,
             first_time_skip=False,
             units=None,
             skiprows=None,
-            filename_format='CSV_?????.fluxo_??m_%Y_%j_%H%M.dat',
-            description='generic datalogger configuration file'):
+            filename_format=None,
+            description='Generic datalogger configuration file. Type help(dataloggerConf) to read intructions'):
+        """
+        Initiates the class
+        """
+        import algs as aux
+
         #-------------------------
         # Makes sure that units is a dictionary type
         if units is not None:
@@ -68,22 +78,39 @@ class dataloggerConf(object):
                 raise TypeError('units should be a dictionary. Ex.: {"u" : "m/s", "v" : "m/s", "theta" : "K" }')
         #-------------------------
 
-        self.varNames=varNames
         #-------------------------
-        # If date_cols is not provided, this will try to guess the date columns
-        # by assuming that no other columns has a % sign on their name
-        if date_cols:
-            import numpy as np
-            self.date_cols=date_cols
-            self.date_col_names = [ varNames[ idx ] for idx in date_cols ]
+        if from_file:
+            from io import read_dlc
+            dlconf = read_dlc(from_file)
+            self.__dict__.update(dlconf.__dict__)
+            return
+        #-------------------------
+
+        #-------------------------
+        if (type(varNames)==list) or (type(varNames)==dict):
+            self.varNames=varNames
+
+            #-------------------------
+            # If date_cols is not provided, this will try to guess the date columns
+            # by assuming that no other columns has a % sign on their name
+            if date_cols:
+                import numpy as np
+                self.date_cols=date_cols
+                self.date_col_names = [ varNames[ idx ] for idx in date_cols ]
+            else:
+                if type(varNames) == list:
+                    self.date_col_names = [ el for el in varNames if '%' in el ]
+                    self.date_cols = aux.get_index(varNames, self.date_cols)
+                if type(varNames) == dict:
+                   date_cols = { k : it for (k, it) in varNames.iteritems() if '%' in it }
+                   self.date_col_names = date_cols.values()
+                   self.date_cols = date_cols.keys()
+           #-------------------------
+
         else:
-            if type(varNames) == list:
-                self.date_col_names = [ el for el in varNames if '%' in el ]
-                self.date_cols = aux.get_index(varNames, self.date_cols)
-            if type(varNames) == dict:
-                date_cols = { k : it for (k, it) in varNames.iteritems() if '%' in it }
-                self.date_col_names = date_cols.values()
-                self.date_cols = date_cols.keys()
+            self.varNames = varNames
+            self.date_cols = date_cols
+            self.date_col_names = None
         #-------------------------
 
         self.frequency=frequency
@@ -95,6 +122,7 @@ class dataloggerConf(object):
         self.units=units
         self.description=description
         self.filename_format=filename_format
+        return
 
 
 class siteConstants(object):
