@@ -1,10 +1,8 @@
 #!/usr/bin/python
 """
-
 """
 import pandas as pd
 import numpy as np
-#import scipy.stats as st
 
 
 def splitData(data, rule='30min', return_index=False, **kwargs):
@@ -66,7 +64,7 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
     else:
         return out
 
-def fitWrap(x,y,degree=1):
+def fitWrap(x, y, degree=1):
     """
     A wrapper to numpy.polyfit and numpy.polyval that fits data given an x and y arrays.
     This is specifically designed to be used with by pandas.DataFrame.apply method

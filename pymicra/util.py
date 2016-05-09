@@ -29,7 +29,7 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
         function used to define spikes
     '''
     import pandas as pd
-    import genalgs as algs
+    import algs
     import matplotlib.pyplot as plt
 
     original = pd.concat(dfs)
@@ -202,7 +202,7 @@ def qcontrol(files, datalogger_config,
     import data
     import pandas as pd
     import numpy as np
-    from genalgs import auxiliar as algs
+    from algs import auxiliar as algs
 
     if bdate: bdate=parse(bdate)
     if edate: edate=parse(edate)
@@ -482,7 +482,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
     from os import path
     import io
     import pandas as pd
-    from genalgs import auxiliar as algs
+    from algs import auxiliar as algs
 
     #-----------------------
     # First considerations

@@ -212,7 +212,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, 
     verbose: int, bool
         verbose level
     """
-    from genalgs import auxiliar as algs
+    from algs import auxiliar as algs
     
     if isinstance(flist, str):
         flist=[flist]

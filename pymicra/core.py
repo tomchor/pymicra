@@ -48,7 +48,7 @@ class dataloggerConf(object):
     description: string
         brief description of the datalogger configuration file
     """
-    from genalgs import auxiliar as aux
+    from algs import auxiliar as aux
 
     def __init__(self, varNames,
             date_cols=None,

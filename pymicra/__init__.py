@@ -21,5 +21,5 @@ import util
 import constants
 from micro import spectral
 import micro
-import genalgs
+import algs
 __version__='0.1.0'

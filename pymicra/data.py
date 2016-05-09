@@ -77,7 +77,7 @@ def trend(data, mode='moving average', rule=None, window=None, how='mean', **kwa
         that returns a float. E.g, median.
     """
     import pandas as pd
-    import genalgs
+    import algs
     import numpy as np
 
     mode=mode.lower().replace('_',' ').replace('-','').replace(' ','')
@@ -105,7 +105,7 @@ def trend(data, mode='moving average', rule=None, window=None, how='mean', **kwa
     elif any(w in mode for w in ['linear', 'polynomial']):
         #-------
         # performs a polynomial fit on the data in blocks of "rule"
-        return genalgs.fitByDate(data, rule=rule, **kwargs)
+        return algs.fitByDate(data, rule=rule, **kwargs)
         #-------
 
     else:
@@ -130,9 +130,9 @@ def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
         suffix to add to variable names after fluctuation is extracted
     """
     from scipy import signal
-    import genalgs
+    import algs
 
-    mode=genalgs.stripDown(mode.lower(), args='-_')
+    mode=algs.stripDown(mode.lower(), args='-_')
     df=data.copy()
 
     #-----------
@@ -287,7 +287,7 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
 
     Still not adapted for dataframes
     '''
-    import genalgs
+    import algs
     import numpy as np
 
     #-----------
@@ -322,7 +322,7 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
     Atot = sum(A)
     N=len(xarray)
     mu,variance=mu_var(N)
-    f=genalgs.inverse_normal_cdf(mu, np.sqrt(variance))
+    f=algs.inverse_normal_cdf(mu, np.sqrt(variance))
     phi1=1.-alpha/2.
     phi2=alpha/2.
     A1=f(phi1)
