@@ -91,13 +91,18 @@ def fitByDate(data, degree=1, rule=None):
     ----------
     data: pd.DataFrame, pd.Series
         dataframe whose columns have to be fitted
+    degree: int
+        degree of the polynomial. Default is 1.
+    rule: str
+        pandas offside string. Ex.: "10min".
     """
     import pandas as pd
 
-    if rule==None:
-        dflist=[data]
-    else:
-        dflist=splitData(data, rule=rule)
+    #-----------
+    # If rule == None it should return a list of 1
+    dflist=splitData(data, rule=rule)
+    #-----------
+
     out=pd.DataFrame()
     for data in dflist:
         xx=data.index.to_julian_date()

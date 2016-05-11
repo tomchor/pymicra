@@ -59,7 +59,7 @@ def rotCoor(data, notation_defs=None):
     return data
 
 
-def trend(data, mode='moving average', rule=None, window=None, how='mean', **kwargs):
+def trend(data, mode='linear', rule=None, window=None, how='mean', **kwargs):
     """
     Wrapper to return the trend given data. Can be achieved using a moving avg, block avg or polynomial fitting
 
@@ -76,6 +76,9 @@ def trend(data, mode='moving average', rule=None, window=None, how='mean', **kwa
     how: str, function
         how to resample in block type. Default is mean but it can be any numpy function
         that returns a float. E.g, median.
+    kwargs:
+        degree: int
+            degree of polynomial fit to be passed to algs.fitByDate
     """
     import pandas as pd
     import algs
@@ -86,8 +89,8 @@ def trend(data, mode='moving average', rule=None, window=None, how='mean', **kwa
         #-------
         # performs moving average on the data with window equivalent to the rule
         if window==None:
-            print('warning: approximating window size for moving average')
-            window=int(len(data)/len(data.resample(rule)))
+            print('Warning: approximating window size for moving average!\nShould provide window keyword.\n')
+            window = int(len(data)/len(data.resample(rule)))
         return pd.rolling_mean(data, window=window, **kwargs)
         #-------
 
@@ -112,7 +115,7 @@ def trend(data, mode='moving average', rule=None, window=None, how='mean', **kwa
     else:
         #-------
         # if no mode can be identified
-        raise KeyError('Mode defined is not correct. Options are "moving" and "block".')
+        raise KeyError('Mode defined is not correct. Options are "moving", "linear", "polynomial" and "block".')
         #-------
 
 def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
