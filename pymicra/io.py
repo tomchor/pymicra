@@ -136,7 +136,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, 
     header_lines=datalogger.header_lines
     skiprows=datalogger.skiprows
     columns_separator=datalogger.columns_separator
-    date_cols=datalogger.date_cols
+    date_col_names=datalogger.date_col_names
     date_connector=datalogger.date_connector
     if columns_separator=='whitespace':
         series=readDataFiles(flist, header=header_lines, skiprows=skiprows, delim_whitespace=True, varNames=datalogger.varNames, **read_data_kw)
@@ -147,7 +147,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, 
     if parse_dates:
         if verbose:
             print 'Starting to parse the dates'
-        series=algs.parseDates(series, date_cols, connector=date_connector, first_time_skip=datalogger.first_time_skip, 
+        series=algs.parseDates(series, date_col_names, connector=date_connector, first_time_skip=datalogger.first_time_skip, 
                           **parse_dates_kw)
     return series
 

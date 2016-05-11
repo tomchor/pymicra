@@ -308,8 +308,8 @@ def applyResult(result, failed, df, control=None, testname=None, filename=None, 
     return control
 
 
-def parseDates(data, date_cols, connector='-', first_time_skip=0,
-  clean=True, correct_fracs=None, complete_zeroes=False):
+def parseDates(data, date_col_names, connector='-', first_time_skip=0,
+  clean=True, correct_fracs=None, complete_zeroes=False, verbose=False):
     """
     Author: Tomas Chor
     date: 2015-08-10
@@ -319,12 +319,13 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
     -----------
     data: pandas DataFrame
         dataFrame whose dates have to be parsed
-    date_cols: list of ints
-        A list of the index of the columns in which the date is divided
+    date_col_names: list
+        A list of the names of the columns in which the date is divided
         the naming of the date columns must be in accordance with the datetime directives,
         so if the first column is only the year, its name must be `%Y` and so forth.
         see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
     connector: string
+        should be used only when the default connector causes some conflit
     first_time_skip: int
         the offset (mostly because of the bad converting done by LBA
     clean: bool
@@ -339,8 +340,7 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
 
     #------------------------------------
     # joins the names of the columns, which must match the datetime directive (see __doc__)
-    #------------------------------------
-    date_col_names = data.columns[ date_cols ]
+    if verbose: print 'Using these columns: ', date_col_names
     date_format=connector.join(date_col_names)
     auxformat='%Y-%m-%d %H:%M:%S.%f'
     if complete_zeroes:
@@ -348,9 +348,10 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
             complete_zeroes=[complete_zeroes]
         for col in complete_zeroes:
             data[col]=data[col].apply(completeHM)
+    #------------------------------------
+
     #-------------------------------------
     # joins the appropriate pandas columns because pandas can read only one column into datetime
-    #-------------------------------------
     try:
         aux=data[date_col_names[0]].astype(str)
     except ValueError:
@@ -359,9 +360,10 @@ def parseDates(data, date_cols, connector='-', first_time_skip=0,
         aux+=connector + data[col].astype(str)
     dates=pd.to_datetime(aux, format=date_format)
     #-------------------------------------
+
+    #-------------------------------------
     # The next steps are there to check if there are fractions that are not expressed in the datetime convention
     # and it assumes that the lowest time period expressed is the minute
-    #-------------------------------------
     first_date=dates.unique()[1]
     n_fracs=len(dates[dates.values==first_date])
     if n_fracs>1:
@@ -384,15 +386,19 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
         else:
             print '\nWarning: fractions werent corrected. Check your timestamp data and the correct_fracs flag\n'
     #-------------------------------------
-    # setting new dates list as the index
+
     #-------------------------------------
+    # setting new dates list as the index
     data=data.set_index([dates])
     data.index.name = date_format
     #-------------------------------------
-    # removing the columns used to generate the date
+
     #-------------------------------------
+    # removing the columns used to generate the date
     if clean:
         data=data.drop(date_col_names, axis=1)
+    #-------------------------------------
+
     return data
 
 
