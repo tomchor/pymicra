@@ -125,31 +125,56 @@ class dataloggerConf(object):
         return
 
 
-class siteConstants(object):
+class siteConfig(object):
     """
-    Keeper of the characteristics and constants of an experiment.
-
-    Attributes:
-    -----------
-        variables_height: float
-            the main height of the instruments in meters. Generally the height of the sonic anemometer
-        canopy height: float
-            the mean height of the vegetation meters
-        displacement_height: float
-            also called zero-plane displacement. Will be estimated as 2/3*canopy_height if not given.
+    Keeper of the configurations and constants of an experiment. (such as height of instruments,
+    location, canopy height and etc)
     """
-    def __init__(self, variables_height, canopy_height,
-             displacement_height=None, z0=None, description=None):
+    def __init__(self, from_file=None,
+             instruments_height=None, canopy_height=None,
+             displacement_height=None, roughness_length=None,
+             latitude=None, longitude=None, altitude=None, description=None):
+        """
+        Parameters:
+        -----------
+            from_file: str
+                path to .site file with the configurations of the experiment. All atributes are taken from there.
+            instruments_height: float
+                the mainn height of the instruments in meters considered for calculations.
+                Generally it's the height of the sonic anemometer.
+            canopy_height: float
+                the mean height of the vegetation meters
+            displacement_height: float
+                also called zero-plane displacement. Will be estimated as 2/3*canopy_height if not given.
+            roughness_length:
+                the average length of roughness elements.
+            description:
+                short description of the site
+        """
 
-        self.description=description
-        self.variables_height = variables_height    #meters
-        self.canopy_height = canopy_height          #meters
-        self.z0 = z0
+        #---------
+        # If from file keyword exists then we get it from there
+        if from_file:
+            from io import read_site
+            siteconf = read_site(from_file)
+            self.__dict__.update(siteconf.__dict__)
+            return
+        #---------
+
         self.description = description
+        self.instruments_height = instruments_height    #meters
+        self.canopy_height = canopy_height          #meters
+        self.roughness_length = roughness_length
+
         if displacement_height==None:
             self.displacement_height = (2./3.)*self.canopy_height #meters
         else:
             self.displacement_height=displacement_height
+
+        self.latitude = latitude
+        self.longitude = longitude
+        self.altitude = altitude
+
 
 
 class get_notation(object):
@@ -196,5 +221,33 @@ class get_notation(object):
     water_vapor_flux = 'E'
     latent_heat_flux = 'LE'
     flux_of = 'F_%s'
+
+
+class siteConstants(object):
+    """
+    Keeper of the characteristics and constants of an experiment.
+    This is obsolete. Try using siteConfig instead.
+
+    Attributes:
+    -----------
+        variables_height: float
+            the main height of the instruments in meters. Generally the height of the sonic anemometer
+        canopy height: float
+            the mean height of the vegetation meters
+        displacement_height: float
+            also called zero-plane displacement. Will be estimated as 2/3*canopy_height if not given.
+    """
+    def __init__(self, variables_height, canopy_height,
+             displacement_height=None, z0=None, description=None):
+
+        self.description=description
+        self.variables_height = variables_height    #meters
+        self.canopy_height = canopy_height          #meters
+        self.z0 = z0
+        self.description = description
+        if displacement_height==None:
+            self.displacement_height = (2./3.)*self.canopy_height #meters
+        else:
+            self.displacement_height=displacement_height
 
 

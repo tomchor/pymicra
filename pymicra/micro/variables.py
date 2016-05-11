@@ -175,7 +175,7 @@ def get_scales(dataframe, siteConst, notation_defs=None,
 
 
 def eddyCov(data, wpl=True,
-        notation_defs=None, solutes=[]):
+        notation_defs=None, solutes=[], from_fluctuations=True, from_scales=False):
     """
     Get fluxes according to characteristic lengths
     
@@ -200,6 +200,9 @@ def eddyCov(data, wpl=True,
     from .. import constants
     from ..core import get_notation
     import pandas as pd
+
+    if from_fluctuations:
+        return eddyCov2(data, wpl=wpl, notation_defs=notation_defs, solutes=solutes)
 
     cp=constants.cp_dry
     lamb = constants.latent_heat_water
@@ -265,9 +268,9 @@ def eddyCov(data, wpl=True,
 
 
 def eddyCov2(data, wpl=True,
-        notation2_defs=None, solutes=[]):
+        notation_defs=None, solutes=[]):
     """
-    Get fluxes according to characteristic lengths
+    Get fluxes from the turbulent fluctuations
     
     WARNING! If using wpl=True, be sure that all masses are consistent!
         For example, if q = [g/g], rho_h2o = [g/m3] and rho_co2 = [g/m3] and so on.
@@ -296,7 +299,7 @@ def eddyCov2(data, wpl=True,
 
     #---------
     # Define useful notation to look for
-    if notation2_defs==None:
+    if notation_defs==None:
         defs=get_notation()
     else:
         defs=notation_defs2

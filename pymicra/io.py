@@ -184,13 +184,15 @@ def read_site(sitefile):
     Reads .site configuration file, which holds siteConstants definitions
 
     The .site should have definitions as regular python syntax (in meters!):
-        variables_height    = 10
+        instruments_height    = 10
         canopy_height       = 5
         displacement_height = 3
-        z0                  = 1.0
+        roughness_length    = 1.0
 
+    sitedile: str
+        path to .site file
     """
-    from core import siteConstants
+    from core import siteConstants, siteConfig
 
     globs={}
     sitevars={}
@@ -201,7 +203,14 @@ def read_site(sitefile):
         with open(sitefile) as f:
             code=compile(f.read(), sitefile, 'exec')
             exec(code, globs, sitevars)
-    return siteConstants(**sitevars)
+
+    #--------
+    # First try new class, if not possible, try old one
+    try:
+        return siteConfig(**sitevars)
+    except:
+        return siteConstants(**sitevars)
+    #--------
 
 
 
