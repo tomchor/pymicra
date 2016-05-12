@@ -434,7 +434,6 @@ def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscal
         #-----------
         # The following if statement gets rid of negative or zero values in the x array, since we are using log-scale
         if (x<=0).any():
-            print 'Warning: zero and/or negative values exist in x array about to be log-scaled. Will try to ignore but errors might arise.'
             y=np.array([ yy for yy, xx in zip(y,x) if xx > 0 ])
             x=np.array([ el for el in x if el > 0])
             xmin=np.min(x)

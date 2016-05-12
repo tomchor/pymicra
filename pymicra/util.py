@@ -615,7 +615,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
         return
 
 
-def correctDrift(drifted, correct_drifted_vars, correct=None,
+def correctDrift(drifted, correct_drifted_vars=None, correct=None,
                 get_fit=True, write_fit=True, fit_file='correctDrift_linfit.params',
                 apply_fit=True, show_plot=False, return_plot=False, units={}, return_index=False):
     """
@@ -653,7 +653,14 @@ def correctDrift(drifted, correct_drifted_vars, correct=None,
     import pandas as pd
     import numpy as np
 
-    rwvars = correct_drifted_vars
+    if correct_drifted_vars:
+        rwvars = correct_drifted_vars
+    else:
+        if len(correct.columns)==1:
+            rwvars = { cor : dft for cor, dft in zip(correct.columns, drifted.columns) }
+        else:
+            raise NameError('If correct is not provided or has more than one column, you should provide correct_drifted_vars.')
+
     cors=[]
     #----------------
     # This option is activated if we provide a correct dataset from which to withdraw the correction parameters

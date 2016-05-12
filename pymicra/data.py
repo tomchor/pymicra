@@ -227,7 +227,10 @@ def spectrum(data, frequency=10, out_index='frequency', anti_aliasing=False, out
     else:
         raise NameError
 
-    return aux
+    if co:
+        return aux
+    else:
+        return aux.apply(np.real)
 
 
 def bulkCorr(data):
