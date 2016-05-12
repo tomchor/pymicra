@@ -1,7 +1,12 @@
+def phaseCorrection(cross_spec, T):
+    return hfc_Dias_ea_16(cross_spec, T)
 
 def hfc_Dias_ea_16(cross_spec, T):
     """
-    Applies correction to high frequencies using the quadrature
+    Applies correction to high frequencies using the quadrature.
+    Xab_ab = Co_ab - i Qu_ab
+
+    Co_recovered = Co_ab + 2*pi*n*T*Qu_ab
 
     Parameters:
     -----------
@@ -13,7 +18,7 @@ def hfc_Dias_ea_16(cross_spec, T):
     import numpy as np
 
     Co = cross_spec.apply(np.real)
-    Qu = cross_spec.apply(np.imag)
+    Qu = -cross_spec.apply(np.imag)
     n = np.array(cross_spec.index)
     return Co + 2.*np.pi*T*Qu.multiply(n, axis=0)
 
