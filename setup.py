@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
+from pymicra.__init__ import __version__
 """
 Python Micrometeorological Analysis tool - Pymicra
 """
@@ -32,10 +33,9 @@ else:
     extra_kwargs={}
 #-----------
 
-
 setup(name='pymicra',
-      version='0.1.3',
-      description='A Python Micrometeorology Analysis tool',
+      version = __version__,
+      description='A Python toll for Micrometeorological Analysis',
       long_description=open('README.md').read(),
       url='https://github.com/tomchor/pymicra.git',
       author='Tomas Chor',
@@ -43,3 +43,4 @@ setup(name='pymicra',
       license='GNU GPL V3.0',
       packages=packages,
       **extra_kwargs)
+

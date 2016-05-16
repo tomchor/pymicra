@@ -8,6 +8,9 @@
  This package is a collection of functions aimed at analysing 
  micrometeorology data. It mainly uses Pandas and Numpy for its
  analysis so these are required packages.
+
+ It is recommended that pint is installed for better handling the
+ units inside the functions.
 """
 from io import timeSeries, read_dlc, read_site, toUnitsCsv, readUnitsCsv
 from util import qcontrol, separateFiles, correctDrift
@@ -22,4 +25,10 @@ import constants
 from micro import spectral
 import micro
 import algs
-__version__='0.1.0'
+__version__ = '0.1.4'
+
+try:
+    from pint.unit import UnitRegistry
+    ureg = UnitRegistry()
+except ImportError:
+    pass
