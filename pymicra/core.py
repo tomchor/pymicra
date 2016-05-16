@@ -222,6 +222,21 @@ class get_notation(object):
     latent_heat_flux = 'LE'
     flux_of = 'F_%s'
 
+    def build(self):
+        """
+        This method builds the full notation based on the base notation
+        """
+
+        for subst in ['h2o', 'co2', 'ch4', 'o3', 'moist_air', 'dry_air']:
+            exec('self.{0}_mean_density = self.mean % self.density % self.{0}'.format(subst))
+            exec('self.{0}_density = self.density % self.{0}'.format(subst))
+
+        for subst in ['co2', 'ch4', 'o3']:
+            exec('self.{0}_flux = self.flux_of % self.{0}'.format(subst))
+
+        for var in ['u', 'v', 'w', 'thermodyn_temp', 'virtual_temp', 'specific_humidity', 'relative_humidity', 'pressure']:
+            exec('self.{0}_fluct = self.fluctuation % self.{0}'.format(subst))
+            exec('self.{0}_mean = self.mean % self.{0}'.format(subst))
 
 class siteConstants(object):
     """
