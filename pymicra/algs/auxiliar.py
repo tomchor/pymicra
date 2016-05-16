@@ -313,8 +313,9 @@ def applyResult(result, failed, df, control=None, testname=None, filename=None, 
     return control
 
 
-def parseDates(data, date_col_names, connector='-', first_time_skip=0,
-  clean=True, correct_fracs=None, complete_zeroes=False, verbose=False):
+def parseDates(data, dataloggerConf=None,
+        date_col_names=None, connector='-', first_time_skip=0,
+        clean=True, correct_fracs=None, complete_zeroes=False, verbose=False):
     """
     Author: Tomas Chor
     date: 2015-08-10
@@ -344,7 +345,17 @@ def parseDates(data, date_col_names, connector='-', first_time_skip=0,
     import pandas as pd
 
     #------------------------------------
-    # joins the names of the columns, which must match the datetime directive (see __doc__)
+    # If dataloggerConf object is provided, we take the keywords from it
+    if dataloggerConf:
+        date_col_names = dataloggerConf.date_col_names
+        connector = dataloggerConf.date_connector
+        first_time_skip = dataloggerConf.first_time_skip
+    elif date_col_names==None:
+        raise NameError('Must provide either dataloggerConf or date_col_names')
+    #------------------------------------
+
+    #------------------------------------
+    # Joins the names of the columns, which must match the datetime directive (see __doc__)
     if verbose: print 'Using these columns: ', date_col_names
     date_format=connector.join(date_col_names)
     auxformat='%Y-%m-%d %H:%M:%S.%f'
