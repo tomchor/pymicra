@@ -88,7 +88,8 @@ def qcontrol(files, datalogger_config,
              window_size=900, chunk_size='2Min',
              rev_arrang_test = False, RATvars = None,
              RAT_points = 50, RAT_significance = 0.01,
-             trueverbose=False, falseverbose=True, falseshow=0, trueshow=0, 
+             trueverbose=False, falseverbose=True, falseshow=False, 
+             trueshow=False, trueshow_vars=None,
              outdir='quality_controlled',
              summary_file='qcontrol_summary.csv'):
 
@@ -185,6 +186,8 @@ def qcontrol(files, datalogger_config,
         whether or not to show details on the failed runs.
     trueshow: bool
         whether of not to plot the successful runs on screen.
+    trueshow_vars: list
+        list of columns to plot if run is successfull.
     falseshow: bool
         whether of not to plot the failed runs on screen.
     outdir: str
@@ -204,6 +207,9 @@ def qcontrol(files, datalogger_config,
     import pandas as pd
     import numpy as np
     from algs import auxiliar as algs
+
+    if trueshow:
+        import matplotlib.pyplot as plt
 
     if bdate: bdate=parse(bdate)
     if edate: edate=parse(edate)
@@ -402,18 +408,21 @@ def qcontrol(files, datalogger_config,
         # END OF TESTS
         print 'Successful run!'
         if trueshow:
-            fin.plot()
+            if trueshow_vars:
+                fin.loc[:, trueshow_vars]
+            else:
+                fin.plot()
             plt.show()
         numbers['successful'].append(filename)
         #-----------------
 
         #-----------------
         # FINALLY, we write the result in the output directory in the same format
-        print 'Re-writing',filepath
-        fullfin[usedvars] = fin[usedvars]       # This is because some spikes were during the process
-        fullfin.to_csv(
-                   join(outdir, basename(filepath)),
-                   header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
+        if outdir:
+            print 'Re-writing',filepath
+            fullfin[usedvars] = fin[usedvars]       # This is because some spikes were removed during the process
+            fullfin.to_csv(join(outdir, basename(filepath)),
+                       header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
         #-----------------
     
     #-------------

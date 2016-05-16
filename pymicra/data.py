@@ -334,6 +334,7 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
     phi2=alpha/2.
     A1=f(phi1)
     A2=f(phi2)
+    print(A1, Atot, A2)
     if A1 < Atot < A2:
         return True
     else:
