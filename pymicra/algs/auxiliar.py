@@ -717,3 +717,21 @@ def _xplot(self, xcol, reverse_x=False, return_ax=False,
         return
 pd.DataFrame.xplot = _xplot
 #--------
+
+
+def getUnit(unitstr):
+    from pint.unit import UnitRegistry
+    ur = UnitRegistry()
+    if isinstance(unitstr, str):
+        return ur[unitstr]
+    elif isinstance(unitstr, list):
+        return [ ur[el] for el in unitstr ]
+    elif isinstance(unitstr, dict):
+        return { key: ur[el] for key, el in unitstr.items() }
+
+def operateUnit(unitlist, operate=None):
+    """
+    Apply an operation to a list of pint units
+    """
+    unitlist = getUnit(unitlist)
+    return operate(*unitlist)
