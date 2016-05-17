@@ -262,6 +262,13 @@ def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepa
         whether to return which variables caused a false result
     trueverbose: bool
         whether to print something successful cases
+
+    Returns:
+    --------
+    result: bool
+        True if the run passed the passed
+    failed: list
+        list of failed variables if result==False. None otherwise.
     '''
     
     if False in df_valid.values:
@@ -313,16 +320,6 @@ def check_numlines(fname, numlines=18000):
     else:
         return False
 
-def inverse_normal_cdf(mu, sigma):
-    """
-    """
-    from scipy.special import erfinv
-    import numpy as np
-
-    def f(phi):
-        Z=np.sqrt(2.)*erfinv(-2.*phi+1.)
-        return sigma*Z + mu
-    return f
 
 def applyResult(result, failed, df, control=None, testname=None, filename=None, falseshow=False):
     """
@@ -351,6 +348,22 @@ def applyResult(result, failed, df, control=None, testname=None, filename=None, 
         if control:
             control[testname].append(filename)
     return control
+
+
+def inverse_normal_cdf(mu, sigma):
+    """
+    Applied the inverse normal cumulative distribution
+
+    mu: mean
+    sigma: standard deviation
+    """
+    from scipy.special import erfinv
+    import numpy as np
+
+    def f(phi):
+        Z=np.sqrt(2.)*erfinv(-2.*phi+1.)
+        return sigma*Z + mu
+    return f
 
 
 def parseDates(data, dataloggerConf=None,

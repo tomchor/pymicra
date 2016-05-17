@@ -77,8 +77,10 @@ def check_spikes(data, chunk_size=None,
 
     Parameters:
     -----------
-    dfs: list, tuple
-        sequence of pandas.DataFrame objects
+    data: pandas.dataframe
+        data to de-spike
+    chunk_size: str, int
+        size of chunks to consider. If str should be pandas offset string. If int, number of lines.
     visualize: bool
         whether of not to visualize the interpolation ocurring
     vis_col: str, int or list
@@ -87,6 +89,8 @@ def check_spikes(data, chunk_size=None,
         maximum number of consecutive spikes to actually be considered spikes and substituted
     cut_func: function
         function used to define spikes
+    max_percent: float
+        maximum percentage of spikes to allow.
     '''
     import pandas as pd
     import algs
@@ -114,7 +118,6 @@ def check_spikes(data, chunk_size=None,
 
         #-------------------------------
         # Substitution of spikes happens here
-        #chunk=chunk.interpolate(method='time', axis=0)
         trend = chunk.polyfit()
         chunk = chunk.fillna(trend)
         #-------------------------------
@@ -130,9 +133,8 @@ def check_spikes(data, chunk_size=None,
     #-------------------------------
     # Visualize what you're doing to see if it's correct
     if visualize:
-        print 'Plotting de-spikes...'
+        print 'Plotting de-spiking...'
         original[vis_col].plot(style='g-', label='original')
-        #aux[ cut_func(aux) ].plot(style='ro-', label='spikes')
         fou[vis_col].plot(style='b-', label='final')
         plt.title('Column: {}'.format(vis_col))
         plt.legend()
@@ -458,15 +460,9 @@ def qcontrol(files, datalogger_config,
         if spikes_check:
             fin, valid = check_spikes(fin, visualize=visualize_spikes, vis_col=spikes_vis_col, 
                             cut_func=spikes_func, max_consec_spikes=max_consec_spikes, max_percent=accepted_percent)
-            exit()
 
-            chunks = algs.splitData(fin, chunk_size)
-            fin, valid_cols=check_spikes(chunks, visualize=visualize_spikes, vis_col=spikes_vis_col, cut_func=spikes_func, max_consec_spikes=max_consec_spikes)
-
-            valid = valid_cols >= (1.-(accepted_percent/100.))
-
-            result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
+            result, failed = algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
             if result==False: continue
         #-------------------------------
    
