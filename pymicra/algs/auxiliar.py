@@ -110,6 +110,46 @@ def fitByDate(data, degree=1, rule=None):
         out=out.append(aux)
     return out
 
+#---------
+# Definition of dataframe method to fit
+def _polyfit(self, degree=1, rule=None):
+    """
+    This method fits an n-degree polynomial to the dataset. The index can
+    be a DateTimeIndex or not
+
+    Parameters
+    ----------
+    data: pd.DataFrame, pd.Series
+        dataframe whose columns have to be fitted
+    degree: int
+        degree of the polynomial. Default is 1.
+    rule: str
+        pandas offside string. Ex.: "10min".
+    """
+    import pandas as pd
+
+    data = self.copy()
+    #-----------
+    # If rule == None it should return a list of 1
+    dflist=splitData(data, rule=rule)
+    #-----------
+
+    out=pd.DataFrame()
+    if isinstance(data.index, pd.DatetimeIndex):
+        for data in dflist:
+            xx=data.index.to_julian_date()
+            aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
+            out=out.append(aux)
+    else:
+         for data in dflist:
+            xx=data.index.values
+            aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
+            out=out.append(aux)
+ 
+    return out
+pd.DataFrame.polyfit = _polyfit
+#---------
+
 
 def stripDown(str, final='', args=['_', '-']):
     """

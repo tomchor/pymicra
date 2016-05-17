@@ -76,9 +76,8 @@ def trend(data, mode='linear', rule=None, window=None, how='mean', **kwargs):
     how: str, function
         how to resample in block type. Default is mean but it can be any numpy function
         that returns a float. E.g, median.
-    kwargs:
-        degree: int
-            degree of polynomial fit to be passed to algs.fitByDate
+    degree: int
+        degree of polynomial fit (only if mode==linear or mode==polynomial)
     """
     import pandas as pd
     import algs
@@ -109,7 +108,8 @@ def trend(data, mode='linear', rule=None, window=None, how='mean', **kwargs):
     elif any(w in mode for w in ['linear', 'polynomial']):
         #-------
         # performs a polynomial fit on the data in blocks of "rule"
-        return algs.fitByDate(data, rule=rule, **kwargs)
+        #return algs.fitByDate(data, rule=rule, **kwargs)
+        return data.polyfit(rule=rule, **kwargs)
         #-------
 
     else:

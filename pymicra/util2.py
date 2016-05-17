@@ -6,12 +6,72 @@ Date: 2015-08-07
 
 TODO LIST
 -INCLUDE DECODIFICAION OF DATA?
-
 """
 
+def check_limits(data, tables, max_percent=1.):
+    '''
+    Checks dataframe for lower and upper limits. If found, they are substituted by 
+    the linear trend of the run. The number of faulty points is also checked for each
+    column against the maximum percentage of accepted faults max_percent
 
-def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
-                 cut_func=lambda x: (abs(x - x.mean()) > 4.*abs(x.std())) ):
+    Parameters:
+    -----------
+    data: pandas dataframe
+        dataframe to be checked
+    tables: pandas.dataframe
+        dataframe with the lower and upper limits for variables
+    max_percent: float
+        number from 0 to 100 that represents the maximum percentage of faulty
+        runs accepted by this test.
+
+    Return:
+    -------
+    df: pandas.DataFrame
+        input data but with the faulty points substituted by the linear trend of the run.
+    valid: pandas.Series
+        True for the columns that passed this test, False for the columns that didn't.
+    '''
+    import numpy as np
+    import algs
+    import pandas as pd
+
+    df = data.copy()
+    max_count = int(len(df)*max_percent/100.)
+    low_count = pd.Series(0, index=tables.columns)
+    upp_count = pd.Series(0, index=tables.columns)
+    fault_count = pd.Series(0, index=tables.columns)
+
+    #-----------
+    # First we check the lower values
+    if 'low_limits' in tables.index.values:
+        faulty = df < tables.loc['low_limits']
+        low_count = df[ faulty ].count() 
+        df[ faulty ] = np.nan
+    #-------------------------------
+    
+    #-------------------------------
+    # Now we check the upper values
+    if 'upp_limits' in tables.index.values:
+        faulty = df > tables.loc['upp_limits']
+        upp_count = df[ faulty ].count() 
+        df[ faulty ] = np.nan
+    #-------------------------------
+
+    fault_count = low_count + upp_count
+    valid = fault_count < max_count
+
+    #-------------------------------
+    # Substitute faulty points by the linear trend
+    trend = data.polyfit()
+    df = df.fillna(trend)
+    #-------------------------------
+    return df, valid
+ 
+
+def check_spikes(data, chunk_size=None,
+                 visualize=False, vis_col=1, max_consec_spikes=3,
+                 cut_func=lambda x: (abs(x - x.mean()) > 4.*abs(x.std())),
+                 max_percent=1.):
     '''
     Applies spikes-check according to Vickers and Mart (1997)
 
@@ -23,8 +83,8 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
         whether of not to visualize the interpolation ocurring
     vis_col: str, int or list
         the column(s) to visualize when seeing the interpolation (only effective if visualize==True)
-    interp_limit: int
-        limit of consecutive spikes to interpolate
+    max_consec_spikes: int
+        maximum number of consecutive spikes to actually be considered spikes and substituted
     cut_func: function
         function used to define spikes
     '''
@@ -32,8 +92,12 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
     import algs
     import matplotlib.pyplot as plt
 
-    original = pd.concat(dfs)
-    valid_cols=pd.Series(0, index=dfs[0].columns)
+    original = data.copy()
+    max_count = int(len(original)*max_percent/100.)
+    dfs = algs.splitData(original, chunk_size)
+
+    #original = pd.concat(dfs)
+    fault_count=pd.Series(len(original), index=dfs[0].columns)
 
     for i in range(len(dfs)):
         #-------------------------------
@@ -43,14 +107,16 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
 
         #-------------------------------
         # This substitutes the spikes to NaNs so it can be interpolated later
-        if len(chunk)>interp_limit:
-            chunk=algs.limitedSubs(chunk, max_interp=interp_limit, func=cut_func)
-        valid_cols = valid_cols + chunk.count()
+        if len(chunk)>max_consec_spikes:
+            chunk=algs.limitedSubs(chunk, max_interp=max_consec_spikes, func=cut_func)
+        fault_count = fault_count - chunk.count()
         #-------------------------------
 
         #-------------------------------
-        #Interpolation takes place here
-        chunk=chunk.interpolate(method='time', axis=0)
+        # Substitution of spikes happens here
+        #chunk=chunk.interpolate(method='time', axis=0)
+        trend = chunk.polyfit()
+        chunk = chunk.fillna(trend)
         #-------------------------------
 
         #-------------------------------
@@ -59,9 +125,7 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
         #-------------------------------
 
     fou=pd.concat(dfs)
-    fou=fou.interpolate(method='time', axis=0)
-    fou_points=len(fou.index)
-    valid_cols=valid_cols/fou_points
+    valid = fault_count < max_count
 
     #-------------------------------
     # Visualize what you're doing to see if it's correct
@@ -76,7 +140,7 @@ def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
         plt.close()
     #-------------------------------
 
-    return fou, valid_cols
+    return fou, valid
 
 
 def qcontrol(files, datalogger_config,
@@ -84,8 +148,8 @@ def qcontrol(files, datalogger_config,
              file_lines=None, bdate=None, edate=None,
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
              spikes_check=True, visualize_spikes = False, spikes_vis_col = 'u',
-             spikes_func = lambda x: (abs(x - x.mean()) > 3.*abs(x.std())), 
-             interp_limit=3, window_size=900, chunk_size='2Min',
+             spikes_func = lambda x: (abs(x - x.mean()) > 4.*abs(x.std())), 
+             max_consec_spikes=3, window_size=900, chunk_size='2Min',
              rev_arrang_test = False, RATvars = None,
              RAT_points = 50, RAT_significance = 0.01,
              trueverbose=False, falseverbose=True, falseshow=False, 
@@ -118,7 +182,7 @@ def qcontrol(files, datalogger_config,
     spikes test:
         runs with more than a certain percetage of spikes are left out. 
         Activate it by passing a spikes_check keyword. Adjust the test with the spikes_func
-        visualize_spikes, spikes_vis_col, interp_limit, accepted_percent and chunk_size keywords.
+        visualize_spikes, spikes_vis_col, max_consec_spikes, accepted_percent and chunk_size keywords.
     standard deviation check:
         runs with a standard deviation lower than a pre-determined value (generally close to the
         sensor precision) are left out.
@@ -165,7 +229,7 @@ def qcontrol(files, datalogger_config,
     spikes_func: function
         function used to look for spikes. Can be defined used numpy/pandas notation for methods with lambda functions.
         Default is: lambda x: (abs(x - x.mean()) > abs(x.std()*4.))
-    interp_limit: int
+    max_consec_spikes: int
         limit of consecutive spike points to be interpolated. After this spikes are left as they are in the output.
     accepted_percent: float
         limit percentage of spike points in the data. If spike points represent a higher percentage
@@ -245,10 +309,10 @@ def qcontrol(files, datalogger_config,
         numbers['STD'] = []
     if low_limits:
         tables = tables.append( pd.DataFrame(low_limits, index=['low_limits']) )
-        numbers['lowest value' ] = []
+        numbers['limits' ] = []
     if upp_limits:
         tables = tables.append( pd.DataFrame(upp_limits, index=['upp_limits']) )
-        numbers['highest value' ] = []
+        numbers['limits' ] = []
     if dif_limits:
         tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
         numbers['difference'] = []
@@ -324,28 +388,23 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         # We save the full input for writting it later
         fullfin=fin.copy()
-        fin=fin[usedvars]      # Exclude unnused variables
         #-------------------------------
 
         #-------------------------------
-        # BEGINNING OF LOWEST VALUE CHECK
-        if low_limits:
-            valid= ~(fin < tables.loc['low_limits']).any(axis=0)
+        # Exclude unnused variables and detrend
+        fin=fin[usedvars].copy()
+        dfin = data.detrend(fin, mode='linear', suffix='')
+        #-------------------------------
 
-            result, failed=algs.testValid(valid, testname='lowest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='lowest value', filename=filename, falseshow=falseshow)
+        #-------------------------------
+        # BEGINNING OF LOWER AND UPPER VALUES CHECK
+        if low_limits or upp_limits:
+            fin, valid = check_limits(fin, tables)
+
+            result, failed = algs.testValid(valid, testname='limits', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname='limits', filename=filename, falseshow=falseshow)
             if result==False: continue
-        #-------------------------------
-    
-        #-------------------------------
-        # BEGINNING OF HIGHEST VALUE CHECK
-        if upp_limits:
-            valid= ~(fin > tables.loc['upp_limits']).any(axis=0)
-
-            result, failed=algs.testValid(valid, testname='highest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='highest value', filename=filename, falseshow=falseshow)
-            if result==False: continue
-        #-------------------------------
+        #----------------------------------
 
         #----------------------------------
         # BEGINNING OF STANDARD DEVIATION CHECK
@@ -365,7 +424,7 @@ def qcontrol(files, datalogger_config,
             if result==False: continue
         #----------------------------------
     
-        #---------------------------------
+        #------------------------------
         # BEGINNING OF REVERSE ARRANGEMENT TEST
         if rev_arrang_test:
             if RATvars:
@@ -378,13 +437,13 @@ def qcontrol(files, datalogger_config,
             result, failed = algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
             numbers=algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
             if result==False: continue
-        #---------------------------------
+        #-------------------------------
     
-        #--------------------------------
+        #-------------------------------
         # BEGINNING OF MAXIMUM DIFFERENCE METHOD
         if dif_limits:
             trend=data.trend(fin, mode='linear')
-            maxdif=trend.iloc[0]-trend.iloc[-1]
+            maxdif=trend.max()-trend.min()
             maxdif=maxdif.abs()
             chunks_valid= tables.loc['dif_limits'] - maxdif
             chunks_valid= ~(chunks_valid < 0)
@@ -392,15 +451,19 @@ def qcontrol(files, datalogger_config,
             result, failed = algs.testValid(chunks_valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
             numbers=algs.applyResult(result, failed, fin, control=numbers, testname='difference', filename=filename, falseshow=falseshow)
             if result==False: continue
-        #--------------------------------
+        #-------------------------------
  
         #-------------------------------
         # BEGINNING OF SPIKES CHECK
         if spikes_check:
-            chunks = algs.splitData(fin, chunk_size)
-            fin,valid_cols=check_spikes(chunks, visualize=visualize_spikes, vis_col=spikes_vis_col, cut_func=spikes_func, interp_limit=interp_limit)
+            fin, valid = check_spikes(fin, visualize=visualize_spikes, vis_col=spikes_vis_col, 
+                            cut_func=spikes_func, max_consec_spikes=max_consec_spikes, max_percent=accepted_percent)
+            exit()
 
-            valid= valid_cols >= (1.-(accepted_percent/100.))
+            chunks = algs.splitData(fin, chunk_size)
+            fin, valid_cols=check_spikes(chunks, visualize=visualize_spikes, vis_col=spikes_vis_col, cut_func=spikes_func, max_consec_spikes=max_consec_spikes)
+
+            valid = valid_cols >= (1.-(accepted_percent/100.))
 
             result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers=algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
