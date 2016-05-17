@@ -272,7 +272,7 @@ del pd      # prevents pandas to being pre-loaded in data.py
 #----------
 
 
-def reverse_arrangement(array, points_number=None, alpha=0.05):
+def reverse_arrangement(array, points_number=None, alpha=0.05, verbose=False):
     '''
     Performs the reverse arrangement test
     according to Bendat and Piersol - Random Data - 4th edition, page 96
@@ -308,6 +308,8 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
         return mu, variance
     #-----------
 
+    #-----------
+    # If number of points N is provided, we turn the run into a N-length array
     if points_number==None:
         points_number=len(array)
         xarray=array
@@ -317,8 +319,11 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
         pts = len(array)//points_number
         xarray = []
         for j in range(0,points_number):
-            xarray.append( np.mean(array[(j*pts):((j+1)*pts)]) ) # Calculo a media de cada um dos 50 intervalos
+            xarray.append( np.mean(array[(j*pts):((j+1)*pts)]) )
+    #-----------
 
+    #-----------
+    # We calculate the reverse arrangements
     A = []
     for i in range(len(xarray)-1):
         h = []
@@ -327,6 +332,8 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
                 h.append(1)
         A.append(sum(h))
     Atot = sum(A)
+    #-----------
+
     N=len(xarray)
     mu,variance=mu_var(N)
     f=algs.inverse_normal_cdf(mu, np.sqrt(variance))
@@ -334,7 +341,7 @@ def reverse_arrangement(array, points_number=None, alpha=0.05):
     phi2=alpha/2.
     A1=f(phi1)
     A2=f(phi2)
-    print(A1, Atot, A2)
+    if verbose: print(A1, Atot, A2)
     if A1 < Atot < A2:
         return True
     else:
