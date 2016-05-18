@@ -7,6 +7,61 @@ Date: 2015-08-07
 TODO LIST
 -INCLUDE DECODIFICAION OF DATA?
 """
+def check_std(data, tables, detrend=False, detrend_mode='linear', chunk_size='2min', falseverbose=False):
+    '''
+    Checks dataframe for columns with too small of a standard deviation
+
+    Parameters:
+    -----------
+    data: pandas.DataFrame
+        dataset whose standard deviation to check 
+    tables: pandas.DataFrame
+        dataset containing the standard deviation limits for each column
+    detrend: bool
+        whether to work with the absolute series and the fluctuations
+    detrend_mode: str
+        mode to use in detrend, with detrend==True
+    chunk_size: str
+        pandas datetime offset string
+
+    Returns:
+    --------
+    valid: pandas.Series
+        contatining True of False for each column. True means passed the test.
+    '''
+    import data as pmdata
+    import numpy as np
+    import pandas as pd
+
+    #-----------
+    # Detrend the data or nor
+    if detrend:
+        df = pmdata.detrend(data, mode=detrend_mode, suffix='')
+    else:
+        df = data.copy()
+    #-----------
+
+    #-----------
+    # Separate into smaller bits or just get the full standard deviation
+    if chunk_size:
+        stds_list = df.resample(chunk_size, np.std).dropna()
+    else:
+        stds_list = pd.DataFrame(index=[df.index[0]], columns = df.columns)
+        stds_list.iloc[0, :] = df.apply(np.std)
+    #-----------
+
+    #-----------
+    # Check each chunk separately
+    validcols = ~( stds_list < tables.loc['std_limits'] )
+    falseverbose=True
+    if falseverbose and (False in validcols.values):
+        falsecols = [ el for el in df.columns if False in validcols.loc[:, el].values ]
+        print 'The failed variables and times:\n{0}\n'.format(validcols.loc[:, falsecols])
+    #-----------
+
+    valid = validcols.all(axis=0)
+    return valid
+ 
 
 def check_limits(data, tables, max_percent=1.):
     '''
@@ -146,7 +201,7 @@ def check_spikes(data, chunk_size=None,
 
 
 def qcontrol(files, datalogger_config,
-             detrend=False, accepted_percent=1.,
+             detrend=False, detrend_mode='2min', accepted_percent=1.,
              file_lines=None, bdate=None, edate=None,
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
              spikes_check=True, visualize_spikes = False, spikes_vis_col = 'u',
@@ -206,6 +261,8 @@ def qcontrol(files, datalogger_config,
     detrend: bool
         whether or not to work with the fluctations of the data in the tests where absolute values
         don't matter (spikes, standard deviation and reverse arrangement tests).
+    detrend_mode: str
+        mode to use for detrending.
     file_lines: int
         number of line a "good" file must have. Fails if the run has any other number of lines.
     bdate: str
@@ -339,7 +396,6 @@ def qcontrol(files, datalogger_config,
     #-------------------------------------
 
     for filepath in files:
-        print
         filename=basename(filepath)
         print filename
         numbers['total'].append(filename)
@@ -395,7 +451,6 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         # Exclude unnused variables and detrend
         fin=fin[usedvars].copy()
-        dfin = data.detrend(fin, mode='linear', suffix='')
         #-------------------------------
 
         #-------------------------------
@@ -411,18 +466,10 @@ def qcontrol(files, datalogger_config,
         #----------------------------------
         # BEGINNING OF STANDARD DEVIATION CHECK
         if std_limits:
-            df=fin.copy()
-            df=df-pd.rolling_mean(df,window=window_size, center=True)
-            stds_list=df.resample(chunk_size, np.std).dropna()
-            valid= ~(stds_list<tables.loc['std_limits']).any(axis=0)
+            valid = check_std(fin, tables, detrend=detrend, detrend_mode=detrend_mode, chunk_size=chunk_size, falseverbose=falseverbose)
 
             result, failed = algs.testValid(valid, testname='STD', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            #--------------
-            # This specifies which part of the run failed on this test
-            if falseverbose and (result==False):
-                print (not result)*'The failed variables and times:\n{0}'.format(~(stds_list<tables.loc['std_limits']))
-            #--------------
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='STD', filename=filename, falseshow=falseshow)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname='STD', filename=filename, falseshow=falseshow)
             if result==False: continue
         #----------------------------------
     
@@ -430,14 +477,14 @@ def qcontrol(files, datalogger_config,
         # BEGINNING OF REVERSE ARRANGEMENT TEST
         if rev_arrang_test:
             if RATvars:
-                valid_chunks= fin[RATvars].apply(data.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
+                valid_chunks = fin[RATvars].apply(data.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
             elif RATvars==None:
-                valid_chunks= fin.apply(data.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
+                valid_chunks = fin.apply(data.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
             else:
-                valid_chunks= fin.any(axis=0)
+                valid_chunks = fin.any(axis=0)
 
             result, failed = algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
             if result==False: continue
         #-------------------------------
     
@@ -455,7 +502,7 @@ def qcontrol(files, datalogger_config,
             if result==False: continue
         #-------------------------------
  
-        #-------------------------------
+        #-----------------
         # BEGINNING OF SPIKES CHECK
         if spikes_check:
             fin, valid = check_spikes(fin, visualize=visualize_spikes, vis_col=spikes_vis_col, 
@@ -464,7 +511,7 @@ def qcontrol(files, datalogger_config,
             result, failed = algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
             if result==False: continue
-        #-------------------------------
+        #-----------------
    
         #-----------------
         # END OF TESTS
@@ -486,6 +533,7 @@ def qcontrol(files, datalogger_config,
             fullfin.to_csv(join(outdir, basename(filepath)),
                        header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
         #-----------------
+        print
     
     #-------------
     # We create the summary dataframe
