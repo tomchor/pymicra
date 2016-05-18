@@ -59,7 +59,7 @@ def rotCoor(data, notation_defs=None):
     return data
 
 
-def trend(data, how='linear', rule=None, window=None, block_func='mean', center=True, **kwargs):
+def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=True, **kwargs):
     """
     Wrapper to return the trend given data. Can be achieved using a moving avg, block avg or polynomial fitting
 

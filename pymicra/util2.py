@@ -8,38 +8,52 @@ TODO LIST
 -INCLUDE DECODIFICAION OF DATA?
 """
 
-def check_RA(data, detrend_mode='linear',
-            RATvars=None, RAT_points=50, RAT_significance=0.05):
+def check_RA(data, detrend_kw={'how':'linear'},
+            RAT_vars=None, RAT_points=50, RAT_significance=0.05):
     '''
     Performs the Reverse Arrangement Test in each column of data
+
+    Parameters:
+    -----------
+    data: pandas.DataFrame
+        to apply RAT to each column
+    detrend_kw: dict
+        keywords to pass to pymicra.detrend
+    RAT_vars:
+        list of variables to which apply the RAT
+    RAT_points: int
+        if it's an int N, then reduce each column to N points by averaging. If None,
+        then the whole columns are used
+    RAT_significance: float
+        significance with which to apply the RAT
+
+    Returns:
+    --------
+    valid: pd.Series
+        True or False for each column. If True, column passed the test
     '''
     import data as pmdata
 
     #-----------
     # Detrend the data
-    df = pmdata.detrend(data, how=detrend_mode, suffix='')
+    df = pmdata.detrend(data, suffix='', **detrend_kw)
     #-----------
 
     #-----------
-    # If RATvars is given, apply reverse arrangement only on these variables
-    if RATvars:
-        valid = df[RATvars].apply(pmdata.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
-    elif RATvars==None:
+    # If RAT_vars is given, apply reverse arrangement only on these variables
+    if RAT_vars:
+        valid = df[RAT_vars].apply(pmdata.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
+    elif RAT_vars==None:
         valid = df.apply(pmdata.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
     else:
-        raise TypeError('Check RATvars keyword')
+        raise TypeError('Check RAT_vars keyword')
     #-----------
 
     return valid
 
-#        result, failed = algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
-#        numbers = algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
-#        if result==False: continue
- 
 
 
-
-def check_std(data, tables, detrend=False, detrend_mode='linear', chunk_size='2min', falseverbose=False):
+def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_size='2min', falseverbose=False):
     '''
     Checks dataframe for columns with too small of a standard deviation
 
@@ -51,8 +65,8 @@ def check_std(data, tables, detrend=False, detrend_mode='linear', chunk_size='2m
         dataset containing the standard deviation limits for each column
     detrend: bool
         whether to work with the absolute series and the fluctuations
-    detrend_mode: str
-        mode to use in detrend, with detrend==True
+    detrend_kw: dict
+        keywords to pass to pymicra.detrend with detrend==True
     chunk_size: str
         pandas datetime offset string
 
@@ -68,7 +82,7 @@ def check_std(data, tables, detrend=False, detrend_mode='linear', chunk_size='2m
     #-----------
     # Detrend the data or not
     if detrend:
-        df = pmdata.detrend(data, how=detrend_mode, suffix='')
+        df = pmdata.detrend(data, suffix='', **detrend_kw)
     else:
         df = data.copy()
     #-----------
@@ -88,7 +102,7 @@ def check_std(data, tables, detrend=False, detrend_mode='linear', chunk_size='2m
     falseverbose=True
     if falseverbose and (False in validcols.values):
         falsecols = [ el for el in df.columns if False in validcols.loc[:, el].values ]
-        print 'The failed variables and times:\n{0}\n'.format(validcols.loc[:, falsecols])
+        print 'STD test: failed variables and times are\n{0}\n'.format(validcols.loc[:, falsecols])
     #-----------
 
     valid = validcols.all(axis=0)
@@ -155,7 +169,8 @@ def check_limits(data, tables, max_percent=1.):
     return df, valid
  
 
-def check_spikes(data, chunk_size=None,
+def check_spikes(data, chunk_size='2min',
+                 spikes_detrend_kw={'how':'linear'},
                  visualize=False, vis_col=1, max_consec_spikes=3,
                  cut_func=lambda x: (abs(x - x.mean()) > 4.*abs(x.std())),
                  max_percent=1.):
@@ -187,8 +202,7 @@ def check_spikes(data, chunk_size=None,
     max_count = int(len(original)*max_percent/100.)
     dfs = algs.splitData(original, chunk_size)
 
-    #original = pd.concat(dfs)
-    fault_count=pd.Series(len(original), index=dfs[0].columns)
+    fault_count = pd.Series(len(original), index=dfs[0].columns)
 
     for i in range(len(dfs)):
         #-------------------------------
@@ -233,14 +247,19 @@ def check_spikes(data, chunk_size=None,
 
 
 def qcontrol(files, datalogger_config,
-             detrend=False, detrend_mode='linear', accepted_percent=1.,
+             detrend=False,
+             accepted_percent=1.,
              file_lines=None, bdate=None, edate=None,
+             trend_kw={'how':'linear'},
+             std_detrend_kw={'how':'linear'},
+             RAT_detrend_kw = {'how':'linear'},
+             spikes_detrend_kw = {'how':'linear'},
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
              spikes_check=True, visualize_spikes = False, spikes_vis_col = 'u',
              spikes_func = lambda x: (abs(x - x.mean()) > 4.*abs(x.std())), 
              max_consec_spikes=3, window_size=900, chunk_size='2Min',
-             rev_arrang_test = False, RATvars = None,
-             RAT_points = 50, RAT_significance = 0.01,
+             rev_arrang_test = False, RAT_vars = None,
+             RAT_points = 50, RAT_significance = 0.05,
              trueverbose=False, falseverbose=True, falseshow=False, 
              trueshow=False, trueshow_vars=None,
              outdir='quality_controlled',
@@ -262,12 +281,9 @@ def qcontrol(files, datalogger_config,
 
     Non-trivial tests:
     ------------------
-    lowest value test:
-        runs with values in any column lower then a pre-determined value are left out.
-        Activate it by passing a low_limits keyword.
-    highest value test:
-        runs with values in any column higher then a pre-determined value are left out.
-        Activate it by passing a upp_limits keyword.
+    boundaries test:
+        runs with values in any column lower than a pre-determined lower limit or higher
+        than a upper limits are left out. Activate it by passing a low_limits or upp_limits keyword.
     spikes test:
         runs with more than a certain percetage of spikes are left out. 
         Activate it by passing a spikes_check keyword. Adjust the test with the spikes_func
@@ -280,7 +296,7 @@ def qcontrol(files, datalogger_config,
         runs that fail the reverse arrangement test for any variable are left out.
         Activate it by passing a rev_arrang_test keyword.
     maximum difference test:
-        runs whose trend have a maximum different greater than a certain value are left out.
+        runs whose trend have a maximum difference greater than a certain value are left out.
         This excludes non-stationary runs.
         Activate it by passing a dif_limits keyword.
 
@@ -292,23 +308,27 @@ def qcontrol(files, datalogger_config,
         datalogger configuration object used for all files in the list of files or path to a dlc file.
     detrend: bool
         whether or not to work with the fluctations of the data on the spikes and standard deviation test.
-    detrend_mode: str
-        mode to use for detrending.
+    trend_kw: dict
+        dictionary of keywords to pass to pymicra.data.trend. This is used in the max difference test, since
+        the difference is taken between the max and min values of the trend, not of the series.
+        Default = {'how':'linear'}.
     file_lines: int
         number of line a "good" file must have. Fails if the run has any other number of lines.
     bdate: str
         dates before this automatically fail.
     edate: str
         dates after this automatically fail.
+    std_detrend_kw:
+        keywords to be passed to pymicra.detrend specifically to be used on the STD test.
     std_limits: dict
         keys must be names of variables and values must be upper limits for the standard deviation.
-    dif_limits: dict
-        keys must be names of variables and values must be upper limits for the maximum difference
-        of values that the linear trend of the run must have.
     low_limits: dict
         keys must be names of variables and values must be lower absolute limits for the values of each var.
     upp_limits: dict
         keys must be names of variables and values must be upper absolute limits for the values of each var.
+    dif_limits: dict
+        keys must be names of variables and values must be upper limits for the maximum difference
+        of values that the linear trend of the run must have.
     spikes_check: bool
         whether or not to check for spikes.
     visualize_spikes: bool
@@ -326,17 +346,19 @@ def qcontrol(files, datalogger_config,
         than the run fails the spikes check.
     chunk_size: str
         string representing time length of chunks used in the spikes and standard deviation check. Default is "2Min".
-        Putting None will not separate in chunks. It's recommended to use rolling functions in this case.
+        Putting None will not separate in chunks. It's recommended to use rolling functions in this case (might be slow).
     window_size: int
         window size for rolling mean used in the standard deviation test.
     rev_arrang_test: bool
         whether or not to perform the reverse arrangement test on data.
-    RATvars: list
+    RAT_vars: list
         list containing the name of variables to go through the reverse arrangement test. If None, all variables are tested.
     RAT_points: int
         number of final points to apply the RAT. If 50, the run will be averaged to a 50-points run.
     RAT_significance:
         significance level to apply the RAT.
+    RAT_detrend_kw:
+        keywords to be passed to pymicra.detrend specifically to be used on the RA test.
     trueverbose: bool
         whether or not to show details on the successful runs.
     falseverbose: bool
@@ -371,6 +393,10 @@ def qcontrol(files, datalogger_config,
     if bdate: bdate=parse(bdate)
     if edate: edate=parse(edate)
 
+    bound_name='boundary'
+    maxdif_name='difference'
+    STD_name='STD'
+
     #--------------
     # If the path to the dlc is provided, we read it as a dataloggerConf object
     if isinstance(datalogger_config, str):
@@ -399,13 +425,13 @@ def qcontrol(files, datalogger_config,
         numbers['STD'] = []
     if low_limits:
         tables = tables.append( pd.DataFrame(low_limits, index=['low_limits']) )
-        numbers['limits' ] = []
+        numbers[ bound_name ] = []
     if upp_limits:
         tables = tables.append( pd.DataFrame(upp_limits, index=['upp_limits']) )
-        numbers['limits' ] = []
+        numbers[ bound_name ] = []
     if dif_limits:
         tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
-        numbers['difference'] = []
+        numbers[ maxdif_name ] = []
     if rev_arrang_test:
         numbers['RAT'] = []
     tables = tables.fillna(value=np.nan)
@@ -475,12 +501,8 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
 
         #-------------------------------
-        # We save the full input for writting it later
+        # We save the full input for writting it later and exclude unnused variables
         fullfin=fin.copy()
-        #-------------------------------
-
-        #-------------------------------
-        # Exclude unnused variables and detrend
         fin=fin[usedvars].copy()
         #-------------------------------
 
@@ -490,24 +512,24 @@ def qcontrol(files, datalogger_config,
             fin, valid = check_limits(fin, tables)
 
             result, failed = algs.testValid(valid, testname='limits', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers = algs.applyResult(result, failed, fin, control=numbers, testname='limits', filename=filename, falseshow=falseshow)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=bound_name, filename=filename, falseshow=falseshow)
             if result==False: continue
         #----------------------------------
 
         #----------------------------------
         # BEGINNING OF STANDARD DEVIATION CHECK
         if std_limits:
-            valid = check_std(fin, tables, detrend=detrend, detrend_mode=detrend_mode, chunk_size=chunk_size, falseverbose=falseverbose)
+            valid = check_std(fin, tables, detrend=detrend, detrend_kw=std_detrend_kw, chunk_size=chunk_size, falseverbose=falseverbose)
 
             result, failed = algs.testValid(valid, testname='STD', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers = algs.applyResult(result, failed, fin, control=numbers, testname='STD', filename=filename, falseshow=falseshow)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=STD_name, filename=filename, falseshow=falseshow)
             if result==False: continue
         #----------------------------------
     
         #------------------------------
         # BEGINNING OF REVERSE ARRANGEMENT TEST
         if rev_arrang_test:
-            valid = check_RA(fin, detrend_mode=detrend_mode, RATvars=None, RAT_points=RAT_points, RAT_significance=RAT_significance)
+            valid = check_RA(fin, detrend_kw=RAT_detrend_kw, RAT_vars=None, RAT_points=RAT_points, RAT_significance=RAT_significance)
 
             result, failed = algs.testValid(valid, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
@@ -517,21 +539,21 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         # BEGINNING OF MAXIMUM DIFFERENCE TEST
         if dif_limits:
-            trend=data.trend(fin, how='linear')
-            maxdif=trend.max()-trend.min()
+            trend=data.trend(fin, **trend_kw)
+            maxdif=trend.max() - trend.min()
             maxdif=maxdif.abs()
             chunks_valid= tables.loc['dif_limits'] - maxdif
             chunks_valid= ~(chunks_valid < 0)
 
             result, failed = algs.testValid(chunks_valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='difference', filename=filename, falseshow=falseshow)
+            numbers=algs.applyResult(result, failed, fin, control=numbers, testname=maxdif_name, filename=filename, falseshow=falseshow)
             if result==False: continue
         #-------------------------------
  
         #-----------------
         # BEGINNING OF SPIKES CHECK
         if spikes_check:
-            fin, valid = check_spikes(fin, visualize=visualize_spikes, vis_col=spikes_vis_col, 
+            fin, valid = check_spikes(fin, visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size,
                             cut_func=spikes_func, max_consec_spikes=max_consec_spikes, max_percent=accepted_percent)
 
             result, failed = algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
