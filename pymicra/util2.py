@@ -7,6 +7,38 @@ Date: 2015-08-07
 TODO LIST
 -INCLUDE DECODIFICAION OF DATA?
 """
+
+def check_RA(data, detrend_mode='linear',
+            RATvars=None, RAT_points=50, RAT_significance=0.05):
+    '''
+    Performs the Reverse Arrangement Test in each column of data
+    '''
+    import data as pmdata
+
+    #-----------
+    # Detrend the data
+    df = pmdata.detrend(data, how=detrend_mode, suffix='')
+    #-----------
+
+    #-----------
+    # If RATvars is given, apply reverse arrangement only on these variables
+    if RATvars:
+        valid = df[RATvars].apply(pmdata.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
+    elif RATvars==None:
+        valid = df.apply(pmdata.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
+    else:
+        raise TypeError('Check RATvars keyword')
+    #-----------
+
+    return valid
+
+#        result, failed = algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
+#        numbers = algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
+#        if result==False: continue
+ 
+
+
+
 def check_std(data, tables, detrend=False, detrend_mode='linear', chunk_size='2min', falseverbose=False):
     '''
     Checks dataframe for columns with too small of a standard deviation
@@ -34,9 +66,9 @@ def check_std(data, tables, detrend=False, detrend_mode='linear', chunk_size='2m
     import pandas as pd
 
     #-----------
-    # Detrend the data or nor
+    # Detrend the data or not
     if detrend:
-        df = pmdata.detrend(data, mode=detrend_mode, suffix='')
+        df = pmdata.detrend(data, how=detrend_mode, suffix='')
     else:
         df = data.copy()
     #-----------
@@ -201,7 +233,7 @@ def check_spikes(data, chunk_size=None,
 
 
 def qcontrol(files, datalogger_config,
-             detrend=False, detrend_mode='2min', accepted_percent=1.,
+             detrend=False, detrend_mode='linear', accepted_percent=1.,
              file_lines=None, bdate=None, edate=None,
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
              spikes_check=True, visualize_spikes = False, spikes_vis_col = 'u',
@@ -259,8 +291,7 @@ def qcontrol(files, datalogger_config,
     datalogger_config: pymicra.datalogerConf object or str
         datalogger configuration object used for all files in the list of files or path to a dlc file.
     detrend: bool
-        whether or not to work with the fluctations of the data in the tests where absolute values
-        don't matter (spikes, standard deviation and reverse arrangement tests).
+        whether or not to work with the fluctations of the data on the spikes and standard deviation test.
     detrend_mode: str
         mode to use for detrending.
     file_lines: int
@@ -476,22 +507,17 @@ def qcontrol(files, datalogger_config,
         #------------------------------
         # BEGINNING OF REVERSE ARRANGEMENT TEST
         if rev_arrang_test:
-            if RATvars:
-                valid_chunks = fin[RATvars].apply(data.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
-            elif RATvars==None:
-                valid_chunks = fin.apply(data.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
-            else:
-                valid_chunks = fin.any(axis=0)
+            valid = check_RA(fin, detrend_mode=detrend_mode, RATvars=None, RAT_points=RAT_points, RAT_significance=RAT_significance)
 
-            result, failed = algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
+            result, failed = algs.testValid(valid, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
             if result==False: continue
         #-------------------------------
     
         #-------------------------------
-        # BEGINNING OF MAXIMUM DIFFERENCE METHOD
+        # BEGINNING OF MAXIMUM DIFFERENCE TEST
         if dif_limits:
-            trend=data.trend(fin, mode='linear')
+            trend=data.trend(fin, how='linear')
             maxdif=trend.max()-trend.min()
             maxdif=maxdif.abs()
             chunks_valid= tables.loc['dif_limits'] - maxdif

@@ -59,66 +59,93 @@ def rotCoor(data, notation_defs=None):
     return data
 
 
-def trend(data, mode='linear', rule=None, window=None, how='mean', **kwargs):
+def trend(data, how='linear', rule=None, window=None, block_func='mean', center=True, **kwargs):
     """
     Wrapper to return the trend given data. Can be achieved using a moving avg, block avg or polynomial fitting
 
     Parameters
     ----------
-    data: pandas DataFrame 
-        the dataFrame to be trended
-    mode: string
-        mode of average to apply. Currently {'moving', 'block', 'linear'}.
+    data: pandas.DataFrame or pandas.Series
+        the data whose trend wee seek.
+    how: string
+        how of average to apply. Currently {'movingmean', 'movingmedian', 'block', 'linear'}.
     rule: string
         pandas offset string to define the block in the block average. Default is "10min".
-    window: pandas date offset string
-        if moving average is chosen, this tells us the window size
-    how: str, function
+    window: pandas date offset string or int
+        if moving mean/median is chosen, this tells us the window size to pass to pandas. If int,
+        this is the number of points used in the window. If string we will to guess the number of
+        points from the index.
+        Small windows (equivalent to 1min approx) work better when using rollingmedian.
+    block_func: str, function
         how to resample in block type. Default is mean but it can be any numpy function
         that returns a float. E.g, median.
     degree: int
-        degree of polynomial fit (only if mode==linear or mode==polynomial)
+        degree of polynomial fit (only if how=='linear' or how=='polynomial')
+
+    Returns:
+        out: pandas.DataFrame or pandas.Series
     """
     import pandas as pd
     import algs
     import numpy as np
 
-    mode=mode.lower().replace('_',' ').replace('-','').replace(' ','')
-    if any(w==mode for w in ['moving', 'movingaverage']):
+    how=algs.stripDown(how.lower(), args='-_')
+
+    if ('moving' in how) or ('rolling' in how):
+        if isinstance(window, str):
+            window = int(len(data)/len(data.resample(window)))
+        elif isinstance(window, int):
+            pass
+        else:
+            raise TypeError('Window of moving function should be either an int or a pandas datetime offset string.')
+            
         #-------
-        # performs moving average on the data with window equivalent to the rule
-        if window==None:
-            print('Warning: approximating window size for moving average!\nShould provide window keyword.\n')
-            window = int(len(data)/len(data.resample(rule)))
-        return pd.rolling_mean(data, window=window, **kwargs)
+        # Performs moving average on the data with window
+        if ('mean' in how) or ('average' in how):
+            return pd.rolling_mean(data, window=window, center=center, **kwargs)
         #-------
 
-    elif any(w==mode for w in ['block']):
+        #-------
+        # Performs moving median on the data with window
+        elif 'median' in how:
+            return pd.rolling_median(data, window=window, center=center, **kwargs)
+        #-------
+
+        #-------
+        # In case how not found.
+        else:
+            raise KeyError('Method of trending not found. Check how keyword options with help(trend).')
+        #-------
+
+    elif any(w==how for w in ['block', 'blockaverage', 'blockmean']):
         #-------
         # performs block average on the data with the window being the rule. Assumes that frequency is constant
         if rule==None:
-            return data.apply(lambda x: [np.mean(x)]*len(x), axis=0)
+            if isinstance(data, pd.DataFrame):
+                return data.apply(lambda x: [np.mean(x)]*len(x), axis=0)
+            elif isinstance(data, pd.Series):
+                return data.apply(lambda x: np.mean(x))
         else:
             freq=data.index.inferred_freq
-            aux = data.resample(rule, how=how, **kwargs)
+            aux = data.resample(rule, how=block_func, **kwargs)
             aux.loc[ data.index[-1] ] = np.nan
             return aux.resample(freq, fill_method='pad')
         #-------
 
-    elif any(w in mode for w in ['linear', 'polynomial']):
+    elif any(w in how for w in ['linear', 'polynomial', 'poly']):
         #-------
         # performs a polynomial fit on the data in blocks of "rule"
-        #return algs.fitByDate(data, rule=rule, **kwargs)
         return data.polyfit(rule=rule, **kwargs)
         #-------
 
     else:
         #-------
-        # if no mode can be identified
-        raise KeyError('Mode defined is not correct. Options are "moving", "linear", "polynomial" and "block".')
+        # if no how can be identified
+        raise KeyError('Method of trending not found. Check how keyword options with help(trend).')
         #-------
 
-def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
+
+def detrend(data, how='linear', rule=None, suffix="'", **kwargs):
     """
     Returns the detrended fluctuations of a given dataset
 
@@ -126,32 +153,58 @@ def detrend(data, mode='moving average', rule=None, suffix="'", **kwargs):
     ----------
     data: pandas.DataFrame, pandas.Series
         dataset to be detrended
-    mode: string
-        what method to use in order to identify the trend
+    how: string
+        how of average to apply. Currently {'movingmean', 'movingmedian', 'block', 'linear', 'poly'}.
     rule: pandas offset string
-        the blocks for which the trends should be calculated
+        the blocks for which the trends should be calculated in the block and linear type
     suffix: string
         suffix to add to variable names after fluctuation is extracted
+    window: pandas date offset string or int
+        if moving mean/median is chosen, this tells us the window size to pass to pandas. If int,
+        this is the number of points used in the window. If string we will to guess the number of
+        points from the index.
+        Small windows (equivalent to 1min approx) work better when using rollingmedian.
+    block_func: str, function
+        how to resample in block type. Default is mean but it can be any numpy function
+        that returns a float. E.g, median.
+    degree: int
+        degree of polynomial fit (only if how=='linear' or how=='polynomial')
+
+    Returns:
+        out: pandas.DataFrame or pandas.Series
     """
     from scipy import signal
     import algs
+    import pandas as pd
 
-    mode=algs.stripDown(mode.lower(), args='-_')
+    how=algs.stripDown(how.lower(), args='-_')
     df=data.copy()
 
     #-----------
-    # If possible, try to use scipy's optimized functions
-    if mode=='linear' and rule==None:
-        df=df.apply(signal.detrend, axis=0, type=mode)
-
-    elif mode=='block' and rule==None:
-        df=df.apply(signal.detrend, axis=0, type='constant')
-    #-----------
-
-    #-----------
-    # If not, use our trending function
+    # We can only use scipy's detrend function safely if index in not datetime
+    if isinstance(df.index, pd.DatetimeIndex):
+        df = df - trend(df, how=how, rule=rule, **kwargs)
     else:
-        df=df-trend(df, mode=mode, rule=rule, **kwargs)
+        #-----------
+        # If possible, try to use scipy's optimized functions
+        if how=='linear' and rule==None:
+            try:
+                df=df.apply(signal.detrend, axis=0, type=how)
+            except:
+                df=df-trend(df, how=how, rule=rule, **kwargs)
+
+        elif (any(w==how for w in ['block', 'blockaverage', 'blockmean'])) and (rule==None):
+            try:
+                df = df.apply(signal.detrend, axis=0, type='constant')
+            except:
+                df=df-trend(df, how=how, rule=rule, **kwargs)
+        #-----------
+
+        #-----------
+        # If not, use our trending function
+        else:
+            df = df-trend(df, how=how, rule=rule, **kwargs)
+        #-----------
     #-----------
 
     return df.add_suffix(suffix)

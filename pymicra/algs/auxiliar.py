@@ -77,8 +77,11 @@ def fitWrap(x, y, degree=1):
     """
     import numpy as np
 
-    coefs=np.polyfit(x,y,degree)
-    yy=np.polyval(coefs,x)
+    x = np.array(x)
+    y = np.array(y)
+
+    coefs = np.polyfit(x, y, degree)
+    yy = np.polyval(coefs, x)
     return yy
 
 
@@ -129,6 +132,8 @@ def _polyfit(self, degree=1, rule=None):
     import pandas as pd
 
     data = self.copy()
+    if isinstance(self, pd.Series):
+        data = pd.DataFrame(data)
     #-----------
     # If rule == None it should return a list of 1
     dflist=splitData(data, rule=rule)
@@ -146,8 +151,12 @@ def _polyfit(self, degree=1, rule=None):
             aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
             out=out.append(aux)
  
-    return out
+    if isinstance(self, pd.Series):
+        return out.iloc[:, 0]
+    else:
+        return out
 pd.DataFrame.polyfit = _polyfit
+pd.Series.polyfit = _polyfit
 #---------
 
 
