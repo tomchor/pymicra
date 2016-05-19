@@ -1,4 +1,3 @@
-from __future__ import print_function
 #!/usr/bin/python
 """
 Author: Tomas Chor
@@ -103,7 +102,7 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     falseverbose=True
     if falseverbose and (False in validcols.values):
         falsecols = [ el for el in df.columns if False in validcols.loc[:, el].values ]
-        print('STD test: failed variables and times are\n{0}\n'.format(validcols.loc[:, falsecols]))
+        print 'STD test: failed variables and times are\n{0}\n'.format(validcols.loc[:, falsecols])
     #-----------
 
     valid = validcols.all(axis=0)
@@ -236,7 +235,7 @@ def check_spikes(data, chunk_size='2min',
     #-------------------------------
     # Visualize what you're doing to see if it's correct
     if visualize:
-        print('Plotting de-spiking...')
+        print 'Plotting de-spiking...'
         original[vis_col].plot(style='g-', label='original')
         fou[vis_col].plot(style='b-', label='final')
         plt.title('Column: {}'.format(vis_col))
@@ -454,7 +453,7 @@ def qcontrol(files, datalogger_config,
 
     for filepath in files:
         filename=basename(filepath)
-        print(filename)
+        print filename
         numbers['total'].append(filename)
 
         #---------------
@@ -463,17 +462,17 @@ def qcontrol(files, datalogger_config,
             cdate = algs.name2date(filename, datalogger_config)
             if bdate:
                 if cdate<bdate:
-                    if falseverbose: print(filename, 'failed dates check')
+                    if falseverbose: print filename, 'failed dates check'
                     numbers['dates'].append(filename)
                     continue
             if edate: 
                 if cdate>edate:
-                    if falseverbose: print(filename, 'failed dates check')
+                    if falseverbose: print filename, 'failed dates check'
                     numbers['dates'].append(filename)
                     continue
             #-----------------
             # If we get here, then test is successful
-            if trueverbose: print(filename, 'passed dates check')
+            if trueverbose: print filename, 'passed dates check'
             #-----------------
         #----------------
     
@@ -482,11 +481,11 @@ def qcontrol(files, datalogger_config,
         if file_lines:
             result=algs.check_numlines(filepath, numlines=file_lines)
             if result == False:
-                if falseverbose: print(filepath,'failed lines test')
+                if falseverbose: print filepath,'failed lines test'
                 numbers['lines'].append(filename)
                 continue
             else:
-                if trueverbose: print(filename, 'passed lines check')
+                if trueverbose: print filename, 'passed lines check'
         #-------------------------------
     
         #-------------------------------
@@ -564,7 +563,7 @@ def qcontrol(files, datalogger_config,
    
         #-----------------
         # END OF TESTS
-        print('Successful run!')
+        print 'Successful run!'
         if trueshow:
             if trueshow_vars:
                 fin.loc[:, trueshow_vars]
@@ -577,12 +576,12 @@ def qcontrol(files, datalogger_config,
         #-----------------
         # FINALLY, we write the result in the output directory in the same format
         if outdir:
-            print('Re-writing',filepath)
+            print 'Re-writing',filepath
             fullfin[usedvars] = fin[usedvars]       # This is because some spikes were removed during the process
             fullfin.to_csv(join(outdir, basename(filepath)),
                        header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
         #-----------------
-        print()
+        print
     
     #-------------
     # We create the summary dataframe
@@ -591,7 +590,7 @@ def qcontrol(files, datalogger_config,
     summary['percent']=100.*summary['numbers']/summary.loc['total','numbers']
     #-------------
 
-    print(summary)
+    print summary
     summary.to_csv(summary_file, na_rep='NaN')
     return numbers
  
@@ -684,7 +683,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
             chunks, index = algs.splitData(df, frequency, return_index=True)
             for idx, chunk in zip(index,chunks):
                 out = idx.strftime(outpath)
-                if verbose: print('Writting chunk to ',out)
+                if verbose: print 'Writting chunk to ',out
                 chunk.to_csv(out, index=False, header=False)
         return
     
@@ -695,7 +694,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
         if header==None: header=0
     #------------
         for fin in files:
-            print('Now opening',fin)
+            print 'Now opening',fin
             #------------
             # Creates a sequence of equaly-spaced dates based on the frequency and nicely rounded-up
             ft, lt = algs.first_last(fin)
@@ -718,7 +717,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                         lines.append(line)
                     elif (cdate>=labeldates[1]):
                         if verbose:
-                            print(labeldates[0])
+                            print labeldates[0]
                         #------------
                         # labels first and last runs separately, so they can be identified and put together later
                         if len(labeldates) == nfiles:
@@ -772,14 +771,14 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                 first = fedges.pop(idx)
                 first_lines = open(first,'rt').readlines()
                 if verbose:
-                    print('Concatenating ', last, ' and ', first)
+                    print 'Concatenating ', last, ' and ', first
                 with open(root, 'wt') as fou:
                     fou.writelines(last_lines)
                     fou.writelines(first_lines)
 
-        print('List of bad files:', badfiles)
+        print 'List of bad files:', badfiles
         if verbose:
-            print('Done!')
+            print 'Done!'
         return
 
 
@@ -842,9 +841,9 @@ def correctDrift(drifted, correct_drifted_vars=None, correct=None,
                 if pd.infer_freq(correct.index) == pd.infer_freq(drifted.index):
                     slow, fast = map(np.array, [slow, fast] )
                 else:
-                    print('Frequencies must be the same, however, inferred frequencies appear to be different. Plese check.')
+                    print 'Frequencies must be the same, however, inferred frequencies appear to be different. Plese check.'
             except TypeError:
-                print('Cannot determine if frequencies are the same. We will continue but you should check')
+                print 'Cannot determine if frequencies are the same. We will continue but you should check'
                 slow, fast = map(np.array, [slow, fast] )
             #----------------
     
@@ -868,7 +867,7 @@ def correctDrift(drifted, correct_drifted_vars=None, correct=None,
             correc=pd.DataFrame(columns=[ '{}_{}'.format(slw, fst) ], index=['angular', 'linear'], data=coefs).transpose()
             cors.append(correc)
         cors = pd.concat(cors, join='outer')
-        print(cors)
+        print cors
     #----------------
 
         #----------------
