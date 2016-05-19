@@ -166,6 +166,7 @@ def check_limits(data, tables, max_percent=1.):
     trend = data.polyfit()
     df = df.fillna(trend)
     #-------------------------------
+
     return df, valid
  
 
@@ -250,14 +251,14 @@ def qcontrol(files, datalogger_config,
              detrend=False,
              accepted_percent=1.,
              file_lines=None, bdate=None, edate=None,
-             trend_kw={'how':'linear'},
+             trend_kw={'how':'movingmedian', 'window':'1min'},
              std_detrend_kw={'how':'linear'},
              RAT_detrend_kw = {'how':'linear'},
              spikes_detrend_kw = {'how':'linear'},
              std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
              spikes_check=True, visualize_spikes = False, spikes_vis_col = 'u',
              spikes_func = lambda x: (abs(x - x.mean()) > 4.*abs(x.std())), 
-             max_consec_spikes=3, window_size=900, chunk_size='2Min',
+             max_consec_spikes=3, chunk_size='2Min',
              rev_arrang_test = False, RAT_vars = None,
              RAT_points = 50, RAT_significance = 0.05,
              trueverbose=False, falseverbose=True, falseshow=False, 
@@ -347,8 +348,6 @@ def qcontrol(files, datalogger_config,
     chunk_size: str
         string representing time length of chunks used in the spikes and standard deviation check. Default is "2Min".
         Putting None will not separate in chunks. It's recommended to use rolling functions in this case (might be slow).
-    window_size: int
-        window size for rolling mean used in the standard deviation test.
     rev_arrang_test: bool
         whether or not to perform the reverse arrangement test on data.
     RAT_vars: list
@@ -404,10 +403,21 @@ def qcontrol(files, datalogger_config,
         datalogger_config = read_dlc(datalogger_config)
     #--------------
 
+    #-------------------------------------
+    # Identifying columns that are not part of the datetime
+    variables_list=datalogger_config.varNames
+    if type(variables_list) == dict:
+        usedvars=[ v for v in variables_list.values() if r'%' not in v ]
+    elif type(variables_list) == list:
+        usedvars=[ v for v in variables_list[1:] if r'%' not in v ]
+    else:
+        raise TypeError('Check varNames of the dataloggerConf object.')
+    #-------------------------------------
+
     #--------------
     # We first create the dataframe to hols our limit values and the numbers dict, which
     # is what we use to produce our summary
-    tables=pd.DataFrame()
+    tables=pd.DataFrame(columns=usedvars)
     numbers = {'total': [], 'successful': []}
     #--------------
 
@@ -438,17 +448,6 @@ def qcontrol(files, datalogger_config,
     #--------------
 
     #-------------------------------------
-    # Identifying columns that are not part of the datetime
-    variables_list=datalogger_config.varNames
-    if type(variables_list) == dict:
-        usedvars=[ v for v in variables_list.values() if r'%' not in v ]
-    elif type(variables_list) == list:
-        usedvars=[ v for v in variables_list[1:] if r'%' not in v ]
-    else:
-        raise TypeError('Check varNames of the dataloggerConf object.')
-    #-------------------------------------
-
-    #-------------------------------------
     # BEGINNING OF MAIN PROGRAM
     #-------------------------------------
 
@@ -456,8 +455,9 @@ def qcontrol(files, datalogger_config,
         filename=basename(filepath)
         print filename
         numbers['total'].append(filename)
+
         #---------------
-        # BEGINNING OF DATE CHECK
+        # DATE CHECK
         if bdate or edate:
             cdate = algs.name2date(filename, datalogger_config)
             if bdate:
@@ -477,7 +477,7 @@ def qcontrol(files, datalogger_config,
         #----------------
     
         #-------------------------------
-        # BEGINNING LINE NUMBERS TEST
+        # LINE NUMBERS TEST
         if file_lines:
             result=algs.check_numlines(filepath, numlines=file_lines)
             if result == False:
