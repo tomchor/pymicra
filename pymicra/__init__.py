@@ -31,5 +31,6 @@ __version__ = '0.1.4'
 try:
     from pint.unit import UnitRegistry
     ureg = UnitRegistry()
+    Q_ = ureg.Quantity
 except ImportError:
     pass

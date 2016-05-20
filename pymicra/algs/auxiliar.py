@@ -793,14 +793,16 @@ pd.DataFrame.xplot = _xplot
 
 
 def getUnit(unitstr):
-    from pint.unit import UnitRegistry
-    ur = UnitRegistry()
+    #from pint.unit import UnitRegistry
+    #ur = UnitRegistry()
+    from .. import ureg, Q_
     if isinstance(unitstr, str):
-        return ur[unitstr]
+        return ureg[unitstr]
     elif isinstance(unitstr, list):
-        return [ ur[el] for el in unitstr ]
+        return [ ureg[el] for el in unitstr ]
     elif isinstance(unitstr, dict):
-        return { key: ur[el] for key, el in unitstr.items() }
+        return { key: ureg[el] for key, el in unitstr.items() }
+
 
 def operateUnit(unitlist, operate=None):
     """
