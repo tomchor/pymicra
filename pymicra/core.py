@@ -76,6 +76,8 @@ class dataloggerConf(object):
         if units is not None:
             if not isinstance(units, dict):
                 raise TypeError('units should be a dictionary. Ex.: {"u" : "m/s", "v" : "m/s", "theta" : "K" }')
+            else:
+                units = aux.parseUnits(units)
         #-------------------------
 
         #-------------------------

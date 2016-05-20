@@ -2,6 +2,7 @@
 """
 Defines some useful constants
 """
+import algs
 units={}    # creates units dictionary so it can be updated everytime a constant is added
 
 #---------------------------------------
@@ -144,3 +145,8 @@ try:
     del val, key
 except:
     pass
+
+#---------------
+# Parse units to pint!
+units = algs.parseUnits(units)
+#---------------

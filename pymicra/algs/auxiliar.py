@@ -792,10 +792,13 @@ pd.DataFrame.xplot = _xplot
 #--------
 
 
-def getUnit(unitstr):
-    #from pint.unit import UnitRegistry
-    #ur = UnitRegistry()
+def parseUnits(unitstr):
+    '''
+    Gets unit from string, list of strings, or dict's values, using the UnitRegistry
+    defined in __init__.py
+    '''
     from .. import ureg, Q_
+
     if isinstance(unitstr, str):
         return ureg[unitstr]
     elif isinstance(unitstr, list):
@@ -808,5 +811,5 @@ def operateUnit(unitlist, operate=None):
     """
     Apply an operation to a list of pint units
     """
-    unitlist = getUnit(unitlist)
+    unitlist = parseUnits(unitlist)
     return operate(*unitlist)
