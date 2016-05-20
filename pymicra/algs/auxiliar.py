@@ -283,12 +283,12 @@ def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepa
     if False in df_valid.values:
         failed=df_valid[df_valid==False].index
         if falseverbose:
-            print filepath, 'failed',testname,'test'
-            print 'Failed variable(s):', ', '.join(failed)
+            print(filepath, 'failed',testname,'test')
+            print('Failed variable(s):', ', '.join(failed))
             print
         return False, failed
     else:
-        if trueverbose: print filepath,'Passed',testname,'test'
+        if trueverbose: print(filepath,'Passed',testname,'test')
         return True, None
 
 
@@ -418,7 +418,7 @@ def parseDates(data, dataloggerConf=None,
 
     #------------------------------------
     # Joins the names of the columns, which must match the datetime directive (see __doc__)
-    if verbose: print 'Using these columns: ', date_col_names
+    if verbose: print('Using these columns: ', date_col_names)
     date_format=connector.join(date_col_names)
     auxformat='%Y-%m-%d %H:%M:%S.%f'
     if complete_zeroes:
@@ -446,9 +446,9 @@ def parseDates(data, dataloggerConf=None,
     n_fracs=len(dates[dates.values==first_date])
     if n_fracs>1:
         if correct_fracs == None:
-            print 'Warning! I identified that there are', n_fracs, ' values (on average) for every timestamp.\n\
+            print('Warning! I identified that there are', n_fracs, ' values (on average) for every timestamp.\n\
 This generally means that the data is sampled at a frequency greater than the frequency of the timestamp. \
-I will then proceed to guess the fractions based of the keyword "first_time_skip" and correct the index.'
+I will then proceed to guess the fractions based of the keyword "first_time_skip" and correct the index.')
         if (correct_fracs==None) or (correct_fracs==True):
             dates=[ date.strftime(auxformat) for date in dates ]
             aux=dates[0]
@@ -462,7 +462,7 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
                 dates[i]=datetime.strptime(date, auxformat) + timedelta(minutes=cont/float(n_fracs))
                 cont+=1
         else:
-            print '\nWarning: fractions werent corrected. Check your timestamp data and the correct_fracs flag\n'
+            print('\nWarning: fractions werent corrected. Check your timestamp data and the correct_fracs flag\n')
     #-------------------------------------
 
     #-------------------------------------
