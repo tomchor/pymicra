@@ -1,3 +1,4 @@
+from __future__ import print_function
 #!/usr/bin/python
 """
 """
@@ -283,12 +284,12 @@ def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepa
     if False in df_valid.values:
         failed=df_valid[df_valid==False].index
         if falseverbose:
-            print(filepath, 'failed',testname,'test')
-            print('Failed variable(s):', ', '.join(failed))
+            print(filepath, 'FAILED',testname,'test!')
+            print('Failed variable(s):', ', '.join(failed),'\n')
             print
         return False, failed
     else:
-        if trueverbose: print(filepath,'Passed',testname,'test')
+        if trueverbose: print(filepath,'passed',testname,'test')
         return True, None
 
 
