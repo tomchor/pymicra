@@ -284,7 +284,8 @@ def qcontrol(files, datalogger_config,
         #-----------------
         # BEGINNING OF SPIKES CHECK
         if spikes_check:
-            fin, valid = tests.check_spikes(fin, visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size,
+            fin, valid = tests.check_spikes(fin, detrend=spikes_detrend, detrend_kw=spikes_detrend_kw,
+                            visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size,
                             cut_func=spikes_func, max_consec_spikes=max_consec_spikes, max_percent=accepted_percent)
 
             result, failed = algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
@@ -295,7 +296,7 @@ def qcontrol(files, datalogger_config,
         #----------------------------------
         # BEGINNING OF STANDARD DEVIATION CHECK
         if std_limits:
-            valid = tests.check_std(fin, tables, detrend=detrend, detrend_kw=std_detrend_kw, chunk_size=chunk_size, falseverbose=falseverbose)
+            valid = tests.check_std(fin, tables, detrend=std_detrend, detrend_kw=std_detrend_kw, chunk_size=chunk_size, falseverbose=falseverbose)
 
             result, failed = algs.testValid(valid, testname='STD', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname=STD_name, filename=filename, falseshow=falseshow)

@@ -15,7 +15,7 @@ try:
     _has_setuptools = True
 except ImportError:
     print("No setuptools installed.\nWill try to install with distutils...\n")
-    from distutils.core import setup, find_packages
+    from distutils.core import setup
     _has_setuptools = False
 #-----------
 
