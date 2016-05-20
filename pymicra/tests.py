@@ -172,16 +172,16 @@ def check_limits(data, tables, max_percent=1.):
 
     #-----------
     # First we check the lower values
-    if 'low_limits' in tables.index.values:
-        faulty = df < tables.loc['low_limits']
+    if 'lower_limits' in tables.index.values:
+        faulty = df < tables.loc['lower_limits']
         low_count = df[ faulty ].count() 
         df[ faulty ] = np.nan
     #-------------------------------
     
     #-------------------------------
     # Now we check the upper values
-    if 'upp_limits' in tables.index.values:
-        faulty = df > tables.loc['upp_limits']
+    if 'upper_limits' in tables.index.values:
+        faulty = df > tables.loc['upper_limits']
         upp_count = df[ faulty ].count() 
         df[ faulty ] = np.nan
     #-------------------------------
@@ -195,7 +195,7 @@ def check_limits(data, tables, max_percent=1.):
     df = df.fillna(trend)
     #-------------------------------
 
-    return df, valid
+    return df, valid, fault_count
  
 
 def check_spikes(data, chunk_size='2min',
@@ -203,6 +203,7 @@ def check_spikes(data, chunk_size='2min',
                  detrend_kw={'how':'linear'},
                  visualize=False, vis_col=1, max_consec_spikes=3,
                  cut_func = lambda x: (abs(x - x.mean()) > 5.*x.std()),
+                 replace_with='interpolation',
                  max_percent=1.):
     '''
     Applies spikes-check according to Vickers and Mahrt (1997)
@@ -213,6 +214,10 @@ def check_spikes(data, chunk_size='2min',
         data to de-spike
     chunk_size: str, int
         size of chunks to consider. If str should be pandas offset string. If int, number of lines.
+    detrend: bool
+        whether to detrend the data and work  with the fluctuations or to work with the absolute series.
+    detrend_kw: dict
+        dict of keywords to pass to pymicra.trend in order to detrend data (if detrend==True).
     visualize: bool
         whether of not to visualize the interpolation ocurring
     vis_col: str, int or list
@@ -221,12 +226,13 @@ def check_spikes(data, chunk_size='2min',
         maximum number of consecutive spikes to actually be considered spikes and substituted
     cut_func: function
         function used to define spikes
+    replace_with: str
+        method to use when replacing spikes. Options are 'interpolation' or 'trend'.
     max_percent: float
         maximum percentage of spikes to allow.
     '''
     import pandas as pd
     import algs
-    import matplotlib.pyplot as plt
     import data as pmdata
 
     original = data.copy()
@@ -244,14 +250,21 @@ def check_spikes(data, chunk_size='2min',
     max_count = int(len(original)*max_percent/100.)
     fault_count = pd.Series(len(original), index=dfs[0].columns)
 
+    #------------
+    if replace_with=='trend':
+        def replace_spikes(dframe):
+            trend = pmdata.trend(dframe, how='linear')
+            return dframe.fillna(trend)
+    elif replace_with=='interpolation':
+        def replace_spikes(dframe):
+            return dframe.interpolate(method='index')
+    #------------
+
     for i in range(len(dfs)):
-        #-------------------------------
-        # We make a copy of the original df just in case
         chunk=dfs[i].copy()
-        #-------------------------------
 
         #-------------------------------
-        # This substitutes the spikes to NaNs so it can be interpolated later
+        # This substitutes the spikes to NaNs so it can be replaced later
         if len(chunk)>max_consec_spikes:
             chunk=algs.limitedSubs(chunk, max_interp=max_consec_spikes, func=cut_func)
         fault_count = fault_count - chunk.count()
@@ -281,6 +294,7 @@ def check_spikes(data, chunk_size='2min',
     #---------------------
     # Visualize what you're doing to see if it's correct
     if visualize:
+        import matplotlib.pyplot as plt
         print('Plotting de-spiking...')
         original[vis_col].plot(style='g-', label='original')
         fou[vis_col].plot(style='b-', label='final')
@@ -290,6 +304,6 @@ def check_spikes(data, chunk_size='2min',
         plt.close()
     #---------------------
 
-    return fou, valid
+    return fou, valid, fault_count
 
 

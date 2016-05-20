@@ -20,6 +20,7 @@ def qcontrol(files, datalogger_config,
              low_limits={}, upp_limits={},
              spikes_check=True, visualize_spikes=False, spikes_vis_col='u',
              spikes_func = lambda x: (abs(x - x.mean()) > 5.*x.std()), 
+             replace_spikes_with='interpolation',
              max_consec_spikes=3, chunk_size='2Min',
              std_limits={}, dif_limits={},
              RAT = False, RAT_vars = None,
@@ -104,6 +105,8 @@ def qcontrol(files, datalogger_config,
     spikes_func: function
         function used to look for spikes. Can be defined used numpy/pandas notation for methods with lambda functions.
         Default is: lambda x: (abs(x - x.mean()) > abs(x.std()*4.))
+    replace_spikes_with: str
+        method to use when replacing the spikes. Options are 'interpolation' and 'trend'.
     max_consec_spikes: int
         limit of consecutive spike points to be interpolated. After this spikes are left as they are in the output.
     accepted_percent: float
@@ -274,7 +277,7 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         # BEGINNING OF LOWER AND UPPER VALUES CHECK (BOUNDARIES TEST)
         if low_limits or upp_limits:
-            fin, valid = tests.check_limits(fin, tables)
+            fin, valid, limits_replaced = tests.check_limits(fin, tables)
 
             result, failed = algs.testValid(valid, testname='limits', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname=bound_name, filename=filename, falseshow=falseshow)
@@ -284,8 +287,8 @@ def qcontrol(files, datalogger_config,
         #-----------------
         # BEGINNING OF SPIKES CHECK
         if spikes_check:
-            fin, valid = tests.check_spikes(fin, detrend=spikes_detrend, detrend_kw=spikes_detrend_kw,
-                            visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size,
+            fin, valid, spikes_replaced = tests.check_spikes(fin, detrend=spikes_detrend, detrend_kw=spikes_detrend_kw,
+                            visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size, replace_with=replace_spikes_with,
                             cut_func=spikes_func, max_consec_spikes=max_consec_spikes, max_percent=accepted_percent)
 
             result, failed = algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
