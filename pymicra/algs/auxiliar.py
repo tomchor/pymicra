@@ -81,7 +81,12 @@ def fitWrap(x, y, degree=1):
     x = np.array(x)
     y = np.array(y)
 
-    coefs = np.polyfit(x, y, degree)
+    #----------
+    # Getting rid of NaNs and passing only "good" points to polyfit
+    idx = np.isfinite(x) & np.isfinite(y)
+    coefs = np.polyfit(x[idx], y[idx], degree)
+    #----------
+
     yy = np.polyval(coefs, x)
     return yy
 

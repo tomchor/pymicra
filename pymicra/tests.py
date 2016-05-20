@@ -199,12 +199,13 @@ def check_limits(data, tables, max_percent=1.):
  
 
 def check_spikes(data, chunk_size='2min',
-                 spikes_detrend_kw={'how':'linear'},
+                 detrend=True,
+                 detrend_kw={'how':'linear'},
                  visualize=False, vis_col=1, max_consec_spikes=3,
-                 cut_func=lambda x: (abs(x - x.mean()) > 4.*x.std()),
+                 cut_func = lambda x: (abs(x - x.mean()) > 5.*x.std()),
                  max_percent=1.):
     '''
-    Applies spikes-check according to Vickers and Mart (1997)
+    Applies spikes-check according to Vickers and Mahrt (1997)
 
     Parameters:
     -----------
@@ -226,11 +227,21 @@ def check_spikes(data, chunk_size='2min',
     import pandas as pd
     import algs
     import matplotlib.pyplot as plt
+    import data as pmdata
 
     original = data.copy()
-    max_count = int(len(original)*max_percent/100.)
-    dfs = algs.splitData(original, chunk_size)
 
+    #------------
+    # If dentreded == True we save the trend for later and work with the detrended data
+    if detrend:
+        origtrend = pmdata.trend(data, **detrend_kw)
+        detrended = original - origtrend
+        dfs = algs.splitData(detrended, chunk_size)
+    else:
+        dfs = algs.splitData(original, chunk_size)
+    #------------
+
+    max_count = int(len(original)*max_percent/100.)
     fault_count = pd.Series(len(original), index=dfs[0].columns)
 
     for i in range(len(dfs)):
@@ -248,7 +259,7 @@ def check_spikes(data, chunk_size='2min',
 
         #-------------------------------
         # Substitution of spikes happens here
-        trend = chunk.polyfit()
+        trend = pmdata.trend(chunk, how='linear')
         chunk = chunk.fillna(trend)
         #-------------------------------
 
@@ -257,10 +268,17 @@ def check_spikes(data, chunk_size='2min',
         dfs[i]=chunk.copy()
         #-------------------------------
 
-    fou=pd.concat(dfs)
+    #---------------------
+    # Now we put the chunks back together and maybe correct the trend
+    despiked = pd.concat(dfs)
+    if detrend:
+        fou = despiked + origtrend
+    else:
+        fou = despiked
     valid = fault_count < max_count
+    #---------------------
 
-    #-------------------------------
+    #---------------------
     # Visualize what you're doing to see if it's correct
     if visualize:
         print('Plotting de-spiking...')
@@ -270,7 +288,7 @@ def check_spikes(data, chunk_size='2min',
         plt.legend()
         plt.show()
         plt.close()
-    #-------------------------------
+    #---------------------
 
     return fou, valid
 

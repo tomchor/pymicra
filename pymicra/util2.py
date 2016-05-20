@@ -19,7 +19,7 @@ def qcontrol(files, datalogger_config,
              spikes_detrend=True, spikes_detrend_kw = {'how':'linear'},
              low_limits={}, upp_limits={},
              spikes_check=True, visualize_spikes=False, spikes_vis_col='u',
-             spikes_func = lambda x: (abs(x - x.mean()) > 4.*abs(x.std())), 
+             spikes_func = lambda x: (abs(x - x.mean()) > 5.*x.std()), 
              max_consec_spikes=3, chunk_size='2Min',
              std_limits={}, dif_limits={},
              RAT = False, RAT_vars = None,
@@ -79,12 +79,12 @@ def qcontrol(files, datalogger_config,
         dates before this automatically fail.
     edate: str
         dates after this automatically fail.
-    std_detrend_kw:
-        keywords to be passed to pymicra.detrend specifically to be used on the STD test.
     std_limits: dict
         keys must be names of variables and values must be upper limits for the standard deviation.
     std_detrend: bool
         whether or not to work with the fluctations of the data on the spikes and standard deviation test.
+    std_detrend_kw:
+        keywords to be passed to pymicra.detrend specifically to be used on the STD test.
     low_limits: dict
         keys must be names of variables and values must be lower absolute limits for the values of each var.
     upp_limits: dict
@@ -246,7 +246,7 @@ def qcontrol(files, datalogger_config,
         if file_lines:
             result=algs.check_numlines(filepath, numlines=file_lines)
             if result == False:
-                if falseverbose: print(filepath,'failed lines test')
+                if falseverbose: print(filepath,'failed lines check')
                 numbers['lines'].append(filename)
                 continue
             else:
