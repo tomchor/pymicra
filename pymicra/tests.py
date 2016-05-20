@@ -257,7 +257,7 @@ def check_spikes(data, chunk_size='2min',
             return dframe.fillna(trend)
     elif replace_with=='interpolation':
         def replace_spikes(dframe):
-            return dframe.interpolate(method='index')
+            return dframe.interpolate(method='index', limit_direction='both')
     #------------
 
     for i in range(len(dfs)):
