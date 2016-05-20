@@ -28,8 +28,8 @@ def rotCoor(data, notation_defs=None):
     #-------
     # Getting the names for u, v, w
     if notation_defs==None:
-        from core import get_notation
-        defs=get_notation()
+        from core import notation
+        defs=notation()
     else:
         defs=notation_defs
     wind_vars = [ defs.u, defs.v, defs.w ]

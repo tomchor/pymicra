@@ -182,7 +182,7 @@ class get_notation(object):
     This creates an object that holds the default notation for pymicra.
     Example of usage:
 
-    notation = get_notation()
+    notation = notation()
 
     fluctuation_of_co2_conc = notation.concentration % notation.fluctuation % notation.co2
 
