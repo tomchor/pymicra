@@ -1,3 +1,4 @@
+from __future__ import print_function
 #!/usr/bin/python
 """
 Author: Tomas Chor
@@ -57,7 +58,7 @@ def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
     try:
         data=pd.read_csv(fname, usecols=usedcols, dtype=dtypes, **kwargs)
     except ValueError:
-        print 'WARNING: Ignoring dtypes for date columns. This may cause problems parsing dates'
+        print('WARNING: Ignoring dtypes for date columns. This may cause problems parsing dates')
         data=pd.read_csv(fname, usecols=usedcols, **kwargs)
     #------------
 
@@ -93,14 +94,14 @@ def readDataFiles(flist, verbose=0, **kwargs):
     dflist=[]
     for f in flist:
         if verbose==1:
-            print 'Reading',f
+            print('Reading',f)
         subdata=readDataFile(f, **kwargs)
         dflist.append(subdata)
     if verbose:
-        print 'Concatenating DataFrames...'
+        print('Concatenating DataFrames...')
     data=pd.concat(dflist, ignore_index=True)
     if verbose:
-        print 'Done!'
+        print('Done!')
     return data
 
 
@@ -147,7 +148,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, 
     #------------
     # We parse de dates
     if parse_dates:
-        if verbose: print 'Starting to parse the dates'
+        if verbose: print('Starting to parse the dates')
         series=algs.parseDates(series, dataloggerConf=datalogger, **parse_dates_kw)
     #------------
 
@@ -173,7 +174,7 @@ def read_dlc(dlcfile):
     try:
         execfile(dlcfile, globs, dlcvars)
     except NameError:
-        print '''This version of python does not have an execfile function. This workaround should work but is yet to be fully tested'''
+        print('This version of python does not have an execfile function. This workaround should work but is yet to be fully tested')
         with open(dlcfile) as f:
             code=compile(f.read(), dlcfile, 'exec')
             exec(code, globs, dlcvars)
@@ -201,7 +202,7 @@ def read_site(sitefile):
     try:
         execfile(sitefile, globs, sitevars)
     except NameError:
-        print '''This version of python does not have an execfile function. This workaround should work but is yet to be fully tested'''
+        print('This version of python does not have an execfile function. This workaround should work but is yet to be fully tested')
         with open(sitefile) as f:
             code=compile(f.read(), sitefile, 'exec')
             exec(code, globs, sitevars)
