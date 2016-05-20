@@ -22,7 +22,7 @@ def qcontrol(files, datalogger_config,
              spikes_func = lambda x: (abs(x - x.mean()) > 4.*abs(x.std())), 
              max_consec_spikes=3, chunk_size='2Min',
              std_limits={}, dif_limits={},
-             rev_arrang_test = False, RAT_vars = None,
+             RAT = False, RAT_vars = None,
              RAT_points = 50, RAT_significance = 0.05,
              trueverbose=False, falseverbose=True, falseshow=False, 
              trueshow=False, trueshow_vars=None,
@@ -56,9 +56,9 @@ def qcontrol(files, datalogger_config,
         runs with a standard deviation lower than a pre-determined value (generally close to the
         sensor precision) are left out.
         Activate it by passing a std_limits keyword.
-    reverse arrangement test:
+    reverse arrangement test (RAT):
         runs that fail the reverse arrangement test for any variable are left out.
-        Activate it by passing a rev_arrang_test keyword.
+        Activate it by passing a RAT keyword.
     stationarity test:
         runs whose trend have a maximum difference greater than a certain value are left out.
         This excludes non-stationary runs. Activate it by passing a dif_limits keyword.
@@ -112,7 +112,7 @@ def qcontrol(files, datalogger_config,
     chunk_size: str
         string representing time length of chunks used in the spikes and standard deviation check. Default is "2Min".
         Putting None will not separate in chunks. It's recommended to use rolling functions in this case (might be slow).
-    rev_arrang_test: bool
+    RAT: bool
         whether or not to perform the reverse arrangement test on data.
     RAT_vars: list
         list containing the name of variables to go through the reverse arrangement test. If None, all variables are tested.
@@ -207,7 +207,7 @@ def qcontrol(files, datalogger_config,
     if dif_limits:
         tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
         numbers[ maxdif_name ] = []
-    if rev_arrang_test:
+    if RAT:
         numbers['RAT'] = []
     tables = tables.fillna(value=np.nan)
     #--------------
@@ -305,7 +305,7 @@ def qcontrol(files, datalogger_config,
     
         #------------------------------
         # BEGINNING OF REVERSE ARRANGEMENT TEST
-        if rev_arrang_test:
+        if RAT:
             valid = tests.check_RA(fin, detrend=RAT_detrend, detrend_kw=RAT_detrend_kw,
                                     RAT_vars=None, RAT_points=RAT_points, RAT_significance=RAT_significance)
 
