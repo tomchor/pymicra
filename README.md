@@ -25,7 +25,11 @@ Currently, this is a sum up of what pymicra does:
   - Plus all native features of Pandas (interpolation, resampling, grouping, statistical tests, slicing, handling of missing data and etc.)
 
 ## Instalation
+To install Pymicra we recommend to install the `setuptools` package, which can be done with `sudo apt-get install python-setuptools` depending on your Linux distribution.
+
 Download the package an unpack in somewhere. Then open a terminal and move to the directory created, whose name should be `pymicra`. Then run `sudo python setup.py install`. This should be enough to install the package.
+
+To remove Pymicra, the easiest way is to use pip (`sudo apt-get install python-pip`) with the command `sudo pip uninstall pymicra`.
 
 ## Suggested notation (already default)
 To work with Pandas (and hence Pymicra) each column of data preferably has to have its own name, so it is important that the names the user uses for columns match the ones that Pymicra uses (although a different-from-default notation can be passed to pymicra). The next lines describe some general quantities, followed by the name that should be used inside straight brackets, followed by the units that compose it. The names provided are the default names and will be subjected to change by the user.
