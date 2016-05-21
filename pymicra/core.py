@@ -177,7 +177,7 @@ class siteConfig(object):
 
 
 
-class get_notation(object):
+class notation(object):
     """
     This creates an object that holds the default notation for pymicra.
     Example of usage:

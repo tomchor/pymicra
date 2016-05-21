@@ -85,13 +85,13 @@ def get_scales(dataframe, siteConst, notation_defs=None,
     CHECKLIST:
     ADD MIXED-LAYER CONVECTION SCALES FOR VELOCITY (w*) AND TEMPERATURE (t*) MAYBE
     """
-    from ..core import get_notation
+    from ..core import notation
     from .. import constants
     import pandas as pd
     import numpy as np
 
     if notation_defs==None:
-        defs=get_notation()
+        defs=notation()
     else:
         defs=notation_defs
     data = dataframe.copy()
@@ -198,7 +198,7 @@ def eddyCov(data, wpl=True,
         list that holds every solute considered for flux
     """
     from .. import constants
-    from ..core import get_notation
+    from ..core import notation
     import pandas as pd
 
     if from_fluctuations:
@@ -210,7 +210,7 @@ def eddyCov(data, wpl=True,
     #---------
     # Define useful notation to look for
     if notation_defs==None:
-        defs=get_notation()
+        defs=notation()
     else:
         defs=notation_defs
     star = defs.star
@@ -291,7 +291,7 @@ def eddyCov2(data, wpl=True,
         list that holds every solute considered for flux
     """
     from .. import constants
-    from ..core import get_notation
+    from ..core import notation
     import pandas as pd
 
     cp = constants.cp_dry
@@ -300,9 +300,9 @@ def eddyCov2(data, wpl=True,
     #---------
     # Define useful notation to look for
     if notation_defs==None:
-        defs=get_notation()
+        defs=notation()
     else:
-        defs=notation_defs2
+        defs=notation_defs
     fluct = defs.fluctuation
     mean = defs.mean
     #---------
