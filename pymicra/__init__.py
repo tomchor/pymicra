@@ -12,6 +12,16 @@
  It is recommended that pint is installed for better handling the
  units inside the functions.
 """
+#---------
+# Here we create a "global" unitregistry for pymicra
+try:
+    from pint.unit import UnitRegistry
+    ureg = UnitRegistry()
+    Q_ = ureg.Quantity
+except ImportError:
+    pass
+#---------
+
 from io import timeSeries, read_dlc, read_site, toUnitsCsv, readUnitsCsv
 from util import qcontrol, separateFiles, correctDrift
 from micro import *
@@ -28,6 +38,4 @@ import micro
 import algs
 __version__ = '0.1.4'
 
-from pint.unit import UnitRegistry
-ureg = UnitRegistry()
-Q_ = ureg.Quantity
+

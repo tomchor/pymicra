@@ -797,7 +797,11 @@ def parseUnits(unitstr):
     Gets unit from string, list of strings, or dict's values, using the UnitRegistry
     defined in __init__.py
     '''
-    from .. import ureg, Q_
+    try:
+        from .. import ureg, Q_
+    except ImportError:
+        print('You should have pint installed to use units!')
+        return unitstr
 
     if isinstance(unitstr, str):
         return ureg[unitstr]
