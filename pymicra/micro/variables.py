@@ -16,13 +16,13 @@ http://www.licor.com/env/help/EddyPro3/Content/Topics/Calculating_Micromet_Varia
 
 """
 
-def MonObuVar(L_m, siteConst):
+def MonObuVar(L_m, siteConf):
     """
     Redirects to MonObuSimVar
     """
-    return MonObuSimVar(L_m, siteConst)
+    return MonObuSimVar(L_m, siteConf)
 
-def MonObuSimVar(L_m, siteConst):
+def MonObuSimVar(L_m, siteConf):
     """
     Calculates the Monin-Obukhov Similarity Variable
     defined as
@@ -31,8 +31,8 @@ def MonObuSimVar(L_m, siteConst):
     where d is the displacement height or zero-plane displacement
     and L_m is the Monin-Obukhov Length.
     """
-    z=siteConst.variables_height
-    d=siteConst.displacement_height
+    z=siteConf.variables_height
+    d=siteConf.displacement_height
     zeta = (z-d)/L_m
     return zeta
 
@@ -63,7 +63,7 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
     return Lm
 
 
-def get_scales(dataframe, siteConst, notation_defs=None,
+def get_scales(dataframe, siteConf, notation_defs=None,
   output_as_df=True, theta_from_theta_v=True, solutes=[]):
     """
     Calculates characteristic lengths for data
@@ -75,7 +75,7 @@ def get_scales(dataframe, siteConst, notation_defs=None,
     -----------
     data: pandas.DataFrame
         dataset to be used. Must have a minimum of columns in order for it to work
-    siteConst: pymicra.siteConstants object
+    siteConf: pymicra.siteConfig object
         currently not used
     updt: dictionary
         use this dictionary to change a small amount of the names that the variables have in the dataframe
@@ -151,7 +151,7 @@ def get_scales(dataframe, siteConst, notation_defs=None,
     #---------
     # Now we calculate the obukhov length and the similarity variable
     Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=constants.gravity)
-    zeta=MonObuSimVar(Lm, siteConst)
+    zeta=MonObuSimVar(Lm, siteConf)
     #---------
 
     #---------

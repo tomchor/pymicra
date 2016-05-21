@@ -184,7 +184,7 @@ def read_dlc(dlcfile):
 
 def read_site(sitefile):
     """
-    Reads .site configuration file, which holds siteConstants definitions
+    Reads .site configuration file, which holds siteConfig definitions
 
     The .site should have definitions as regular python syntax (in meters!):
         instruments_height    = 10
@@ -195,7 +195,7 @@ def read_site(sitefile):
     sitedile: str
         path to .site file
     """
-    from core import siteConstants, siteConfig
+    from core import siteConfig, siteConfig
 
     globs={}
     sitevars={}
@@ -212,7 +212,7 @@ def read_site(sitefile):
     try:
         return siteConfig(**sitevars)
     except:
-        return siteConstants(**sitevars)
+        return siteConfig(**sitevars)
     #--------
 
 

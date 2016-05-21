@@ -1,3 +1,4 @@
+from __future__ import print_function
 #!/usr/bin/python
 """
 """
@@ -163,17 +164,29 @@ class siteConfig(object):
 
         self.description = description
         self.instruments_height = instruments_height    #meters
-        self.canopy_height = canopy_height          #meters
+        self.canopy_height = canopy_height              #meters
         self.roughness_length = roughness_length
 
-        if displacement_height==None:
-            self.displacement_height = (2./3.)*self.canopy_height #meters
-        else:
+        #---------
+        # If there's no displacement height, we try to calculate it
+        if displacement_height:
             self.displacement_height=displacement_height
-
+        else:
+            if canopy_height:
+                self.displacement_height = (2./3.)*self.canopy_height #meters
+            else:
+                self.displacement_height = None
+        #---------
+            
         self.latitude = latitude
         self.longitude = longitude
         self.altitude = altitude
+
+    def show(self):
+        """
+        Shows the characteristics of the site on screen
+        """
+        print('Lat-Lon is:', self.latitude, self.longitude)
 
 
 
@@ -240,33 +253,5 @@ class notation(object):
             exec('self.{0}_mean = self.mean % self.{0}'.format(subst))
             exec('self.{0}_star = self.star % self.{0}'.format(subst))
 
-
-
-class siteConstants(object):
-    """
-    Keeper of the characteristics and constants of an experiment.
-    This is obsolete. Try using siteConfig instead.
-
-    Attributes:
-    -----------
-        variables_height: float
-            the main height of the instruments in meters. Generally the height of the sonic anemometer
-        canopy height: float
-            the mean height of the vegetation meters
-        displacement_height: float
-            also called zero-plane displacement. Will be estimated as 2/3*canopy_height if not given.
-    """
-    def __init__(self, variables_height, canopy_height,
-             displacement_height=None, z0=None, description=None):
-
-        self.description=description
-        self.variables_height = variables_height    #meters
-        self.canopy_height = canopy_height          #meters
-        self.z0 = z0
-        self.description = description
-        if displacement_height==None:
-            self.displacement_height = (2./3.)*self.canopy_height #meters
-        else:
-            self.displacement_height=displacement_height
 
 
