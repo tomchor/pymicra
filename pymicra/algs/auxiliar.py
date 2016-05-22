@@ -798,19 +798,28 @@ pd.DataFrame.xplot = _xplot
 #--------
 
 
-def getUnit(unitstr):
-    from pint.unit import UnitRegistry
-    ur = UnitRegistry()
+def parseUnits(unitstr):
+    '''
+    Gets unit from string, list of strings, or dict's values, using the UnitRegistry
+    defined in __init__.py
+    '''
+    try:
+        from .. import ureg, Q_
+    except ImportError:
+        print('You should have pint installed to use units!')
+        return unitstr
+
     if isinstance(unitstr, str):
-        return ur[unitstr]
+        return ureg[unitstr]
     elif isinstance(unitstr, list):
-        return [ ur[el] for el in unitstr ]
+        return [ ureg[el] for el in unitstr ]
     elif isinstance(unitstr, dict):
-        return { key: ur[el] for key, el in unitstr.items() }
+        return { key: ureg[el] for key, el in unitstr.items() }
+
 
 def operateUnit(unitlist, operate=None):
     """
     Apply an operation to a list of pint units
     """
-    unitlist = getUnit(unitlist)
+    unitlist = parseUnits(unitlist)
     return operate(*unitlist)
