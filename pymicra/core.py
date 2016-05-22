@@ -188,7 +188,9 @@ class siteConfig(object):
         """
         Shows the characteristics of the site on screen
         """
-        print('Lat-Lon is:', self.latitude, self.longitude)
+        print('Description:', self.description)
+        print('Lat, Lon:', self.latitude, self.longitude)
+        print('Altitude:', self.altitude)
 
 
 
@@ -244,7 +246,9 @@ class notation(object):
         for subst in ['h2o', 'co2', 'ch4', 'o3', 'moist_air', 'dry_air']:
             exec('self.{0}_mean_density = self.mean % self.density % self.{0}'.format(subst))
             exec('self.{0}_density = self.density % self.{0}'.format(subst))
+            exec('self.{0}_mean_molar_density = self.mean % self.molar_density % self.{0}'.format(subst))
             exec('self.{0}_molar_density = self.molar_density % self.{0}'.format(subst))
+            exec('self.{0}_mean_mixing_ratio = self.mean % self.mixing_ratio % self.{0}'.format(subst))
             exec('self.{0}_mixing_ratio = self.mixing_ratio % self.{0}'.format(subst))
 
         for subst in ['co2', 'ch4', 'o3']:

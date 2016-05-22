@@ -2,12 +2,8 @@
 """
 """
 
-#-------------------------------------------
-#-------------------------------------------
-# OUTPUT OF DATA
-#-------------------------------------------
-#-------------------------------------------
-def toUnitsCsv(data, units, filename, to_tex=False, **kwargs):
+
+def to_UnitsCsv(data, units, filename, to_tex=False, **kwargs):
     """
     Writes s csv with the units of the variables as a second line
 
@@ -65,18 +61,27 @@ del pd
 #---------------
 
 
-def _as_dlc(self, dlc):
+#---------------
+def _as_dlc(self, outfile, dlc):
     """
-    Still to be writen:
-    should write a DataFrame in the exact format described by a dataloggerConfiguration object
+    Should write a DataFrame in the exact format described by a dataloggerConfig object
     """
-    cols=dlc.columns
     df = self.copy()
-    df = df[ cols ]
 
-    fullfin[usedvars] = fin[usedvars]       # This is because some spikes were removed during the process
-    fullfin.to_csv(join(outdir, basename(filepath)),
-                       header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
+    #---------------
+    # Re-create date columns if they existed
+    for datecol in dlc.date_col_names:
+        df[ datecol ] = df.index.strftime(datecol)
+    #---------------
 
+    if isinstance(dlc.varNames, list):
+        df = df[ dlc.varNames ]
+    elif isinstance(dlc.varNames, dict):
+        df = df[ dlc.varNames.values ]
+
+    df.to_csv(outfile, header=dlc.header_lines, 
+            sep=dlc.columns_separator, index=False, quoting=3, na_rep='nan')
+
+#---------------
 
 
