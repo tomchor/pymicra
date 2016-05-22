@@ -17,7 +17,7 @@ def qcontrol(files, datalogger_config,
              std_detrend=True, std_detrend_kw={'how':'linear'},
              RAT_detrend=True, RAT_detrend_kw={'how':'linear'},
              spikes_detrend=True, spikes_detrend_kw = {'how':'linear'},
-             low_limits={}, upp_limits={},
+             lower_limits={}, upper_limits={},
              spikes_check=True, visualize_spikes=False, spikes_vis_col='u',
              spikes_func = lambda x: (abs(x - x.mean()) > 5.*x.std()), 
              replace_spikes_with='interpolation',
@@ -48,7 +48,7 @@ def qcontrol(files, datalogger_config,
     ------------------
     boundaries test:
         runs with values in any column lower than a pre-determined lower limit or higher
-        than a upper limits are left out. Activate it by passing a low_limits or upp_limits keyword.
+        than a upper limits are left out. Activate it by passing a lower_limits or upper_limits keyword.
     spikes test:
         runs with more than a certain percetage of spikes are left out. 
         Activate it by passing a spikes_check keyword. Adjust the test with the spikes_func
@@ -86,9 +86,9 @@ def qcontrol(files, datalogger_config,
         whether or not to work with the fluctations of the data on the spikes and standard deviation test.
     std_detrend_kw:
         keywords to be passed to pymicra.detrend specifically to be used on the STD test.
-    low_limits: dict
+    lower_limits: dict
         keys must be names of variables and values must be lower absolute limits for the values of each var.
-    upp_limits: dict
+    upper_limits: dict
         keys must be names of variables and values must be upper absolute limits for the values of each var.
     dif_limits: dict
         keys must be names of variables and values must be upper limits for the maximum difference
@@ -149,7 +149,6 @@ def qcontrol(files, datalogger_config,
     from io import timeSeries
     from os.path import basename, join
     from dateutil.parser import parse
-    import data
     import pandas as pd
     import numpy as np
     from algs import auxiliar as algs
@@ -201,11 +200,11 @@ def qcontrol(files, datalogger_config,
     if std_limits:
         tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
         numbers['STD'] = []
-    if low_limits:
-        tables = tables.append( pd.DataFrame(low_limits, index=['low_limits']) )
+    if lower_limits:
+        tables = tables.append( pd.DataFrame(lower_limits, index=['lower_limits']) )
         numbers[ bound_name ] = []
-    if upp_limits:
-        tables = tables.append( pd.DataFrame(upp_limits, index=['upp_limits']) )
+    if upper_limits:
+        tables = tables.append( pd.DataFrame(upper_limits, index=['upper_limits']) )
         numbers[ bound_name ] = []
     if dif_limits:
         tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
@@ -276,7 +275,7 @@ def qcontrol(files, datalogger_config,
 
         #-------------------------------
         # BEGINNING OF LOWER AND UPPER VALUES CHECK (BOUNDARIES TEST)
-        if low_limits or upp_limits:
+        if lower_limits or upper_limits:
             fin, valid, limits_replaced = tests.check_limits(fin, tables)
 
             result, failed = algs.testValid(valid, testname='limits', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
@@ -320,11 +319,9 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         # BEGINNING OF STATIONARITY TEST
         if dif_limits:
-            trend=data.trend(fin, **trend_kw)
-            maxdif=trend.max() - trend.min()
-            maxdif=maxdif.abs()
-            chunks_valid= tables.loc['dif_limits'] - maxdif
-            chunks_valid= ~(chunks_valid < 0)
+            valid = tests.check_stationarity(fin, tables)
+            valid = tests.check_maxdif(fin, tables)
+            exit()
 
             result, failed = algs.testValid(chunks_valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
             numbers=algs.applyResult(result, failed, fin, control=numbers, testname=maxdif_name, filename=filename, falseshow=falseshow)

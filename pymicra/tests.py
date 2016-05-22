@@ -10,25 +10,40 @@ def check_maxdif(data, tables, detrend_kw={'how':'linear', 'window':900}):
     '''
     Check the maximum and minimum differences between the fluctuations of a run.
     '''
-    detrended = data.detrend(fin, **detrend_kw)
+    from . import data as pmdata
+    from matplotlib import pyplot as plt
+
+    detrended = pmdata.detrend(data, suffix='', **detrend_kw)
     maxdif = (detrended.max() - detrended.min()).abs()
     valid = tables.loc['dif_limits'] - maxdif
     valid = ~(valid < 0)
 
+    detrended[['u', 'w', 'theta_v']].plot()
+    plt.show()
+    print(valid)
     return valid
 
 
 
-def check_stationarity(data, tables, trend_kw={'how':'movingmedian', 'window':'1min'}):
+def check_stationarity(data, tables, detrend=False,
+            detrend_kw={'how':'movingmean', 'window':900}, trend_kw={'how':'movingmedian', 'window':'1min'}):
     '''
-    Check difference between the maximum and minimum values of the run agaisnt an upper-limit.
+    Check difference between the maximum and minimum values of the run trend agaisnt an upper-limit.
     This aims to flag nonstationary runs
     '''
-    trend = data.trend(fin, **trend_kw)
+    from . import data as pmdata
+
+    if detrend:
+        df = pmdata.detrend(data, suffix='', **detrend_kw)
+    else:
+        df = data.copy()
+
+    trend = pmdata.trend(df, **trend_kw)
     maxdif = (trend.max() - trend.min()).abs()
-    valid = tables.loc['stat_limits'] - maxdif
+    valid = tables.loc['dif_limits'] - maxdif
     valid = ~(valid < 0)
 
+    print(valid)
     return valid
 
  
