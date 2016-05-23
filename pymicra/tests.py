@@ -135,6 +135,7 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     import data as pmdata
     import numpy as np
     import pandas as pd
+    from . import algs
 
     #-----------
     # Detrend the data or not
@@ -147,7 +148,9 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     #-----------
     # Separate into smaller bits or just get the full standard deviation
     if chunk_size:
-        stds_list = df.resample(chunk_size, np.std).dropna()
+        #stds_list = df.resample(chunk_size, np.std).dropna()
+        stds_list = algs.resample(df, chunk_size, how=np.std).dropna()
+        print(stds_list)
     else:
         stds_list = pd.DataFrame(index=[df.index[0]], columns = df.columns)
         stds_list.iloc[0, :] = df.apply(np.std)
@@ -271,9 +274,9 @@ def check_spikes(data, chunk_size='2min',
     if detrend:
         origtrend = pmdata.trend(data, **detrend_kw)
         detrended = original - origtrend
-        dfs = algs.splitData(detrended, chunk_size)
+        dfs = algs.splitData(detrended, rule=chunk_size)
     else:
-        dfs = algs.splitData(original, chunk_size)
+        dfs = algs.splitData(original, rule=chunk_size)
     #------------
 
     max_count = int(len(original)*max_percent/100.)

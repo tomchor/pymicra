@@ -65,6 +65,27 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
     else:
         return out
 
+
+def resample(df, rule, how=None, **kwargs):
+    '''
+    Extends pandas resample methods to index made of integers
+    '''
+    import pandas as pd
+    if how==None:
+        import numpy as np
+        how = np.mean
+
+    if isinstance(df.index, pd.DatetimeIndex) and isinstance(rule, str):
+        return df.resample(rule, how, **kwargs)
+    else:
+        idx, bins = pd.cut(df.index, range(df.index[0], df.index[-1]+2, rule), right=False, retbins=True)
+        aux = df.groupby(idx).apply(how)
+        aux = aux.set_index(bins[:-1])
+        #s =(df.index.to_series() / rule).astype(int)
+        #df.groupby(s).std().set_index(s.index[4::5])
+        return aux
+
+
 def fitWrap(x, y, degree=1):
     """
     A wrapper to numpy.polyfit and numpy.polyval that fits data given an x and y arrays.

@@ -11,6 +11,7 @@ TODO LIST
 import tests
 
 def qcontrol(files, datalogger_config,
+             read_files_kw={'parse_dates':False},
              accepted_percent=1.,
              file_lines=None, bdate=None, edate=None,
              maxdif_detrend=True, maxdif_detrend_kw={'how':'movingmean', 'window':900},
@@ -19,7 +20,7 @@ def qcontrol(files, datalogger_config,
              RAT_detrend=True, RAT_detrend_kw={'how':'linear'},
              spikes_detrend=True, spikes_detrend_kw = {'how':'linear'},
              lower_limits={}, upper_limits={},
-             spikes_check=True, visualize_spikes=False, spikes_vis_col='u',
+             spikes_test=True, visualize_spikes=False, spikes_vis_col='u',
              spikes_func = lambda x: (abs(x - x.mean()) > 5.*x.std()), 
              replace_spikes_with='interpolation',
              max_consec_spikes=3, chunk_size='2Min',
@@ -52,7 +53,7 @@ def qcontrol(files, datalogger_config,
         than a upper limits are left out. Activate it by passing a lower_limits or upper_limits keyword.
     spikes test:
         runs with more than a certain percetage of spikes are left out. 
-        Activate it by passing a spikes_check keyword. Adjust the test with the spikes_func
+        Activate it by passing a spikes_test keyword. Adjust the test with the spikes_func
         visualize_spikes, spikes_vis_col, max_consec_spikes, accepted_percent and chunk_size keywords.
     standard deviation check:
         runs with a standard deviation lower than a pre-determined value (generally close to the
@@ -71,6 +72,12 @@ def qcontrol(files, datalogger_config,
         list of filepaths
     datalogger_config: pymicra.datalogerConf object or str
         datalogger configuration object used for all files in the list of files or path to a dlc file.
+    read_files_kw: dict
+        keywords to pass to pymicra.timeSeries. Default is {'parse_dates':False} because parsing dates
+        at every file is slow, so this makes the whole process faster.
+        However, {'parse_dates':True, 'clean_dates':False} is recommended if time is not a problem because
+        the window and chunk_size keywords may be used as, for example '2min', instead of 1200, which is the
+        equivalent number of points.
     file_lines: int
         number of line a "good" file must have. Fails if the run has any other number of lines.
     bdate: str
@@ -102,7 +109,7 @@ def qcontrol(files, datalogger_config,
         dictionary of keywords to pass to pymicra.data.trend. This is used in the max difference test, since
         the difference is taken between the max and min values of the trend, not of the series.
         Default = {'how':'linear'}.
-    spikes_check: bool
+    spikes_test: bool
         whether or not to check for spikes.
     spikes_detrend: bool
         whether or not to work with the fluctations of the data on the spikes test.
@@ -157,7 +164,7 @@ def qcontrol(files, datalogger_config,
     ext_summary: pandas.DataFrame
         dict with the extended summary, which has the path of the files that got "stuck" in each test along with the successful ones
     """
-    from io import timeSeries
+    from . import timeSeries
     from os.path import basename, join
     from dateutil.parser import parse
     import pandas as pd
@@ -204,7 +211,7 @@ def qcontrol(files, datalogger_config,
     # If a test is not marked to be perform, it will not be on this list.
     if bdate or edate:
         numbers['dates'] = []
-    if spikes_check:
+    if spikes_test:
         numbers['spikes'] = []
     if file_lines:
         numbers['lines'] = []
@@ -270,7 +277,7 @@ def qcontrol(files, datalogger_config,
         # OPENNING OF THE FILE HAPPENS HERE
         # TRY-EXCEPT IS A SAFETY NET BECAUSE OF THE POOR DECODING (2015-06-21 00:00 appears as 2015-06-20 24:00)
         try:
-            fin=timeSeries(filepath, datalogger_config, parse_dates_kw={'correct_fracs':True, 'clean':False})
+            fin=timeSeries(filepath, datalogger_config, **read_files_kw)
         except ValueError, e:
             if str(e)=='unconverted data remains: 0' and cdate.hour==23:
                 continue
@@ -296,7 +303,7 @@ def qcontrol(files, datalogger_config,
  
         #-----------------
         # BEGINNING OF SPIKES CHECK
-        if spikes_check:
+        if spikes_test:
             fin, valid, spikes_replaced = tests.check_spikes(fin, detrend=spikes_detrend, detrend_kw=spikes_detrend_kw,
                             visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size, replace_with=replace_spikes_with,
                             cut_func=spikes_func, max_consec_spikes=max_consec_spikes, max_percent=accepted_percent)
