@@ -6,7 +6,7 @@ that fail the test.
 """
 
 
-def check_maxdif(data, tables, detrend_kw={'how':'linear', 'window':900}):
+def check_maxdif(data, tables, detrend=True, detrend_kw={'how':'movingmean', 'window':900}):
     '''
     Check the maximum and minimum differences between the fluctuations of a run.
     '''
@@ -18,32 +18,46 @@ def check_maxdif(data, tables, detrend_kw={'how':'linear', 'window':900}):
     valid = tables.loc['dif_limits'] - maxdif
     valid = ~(valid < 0)
 
-    detrended[['u', 'w', 'theta_v']].plot()
-    plt.show()
-    print(valid)
+    #print(valid)
+    #if (~valid).any():
+        #print(~valid)
+        #detrended['theta_v' ].plot()
+        #plt.show()
+
     return valid
 
 
 
 def check_stationarity(data, tables, detrend=False,
-            detrend_kw={'how':'movingmean', 'window':900}, trend_kw={'how':'movingmedian', 'window':'1min'}):
+            detrend_kw={'how':'movingmean', 'window':900}, 
+            trend=True, trend_kw={'how':'movingmedian', 'window':'1min'}):
     '''
     Check difference between the maximum and minimum values of the run trend agaisnt an upper-limit.
     This aims to flag nonstationary runs
     '''
     from . import data as pmdata
 
+    #------------
+    # If detrend==True, work with the fluctuations
     if detrend:
         df = pmdata.detrend(data, suffix='', **detrend_kw)
     else:
         df = data.copy()
+    #------------
 
-    trend = pmdata.trend(df, **trend_kw)
+    #------------
+    # If trend==True, work with the trend of df (df being either absolute values or the fluctuation)
+    if trend:
+        trend = pmdata.trend(df, **trend_kw)
+    else:
+        trend = df.copy()
+    #------------
+
     maxdif = (trend.max() - trend.min()).abs()
     valid = tables.loc['dif_limits'] - maxdif
     valid = ~(valid < 0)
 
-    print(valid)
+    #print(valid)
     return valid
 
  

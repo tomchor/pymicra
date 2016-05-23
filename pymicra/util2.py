@@ -13,7 +13,8 @@ import tests
 def qcontrol(files, datalogger_config,
              accepted_percent=1.,
              file_lines=None, bdate=None, edate=None,
-             trend_kw={'how':'movingmedian', 'window':'1min'},
+             maxdif_detrend=True, maxdif_detrend_kw={'how':'movingmean', 'window':900},
+             maxdif_trend=True, maxdif_trend_kw={'how':'movingmedian', 'window':'1min'},
              std_detrend=True, std_detrend_kw={'how':'linear'},
              RAT_detrend=True, RAT_detrend_kw={'how':'linear'},
              spikes_detrend=True, spikes_detrend_kw = {'how':'linear'},
@@ -70,10 +71,6 @@ def qcontrol(files, datalogger_config,
         list of filepaths
     datalogger_config: pymicra.datalogerConf object or str
         datalogger configuration object used for all files in the list of files or path to a dlc file.
-    trend_kw: dict
-        dictionary of keywords to pass to pymicra.data.trend. This is used in the max difference test, since
-        the difference is taken between the max and min values of the trend, not of the series.
-        Default = {'how':'linear'}.
     file_lines: int
         number of line a "good" file must have. Fails if the run has any other number of lines.
     bdate: str
@@ -93,10 +90,24 @@ def qcontrol(files, datalogger_config,
     dif_limits: dict
         keys must be names of variables and values must be upper limits for the maximum difference
         of values that the linear trend of the run must have.
+    maxdif_detrend: bool
+        whether to detrend data before checking for differences.
+    maxdif_detrend_kw: dict
+        keywords to pass to pymicra.detrend when detrending for max difference test.
+    maxdif_trend: bool
+        whether to check for differences using the trend, instead of raw points (which can be the fluctuations
+        or the original absolute values of data, depending if maxdif_detrend==True or False).
+    maxdif_trend_kw: dict
+        keywords to pass to pymicra.detrend when trending for max difference test.
+        dictionary of keywords to pass to pymicra.data.trend. This is used in the max difference test, since
+        the difference is taken between the max and min values of the trend, not of the series.
+        Default = {'how':'linear'}.
     spikes_check: bool
         whether or not to check for spikes.
     spikes_detrend: bool
         whether or not to work with the fluctations of the data on the spikes test.
+    spikes_detrend_kw: dict
+        keywords to pass to pymicra.detrend when detrending for spikes.
     visualize_spikes: bool
         whether or not to plot the spikes identification and interpolation (useful for calibration of spikes_func). Only
         one column is visualized at each time. This is set with the spikes_vis_col keyword.
@@ -319,11 +330,12 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         # BEGINNING OF STATIONARITY TEST
         if dif_limits:
-            valid = tests.check_stationarity(fin, tables)
-            valid = tests.check_maxdif(fin, tables)
-            exit()
+            #valid = tests.check_maxdif(fin, tables, trend=False, detrend=True)
+            valid = tests.check_stationarity(fin, tables, detrend=maxdif_detrend, detrend_kw=maxdif_detrend_kw,
+                                        trend=maxdif_trend, trend_kw=maxdif_trend_kw)
+            #exit()
 
-            result, failed = algs.testValid(chunks_valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
+            result, failed = algs.testValid(valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
             numbers=algs.applyResult(result, failed, fin, control=numbers, testname=maxdif_name, filename=filename, falseshow=falseshow)
             if result==False: continue
         #-------------------------------
