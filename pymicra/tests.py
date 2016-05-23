@@ -150,7 +150,6 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     if chunk_size:
         #stds_list = df.resample(chunk_size, np.std).dropna()
         stds_list = algs.resample(df, chunk_size, how=np.std).dropna()
-        print(stds_list)
     else:
         stds_list = pd.DataFrame(index=[df.index[0]], columns = df.columns)
         stds_list.iloc[0, :] = df.apply(np.std)
