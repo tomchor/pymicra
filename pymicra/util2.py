@@ -14,6 +14,7 @@ def qcontrol(files, datalogger_config,
              read_files_kw={'parse_dates':False},
              accepted_percent=1.,
              file_lines=None, bdate=None, edate=None,
+             nan_test=True,
              maxdif_detrend=True, maxdif_detrend_kw={'how':'movingmean', 'window':900},
              maxdif_trend=True, maxdif_trend_kw={'how':'movingmedian', 'window':600},
              std_detrend=True, std_detrend_kw={'how':'movingmean', 'window':900},
@@ -22,7 +23,7 @@ def qcontrol(files, datalogger_config,
              lower_limits={}, upper_limits={},
              spikes_test=True, visualize_spikes=False, spikes_vis_col='u',
              spikes_func = lambda x: (abs(x - x.mean()) > 4.*x.std()), 
-             replace_spikes_with='interpolation',
+             replace_with='interpolation',
              max_consec_spikes=3, chunk_size=1200,
              std_limits={}, dif_limits={},
              RAT = False, RAT_vars = None,
@@ -49,6 +50,9 @@ def qcontrol(files, datalogger_config,
 
     Non-trivial tests (in this order):
     ------------------
+    NaN test:
+        checks for any NaN values. NaNs are replaced with interpolation or linear trend. If the percentage
+        of NaNs is greater than accepted_percent, run is discarded.
     boundaries test:
         runs with values in any column lower than a pre-determined lower limit or higher
         than a upper limits are left out. Activate it by passing a lower_limits or upper_limits keyword.
@@ -124,7 +128,7 @@ def qcontrol(files, datalogger_config,
     spikes_func: function
         function used to look for spikes. Can be defined used numpy/pandas notation for methods with lambda functions.
         Default is: lambda x: (abs(x - x.mean()) > abs(x.std()*4.))
-    replace_spikes_with: str
+    replace_with: str
         method to use when replacing the spikes. Options are 'interpolation' and 'trend'.
     max_consec_spikes: int
         limit of consecutive spike points to be interpolated. After this spikes are left as they are in the output.
@@ -178,9 +182,10 @@ def qcontrol(files, datalogger_config,
     if bdate: bdate=parse(bdate)
     if edate: edate=parse(edate)
 
-    bound_name='boundary'
+    bound_name='boundaries'
     maxdif_name='difference'
     STD_name='STD'
+    nan_name='NaN'
 
     #--------------
     # If the path to the dlc is provided, we read it as a dataloggerConfig object
@@ -204,7 +209,8 @@ def qcontrol(files, datalogger_config,
     #--------------
     # We first create the dataframe to hols our limit values and the numbers dict, which
     # is what we use to produce our summary
-    tables=pd.DataFrame(columns=usedvars)
+    tables = pd.DataFrame(columns=usedvars)
+    replaced = pd.DataFrame(columns=usedvars)
     numbers = {'total': [], 'successful': []}
     #--------------
 
@@ -213,6 +219,8 @@ def qcontrol(files, datalogger_config,
     # If a test is not marked to be perform, it will not be on this list.
     if bdate or edate:
         numbers['dates'] = []
+    if nan_test:
+        numbers[ nan_name ] = []
     if spikes_test:
         numbers['spikes'] = []
     if file_lines:
@@ -291,15 +299,28 @@ def qcontrol(files, datalogger_config,
         # We save the full input for writting it later and exclude unnused variables
         fullfin=fin.copy()
         fin=fin[usedvars].copy()
+        replaced.loc[filename] = 0
         #-------------------------------
+
+        #-----------------
+        # CHECK NANS
+        if nan_test:
+            valid, nans_replaced = tests.check_nans(fin, max_percent=accepted_percent, replace_with=replace_with)
+
+            result, failed = algs.testValid(valid, testname=nan_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=nan_name, filename=filename, falseshow=falseshow)
+            replaced.loc[ filename ] += nans_replaced
+            if result==False: continue
+        #-----------------
 
         #-------------------------------
         # BEGINNING OF LOWER AND UPPER VALUES CHECK (BOUNDARIES TEST)
         if lower_limits or upper_limits:
-            fin, valid, limits_replaced = tests.check_limits(fin, tables)
+            fin, valid, limits_replaced = tests.check_limits(fin, tables, max_percent=accepted_percent, replace_with=replace_with)
 
-            result, failed = algs.testValid(valid, testname='limits', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            result, failed = algs.testValid(valid, testname=bound_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname=bound_name, filename=filename, falseshow=falseshow)
+            replaced.loc[ filename ] += limits_replaced
             if result==False: continue
         #----------------------------------
  
@@ -307,11 +328,12 @@ def qcontrol(files, datalogger_config,
         # BEGINNING OF SPIKES CHECK
         if spikes_test:
             fin, valid, spikes_replaced = tests.check_spikes(fin, detrend=spikes_detrend, detrend_kw=spikes_detrend_kw,
-                            visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size, replace_with=replace_spikes_with,
+                            visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size, replace_with=replace_with,
                             cut_func=spikes_func, max_consec_spikes=max_consec_spikes, max_percent=accepted_percent)
 
             result, failed = algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
+            replaced.loc[ filename ] += spikes_replaced
             if result==False: continue
         #-----------------
    
@@ -351,7 +373,7 @@ def qcontrol(files, datalogger_config,
 
         #-----------------
         # END OF TESTS
-        print('Successful run!')
+        print('Passed all tests')
         if trueshow:
             if trueshow_vars:
                 fin.loc[:, trueshow_vars]

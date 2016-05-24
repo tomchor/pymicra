@@ -5,6 +5,31 @@ They all return True for the columns that pass the test and False for the column
 that fail the test.
 """
 
+def check_nans(data, max_percent=0.1, replace_with='interpolation'):
+    '''
+    Checks data for NaN values
+    ''' 
+    from . import data as pmdata
+    df = data.copy() 
+    max_count = int(len(df)*max_percent/100.)
+
+    #-----------
+    # This counts the number of NaNs
+    nan_count = df.isnull().sum()
+    valid = nan_count < max_count
+    #-----------
+
+    #------------
+    # Replace data with either its trend or by interpolating
+    if replace_with=='trend':
+        trend = pmdata.trend(df, how='linear')
+        df = df.fillna(trend)
+    elif replace_with=='interpolation':
+        df = df.interpolate(method='index', limit_direction='both')
+    #------------
+
+    return valid, nan_count
+
 
 def check_maxdif(data, tables, detrend=True, detrend_kw={'how':'movingmean', 'window':900}):
     '''
@@ -168,7 +193,7 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     return valid
  
 
-def check_limits(data, tables, max_percent=1.):
+def check_limits(data, tables, max_percent=1., replace_with='interpolation'):
     '''
     Checks dataframe for lower and upper limits. If found, they are substituted by 
     the linear trend of the run. The number of faulty points is also checked for each
@@ -191,6 +216,7 @@ def check_limits(data, tables, max_percent=1.):
     valid: pandas.Series
         True for the columns that passed this test, False for the columns that didn't.
     '''
+    from . import trend as pmtrend
     import numpy as np
     import algs
     import pandas as pd
@@ -220,10 +246,19 @@ def check_limits(data, tables, max_percent=1.):
     fault_count = low_count + upp_count
     valid = fault_count < max_count
 
+    #------------
+    # Replace data with either its trend or by interpolating
+    if replace_with=='trend':
+        trend = pmdata.trend(df, how='linear')
+        df = df.fillna(trend)
+    elif replace_with=='interpolation':
+        df = df.interpolate(method='index', limit_direction='both')
+    #------------
+
     #-------------------------------
     # Substitute faulty points by the linear trend
-    trend = data.polyfit()
-    df = df.fillna(trend)
+    #trend = data.polyfit()
+    #df = df.fillna(trend)
     #-------------------------------
 
     return df, valid, fault_count
@@ -266,6 +301,16 @@ def check_spikes(data, chunk_size='2min',
     import algs
     import data as pmdata
 
+    #------------
+    if replace_with=='trend':
+        def replace_nans(dframe):
+            trend = pmdata.trend(dframe, how='linear')
+            return dframe.fillna(trend)
+    elif replace_with=='interpolation':
+        def replace_nans(dframe):
+            return dframe.interpolate(method='index', limit_direction='both')
+    #------------
+
     original = data.copy()
 
     #------------
@@ -281,16 +326,6 @@ def check_spikes(data, chunk_size='2min',
     max_count = int(len(original)*max_percent/100.)
     fault_count = pd.Series(len(original), index=dfs[0].columns)
 
-    #------------
-    if replace_with=='trend':
-        def replace_spikes(dframe):
-            trend = pmdata.trend(dframe, how='linear')
-            return dframe.fillna(trend)
-    elif replace_with=='interpolation':
-        def replace_spikes(dframe):
-            return dframe.interpolate(method='index', limit_direction='both')
-    #------------
-
     for i in range(len(dfs)):
         chunk=dfs[i].copy()
 
@@ -303,8 +338,9 @@ def check_spikes(data, chunk_size='2min',
 
         #-------------------------------
         # Substitution of spikes happens here
-        trend = pmdata.trend(chunk, how='linear')
-        chunk = chunk.fillna(trend)
+        #trend = pmdata.trend(chunk, how='linear')
+        #chunk = chunk.fillna(trend)
+        chunk = replace_nans(chunk)
         #-------------------------------
 
         #-------------------------------

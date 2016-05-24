@@ -307,16 +307,17 @@ def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepa
     failed: list
         list of failed variables if result==False. None otherwise.
     '''
+    from os.path import basename
     
     if False in df_valid.values:
-        failed=df_valid[df_valid==False].index
+        failed = df_valid[ df_valid==False ].index
+        print(basename(filepath), ': !FAILED',testname,'test!\n')
         if falseverbose:
-            print(filepath, 'FAILED',testname,'test!')
             print('Failed variable(s):', ', '.join(failed),'\n')
             print
         return False, failed
     else:
-        if trueverbose: print(filepath,'passed',testname,'test')
+        if trueverbose: print(basename(filepath),'passed',testname,'test')
         return True, None
 
 
