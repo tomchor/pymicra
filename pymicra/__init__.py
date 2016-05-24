@@ -36,5 +36,6 @@ import constants
 from micro import spectral
 import micro
 import algs
+import methods
 __version__ = '0.1.4'
 

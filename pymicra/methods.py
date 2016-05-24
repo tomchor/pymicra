@@ -57,7 +57,6 @@ def _to_unitsCsv(self, units, filename, to_tex=False, **kwargs):
     return
 import pandas as pd
 pd.DataFrame.to_unitsCsv = _to_unitsCsv
-del pd
 #---------------
 
 
@@ -81,7 +80,46 @@ def _as_dlc(self, outfile, dlc):
 
     df.to_csv(outfile, header=dlc.header_lines, 
             sep=dlc.columns_separator, index=False, quoting=3, na_rep='nan')
-
 #---------------
 
 
+#---------------
+def binwrapper(self, clean_index=True, **kwargs):
+    """
+    Method to return binned data from a dataframe using the function classbin
+    """
+    from . import algs
+    import numpy as np
+    import pandas as pd
+
+    #----------
+    # If input is a Series, make it a DataFrame
+    if isinstance(self, pd.Series):
+        series=True
+        self = pd.DataFrame(self, index=self.index)
+    else:
+        series=False
+    #----------
+
+    x=np.array(self.index)#.astype(np.float64)
+    out=pd.DataFrame(columns = self.columns)
+    for c in self.columns:
+        xsm, ysm = algs.classbin(x, self[c].astype(np.float64), **kwargs)
+        out[c] = ysm
+    out.index=xsm
+
+    #----------
+    # Remove rows where the index is NaN
+    if clean_index:
+        out = out[ np.isfinite(out.index) ]
+    #----------
+
+    if series==True:
+        return out.iloc[:, 0]
+    else:
+        return out
+pd.DataFrame.binned=binwrapper
+pd.Series.binned=binwrapper
+#---------------
+
+del pd

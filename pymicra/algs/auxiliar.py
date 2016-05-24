@@ -560,23 +560,6 @@ def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscal
     return xsm, ysm
 
 
-def binwrapper(self, **kwargs):
-    """
-    Method to return binned data from a dataframe using the function classbin
-    """
-    import numpy as np
-    import pandas as pd
-
-    x=np.array(self.index)#.astype(np.float64)
-    out=pd.DataFrame(columns = self.columns)
-    for c in self.columns:
-        xsm, ysm = classbin(x, self[c].astype(np.float64), **kwargs)
-        out[c] = ysm
-    out.index=xsm
-    return out
-pd.DataFrame.binned=binwrapper
-
-
 def get_index(x, y):
     """
     Just like the .index method of lists, except it works for multiple values
