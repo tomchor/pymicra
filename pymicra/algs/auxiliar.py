@@ -403,7 +403,7 @@ def inverse_normal_cdf(mu, sigma):
     return f
 
 
-def parseDates(data, dataloggerConf=None,
+def parseDates(data, dataloggerConfig=None,
         date_col_names=None, connector='-', first_time_skip=0,
         clean=True, correct_fracs=None, complete_zeroes=False, verbose=False):
     """
@@ -435,13 +435,13 @@ def parseDates(data, dataloggerConf=None,
     import pandas as pd
 
     #------------------------------------
-    # If dataloggerConf object is provided, we take the keywords from it
-    if dataloggerConf:
-        date_col_names = dataloggerConf.date_col_names
-        connector = dataloggerConf.date_connector
-        first_time_skip = dataloggerConf.first_time_skip
+    # If dataloggerConfig object is provided, we take the keywords from it
+    if dataloggerConfig:
+        date_col_names = dataloggerConfig.date_col_names
+        connector = dataloggerConfig.date_connector
+        first_time_skip = dataloggerConfig.first_time_skip
     elif date_col_names==None:
-        raise NameError('Must provide either dataloggerConf or date_col_names')
+        raise NameError('Must provide either dataloggerConfig or date_col_names')
     #------------------------------------
 
     #------------------------------------
@@ -640,7 +640,7 @@ def name2date(filename, dlconfig):
 
 def line2date(line, dlconfig):
     """
-    Gets a date from a line of file according to dataloggerConf object.
+    Gets a date from a line of file according to dataloggerConfig object.
 
     Parameters:
     -----------

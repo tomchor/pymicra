@@ -3,7 +3,7 @@ from __future__ import print_function
 """
 """
 
-class dataloggerConf(object):
+class dataloggerConfig(object):
     """
     This class defines a specific configuration of a datalogger output file
 
@@ -66,7 +66,7 @@ class dataloggerConf(object):
             units=None,
             skiprows=None,
             filename_format=None,
-            description='Generic datalogger configuration file. Type help(dataloggerConf) to read intructions'):
+            description='Generic datalogger configuration file. Type help(dataloggerConfig) to read intructions'):
         """
         Initiates the class
         """
@@ -239,6 +239,12 @@ class notation(object):
     latent_heat_flux = 'LE'
     flux_of = 'F_%s'
 
+    def __init__(self):
+        """
+        When initialized, calls the build method to build the full notation
+        """
+        self.build()
+
     def build(self):
         """
         This useful method builds the full notation based on the base notation
@@ -258,6 +264,4 @@ class notation(object):
             exec('self.{0}_fluct = self.fluctuation % self.{0}'.format(subst))
             exec('self.{0}_mean = self.mean % self.{0}'.format(subst))
             exec('self.{0}_star = self.star % self.{0}'.format(subst))
-
-
 

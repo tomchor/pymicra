@@ -218,7 +218,7 @@ def qcontrol(files, datalogger_config,
     if edate: edate=parse(edate)
 
     #--------------
-    # If the path to the dlc is provided, we read it as a dataloggerConf object
+    # If the path to the dlc is provided, we read it as a dataloggerConfig object
     if isinstance(datalogger_config, str):
         from io import read_dlc
         datalogger_config = read_dlc(datalogger_config)
@@ -265,7 +265,7 @@ def qcontrol(files, datalogger_config,
     elif type(variables_list) == list:
         usedvars=[ v for v in variables_list[1:] if r'%' not in v ]
     else:
-        raise TypeError('Check varNames of the dataloggerConf object.')
+        raise TypeError('Check varNames of the dataloggerConfig object.')
     #-------------------------------------
 
     #-------------------------------------

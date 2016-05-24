@@ -115,7 +115,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, 
 
     flist: list or string
         either list or names of files (dataFrame will be one concatenated dataframe) or the name of one file
-    datalogger: pymicra.dataloggerConf object
+    datalogger: pymicra.dataloggerConfig object
         configuration of the datalogger which is from where all the configurations of the file will be taken
     parse_date: bool
         whether or not to index the data by date. Note that if this is False many of the functionalities
@@ -149,7 +149,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, 
     # We parse de dates
     if parse_dates:
         if verbose: print('Starting to parse the dates')
-        series=algs.parseDates(series, dataloggerConf=datalogger, **parse_dates_kw)
+        series=algs.parseDates(series, dataloggerConfig=datalogger, **parse_dates_kw)
     #------------
 
     return series
@@ -167,7 +167,7 @@ def read_dlc(dlcfile):
     Then the .dlc should have: varNames=['%Y-%m-%d %H:%M:%S','u','v']. This is the default csv format of
     CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
     """
-    from core import dataloggerConf
+    from core import dataloggerConfig
 
     globs={}
     dlcvars={}
@@ -178,7 +178,7 @@ def read_dlc(dlcfile):
         with open(dlcfile) as f:
             code=compile(f.read(), dlcfile, 'exec')
             exec(code, globs, dlcvars)
-    return dataloggerConf(**dlcvars)
+    return dataloggerConfig(**dlcvars)
 
 
 
@@ -329,7 +329,7 @@ def get_printable(data, units, to_tex_cols=True, to_tex_units=True):
 def _write_as_dlc(df, dlc):
     """
     Still to be writen:
-    should write a DataFrame in the exact format described by a dataloggerConfiguration object
+    should write a DataFrame in the exact format described by a dataloggerConfig object
     """
     cols=dlc.columns
     df = df[ cols ]
