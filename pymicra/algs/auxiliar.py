@@ -140,6 +140,7 @@ def fitByDate(data, degree=1, rule=None):
         out=out.append(aux)
     return out
 
+
 #---------
 # Definition of dataframe method to fit
 def _polyfit(self, degree=1, rule=None):
