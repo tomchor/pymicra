@@ -335,7 +335,7 @@ def check_spikes(data, chunk_size='2min',
     #------------
 
     max_count = int(len(original)*max_percent/100.)
-    fault_count = pd.Series(len(original), index=dfs[0].columns)
+    fault_count = pd.Series(len(original), index=original.columns)
 
     for i in range(len(dfs)):
         chunk=dfs[i].copy()
