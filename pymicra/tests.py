@@ -184,7 +184,6 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     #-----------
     # Separate into smaller bits or just get the full standard deviation
     if chunk_size:
-        #stds_list = df.resample(chunk_size, np.std).dropna()
         stds_list = algs.resample(df, chunk_size, how=np.std).dropna()
     else:
         stds_list = pd.DataFrame(index=[df.index[0]], columns = df.columns)
@@ -194,7 +193,6 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     #-----------
     # Check each chunk separately
     validcols = ~( stds_list < tables.loc['std_limits'] )
-    falseverbose=True
     if falseverbose and (False in validcols.values):
         falsecols = [ el for el in df.columns if False in validcols.loc[:, el].values ]
         print('STD test: failed variables and times are\n{0}\n'.format(validcols.loc[:, falsecols]))

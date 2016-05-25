@@ -226,25 +226,34 @@ def qcontrol(files, datalogger_config,
     # If a test is not marked to be perform, it will not be on this list.
     if file_lines:
         numbers[ lines_name ] = []
-    #if begin_date or end_date:
-    #    numbers['dates'] = []
     if nans_test:
         numbers[ nan_name ] = []
+
     if upper_limits:
         tables = tables.append( pd.DataFrame(upper_limits, index=['upper_limits']) )
         numbers[ bound_name ] = []
-    if dif_limits:
-        tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
-        numbers[ maxdif_name ] = []
-    if spikes_test:
-        numbers[ spikes_name ] = []
-    if max_replacement_count:
-        numbers[ replace_name ] = []
     if lower_limits:
         tables = tables.append( pd.DataFrame(lower_limits, index=['lower_limits']) )
         numbers[ bound_name ] = []
+
+
+    if spikes_test:
+        numbers[ spikes_name ] = []
+
+    if max_replacement_count:
+        numbers[ replace_name ] = []
+
+    if std_limits:
+        tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
+        numbers[ STD_name ] = []
+
     if RAT:
         numbers[ RAT_name ] = []
+
+    if dif_limits:
+        tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
+        numbers[ maxdif_name ] = []
+
     tables = tables.fillna(value=np.nan)
     #--------------
 
@@ -285,8 +294,6 @@ def qcontrol(files, datalogger_config,
             valid = tests.check_numlines(filepath, numlines=file_lines, falseverbose=falseverbose)
 
             result, failed = algs.testValid(valid, testname=lines_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            #exit()
-            #numbers = algs.applyResult(result, failed, fin, control=numbers, testname='lines', filename=filename, falseshow=falseshow)
             if result == False:
                 numbers[ lines_name ].append(filename)
                 continue
@@ -376,7 +383,7 @@ def qcontrol(files, datalogger_config,
         if std_limits:
             valid = tests.check_std(fin, tables, detrend=std_detrend, detrend_kw=std_detrend_kw, chunk_size=chunk_size, falseverbose=falseverbose)
 
-            result, failed = algs.testValid(valid, testname='STD', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            result, failed = algs.testValid(valid, testname=STD_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname=STD_name, filename=filename, falseshow=falseshow)
             if result==False: continue
         #----------------------------------
