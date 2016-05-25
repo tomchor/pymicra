@@ -339,24 +339,6 @@ def file_len(fname):
         raise IOError(err)
     return int(result.strip().split()[0])
 
-def check_numlines(fname, numlines=18000):
-    """
-    Checks length of file against a correct value.
-    Returns False is length is wrong and True if length is right
-
-    Parameters:
-    ----------
-
-    fname: string
-        path of the file to check
-    numlines: int
-        correct number of lines that the file has to have
-    """
-    lines=file_len(fname)
-    if lines==numlines:
-        return True
-    else:
-        return False
 
 
 def applyResult(result, failed, df, control=None, testname=None, filename=None, falseshow=False):

@@ -14,7 +14,7 @@ def qcontrol(files, datalogger_config,
              read_files_kw={'parse_dates':False},
              accepted_percent=1.,
              max_replacement_count=180,
-             file_lines=None, bdate=None, edate=None,
+             file_lines=None, begin_date=None, end_date=None,
              nans_test=True,
              maxdif_detrend=True, maxdif_detrend_kw={'how':'movingmean', 'window':900},
              maxdif_trend=True, maxdif_trend_kw={'how':'movingmedian', 'window':600},
@@ -45,7 +45,7 @@ def qcontrol(files, datalogger_config,
     Trivial tests:
     --------------
     date check:
-        files outside a date_range are left out (edate and bdate keywords)
+        files outside a date_range are left out (end_date and begin_date keywords)
     lines test:
         files with a number of lines that is different from the correct number are out.
 
@@ -89,9 +89,9 @@ def qcontrol(files, datalogger_config,
         equivalent number of points.
     file_lines: int
         number of line a "good" file must have. Fails if the run has any other number of lines.
-    bdate: str
+    begin_date: str
         dates before this automatically fail.
-    edate: str
+    end_date: str
         dates after this automatically fail.
     std_limits: dict
         keys must be names of variables and values must be upper limits for the standard deviation.
@@ -183,8 +183,8 @@ def qcontrol(files, datalogger_config,
     if trueshow:
         import matplotlib.pyplot as plt
 
-    if bdate: bdate=parse(bdate)
-    if edate: edate=parse(edate)
+    if begin_date: bdate=parse(begin_date)
+    if end_date: edate=parse(end_date)
 
     lines_name='lines'
     dates_name='dates'
@@ -282,13 +282,14 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
         # LINE NUMBERS TEST
         if file_lines:
-            result=algs.check_numlines(filepath, numlines=file_lines)
+            valid = tests.check_numlines(filepath, numlines=file_lines, falseverbose=falseverbose)
+
+            result, failed = algs.testValid(valid, testname='lines', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            #exit()
+            #numbers = algs.applyResult(result, failed, fin, control=numbers, testname='lines', filename=filename, falseshow=falseshow)
             if result == False:
-                if falseverbose: print(filepath,'failed lines check')
                 numbers[ lines_name ].append(filename)
                 continue
-            else:
-                if trueverbose: print(filename, 'passed lines check')
         #-------------------------------
     
         #-------------------------------

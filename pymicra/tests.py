@@ -385,3 +385,26 @@ def check_spikes(data, chunk_size='2min',
     return fou, valid, fault_count
 
 
+def check_numlines(fname, numlines=18000, falseverbose=False):
+    """
+    Checks length of file against a correct value.
+    Returns False is length is wrong and True if length is right
+
+    Parameters:
+    ----------
+    fname: string
+        path of the file to check
+    numlines: int
+        correct number of lines that the file has to have
+    """
+    from . import algs
+    import pandas as pd
+
+    lines = algs.file_len(fname)
+    if lines==numlines:
+        return pd.Series([True])
+    else:
+        if falseverbose: print('numlines:',lines)
+        return pd.Series([False])
+
+
