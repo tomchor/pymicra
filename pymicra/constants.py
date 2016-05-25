@@ -71,6 +71,8 @@ units.update({'earth_atmosphere_molar_mass' : 'g/mol' })
 #---------------------------------------
 # OTHER CONSTANTS
 #---------------------------------------
+mole = 6.022140857e23
+
 kappa=0.4
 
 greek_alphabet = {
