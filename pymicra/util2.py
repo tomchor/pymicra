@@ -183,8 +183,8 @@ def qcontrol(files, datalogger_config,
     if trueshow:
         import matplotlib.pyplot as plt
 
-    if begin_date: bdate=parse(begin_date)
-    if end_date: edate=parse(end_date)
+    if begin_date: begin_date=parse(begin_date)
+    if end_date: end_date=parse(end_date)
 
     lines_name='lines'
     dates_name='dates'
@@ -228,7 +228,7 @@ def qcontrol(files, datalogger_config,
     # If a test is not marked to be perform, it will not be on this list.
     if file_lines:
         numbers[ lines_name ] = []
-    if bdate or edate:
+    if begin_date or end_date:
         numbers['dates'] = []
     if nans_test:
         numbers[ nan_name ] = []
@@ -261,15 +261,15 @@ def qcontrol(files, datalogger_config,
 
         #---------------
         # DATE CHECK
-        if bdate or edate:
+        if begin_date or end_date:
             cdate = algs.name2date(filename, datalogger_config)
-            if bdate:
-                if cdate<bdate:
+            if begin_date:
+                if cdate<begin_date:
                     if falseverbose: print(filename, 'failed dates check')
                     numbers['dates'].append(filename)
                     continue
-            if edate: 
-                if cdate>edate:
+            if end_date: 
+                if cdate>end_date:
                     if falseverbose: print(filename, 'failed dates check')
                     numbers['dates'].append(filename)
                     continue
