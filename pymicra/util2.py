@@ -13,9 +13,9 @@ import tests
 def qcontrol(files, datalogger_config,
              read_files_kw={'parse_dates':False},
              accepted_percent=1.,
-             max_replaced=180,
+             max_replacement_count=180,
              file_lines=None, bdate=None, edate=None,
-             nan_test=True,
+             nans_test=True,
              maxdif_detrend=True, maxdif_detrend_kw={'how':'movingmean', 'window':900},
              maxdif_trend=True, maxdif_trend_kw={'how':'movingmedian', 'window':600},
              std_detrend=True, std_detrend_kw={'how':'movingmean', 'window':900},
@@ -51,9 +51,9 @@ def qcontrol(files, datalogger_config,
 
     Non-trivial tests (in this order):
     ------------------
-    NaN test:
+    NaNs test:
         checks for any NaN values. NaNs are replaced with interpolation or linear trend. If the percentage
-        of NaNs is greater than accepted_percent, run is discarded.
+        of NaNs is greater than accepted_percent, run is discarded. Activate it by passing nans_test=True.
     boundaries test:
         runs with values in any column lower than a pre-determined lower limit or higher
         than a upper limits are left out. Activate it by passing a lower_limits or upper_limits keyword.
@@ -61,6 +61,9 @@ def qcontrol(files, datalogger_config,
         runs with more than a certain percetage of spikes are left out. 
         Activate it by passing a spikes_test keyword. Adjust the test with the spikes_func
         visualize_spikes, spikes_vis_col, max_consec_spikes, accepted_percent and chunk_size keywords.
+    replacement count:
+        checks the total amount of points that were replaced (including NaN, boundaries and spikes test)
+        against the max_replacement_count keyword. Fails if any columns has more replacements than that.
     standard deviation check:
         runs with a standard deviation lower than a pre-determined value (generally close to the
         sensor precision) are left out.
@@ -185,7 +188,7 @@ def qcontrol(files, datalogger_config,
 
     lines_name='lines'
     dates_name='dates'
-    nan_name='NaN'
+    nan_name='NaNs'
     bound_name='boundaries'
     spikes_name='spikes'
     replace_name = 'replacement'
@@ -227,7 +230,7 @@ def qcontrol(files, datalogger_config,
         numbers[ lines_name ] = []
     if bdate or edate:
         numbers['dates'] = []
-    if nan_test:
+    if nans_test:
         numbers[ nan_name ] = []
     if upper_limits:
         tables = tables.append( pd.DataFrame(upper_limits, index=['upper_limits']) )
@@ -236,8 +239,8 @@ def qcontrol(files, datalogger_config,
         tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
         numbers[ maxdif_name ] = []
     if spikes_test:
-        numbers['spikes'] = []
-    if max_replaced:
+        numbers[ spikes_name ] = []
+    if max_replacement_count:
         numbers[ replace_name ] = []
     if lower_limits:
         tables = tables.append( pd.DataFrame(lower_limits, index=['lower_limits']) )
@@ -309,13 +312,17 @@ def qcontrol(files, datalogger_config,
 
         #-----------------
         # CHECK NANS
-        if nan_test:
+        if nans_test:
             valid, nans_replaced = tests.check_nans(fin, max_percent=accepted_percent, replace_with=replace_with)
 
             result, failed = algs.testValid(valid, testname=nan_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname=nan_name, filename=filename, falseshow=falseshow)
 
+            #--------------
+            # Add nans that were replaced to the full replaced list
             replaced.loc[ filename ] += nans_replaced
+            #--------------
+
             if result==False: continue
         #-----------------
 
@@ -327,7 +334,11 @@ def qcontrol(files, datalogger_config,
             result, failed = algs.testValid(valid, testname=bound_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname=bound_name, filename=filename, falseshow=falseshow)
 
+            #--------------
+            # Add high/low values that were replaced to the full replaced list
             replaced.loc[ filename ] += limits_replaced
+            #--------------
+
             if result==False: continue
         #----------------------------------
  
@@ -338,16 +349,21 @@ def qcontrol(files, datalogger_config,
                             visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size, replace_with=replace_with,
                             cut_func=spikes_func, max_consec_spikes=max_consec_spikes, max_percent=accepted_percent)
 
-            result, failed = algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers = algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
+            result, failed = algs.testValid(valid, testname=spikes_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=spikes_name, filename=filename, falseshow=falseshow)
+
+            #--------------
+            # Add spikes that were replaced to the full replaced list
             replaced.loc[ filename ] += spikes_replaced
+            #--------------
+
             if result==False: continue
         #-----------------
    
         #-----------------
-        # Check for maximum number of replacements
-        if max_replaced:
-            valid = tests.check_replaced(replaced.iloc[-1], max_count=max_replaced)
+        # REPLACEMENT COUNT TEST
+        if max_replacement_count:
+            valid = tests.check_replaced(replaced.iloc[-1], max_count=max_replacement_count)
 
             result, failed = algs.testValid(valid, testname=replace_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname=replace_name, filename=filename, falseshow=falseshow)
@@ -355,7 +371,7 @@ def qcontrol(files, datalogger_config,
         #-----------------
 
         #----------------------------------
-        # BEGINNING OF STANDARD DEVIATION CHECK
+        # STANDARD DEVIATION TEST
         if std_limits:
             valid = tests.check_std(fin, tables, detrend=std_detrend, detrend_kw=std_detrend_kw, chunk_size=chunk_size, falseverbose=falseverbose)
 
@@ -365,7 +381,7 @@ def qcontrol(files, datalogger_config,
         #----------------------------------
     
         #------------------------------
-        # BEGINNING OF REVERSE ARRANGEMENT TEST
+        # REVERSE ARRANGEMENT TEST
         if RAT:
             valid = tests.check_RA(fin, detrend=RAT_detrend, detrend_kw=RAT_detrend_kw,
                                     RAT_vars=None, RAT_points=RAT_points, RAT_significance=RAT_significance)
@@ -376,11 +392,10 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
     
         #-------------------------------
-        # BEGINNING OF STATIONARITY TEST
+        # STATIONARITY TEST
         if dif_limits:
             valid = tests.check_stationarity(fin, tables, detrend=maxdif_detrend, detrend_kw=maxdif_detrend_kw,
                                         trend=maxdif_trend, trend_kw=maxdif_trend_kw)
-            #exit()
 
             result, failed = algs.testValid(valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
             numbers=algs.applyResult(result, failed, fin, control=numbers, testname=maxdif_name, filename=filename, falseshow=falseshow)
@@ -411,7 +426,7 @@ def qcontrol(files, datalogger_config,
     
     #-------------
     # We create the summary dataframe
-    summary= {k: [len(v)] for k, v in numbers.items()}
+    #summary= {k: [len(v)] for k, v in numbers.items()}
     summary=pd.DataFrame({'numbers': map(len,numbers.values())}, index=numbers.keys())
     summary['percent']=100.*summary['numbers']/summary.loc['total','numbers']
     #-------------

@@ -13,7 +13,6 @@ def check_replaced(replaced, max_count=180):
     '''
     valid = replaced < max_count
 
-    print(valid)
     return valid
 
 
