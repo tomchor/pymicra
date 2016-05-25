@@ -4,6 +4,18 @@ This module contains functions that test certain conditions on pandas.dataframes
 They all return True for the columns that pass the test and False for the columns
 that fail the test.
 """
+from . import algs
+
+def check_replaced(replaced, max_count=180):
+    '''
+    Sums and checks if the number of replaced points is larger than the
+    maximum accepted
+    '''
+    valid = replaced < max_count
+
+    print(valid)
+    return valid
+
 
 def check_nans(data, max_percent=0.1, replace_with='interpolation'):
     '''

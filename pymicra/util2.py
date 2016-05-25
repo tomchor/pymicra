@@ -13,6 +13,7 @@ import tests
 def qcontrol(files, datalogger_config,
              read_files_kw={'parse_dates':False},
              accepted_percent=1.,
+             max_replaced=180,
              file_lines=None, bdate=None, edate=None,
              nan_test=True,
              maxdif_detrend=True, maxdif_detrend_kw={'how':'movingmean', 'window':900},
@@ -182,10 +183,15 @@ def qcontrol(files, datalogger_config,
     if bdate: bdate=parse(bdate)
     if edate: edate=parse(edate)
 
-    bound_name='boundaries'
-    maxdif_name='difference'
-    STD_name='STD'
+    lines_name='lines'
+    dates_name='dates'
     nan_name='NaN'
+    bound_name='boundaries'
+    spikes_name='spikes'
+    replace_name = 'replacement'
+    STD_name='STD'
+    RAT_name = 'Rev Arrang'
+    maxdif_name='difference'
 
     #--------------
     # If the path to the dlc is provided, we read it as a dataloggerConfig object
@@ -217,28 +223,27 @@ def qcontrol(files, datalogger_config,
     #--------------
     # We update numbers and tables based on the tests we will perform.
     # If a test is not marked to be perform, it will not be on this list.
+    if file_lines:
+        numbers[ lines_name ] = []
     if bdate or edate:
         numbers['dates'] = []
     if nan_test:
         numbers[ nan_name ] = []
-    if spikes_test:
-        numbers['spikes'] = []
-    if file_lines:
-        numbers['lines'] = []
-    if std_limits:
-        tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
-        numbers['STD'] = []
-    if lower_limits:
-        tables = tables.append( pd.DataFrame(lower_limits, index=['lower_limits']) )
-        numbers[ bound_name ] = []
     if upper_limits:
         tables = tables.append( pd.DataFrame(upper_limits, index=['upper_limits']) )
         numbers[ bound_name ] = []
     if dif_limits:
         tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
         numbers[ maxdif_name ] = []
+    if spikes_test:
+        numbers['spikes'] = []
+    if max_replaced:
+        numbers[ replace_name ] = []
+    if lower_limits:
+        tables = tables.append( pd.DataFrame(lower_limits, index=['lower_limits']) )
+        numbers[ bound_name ] = []
     if RAT:
-        numbers['RAT'] = []
+        numbers[ RAT_name ] = []
     tables = tables.fillna(value=np.nan)
     #--------------
 
@@ -277,7 +282,7 @@ def qcontrol(files, datalogger_config,
             result=algs.check_numlines(filepath, numlines=file_lines)
             if result == False:
                 if falseverbose: print(filepath,'failed lines check')
-                numbers['lines'].append(filename)
+                numbers[ lines_name ].append(filename)
                 continue
             else:
                 if trueverbose: print(filename, 'passed lines check')
@@ -309,6 +314,7 @@ def qcontrol(files, datalogger_config,
 
             result, failed = algs.testValid(valid, testname=nan_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname=nan_name, filename=filename, falseshow=falseshow)
+
             replaced.loc[ filename ] += nans_replaced
             if result==False: continue
         #-----------------
@@ -320,6 +326,7 @@ def qcontrol(files, datalogger_config,
 
             result, failed = algs.testValid(valid, testname=bound_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname=bound_name, filename=filename, falseshow=falseshow)
+
             replaced.loc[ filename ] += limits_replaced
             if result==False: continue
         #----------------------------------
@@ -337,6 +344,16 @@ def qcontrol(files, datalogger_config,
             if result==False: continue
         #-----------------
    
+        #-----------------
+        # Check for maximum number of replacements
+        if max_replaced:
+            valid = tests.check_replaced(replaced.iloc[-1], max_count=max_replaced)
+
+            result, failed = algs.testValid(valid, testname=replace_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=replace_name, filename=filename, falseshow=falseshow)
+            if result==False: continue
+        #-----------------
+
         #----------------------------------
         # BEGINNING OF STANDARD DEVIATION CHECK
         if std_limits:
@@ -353,15 +370,14 @@ def qcontrol(files, datalogger_config,
             valid = tests.check_RA(fin, detrend=RAT_detrend, detrend_kw=RAT_detrend_kw,
                                     RAT_vars=None, RAT_points=RAT_points, RAT_significance=RAT_significance)
 
-            result, failed = algs.testValid(valid, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
-            numbers = algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
+            result, failed = algs.testValid(valid, testname=RAT_name, trueverbose=trueverbose, filepath=filepath)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=RAT_name , filename=filename, falseshow=falseshow)
             if result==False: continue
         #-------------------------------
     
         #-------------------------------
         # BEGINNING OF STATIONARITY TEST
         if dif_limits:
-            #valid = tests.check_maxdif(fin, tables, trend=False, detrend=True)
             valid = tests.check_stationarity(fin, tables, detrend=maxdif_detrend, detrend_kw=maxdif_detrend_kw,
                                         trend=maxdif_trend, trend_kw=maxdif_trend_kw)
             #exit()
