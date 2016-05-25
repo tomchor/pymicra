@@ -187,7 +187,6 @@ def qcontrol(files, datalogger_config,
     if end_date: end_date=parse(end_date)
 
     lines_name='lines'
-    dates_name='dates'
     nan_name='NaNs'
     bound_name='boundaries'
     spikes_name='spikes'
@@ -201,7 +200,6 @@ def qcontrol(files, datalogger_config,
     if isinstance(datalogger_config, str):
         from . import dataloggerConfig
         datalogger_config = dataloggerConfig(datalogger_config)
-        #datalogger_config = read_dlc(datalogger_config)
     #--------------
 
     #-------------------------------------
@@ -228,8 +226,8 @@ def qcontrol(files, datalogger_config,
     # If a test is not marked to be perform, it will not be on this list.
     if file_lines:
         numbers[ lines_name ] = []
-    if begin_date or end_date:
-        numbers['dates'] = []
+    #if begin_date or end_date:
+    #    numbers['dates'] = []
     if nans_test:
         numbers[ nan_name ] = []
     if upper_limits:
@@ -265,17 +263,17 @@ def qcontrol(files, datalogger_config,
             cdate = algs.name2date(filename, datalogger_config)
             if begin_date:
                 if cdate<begin_date:
-                    if falseverbose: print(filename, 'failed dates check')
-                    numbers['dates'].append(filename)
+                    if falseverbose: print(filename, 'skipped because of begin_date.')
+                    #numbers['dates'].append(filename)
                     continue
             if end_date: 
                 if cdate>end_date:
-                    if falseverbose: print(filename, 'failed dates check')
-                    numbers['dates'].append(filename)
+                    if falseverbose: print(filename, 'skipped because of end_date')
+                    #numbers['dates'].append(filename)
                     continue
             #-----------------
             # If we get here, then test is successful
-            if trueverbose: print(filename, 'passed dates check')
+            #if trueverbose: print(filename, 'passed dates check')
             #-----------------
         #----------------
     
