@@ -263,12 +263,14 @@ def qcontrol(files, datalogger_config,
             cdate = algs.name2date(filename, datalogger_config)
             if begin_date:
                 if cdate<begin_date:
-                    if falseverbose: print(filename, 'skipped because of begin_date.')
+                    print('Skipped because of begin_date.\n')
+                    #if falseverbose: print(filename, 'skipped because of begin_date.')
                     #numbers['dates'].append(filename)
                     continue
             if end_date: 
                 if cdate>end_date:
-                    if falseverbose: print(filename, 'skipped because of end_date')
+                    print('Skipped because of end_date\n')
+                    #if falseverbose: print(filename, 'skipped because of end_date')
                     #numbers['dates'].append(filename)
                     continue
             #-----------------
@@ -282,7 +284,7 @@ def qcontrol(files, datalogger_config,
         if file_lines:
             valid = tests.check_numlines(filepath, numlines=file_lines, falseverbose=falseverbose)
 
-            result, failed = algs.testValid(valid, testname='lines', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            result, failed = algs.testValid(valid, testname=lines_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             #exit()
             #numbers = algs.applyResult(result, failed, fin, control=numbers, testname='lines', filename=filename, falseshow=falseshow)
             if result == False:
