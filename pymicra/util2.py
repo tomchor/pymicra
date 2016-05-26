@@ -264,7 +264,6 @@ def qcontrol(files, datalogger_config,
     for filepath in files:
         filename=basename(filepath)
         print(filename)
-        numbers['total'].append(filename)
 
         #---------------
         # DATE CHECK
@@ -273,19 +272,16 @@ def qcontrol(files, datalogger_config,
             if begin_date:
                 if cdate<begin_date:
                     print('Skipped because of begin_date.\n')
-                    #if falseverbose: print(filename, 'skipped because of begin_date.')
-                    #numbers['dates'].append(filename)
                     continue
             if end_date: 
                 if cdate>end_date:
-                    print('Skipped because of end_date\n')
-                    #if falseverbose: print(filename, 'skipped because of end_date')
-                    #numbers['dates'].append(filename)
+                    print('Skipped because of end_date.\n')
                     continue
-            #-----------------
-            # If we get here, then test is successful
-            #if trueverbose: print(filename, 'passed dates check')
-            #-----------------
+        #----------------
+
+        #----------------
+        # If the test passes the date check then we include it in the total amount
+        numbers['total'].append(filename)
         #----------------
     
         #-------------------------------
