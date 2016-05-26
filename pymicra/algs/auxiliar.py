@@ -78,9 +78,6 @@ def resample(df, rule, how=None, **kwargs):
     if isinstance(df.index, pd.DatetimeIndex) and isinstance(rule, str):
         return df.resample(rule, how, **kwargs)
     else:
-        #idx, bins = pd.cut(df.index, range(df.index[0], df.index[-1]+2, rule), right=False, retbins=True)
-        #aux = df.groupby(idx).apply(how)
-        #aux = aux.set_index(bins[:-1])
         s = (df.index.to_series() / rule).astype(int)
         aux = df.groupby(s).apply(how).set_index(s.index[::rule])
         return aux
@@ -190,7 +187,7 @@ pd.Series.polyfit = _polyfit
 
 def stripDown(str, final='', args=['_', '-']):
     """
-    Auxiliar function to strip down kaywords from symbols
+    Auxiliar function to strip down keywords from symbols
     """
     for arg in args:
         str=str.replace(arg,final)

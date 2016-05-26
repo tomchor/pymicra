@@ -5,7 +5,7 @@ from pymicra.__init__ import __version__
 Python Micrometeorological Analysis tool - Pymicra
 """
 
-dependencies=['Pandas>=0.13', 'Numpy']
+dependencies=['Pandas>=0.15', 'Numpy']
 
 #-----------
 # Be ready to work with or without setuptools
