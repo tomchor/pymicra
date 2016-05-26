@@ -11,12 +11,9 @@ dependencies=['Pandas>=0.13', 'Numpy']
 # Be ready to work with or without setuptools
 try:
     from setuptools import setup, find_packages
-    print("Setuptools installed...\n")
-    _has_setuptools = True
+    print("Setuptools installed. Proceeding with installation...\n")
 except ImportError:
-    print("No setuptools installed.\nWill try to install with distutils...\n")
-    from distutils.core import setup
-    _has_setuptools = False
+    raise ImportError("No setuptools installed!\nPlease install setuptools in order to proceed with installation.")
 #-----------
 
 #-----------
@@ -24,18 +21,10 @@ except ImportError:
 packages = find_packages()
 #-----------
 
-#-----------
-if _has_setuptools:
-    extra_kwargs={'install_requires' : dependencies}
-else:
-    import pkg_resources
-    pkg_resources.require(dependencies)
-    extra_kwargs={}
-#-----------
-
+extra_kwargs={'install_requires' : dependencies}
 setup(name='pymicra',
       version = __version__,
-      description='A Python toll for Micrometeorological Analysis',
+          description='A Python tool for Micrometeorological Analyses',
       long_description=open('README.md').read(),
       url='https://github.com/tomchor/pymicra.git',
       author='Tomas Chor',

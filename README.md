@@ -1,4 +1,4 @@
-# PyMicrA - A Python tool for Micrometeorological Analysis
+# PyMicrA - A Python tool for Micrometeorological Analyses
 
 This package was designed to make it easier to work with micrometeorological data. Pymicra is currently fully writen in python and it's aimed towards agregating all of the commonly needed functionality work with micrometeorological data. The package is extensively (almost entirely) based on Pandas, which itself is based on Numpy.
 
