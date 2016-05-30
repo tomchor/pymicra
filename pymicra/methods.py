@@ -53,7 +53,7 @@ def _to_unitsCsv(self, units, filename, to_tex=False, **kwargs):
     kwargs:
         to be passed to pandas' method .to_csv
     """
-    toUnitsCsv(self, units, filename, to_tex=to_tex, **kwargs)
+    to_UnitsCsv(self, units, filename, to_tex=to_tex, **kwargs)
     return
 import pandas as pd
 pd.DataFrame.to_unitsCsv = _to_unitsCsv

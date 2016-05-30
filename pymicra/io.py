@@ -106,7 +106,8 @@ def readDataFiles(flist, verbose=0, **kwargs):
 
 
 
-def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, parse_dates_kw={}):
+def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
+        read_data_kw={}, parse_dates_kw={}, clean_dates=True, return_units=False):
     """
     Creates a micrometeorological time series from a file or list of files.
 
@@ -140,19 +141,30 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=0, read_data_kw={}, 
     skiprows=datalogger.skiprows
     columns_separator=datalogger.columns_separator
     if columns_separator=='whitespace':
-        series=readDataFiles(flist, header=header_lines, skiprows=skiprows, delim_whitespace=True, varNames=datalogger.varNames, **read_data_kw)
+        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, delim_whitespace=True, varNames=datalogger.varNames, **read_data_kw)
     else:
-        series=readDataFiles(flist, header=header_lines, skiprows=skiprows, sep=columns_separator, varNames=datalogger.varNames, **read_data_kw)
+        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, sep=columns_separator, varNames=datalogger.varNames, **read_data_kw)
     #------------
 
     #------------
     # We parse de dates
     if parse_dates:
         if verbose: print('Starting to parse the dates')
-        series=algs.parseDates(series, dataloggerConfig=datalogger, **parse_dates_kw)
+        timeseries=algs.parseDates(timeseries, dataloggerConfig=datalogger, **parse_dates_kw)
     #------------
 
-    return series
+    #------------
+    # We clean the dates (if not cleaned already
+    if clean_dates:
+        #timeseries = timeseries.drop(datalogger.date_col_names, axis=1)
+        timeseries = timeseries[ [ col for col in timeseries.columns if col not in datalogger.date_col_names ] ]
+    #------------
+
+    if return_units:
+        if verbose: print('Cleaning the date columns')
+        return timeseries, datalogger.units
+    else:
+        return timeseries
 
 
 def read_dlc(dlcfile):
