@@ -260,8 +260,8 @@ class notation(object):
         for subst in ['co2', 'ch4', 'o3']:
             exec('self.{0}_flux = self.flux_of % self.{0}'.format(subst))
 
-        for var in ['u', 'v', 'w', 'thermodyn_temp', 'virtual_temp', 'specific_humidity', 'relative_humidity', 'pressure']:
-            exec('self.{0}_fluct = self.fluctuation % self.{0}'.format(subst))
+        for subst in ['u', 'v', 'w', 'thermodyn_temp', 'virtual_temp', 'specific_humidity', 'relative_humidity', 'pressure']:
+            exec('self.{0}_fluctuation = self.fluctuation % self.{0}'.format(subst))
             exec('self.{0}_mean = self.mean % self.{0}'.format(subst))
             exec('self.{0}_star = self.star % self.{0}'.format(subst))
 
