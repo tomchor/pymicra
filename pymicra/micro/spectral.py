@@ -119,3 +119,12 @@ def recspeAux(df, T):
     return df
 
 
+def anti_aliasing(spec):
+    '''
+    Minimizes aliasing effects on spectra and cross-spectra
+
+    df: pandas.DataFrame
+        containing spectrum or cross-spectrum
+    '''
+    RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
+    return spec * RA**2.
