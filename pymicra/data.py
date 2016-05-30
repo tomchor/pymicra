@@ -211,7 +211,7 @@ def detrend(data, how='linear', rule=None, suffix="'", **kwargs):
 
 
 
-def spectrum(data, frequency=10, out_index='frequency', anti_aliasing=False, outname=None):
+def spectrum(data, frequency=10, anti_aliasing=False, outname=None):
     """
     Calculates the spectrum for a set of data
 
@@ -221,10 +221,8 @@ def spectrum(data, frequency=10, out_index='frequency', anti_aliasing=False, out
         dataframe with one (will return the spectrum) or two (will return to cross-spectrum) columns
     frequency: float
         frequency of measurement of signal to pass to numpy.fft.rfftfreq
-    out_index: str
-        only accepting 'frequency' as keyword
     anti_aliasing: bool
-        not working at the moment
+        whether or not to apply anti-aliasing according to Gobbi, Chamecki & Dias, 2006 (doi:10.1029/2005WR004374)
     outname: str
         name of the output column
 
@@ -237,22 +235,31 @@ def spectrum(data, frequency=10, out_index='frequency', anti_aliasing=False, out
     import pandas as pd
 
     N = len(data)
-    co = False
+    Co = False
     if type(data)==pd.DataFrame:
         if len(data.columns)==1:
             pass
         elif len(data.columns)==2:
-            co=True
+            Co=True
         else:
             raise Exception('Too many columns of data. Chose one (spectrum) or two (cross-spectrum)')
     else:
         raise Exception('Input has to be pandas.DataFrame')
 
-    cols=list(data.columns)
     #---------
-    # This works if there's two columns or just one column
+    # Either calculate the spectrum or the cross-spectrum
     spec = np.fft.rfft(data.iloc[:,0])
-    spec = np.conj(spec)*np.fft.rfft(data.iloc[:,-1])
+    if Co:
+        spec = np.conj(spec) * np.fft.rfft(data.iloc[:,-1])
+    else:
+        spec = np.conj(spec) * spec
+    #---------
+
+    #---------
+    # Anti-aliasing is done here
+    if anti_aliasing:
+        RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
+        spec *= RA**2.
     #---------
 
     #---------
@@ -262,28 +269,22 @@ def spectrum(data, frequency=10, out_index='frequency', anti_aliasing=False, out
     #---------
 
     #---------
-    # names it cross-spectrum for cross-spectrum or spectrum
-    if co:
-        varname='cross-spectrum_{}_{}'.format(*cols)
+    # Return a dataframe if outname is something, otherwise just return a Series
+    if outname:
+        aux=pd.DataFrame( data={ outname : spec }, index=freq )
     else:
-        varname='spectrum_{}'.format(cols[0])
+        aux = pd.Series(spec, index=freq)
+    aux.index.name='frequencies'
     #---------
 
     #---------
-    if varname != None:
-        varname = outname
-    #---------
-
-    if out_index=='frequency':
-        aux=pd.DataFrame( data={ varname : spec }, index=freq )
-        aux.index.name='frequencies'
-    else:
-        raise NameError
-
-    if co:
+    # This is just to avoid x + 0j as output, which is an array of complex numbers
+    # with imaginary part always equal to zero.
+    if Co:
         return aux
     else:
         return aux.apply(np.real)
+    #---------
 
 
 def bulkCorr(data):
@@ -305,23 +306,24 @@ def bulkCorr(data):
     r = r / (np.sqrt(cov.loc[a,a])*np.sqrt(cov.loc[b,b]))
     return r
 
+
 #----------
 # Definition of bulk_correlation according to
 # Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
 # doi:10.1029/2012WR012127
-def _bulk_corr(self):
-    import numpy as np
-    df = self.copy()
-    cov = df.cov()
-    out = cov.copy()
-    for c in out.columns:
-        out.loc[:, c] = out.loc[:, c]/np.sqrt(cov.loc[c, c])
-    for idx in out.index:
-        out.loc[idx, :] = out.loc[idx, :]/np.sqrt(cov.loc[idx, idx])
-    return out
-import pandas as pd
-pd.DataFrame.bulk_corr = _bulk_corr
-del pd      # prevents pandas to being pre-loaded in data.py
+#def _bulk_corr(self):
+#    import numpy as np
+#    df = self.copy()
+#    cov = df.cov()
+#    out = cov.copy()
+#    for c in out.columns:
+#        out.loc[:, c] = out.loc[:, c]/np.sqrt(cov.loc[c, c])
+#    for idx in out.index:
+#        out.loc[idx, :] = out.loc[idx, :]/np.sqrt(cov.loc[idx, idx])
+#    return out
+#import pandas as pd
+#pd.DataFrame.bulk_corr = _bulk_corr
+#del pd      # prevents pandas to being pre-loaded in data.py
 #----------
 
 
