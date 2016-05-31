@@ -157,11 +157,11 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     # We clean the dates (if not cleaned already
     if clean_dates:
         #timeseries = timeseries.drop(datalogger.date_col_names, axis=1)
+        if verbose: print('Cleaning the date columns')
         timeseries = timeseries[ [ col for col in timeseries.columns if col not in datalogger.date_col_names ] ]
     #------------
 
     if return_units:
-        if verbose: print('Cleaning the date columns')
         return timeseries, datalogger.units
     else:
         return timeseries
