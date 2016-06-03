@@ -446,7 +446,7 @@ def parseDates(data, dataloggerConfig=None,
         aux+=connector + data[col].astype(str)
     #print(date_col_names)
     #print(data[date_col_names])
-    dates=pd.to_datetime(aux, format=date_col_names)
+    dates=pd.to_datetime(aux, format=date_format)
     #-------------------------------------
 
     #-------------------------------------
