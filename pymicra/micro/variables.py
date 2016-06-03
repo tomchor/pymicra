@@ -31,7 +31,7 @@ def MonObuSimVar(L_m, siteConf):
     where d is the displacement height or zero-plane displacement
     and L_m is the Monin-Obukhov Length.
     """
-    z=siteConf.variables_height
+    z=siteConf.instruments_height
     d=siteConf.displacement_height
     zeta = (z-d)/L_m
     return zeta
