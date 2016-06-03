@@ -438,15 +438,15 @@ def parseDates(data, dataloggerConfig=None,
 
     #-------------------------------------
     # joins the appropriate pandas columns because pandas can read only one column into datetime
-#    try:
-#        aux=data[date_col_names[0]].astype(str)
-#    except ValueError:
-#        aux=data[date_col_names[0]].astype(int).astype(str)
-#    for col in date_col_names[1:]:
-#        aux+=connector + data[col].astype(str)
-    print(date_col_names)
-    print(data[date_col_names])
-    dates=pd.to_datetime(data, format=date_col_names)
+    try:
+        aux=data[date_col_names[0]].astype(str)
+    except ValueError:
+        aux=data[date_col_names[0]].astype(int).astype(str)
+    for col in date_col_names[1:]:
+        aux+=connector + data[col].astype(str)
+    #print(date_col_names)
+    #print(data[date_col_names])
+    dates=pd.to_datetime(aux, format=date_col_names)
     #-------------------------------------
 
     #-------------------------------------
