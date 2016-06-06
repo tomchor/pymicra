@@ -57,7 +57,7 @@ def airDensity_from_theta(rho_h2o, pressure, temp, dataunits, full=False):
     rho_dry = p_dry/(Rdry*temp)
     dataunits['rho_dry'] = dataunits['p_dry']/(constants.units['R_spec']*dataunits['T'])
     rho_dry = algs.convert_to(rho_dry, dataunits, 'kg/m**3', key='rho_dry', inplace=True)
-    rho_h2o = algs.convert_to(rho_h2o, dataunits, 'kg/m**3', key='rho_h2o', inplace=True)
+    rho_h2o = algs.convert_to(rho_h2o, dataunits, 'kg/m**3', key='h2o', inplace=True)   
 
     #-----------
     # Mantaining units with subtraction or addition is tricky
