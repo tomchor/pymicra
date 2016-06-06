@@ -1,0 +1,9 @@
+ppth = g/kg
+ppm = mg/kg
+ppb = ug/kg
+ppt = ng/kg
+
+ppthv = mole/kmole
+ppmv = mmole/kmole
+ppbv = umole/kmole
+pptv = nmole/kmole

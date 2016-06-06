@@ -16,7 +16,10 @@
 # Here we create a "global" unitregistry for pymicra
 try:
     from pint.unit import UnitRegistry
+    import os
+    abspath = os.path.dirname(os.path.abspath(__file__))
     ureg = UnitRegistry()
+    ureg.load_definitions(os.path.join(abspath,'pymicra.pint'))
     Q_ = ureg.Quantity
 except ImportError:
     pass

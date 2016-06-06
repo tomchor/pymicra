@@ -11,6 +11,68 @@ TO DO LIST:
 * ADD FOOTPRINT CALCULATION?
 """
 
+def ppxv2density(ser, T, p, dataunits, solute=None):
+    """
+    ser should be a series!
+    concentration in ser should be ppmv, which will be transformed to g/m3
+    p should be in kPa!
+    """
+    from . import constants
+    from . import algs
+    from . import ureg
+
+    dataunits = dataunits.copy()
+    ser = ser.copy()
+
+    out = p/(T*constants.R_spec[solute])
+    out = ser.multiply(out, axis=0)
+    unit = dataunits[solute]*dataunits['p']/(dataunits['T']*constants.units['R_spec'])
+    out, unit = algs.convert_to(out, unit, 'kg/m**3')
+    dataunits.update({solute:unit})
+    return out, dataunits
+
+
+def airDensity_from_theta(rho_h2o, pressure, temp, dataunits, full=False):
+    from . import constants
+    from . import algs
+
+    dataunits = dataunits.copy()
+    Rh2o = constants.R_spec['h2o']
+    Rdry = constants.R_spec['dry']
+
+    p_h2o = rho_h2o*Rh2o*temp 
+    dataunits['p_h2o'] = dataunits['h2o']*constants.units['R_spec']*dataunits['T']
+
+    p_h2o, unit = algs.convert_to(p_h2o, dataunits['p_h2o'], 'kPa')
+    dataunits['p_h2o'] = unit
+    pressure, unit = algs.convert_to(pressure, dataunits['p'], 'kPa')
+    dataunits['p'] = unit
+
+    #-----------
+    # Mantaining units with subtraction or addition is tricky
+    p_dry = pressure - p_h2o
+    dataunits['p_dry'] = dataunits['p']# - dataunits['p_h2o']
+    #-----------
+
+    rho_dry = p_dry/(Rdry*temp)
+    dataunits['rho_dry'] = dataunits['p_dry']/(constants.units['R_spec']*dataunits['T'])
+    rho_dry = algs.convert_to(rho_dry, dataunits, 'kg/m**3', key='rho_dry', inplace=True)
+    rho_h2o = algs.convert_to(rho_h2o, dataunits, 'kg/m**3', key='rho_h2o', inplace=True)
+
+    #-----------
+    # Mantaining units with subtraction or addition is tricky
+    rho_air = rho_dry + rho_h2o
+    dataunits['rho_air'] = dataunits['rho_dry']# + dataunits['h2o']
+    #-----------
+
+    rho_air, unit = algs.convert_to(rho_air, dataunits['rho_air'], 'kg/m**3')
+    dataunits['rho_air'] = unit
+
+    if full:
+        return rho_air, rho_dry, p_dry, p_h2o, dataunits
+    else:
+        return rho_air, dataunits
+
 
 def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, dr=None):
     """
