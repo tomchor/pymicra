@@ -7,6 +7,7 @@ This package was designed to make it easier to work with micrometeorological dat
 ## Required Packages
 * Pandas
 * Numpy
+* setuptools (for installation only)
 
 ## Recommended Packages
 * Pint
