@@ -1,7 +1,24 @@
 #!/usr/bin/python
 """
-Maybe add all these variables that EddyPro calculates:
-http://www.licor.com/env/help/EddyPro3/Content/Topics/Calculating_Micromet_Variables.htm
+Maybe add
+
+molecular_weight of moist air
+water vapor mass density
+water vapor partial pressure
+water vapor partial pressure at saturation
+relative humidity?
+dew point temperature?
+partial  pressure of dry air
+dry air molar volume?
+density of dry air
+density of moist air
+dry air heat capacity at constant pressure?
+water vapor heat capacity at constant pressure?
+specific humidity
+refining ambient temperature?
+moist air heat capacity at constant pressure?
+specific evaporation heat?
+water to dry air mixing ratio
 """
 
 def preProcess(data, dataunits, notation_defs=None,
