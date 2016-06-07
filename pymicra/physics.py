@@ -21,6 +21,7 @@ def theta_std_from_theta_v(theta_v, q, theta_v_mean, q_mean, theta_mean):
     q: array
     theta_v_mean: float
     q_mean: float
+    theta_mean: float
     '''
     import numpy as np
     denom = (1. + 0.61*q_mean)**2.
