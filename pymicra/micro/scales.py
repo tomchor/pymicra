@@ -131,8 +131,6 @@ def get_scales(dataframe, siteConf, notation_defs=None,
     if theta_from_theta_v:
         theta_star  = (theta_v_star - 0.61*theta_mean*q_star)/(1.+0.61*q_mean)
         theta_std   = (theta_v_std - 0.61*theta_mean*q_std)/(1.+0.61*q_mean)
-        #theta_star  = theta_v_star/(1.+0.61*q_mean)
-        #theta_std   = theta_v_std/(1.+0.61*q_mean)
     else:
         theta_star  = cov.loc[theta_fluc, w] / u_star
         theta_std   = data[theta].std()
