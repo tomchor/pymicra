@@ -75,6 +75,7 @@ def get_scales(dataframe, siteConf, notation_defs=None,
     """
     from ..core import notation
     from .. import constants
+    from .. import physics
     import pandas as pd
     import numpy as np
 
@@ -130,7 +131,9 @@ def get_scales(dataframe, siteConf, notation_defs=None,
     theta_mean=data[theta].mean()
     if theta_from_theta_v:
         theta_star  = (theta_v_star - 0.61*theta_mean*q_star)/(1.+0.61*q_mean)
-        theta_std   = (theta_v_std - 0.61*theta_mean*q_std)/(1.+0.61*q_mean)
+        #theta_std   = (theta_v_std - 0.61*theta_mean*q_std)/(1.+0.61*q_mean)
+        print('using new function')
+        theta_std   = physics.theta_std_from_theta_v(data[theta_v_fluc], data[qfluct], theta_v_mean, q_mean, theta_mean)
     else:
         theta_star  = cov.loc[theta_fluc, w] / u_star
         theta_std   = data[theta].std()

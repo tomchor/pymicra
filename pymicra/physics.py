@@ -11,6 +11,25 @@ TO DO LIST:
 * ADD FOOTPRINT CALCULATION?
 """
 
+def theta_std_from_theta_v(theta_v, q, theta_v_mean, q_mean, theta_mean):
+    '''
+    Derived from theta_v = theta(1 + 0.61 q)
+
+    Parameters:
+    -----------
+    theta_v: array
+    q: array
+    theta_v_mean: float
+    q_mean: float
+    '''
+    import numpy as np
+    denom = (1. + 0.61*q_mean)**2.
+    num1 = np.nanmean(theta_v*theta_v) 
+    num2 = 2.*0.61*theta_mean*np.nanmean(theta_v * q)
+    num3 = ((0.61*theta_mean)**2.) * np.nanmean(q*q)
+    var = (num1 - num2 + num3)/denom
+    return np.sqrt(var)
+
 def ppxv2density(ser, T, p, dataunits, solute=None):
     """
     ser should be a series!
