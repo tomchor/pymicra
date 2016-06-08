@@ -3,44 +3,54 @@
 Maybe add
 
 molecular_weight of moist air
-water vapor mass density
+* water vapor mass density
 water vapor partial pressure
 water vapor partial pressure at saturation
 relative humidity?
 dew point temperature?
-partial  pressure of dry air
+partial pressure of dry air
 dry air molar volume?
-density of dry air
-density of moist air
+* density of dry air
+* density of moist air
 dry air heat capacity at constant pressure?
 water vapor heat capacity at constant pressure?
-specific humidity
+* specific humidity
 refining ambient temperature?
 moist air heat capacity at constant pressure?
 specific evaporation heat?
-water to dry air mixing ratio
+* water to dry air mixing ratio
 """
 
-def preProcess(data, dataunits, notation_defs=None,
-        rho_air_from="theta_v"):
+def preProcess(data, units, notation_defs=None,
+        rho_air_from_theta_v=True, inplace=True, solutes=[]):
     '''
     Pre-processes data by calculating moist and dry air densities, specific humidity
     mass density and other important variables
 
     Parameters:
     -----------
-    data:
-    dataunits:
+    data: pandas.DataFrame
+        dataframe with micrometeorological measurements
+    units: dict
+        units dictionary with the columns of data as keys
+    notation_defs: pymicra.notation
+        defining notation used in data
+    rho_air_from_theta_v: bool
+        whether to use theta_v to calculate air density or theta
     '''
     from .. import constants
     from .. import notation
     from .. import algs
+    from .. import physics
+    from .. import ureg
 
     data = data.copy()
-    dataunits = dataunits.copy()
+    if not inplace:
+        units = units.copy()
 
     Rh2o = constants.R_spec['h2o']
     Mh2o = constants.molar_mass['h2o']
+    molar_mass_unit = constants.units['molar_mass']
 
     #---------
     # Define useful notation to look for
@@ -50,15 +60,60 @@ def preProcess(data, dataunits, notation_defs=None,
         defs=notation_defs
     #---------
 
+    #---------
+    # First convert the temperature if it is still in Celsius
+    if units[ defs.thermodyn_temp ] == ureg[ 'degC' ]:
+        print('Converting theta to kelvin...')
+        data.loc[ defs.thermodyn_temp ] = data[ defs.thermodyn_temp ].apply(physics.CtoK)
+        units.update({ defs.thermodyn_temp : ureg['kelvin'] })
+
+    if units[ defs.virtual_temp ] == ureg[ 'degC' ]:
+        print('Converting theta_v to kelvin...')
+        data.loc[ defs.virtual_temp ] = data[ defs.virtual_temp ].apply(physics.CtoK)
+        units.update({ defs.virtual_temp : ureg['kelvin'] })
+    #---------
+    print(units)
+
+    #---------
+    # Check for h2o mass density
     if defs.h2o_density not in data.columns:
         print("Didn't locate mass density of h2o. Will try to calculate it")
+        data.loc[ defs.h2o_density ] = data.loc[ defs.h2o_molar_density ]*Mh2o
+        units.update({ defs.h2o_density : units[ defs.h2o_molar_density ]*molar_mass_unit })
+    #---------
+    print(units)
 
-    if rho_air_from=='theta_v':
-        pass
-        #algs.airDensity_from_theta_v()
+    #---------
+    # Check for h2o molar density
+    if defs.h2o_molar_density not in data.columns:
+        print("Didn't locate molar density of h2o. Will try to calculate it")
+        data.loc[ defs.h2o_molar_density ] = data.loc[ defs.h2o_density ]/Mh2o
+        units.update({ defs.h2o_molar_density : units[ defs.h2o_density ]/molar_mass_unit })
+    #---------
+    print(units)
+    exit()
+
+    #---------
+    # Calculation of rho_air is done here
+    if (defs.moist_air_density not in data.columns) or (defs.dry_air_density not in data.columns):
+        if rho_air_from_theta_v:
+            print('Calculating rho_air = p/(Rdry * theta_v)...')
+            data = physics.airDensity_from_theta_v(data, units, notation=defs, inplace=True)
+            print('Calculating rho_dry_air = p_dry/(Rdry * theta)...')
+            data = physics.dryAirDensity(data, units, notation=defs, inplace=True)
+        else:
+            print('calculation of air density from theta has to be implemented')
+            pass
+            #algs.airDensity_from_theta()
+    #---------
+    
+    # Calculation of specific humidity and h2o mixing ratio
+
+    if inplace:
+        return data
     else:
-        pass
-        #algs.airDensity_from_theta()
+        return data, units
+
 
 def eddyCov(data, wpl=True,
         notation_defs=None, solutes=[], from_fluctuations=True, from_scales=False):

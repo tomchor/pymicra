@@ -31,7 +31,8 @@ def theta_std_from_theta_v(theta_v, q, theta_v_mean, q_mean, theta_mean):
     var = (num1 - num2 + num3)/denom
     return np.sqrt(var)
 
-def ppxv2density(ser, T, p, dataunits, solute=None):
+
+def ppxv2density(ser, T, p, units, solute=None):
     """
     ser should be a series!
     concentration in ser should be ppmv, which will be transformed to g/m3
@@ -41,15 +42,70 @@ def ppxv2density(ser, T, p, dataunits, solute=None):
     from . import algs
     from . import ureg
 
-    dataunits = dataunits.copy()
+    units = units.copy()
     ser = ser.copy()
 
     out = p/(T*constants.R_spec[solute])
     out = ser.multiply(out, axis=0)
-    unit = dataunits[solute]*dataunits['p']/(dataunits['T']*constants.units['R_spec'])
+    unit = units[solute]*units['p']/(units['T']*constants.units['R_spec'])
     out, unit = algs.convert_to(out, unit, 'kg/m**3')
-    dataunits.update({solute:unit})
-    return out, dataunits
+    units.update({solute:unit})
+    return out, units
+
+def airDensity_from_theta_v(data, units, notation=None, inplace=True):
+    '''
+    Calculates moist air density using p = rho R_dry T_virtual
+    '''
+    from . import algs
+    from . import constants
+
+    defs = algs.get_notation(notation)
+    data = data.copy()
+    if not inplace:
+        units = units.copy()
+    R_dry = constants.R_spec['dry']
+
+    data.loc[ defs.moist_air_density ] = data[ defs.pressure ]/(R_dry * data[ defs.virtual_temp ])
+    units.update({ defs.moist_aur_density : units[ defs.pressure ]/(constants.units['R_spec']*units[ defs.virtual_temp ]) })
+
+    if inplace:
+        return data
+    else:
+        return data, units
+
+def dryAirDensity(data, units, notation=None, inplace=True):
+    '''
+    Calculates dry air density
+    '''
+    from . import algs
+    from . import constants
+
+    defs = algs.get_notation(notation)
+    data = data.copy()
+    if not inplace:
+        units = units.copy()
+
+    Rdry = constants.R_spec['dry']
+    Rh2o = constsnts.R_spec['h2o']
+    Runit = constsnts.units['R_spec']
+
+    p_h2o = data[ defs.h2o_density ]*Rh2o*data[ defs.thermodyn_temp ]
+    p_h2o_unit = units[ defs.h2o_density ]*Runit*units[ defs.thermodyn_temp ]
+    p_h2o, p_h2o_unit = algs.convert_to(p_h2o, p_h2o_unit, 'kPa')
+
+    p_air, p_air_unit = algs.convert_to(data[ defs.pressure ], units[ defs.pressure ], 'kPa')
+
+    print(p_air_unit)
+    print(p_h2o_unit)
+    p_dry = p_air - p_h2o
+
+    data.loc[:, defs.dry_air_density ] = p_dry/(Rdry * data[ defs.thermodyn_temp ])
+    units.update({ defs.dry_air_density : p_air_unit/(Runit * units[ defs.thermodyn_temp ])})
+
+    if inplace:
+        return data
+    else:
+        return data, units
 
 
 def airDensity_from_theta(rho_h2o, pressure, temp, dataunits, full=False):
