@@ -210,9 +210,11 @@ class notation(object):
     fluctuation="%s'"
     star='%s_star'
     concentration='conc_%s'
+    molar_concentration='mconc_%s'
     density='rho_%s'
     molar_density='mrho_%s'
     mixing_ratio='r_%s'
+    molar_mixing_ratio='mr_%s'
 
     u='u'
     v='v'
@@ -250,12 +252,12 @@ class notation(object):
         This useful method builds the full notation based on the base notation
         """
         for subst in ['h2o', 'co2', 'ch4', 'o3', 'moist_air', 'dry_air']:
-            exec('self.{0}_mean_density = self.mean % self.density % self.{0}'.format(subst))
-            exec('self.{0}_density = self.density % self.{0}'.format(subst))
-            exec('self.{0}_mean_molar_density = self.mean % self.molar_density % self.{0}'.format(subst))
-            exec('self.{0}_molar_density = self.molar_density % self.{0}'.format(subst))
-            exec('self.{0}_mean_mixing_ratio = self.mean % self.mixing_ratio % self.{0}'.format(subst))
-            exec('self.{0}_mixing_ratio = self.mixing_ratio % self.{0}'.format(subst))
+            for mode, comp in zip(['', '_mean' ], ['', 'self.mean %']):
+                exec('self.{0}{1}_density = {2} self.density % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_molar_density = {2} self.molar_density % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_mixing_ratio = {2} self.mixing_ratio % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_concentration = {2} self.concentration % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_molar_concentration = {2} self.molar_concentration % self.{0}'.format(subst, mode, comp))
 
         for subst in ['co2', 'ch4', 'o3']:
             exec('self.{0}_flux = self.flux_of % self.{0}'.format(subst))
