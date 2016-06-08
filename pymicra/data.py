@@ -145,7 +145,7 @@ def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=
         #-------
 
 
-def detrend(data, how='linear', rule=None, suffix="'", **kwargs):
+def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None, inplace=True, **kwargs):
     """
     Returns the detrended fluctuations of a given dataset
 
@@ -203,12 +203,41 @@ def detrend(data, how='linear', rule=None, suffix="'", **kwargs):
         #-----------
         # If not, use our trending function
         else:
-            df = df-trend(df, how=how, rule=rule, **kwargs)
+            df = df - trend(df, how=how, rule=rule, **kwargs)
         #-----------
     #-----------
 
-    return df.add_suffix(suffix)
+    #-----------
+    # We rename the columns names to indicate that they are fluctutions
+    if suffix:
+        #-----------
+        # If units are provided, we include the units for the fluctuations
+        if units:
+            newunits = { el + suffix : units[el] for el in df.columns }
+        #-----------
+        df = df.add_suffix(suffix)
+    else:
+        #-----------
+        # If units are provided, we include the units for the fluctuations
+        if units:
+            newunits = { defs.fluctuations % el : units[el] for el in df.columns }
+        #-----------
+        defs = get_notation(notation)
+        df.columns = [ defs.fluctuations % el for el in df.columns ]
+    #-----------
 
+    #-----------
+    # If units are not be changed in place, we copy them
+    if units:
+        if not inplace:
+            units = units.copy()
+        units.update(newunits)
+    #-----------
+
+    if inplace:
+        return df
+    else:
+        return df, units
 
 
 def spectrum(data, frequency=10, anti_aliasing=False, outname=None):

@@ -222,7 +222,7 @@ def eddyCov(data, wpl=True,
     import pandas as pd
 
     if from_fluctuations:
-        return eddyCov2(data, wpl=wpl, notation_defs=notation_defs, solutes=solutes)
+        return eddyCov3(data, wpl=wpl, notation_defs=notation_defs, solutes=solutes)
 
     cp=constants.cp_dry
     lamb = constants.latent_heat_water
@@ -395,6 +395,146 @@ def eddyCov2(data, wpl=True,
     #------------------------
     return out
 
+
+
+def eddyCov3(data, units, wpl=True,
+        notation=None, inplace=True, solutes=[]):
+    """
+    Get fluxes from the turbulent fluctuations
+    
+    WARNING! If using wpl=True, be sure that all masses are consistent!
+        For example, if q = [g/g], rho_h2o = [g/m3] and rho_co2 = [g/m3] and so on.
+        Avoid mixing kg/m3 with g/m3 (e.g. for co2 and h2o) and mg/kg with g/g (e.g. for
+        co2 and h2o).
+
+    Parameters:
+    -----------
+    data: pandas.DataFrame
+        dataframe with the characteristic lengths calculated
+    notation_defs: pymicra.notation
+        object that holds the notation used in the dataframe
+    wpl: boolean
+        whether or not to apply WPL correction on the latent heat flux and solutes flux
+    solutes: list
+        list that holds every solute considered for flux
+    """
+    from .. import constants
+    from .. import algs
+    import pandas as pd
+
+    cp = constants.cp_dry
+    lamb = constants.latent_heat_water
+
+    defs = algs.get_notation(notation)
+    data = data.copy()
+    units = units.copy()
+    cunits = constants.units
+
+    #---------
+    # Define name of variables to look for based on the notation
+    u               =   defs.u_fluctuations
+    w               =   defs.w_fluctuations
+    mrho_h2o_fluc   =   defs.h2o_molar_density_fluctuations
+    theta_fluc      =   defs.thermodyn_temp_fluctuations
+    theta_v_fluc    =   defs.virtual_temp_fluctuations
+    q_fluc          =   defs.specific_humidity_fluctuations
+    solutesf        = [ defs.molar_density % defs.fluctuations % solute for solute in solutes ]
+    #---------
+
+    #---------
+    # Now we try to calculate or identify the fluctuations of theta
+    theta_mean = data[ defs.thermodyn_temp ].mean()
+    if theta_fluc not in data.columns:
+        print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
+        #---------
+        # We need the mean of the specific humidity and temperature
+        data_q_mean =   data[ defs.specific_humidity ].mean()
+        data[ defs.thermodyn_temp_fluctuations ] = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1.+0.61*data_q_mean)
+        print('done!')
+        #---------
+    #---------
+
+    #---------
+    # First we construct the covariance matrix (slower but more readable than doing it separately
+    cov = data[[u, w, theta_v_fluc, mrho_h2o_fluc, theta_fluc] + solutesf ].cov()
+    #---------
+
+    #---------
+    # Define auxiliar variables
+    mu = constants.R_spec['h2o']/constants.R_spec['dry']
+    rho_air_mean    =   data[ defs.moist_air_density ].mean()
+    rho_dry_mean    =   data[ defs.dry_air_density ].mean()
+    #---------
+
+    #---------
+    # Calculate the fluxes
+    out = pd.DataFrame(index=[data.index[0]])
+    out[ defs.momentum_flux ]               = -rho_air_mean * cov[u][w]
+    out[ defs.sensible_heat_flux ]          = rho_air_mean * cp * cov[theta_fluc][w]
+    out[ defs.virtual_sensible_heat_flux ]  = rho_air_mean * cp * cov[theta_v_fluc][w]
+    out[ defs.water_vapor_flux ]            = cov[mrho_h2o_fluc][w]
+    out[ defs.latent_heat_flux ]            = lamb( theta_mean ) * cov[mrho_h2o_fluc][w]
+    #---------
+
+    #-----------------
+    # And then the flux units
+    fluxunits = {}
+    fluxunits[ defs.sensible_heat_flux ] = units[ defs.moist_air_density ] * cunits['cp_water'] * units['theta']*units[ w ]
+    fluxunits[ defs.virtual_sensible_heat_flux ] = units[ defs.moist_air_density ] * cunits['cp_water'] * units[ defs.virtual_temp ]*units[ w ]
+    fluxunits[ defs.water_vapor_flux ] = units[ defs.molar_density % defs.h2o ]*units[ w ]
+    fluxunits[ defs.latent_heat_flux ] = cunits[ 'latent_heat_water' ]*units[ defs.molar_density % defs.h2o ]*units[ w ]
+    #-----------------
+
+    #---------
+    # Calculate flux for each solute
+    for solute, solutef in zip(solutes, solutesf):
+        out[ defs.flux_of % solute ] =  cov[solutef][w]
+        fluxunits[ defs.flux_of % solute ] = units[ defs.molar_density % solute ]*units['w']
+    #---------
+
+    #------------------------
+    # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
+    if wpl:
+        #---------
+        # If water vapor mixing ratio is present, use it. Otherwise we try to calculate it
+        if defs.h2o_mixing_ratio in data.columns:
+            r_h2o = data[ defs.h2o_mixing_ratio ].mean()
+        else:
+            rho_h2o_mean = data[ defs.h2o_density ].mean()
+            r_h2o = rho_h2o_mean/rho_dry_mean
+        #---------
+        
+        out[ defs.water_vapor_flux ] = (1. +mu*r_h2o)*( out[ defs.water_vapor_flux ] + rho_h2o_mean * (cov[theta_fluc][w]/data_theta_mean) )
+        for solute in solutes:
+            rho_sol_mean    =   data[ defs.molar_density % defs.co2 ].mean()
+            rc=rho_sol_mean/rho_dry_mean
+            out[ defs.flux_of % solute ] = \
+                out[ defs.flux_of % solute ] + \
+                rho_co2_mean*(1. + mu*r_h2o)*(cov[theta_fluc][w])/data_theta_mean + \
+                mu*rc*out[ defs.water_vapor_flux ]
+    #------------------------
+
+    #-----------------
+    # Here we calculate the flux units
+    fluxunits = {}
+    fluxunits['co2'] = units[ defs.molar_density % defs.co2 ]*units['w']
+    fluxunits['E'] = units[ defs.molar_density % defs.h2o ]*units['w']
+    fluxunits['LE'] = units[ 'latent_heat_water' ]*units[ defs.molar_density % defs.h2o ]*units['w']
+    fluxunits['Hv'] = units[ defs.moist_air_density ] * units['cp_water'] * units['theta_v']*units['w']
+
+    fluxunits['LE'] = fluxunits['LE'] * pm.constants.units['molar_mass']
+    coef = (fluxunits['LE'].to(pm.ureg('watts/meter**2'))).magnitude
+    fluxunits['LE'] = pm.ureg('watts/meter**2')
+    out.loc[:, 'LE'] = coef * out['LE'] * pm.constants.molar_mass['h2o']
+
+    coef = (fluxunits['Hv'].to(pm.ureg('watts/meter**2'))).magnitude
+    fluxunits['Hv'] = pm.ureg('watts/meter**2')
+    out.loc[:, 'Hv'] = coef * out['Hv']
+
+    #-----------------
+
+    units.update(fluxunits)
+    return out, units
 
 
 

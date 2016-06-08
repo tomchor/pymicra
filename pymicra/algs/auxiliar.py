@@ -838,6 +838,9 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
 
 
 def get_notation(notation_def):
+    '''
+    Auxiliar function ro retrieve notation
+    '''
     if notation_def != None:
         return notation_def
     else:

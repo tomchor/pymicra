@@ -201,13 +201,13 @@ class notation(object):
 
     notation = notation()
 
-    fluctuation_of_co2_conc = notation.concentration % notation.fluctuation % notation.co2
+    fluctuations_of_co2_conc = notation.concentration % notation.fluctuations % notation.co2
 
     You should be careful with the order. The last argument should not have any '%' symbols
     or you'll get a "TypeError: not all arguments converted during string formatting" message.
     """
     mean='%s_mean'
-    fluctuation="%s'"
+    fluctuations="%s'"
     star='%s_star'
     concentration='conc_%s'
     molar_concentration='mconc_%s'
@@ -259,11 +259,19 @@ class notation(object):
                 exec('self.{0}{1}_concentration = {2} self.concentration % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_molar_concentration = {2} self.molar_concentration % self.{0}'.format(subst, mode, comp))
 
+            exec('self.{0}_density_fluctuations =  self.fluctuations % self.{0}_density'.format(subst))
+            exec('self.{0}_molar_density_fluctuations = self.fluctuations % self.{0}_molar_density'.format(subst))
+            exec('self.{0}_mixing_ratio_fluctuations = self.fluctuations % self.{0}_mixing_ratio'.format(subst))
+            exec('self.{0}_concentration_fluctuations = self.fluctuations % self.{0}_concentration'.format(subst))
+            exec('self.{0}_molar_concentration_fluctuations = self.fluctuations % self.{0}_molar_concentration'.format(subst))
+
+
+
         for subst in ['co2', 'ch4', 'o3']:
             exec('self.{0}_flux = self.flux_of % self.{0}'.format(subst))
 
         for subst in ['u', 'v', 'w', 'thermodyn_temp', 'virtual_temp', 'specific_humidity', 'relative_humidity', 'pressure']:
-            exec('self.{0}_fluctuation = self.fluctuation % self.{0}'.format(subst))
+            exec('self.{0}_fluctuations = self.fluctuations % self.{0}'.format(subst))
             exec('self.{0}_mean = self.mean % self.{0}'.format(subst))
             exec('self.{0}_star = self.star % self.{0}'.format(subst))
 
