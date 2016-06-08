@@ -6,4 +6,3 @@ from functions import *
 from util import *
 import spectral
 from scales import *
-from util import *
