@@ -31,5 +31,6 @@ setup(name='pymicra',
       author_email='tomaschor@gmail.com',
       license='GNU GPL V3.0',
       packages=packages,
+      package_data={'pymicra':['pymicra.pint']},
       **extra_kwargs)
 
