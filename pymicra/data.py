@@ -174,7 +174,7 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
         out: pandas.DataFrame or pandas.Series
     """
     from scipy import signal
-    import algs
+    from . import algs
     import pandas as pd
 
     how=algs.stripDown(how.lower(), args='-_')
@@ -222,7 +222,7 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
         if units:
             newunits = { defs.fluctuations % el : units[el] for el in df.columns }
         #-----------
-        defs = get_notation(notation)
+        defs = algs.get_notation(notation)
         df.columns = [ defs.fluctuations % el for el in df.columns ]
     #-----------
 

@@ -400,9 +400,9 @@ def check_numlines(fname, numlines=18000, falseverbose=False):
 
     lines = algs.file_len(fname)
     if lines==numlines:
-        return pd.Series([True])
+        return pd.Series([True], index=['file'])
     else:
         if falseverbose: print('numlines:',lines)
-        return pd.Series([False])
+        return pd.Series([False], index=['file'])
 
 
