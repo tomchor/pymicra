@@ -208,8 +208,8 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
     #-----------
 
     #-----------
-    # We rename the columns names to indicate that they are fluctutions
-    if suffix:
+    # We rename the columns names to indicate that they are fluctuations
+    if suffix != None:
         #-----------
         # If units are provided, we include the units for the fluctuations
         if units:
