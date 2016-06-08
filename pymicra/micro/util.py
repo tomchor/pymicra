@@ -72,26 +72,23 @@ def preProcess(data, units, notation_defs=None,
         data.loc[ defs.virtual_temp ] = data[ defs.virtual_temp ].apply(physics.CtoK)
         units.update({ defs.virtual_temp : ureg['kelvin'] })
     #---------
-    print(units)
 
     #---------
     # Check for h2o mass density
     if defs.h2o_density not in data.columns:
-        print("Didn't locate mass density of h2o. Will try to calculate it")
-        data.loc[ defs.h2o_density ] = data.loc[ defs.h2o_molar_density ]*Mh2o
+        print("Didn't locate mass density of h2o. Trying to calculate it")
+        data.loc[:, defs.h2o_density ] = data.loc[:, defs.h2o_molar_density ]*Mh2o
         units.update({ defs.h2o_density : units[ defs.h2o_molar_density ]*molar_mass_unit })
+    data.loc[:, defs.h2o_density] = algs.convert_to(data[ defs.h2o_density ], units, 'kg/m**3', inplace=True, key=defs.h2o_density)
     #---------
-    print(units)
 
     #---------
     # Check for h2o molar density
     if defs.h2o_molar_density not in data.columns:
-        print("Didn't locate molar density of h2o. Will try to calculate it")
-        data.loc[ defs.h2o_molar_density ] = data.loc[ defs.h2o_density ]/Mh2o
+        print("Didn't locate molar density of h2o. Trying to calculate it")
+        data.loc[:, defs.h2o_molar_density ] = data.loc[:, defs.h2o_density ]/Mh2o
         units.update({ defs.h2o_molar_density : units[ defs.h2o_density ]/molar_mass_unit })
     #---------
-    print(units)
-    exit()
 
     #---------
     # Calculation of rho_air is done here
@@ -106,6 +103,8 @@ def preProcess(data, units, notation_defs=None,
             pass
             #algs.airDensity_from_theta()
     #---------
+    print(data.mean())
+    print(units)
     
     # Calculation of specific humidity and h2o mixing ratio
 

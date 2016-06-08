@@ -65,8 +65,8 @@ def airDensity_from_theta_v(data, units, notation=None, inplace=True):
         units = units.copy()
     R_dry = constants.R_spec['dry']
 
-    data.loc[ defs.moist_air_density ] = data[ defs.pressure ]/(R_dry * data[ defs.virtual_temp ])
-    units.update({ defs.moist_aur_density : units[ defs.pressure ]/(constants.units['R_spec']*units[ defs.virtual_temp ]) })
+    data.loc[:, defs.moist_air_density ] = data[ defs.pressure ]/(R_dry * data[ defs.virtual_temp ])
+    units.update({ defs.moist_air_density : units[ defs.pressure ]/(constants.units['R_spec']*units[ defs.virtual_temp ]) })
 
     if inplace:
         return data
@@ -86,8 +86,8 @@ def dryAirDensity(data, units, notation=None, inplace=True):
         units = units.copy()
 
     Rdry = constants.R_spec['dry']
-    Rh2o = constsnts.R_spec['h2o']
-    Runit = constsnts.units['R_spec']
+    Rh2o = constants.R_spec['h2o']
+    Runit = constants.units['R_spec']
 
     p_h2o = data[ defs.h2o_density ]*Rh2o*data[ defs.thermodyn_temp ]
     p_h2o_unit = units[ defs.h2o_density ]*Runit*units[ defs.thermodyn_temp ]
