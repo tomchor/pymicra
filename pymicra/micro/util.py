@@ -495,12 +495,12 @@ def eddyCov3(data, units, wpl=True,
     #------------------------
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
+        rho_h2o_mean = data[ defs.h2o_density ].mean()
         #---------
         # If water vapor mixing ratio is present, use it. Otherwise we try to calculate it
         if defs.h2o_mixing_ratio in data.columns:
             r_h2o = data[ defs.h2o_mixing_ratio ].mean()
         else:
-            rho_h2o_mean = data[ defs.h2o_density ].mean()
             r_h2o = rho_h2o_mean/rho_dry_mean
         #---------
         
@@ -516,20 +516,13 @@ def eddyCov3(data, units, wpl=True,
 
     #-----------------
     # Here we calculate the flux units
-    fluxunits = {}
-    fluxunits['co2'] = units[ defs.molar_density % defs.co2 ]*units['w']
-    fluxunits['E'] = units[ defs.molar_density % defs.h2o ]*units['w']
-    fluxunits['LE'] = units[ 'latent_heat_water' ]*units[ defs.molar_density % defs.h2o ]*units['w']
-    fluxunits['Hv'] = units[ defs.moist_air_density ] * units['cp_water'] * units['theta_v']*units['w']
 
-    fluxunits['LE'] = fluxunits['LE'] * pm.constants.units['molar_mass']
-    coef = (fluxunits['LE'].to(pm.ureg('watts/meter**2'))).magnitude
-    fluxunits['LE'] = pm.ureg('watts/meter**2')
-    out.loc[:, 'LE'] = coef * out['LE'] * pm.constants.molar_mass['h2o']
-
-    coef = (fluxunits['Hv'].to(pm.ureg('watts/meter**2'))).magnitude
-    fluxunits['Hv'] = pm.ureg('watts/meter**2')
-    out.loc[:, 'Hv'] = coef * out['Hv']
+    #fluxunits['LE'] = fluxunits['LE'] * pm.constants.units['molar_mass']
+    #coef = (fluxunits['LE'].to(pm.ureg('watts/meter**2'))).magnitude
+    #fluxunits['LE'] = pm.ureg('watts/meter**2')
+    out.loc[:, 'LE'] = algs.convert_to(out['LE'], fluxunits, 'watts/meter**2', inplace=True, key='LE')
+    out.loc[:, 'Hv'] = algs.convert_to(out['Hv'], fluxunits, 'watts/meter**2', inplace=True, key='Hv')
+    out.loc[:, 'H'] = algs.convert_to(out['H'], fluxunits, 'watts/meter**2', inplace=True, key='H')
 
     #-----------------
 
