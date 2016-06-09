@@ -57,6 +57,7 @@ def preProcess(data, units, notation_defs=None,
         defs=notation_defs
     #---------
 
+    print('Beginning of pre-processing ...')
     #---------
     # First convert the temperature if it is still in Celsius
     if units[ defs.thermodyn_temp ] == ureg[ 'degC' ]:
@@ -187,7 +188,7 @@ def preProcess(data, units, notation_defs=None,
         #---------
     #---------
         
-    
+    print('Pre-processing complete.\n')
     if inplace:
         return data
     else:
@@ -421,20 +422,24 @@ def eddyCov3(data, units, wpl=True,
     from .. import constants
     from .. import algs
     import pandas as pd
+    from .. import ureg
 
     cp = constants.cp_dry
     lamb = constants.latent_heat_water
 
     defs = algs.get_notation(notation)
     data = data.copy()
-    units = units.copy()
+    if not inplace:
+        units = units.copy()
     cunits = constants.units
 
+    print('Beginning Eddy Covariance method...')
     #---------
     # Define name of variables to look for based on the notation
-    u               =   defs.u_fluctuations
-    w               =   defs.w_fluctuations
+    u_fluc          =   defs.u_fluctuations
+    w_fluc          =   defs.w_fluctuations
     mrho_h2o_fluc   =   defs.h2o_molar_density_fluctuations
+    rho_h2o_fluc    =   defs.h2o_density_fluctuations
     theta_fluc      =   defs.thermodyn_temp_fluctuations
     theta_v_fluc    =   defs.virtual_temp_fluctuations
     q_fluc          =   defs.specific_humidity_fluctuations
@@ -448,81 +453,106 @@ def eddyCov3(data, units, wpl=True,
         print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
         #---------
         # We need the mean of the specific humidity and temperature
+        if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
+            raise TypeError('Units for both the virtual temp fluctuations and the thermodynamic temperature must be the same')
         data_q_mean =   data[ defs.specific_humidity ].mean()
-        data[ defs.thermodyn_temp_fluctuations ] = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1.+0.61*data_q_mean)
+        data[ theta_fluc ] = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1.+0.61*data_q_mean)
+        theta_fluc_unit = units[ theta_v_fluc ]
         print('done!')
         #---------
     #---------
 
     #---------
-    # First we construct the covariance matrix (slower but more readable than doing it separately
-    cov = data[[u, w, theta_v_fluc, mrho_h2o_fluc, theta_fluc] + solutesf ].cov()
+    # First we construct the covariance matrix (slower but more readable than doing it separately)
+    # maybe figure out later a way that is both faster and more readable
+    cov = data[[u_fluc, w_fluc, theta_v_fluc, mrho_h2o_fluc, rho_h2o_fluc, theta_fluc] + solutesf ].cov()
     #---------
 
     #---------
     # Define auxiliar variables
-    mu = constants.R_spec['h2o']/constants.R_spec['dry']
     rho_air_mean    =   data[ defs.moist_air_density ].mean()
     rho_dry_mean    =   data[ defs.dry_air_density ].mean()
     #---------
 
     #---------
     # Calculate the fluxes
+    print('Calculating fluxes ... ', end='')
     out = pd.DataFrame(index=[ data.index[0] ])
-    out[ defs.momentum_flux ]               = -rho_air_mean * cov[u][w]
-    out[ defs.sensible_heat_flux ]          = rho_air_mean * cp * cov[theta_fluc][w]
-    out[ defs.virtual_sensible_heat_flux ]  = rho_air_mean * cp * cov[theta_v_fluc][w]
-    out[ defs.water_vapor_flux ]            = cov[mrho_h2o_fluc][w]
-    out[ defs.latent_heat_flux ]            = lamb( theta_mean ) * cov[mrho_h2o_fluc][w]
+    out[ defs.momentum_flux ]               = -rho_air_mean * cov[ u_fluc ][ w_fluc ]
+    out[ defs.sensible_heat_flux ]          = rho_air_mean * cp * cov[theta_fluc][w_fluc]
+    out[ defs.virtual_sensible_heat_flux ]  = rho_air_mean * cp * cov[theta_v_fluc][w_fluc]
+    out[ defs.water_vapor_flux ]            = cov[mrho_h2o_fluc][w_fluc]
+    out[ defs.latent_heat_flux ]            = lamb( theta_mean ) * cov[rho_h2o_fluc][w_fluc]
+    print('done!')
     #---------
 
     #-----------------
     # And then the flux units
     fluxunits = {}
-    fluxunits[ defs.sensible_heat_flux ] = units[ defs.moist_air_density ] * cunits['cp_water'] * units['theta']*units[ w ]
-    fluxunits[ defs.virtual_sensible_heat_flux ] = units[ defs.moist_air_density ] * cunits['cp_water'] * units[ defs.virtual_temp ]*units[ w ]
-    fluxunits[ defs.water_vapor_flux ] = units[ defs.molar_density % defs.h2o ]*units[ w ]
-    fluxunits[ defs.latent_heat_flux ] = cunits[ 'latent_heat_water' ]*units[ defs.molar_density % defs.h2o ]*units[ w ]
+    fluxunits[ defs.momentum_flux ]         = units[ defs.moist_air_density ] * units[ u_fluc ]*units[ w_fluc ]
+    fluxunits[ defs.sensible_heat_flux ]    = units[ defs.moist_air_density ] * cunits['cp_water'] * theta_fluc_unit * units[ w_fluc ]
+    fluxunits[ defs.virtual_sensible_heat_flux ] = units[ defs.moist_air_density ] * cunits['cp_water'] * units[ theta_v_fluc ]*units[ w_fluc ]
+    fluxunits[ defs.water_vapor_flux ]      = units[ defs.h2o_molar_density ]*units[ w_fluc ]
+    fluxunits[ defs.latent_heat_flux ]      = cunits[ 'latent_heat_water' ]*units[ rho_h2o_fluc ]*units[ w_fluc ]
     #-----------------
 
     #---------
     # Calculate flux for each solute
     for solute, solutef in zip(solutes, solutesf):
-        out[ defs.flux_of % solute ] =  cov[solutef][w]
-        fluxunits[ defs.flux_of % solute ] = units[ defs.molar_density % solute ]*units['w']
+        out[ defs.flux_of % solute ] =  cov[ solutef ][ w_fluc ]
+        fluxunits[ defs.flux_of % solute ] = units[ solutef ]*units[ w_fluc ]
     #---------
 
     #------------------------
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
+        print('Applying WPL correction for water vapor ... ', end='')
+        mu = constants.R_spec['h2o']/constants.R_spec['dry']
         rho_h2o_mean = data[ defs.h2o_density ].mean()
         #---------
         # If water vapor mixing ratio is present, use it. Otherwise we try to calculate it
         if defs.h2o_mixing_ratio in data.columns:
             r_h2o = data[ defs.h2o_mixing_ratio ].mean()
-        else:
+        elif units[ defs.h2o_density ] == units[ defs.dry_air_density ]:
             r_h2o = rho_h2o_mean/rho_dry_mean
+        else:
+            raise TypeError('Either water mixing ratio should be provided, or dry air and water density should be the same')
         #---------
         
-        out[ defs.water_vapor_flux ] = (1. +mu*r_h2o)*( out[ defs.water_vapor_flux ] + rho_h2o_mean * (cov[theta_fluc][w]/data_theta_mean) )
+        out.loc[:, defs.water_vapor_flux ] = (1. +mu*r_h2o)*( out[ defs.water_vapor_flux ] + rho_h2o_mean * (cov[theta_fluc][w_fluc]/theta_mean) )
+        print('done!')
+
         for solute in solutes:
-            rho_sol_mean    =   data[ defs.molar_density % defs.co2 ].mean()
-            rc=rho_sol_mean/rho_dry_mean
-            out[ defs.flux_of % solute ] = \
+            print('Applying WPL correction for {} ... '.format(solute), end='')
+            #---------
+            # Check if mixing ratio units are correct
+            if units[ defs.density % solute ] == units[ defs.dry_air_density ]:
+                rho_sol_mean    =   data[ defs.molar_density % solute ].mean()
+                rc = rho_sol_mean/rho_dry_mean
+            else:
+                raise TypeError('Either water mixing ratio should be provided, or dry air and water density should be the same')
+            #---------
+
+            out.loc[:, defs.flux_of % solute ] = \
                 out[ defs.flux_of % solute ] + \
-                rho_co2_mean*(1. + mu*r_h2o)*(cov[theta_fluc][w])/data_theta_mean + \
+                rho_sol_mean*(1. + mu*r_h2o)*(cov[theta_fluc][w_fluc])/theta_mean + \
                 mu*rc*out[ defs.water_vapor_flux ]
+            print('done!')
     #------------------------
 
     #-----------------
-    # Here we calculate the flux units
-    out.loc[:, 'LE'] = algs.convert_to(out['LE'], fluxunits, 'watts/meter**2', inplace=True, key='LE')
-    out.loc[:, 'Hv'] = algs.convert_to(out['Hv'], fluxunits, 'watts/meter**2', inplace=True, key='Hv')
-    out.loc[:, 'H'] = algs.convert_to(out['H'], fluxunits, 'watts/meter**2', inplace=True, key='H')
+    # Here we convert the units to watts/m2
+    out.loc[:, defs.latent_heat_flux ] = algs.convert_to(out[ defs.latent_heat_flux ], fluxunits, 'watts/meter**2', inplace=True, key='LE')
+    out.loc[:, defs.virtual_sensible_heat_flux ] = algs.convert_to(out['Hv'], fluxunits, 'watts/meter**2', inplace=True, key='Hv')
+    out.loc[:, defs.sensible_heat_flux ] = algs.convert_to(out['H'], fluxunits, 'watts/meter**2', inplace=True, key='H')
     #-----------------
 
-    units.update(fluxunits)
-    return out, units
+    print('Done with Eddy Covariance.\n')
+    if inplace:
+        units.update(fluxunits)
+        return out
+    else:
+        return out, fluxunits
 
 
 
