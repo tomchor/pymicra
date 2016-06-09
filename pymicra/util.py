@@ -1,3 +1,4 @@
+from __future__ import print_function
 #!/usr/bin/python
 """
 Author: Tomas Chor
@@ -6,90 +7,35 @@ Date: 2015-08-07
 
 TODO LIST
 -INCLUDE DECODIFICAION OF DATA?
-
+-INCLUDE UPPER LIMIT TO STD TEST?
+-INCLUDE DROPOUT TEST
+-INCLUDE THIRD MOMENT TEST
+-CHANGE NOTATION IN QCONTROL'S SUMMARY
 """
-
-
-def check_spikes(dfs, visualize=False, vis_col=1, interp_limit=3,
-                 cut_func=lambda x: (abs(x - x.mean()) > 4.*abs(x.std())) ):
-    '''
-    Applies spikes-check according to Vickers and Mart (1997)
-
-    Parameters:
-    -----------
-    dfs: list, tuple
-        sequence of pandas.DataFrame objects
-    visualize: bool
-        whether of not to visualize the interpolation ocurring
-    vis_col: str, int or list
-        the column(s) to visualize when seeing the interpolation (only effective if visualize==True)
-    interp_limit: int
-        limit of consecutive spikes to interpolate
-    cut_func: function
-        function used to define spikes
-    '''
-    import pandas as pd
-    import algs
-    import matplotlib.pyplot as plt
-
-    original = pd.concat(dfs)
-    valid_cols=pd.Series(0, index=dfs[0].columns)
-
-    for i in range(len(dfs)):
-        #-------------------------------
-        # We make a copy of the original df just in case
-        chunk=dfs[i].copy()
-        #-------------------------------
-
-        #-------------------------------
-        # This substitutes the spikes to NaNs so it can be interpolated later
-        if len(chunk)>interp_limit:
-            chunk=algs.limitedSubs(chunk, max_interp=interp_limit, func=cut_func)
-        valid_cols = valid_cols + chunk.count()
-        #-------------------------------
-
-        #-------------------------------
-        #Interpolation takes place here
-        chunk=chunk.interpolate(method='time', axis=0)
-        #-------------------------------
-
-        #-------------------------------
-        # We change the chunk in the original list of dfs to concatenate later
-        dfs[i]=chunk.copy()
-        #-------------------------------
-
-    fou=pd.concat(dfs)
-    fou=fou.interpolate(method='time', axis=0)
-    fou_points=len(fou.index)
-    valid_cols=valid_cols/fou_points
-
-    #-------------------------------
-    # Visualize what you're doing to see if it's correct
-    if visualize:
-        print 'Plotting de-spikes...'
-        original[vis_col].plot(style='g-', label='original')
-        #aux[ cut_func(aux) ].plot(style='ro-', label='spikes')
-        fou[vis_col].plot(style='b-', label='final')
-        plt.title('Column: {}'.format(vis_col))
-        plt.legend()
-        plt.show()
-        plt.close()
-    #-------------------------------
-
-    return fou, valid_cols
-
+import tests
 
 def qcontrol(files, datalogger_config,
-             detrend=False, accepted_percent=1.,
-             file_lines=None, bdate=None, edate=None,
-             std_limits={}, dif_limits={}, low_limits={}, upp_limits={},
-             spikes_check=True, visualize_spikes = False, spikes_vis_col = 'u',
-             spikes_func = lambda x: (abs(x - x.mean()) > 3.*abs(x.std())), 
-             interp_limit=3, window_size=900, chunk_size='2Min',
-             rev_arrang_test = False, RATvars = None,
-             RAT_points = 50, RAT_significance = 0.01,
-             trueverbose=False, falseverbose=True, falseshow=False, 
-             trueshow=False, trueshow_vars=None,
+             read_files_kw={'parse_dates':False},
+             accepted_percent=1.,
+             max_replacement_count=180,
+             file_lines=None, begin_date=None, end_date=None,
+             nans_test=True,
+             maxdif_detrend=True, maxdif_detrend_kw={'how':'movingmean', 'window':900},
+             maxdif_trend=True, maxdif_trend_kw={'how':'movingmedian', 'window':600},
+             std_detrend=True, std_detrend_kw={'how':'movingmean', 'window':900},
+             RAT_detrend=True, RAT_detrend_kw={'how':'linear'},
+             spikes_detrend=True, spikes_detrend_kw = {'how':'linear'},
+             lower_limits={}, upper_limits={},
+             spikes_test=True, visualize_spikes=False, spikes_vis_col='u',
+             spikes_func = lambda x: (abs(x - x.mean()) > 4.*x.std()), 
+             replace_with='interpolation',
+             max_consec_spikes=3, chunk_size=1200,
+             std_limits={}, dif_limits={},
+             RAT = False, RAT_vars = None,
+             RAT_points = 50, RAT_significance = 0.05,
+             trueverbose=False, falseverbose=True,
+             falseshow=False, trueshow=False,
+             trueshow_vars=None,
              outdir='quality_controlled',
              summary_file='qcontrol_summary.csv'):
 
@@ -103,33 +49,35 @@ def qcontrol(files, datalogger_config,
     Trivial tests:
     --------------
     date check:
-        files outside a date_range are left out (edate and bdate keywords)
+        files outside a date_range are left out (end_date and begin_date keywords)
     lines test:
         files with a number of lines that is different from the correct number are out.
 
-    Non-trivial tests:
+    Non-trivial tests (in this order):
     ------------------
-    lowest value test:
-        runs with values in any column lower then a pre-determined value are left out.
-        Activate it by passing a low_limits keyword.
-    highest value test:
-        runs with values in any column higher then a pre-determined value are left out.
-        Activate it by passing a upp_limits keyword.
+    NaNs test:
+        checks for any NaN values. NaNs are replaced with interpolation or linear trend. If the percentage
+        of NaNs is greater than accepted_percent, run is discarded. Activate it by passing nans_test=True.
+    boundaries test:
+        runs with values in any column lower than a pre-determined lower limit or higher
+        than a upper limits are left out. Activate it by passing a lower_limits or upper_limits keyword.
     spikes test:
         runs with more than a certain percetage of spikes are left out. 
-        Activate it by passing a spikes_check keyword. Adjust the test with the spikes_func
-        visualize_spikes, spikes_vis_col, interp_limit, accepted_percent and chunk_size keywords.
+        Activate it by passing a spikes_test keyword. Adjust the test with the spikes_func
+        visualize_spikes, spikes_vis_col, max_consec_spikes, accepted_percent and chunk_size keywords.
+    replacement count:
+        checks the total amount of points that were replaced (including NaN, boundaries and spikes test)
+        against the max_replacement_count keyword. Fails if any columns has more replacements than that.
     standard deviation check:
         runs with a standard deviation lower than a pre-determined value (generally close to the
         sensor precision) are left out.
         Activate it by passing a std_limits keyword.
-    reverse arrangement test:
+    reverse arrangement test (RAT):
         runs that fail the reverse arrangement test for any variable are left out.
-        Activate it by passing a rev_arrang_test keyword.
-    maximum difference test:
-        runs whose trend have a maximum different greater than a certain value are left out.
-        This excludes non-stationary runs.
-        Activate it by passing a dif_limits keyword.
+        Activate it by passing a RAT keyword.
+    stationarity test:
+        runs whose trend have a maximum difference greater than a certain value are left out.
+        This excludes non-stationary runs. Activate it by passing a dif_limits keyword.
 
     Parameters:
     -----------
@@ -137,26 +85,49 @@ def qcontrol(files, datalogger_config,
         list of filepaths
     datalogger_config: pymicra.datalogerConf object or str
         datalogger configuration object used for all files in the list of files or path to a dlc file.
-    detrend: bool
-        whether or not to work with the fluctations of the data in the tests where absolute values
-        don't matter (spikes, standard deviation and reverse arrangement tests).
+    read_files_kw: dict
+        keywords to pass to pymicra.timeSeries. Default is {'parse_dates':False} because parsing dates
+        at every file is slow, so this makes the whole process faster.
+        However, {'parse_dates':True, 'clean_dates':False} is recommended if time is not a problem because
+        the window and chunk_size keywords may be used as, for example '2min', instead of 1200, which is the
+        equivalent number of points.
     file_lines: int
         number of line a "good" file must have. Fails if the run has any other number of lines.
-    bdate: str
+    begin_date: str
         dates before this automatically fail.
-    edate: str
+    end_date: str
         dates after this automatically fail.
     std_limits: dict
         keys must be names of variables and values must be upper limits for the standard deviation.
+    std_detrend: bool
+        whether or not to work with the fluctations of the data on the spikes and standard deviation test.
+    std_detrend_kw:
+        keywords to be passed to pymicra.detrend specifically to be used on the STD test.
+    lower_limits: dict
+        keys must be names of variables and values must be lower absolute limits for the values of each var.
+    upper_limits: dict
+        keys must be names of variables and values must be upper absolute limits for the values of each var.
     dif_limits: dict
         keys must be names of variables and values must be upper limits for the maximum difference
         of values that the linear trend of the run must have.
-    low_limits: dict
-        keys must be names of variables and values must be lower absolute limits for the values of each var.
-    upp_limits: dict
-        keys must be names of variables and values must be upper absolute limits for the values of each var.
-    spikes_check: bool
+    maxdif_detrend: bool
+        whether to detrend data before checking for differences.
+    maxdif_detrend_kw: dict
+        keywords to pass to pymicra.detrend when detrending for max difference test.
+    maxdif_trend: bool
+        whether to check for differences using the trend, instead of raw points (which can be the fluctuations
+        or the original absolute values of data, depending if maxdif_detrend==True or False).
+    maxdif_trend_kw: dict
+        keywords to pass to pymicra.detrend when trending for max difference test.
+        dictionary of keywords to pass to pymicra.data.trend. This is used in the max difference test, since
+        the difference is taken between the max and min values of the trend, not of the series.
+        Default = {'how':'linear'}.
+    spikes_test: bool
         whether or not to check for spikes.
+    spikes_detrend: bool
+        whether or not to work with the fluctations of the data on the spikes test.
+    spikes_detrend_kw: dict
+        keywords to pass to pymicra.detrend when detrending for spikes.
     visualize_spikes: bool
         whether or not to plot the spikes identification and interpolation (useful for calibration of spikes_func). Only
         one column is visualized at each time. This is set with the spikes_vis_col keyword.
@@ -165,24 +136,27 @@ def qcontrol(files, datalogger_config,
     spikes_func: function
         function used to look for spikes. Can be defined used numpy/pandas notation for methods with lambda functions.
         Default is: lambda x: (abs(x - x.mean()) > abs(x.std()*4.))
-    interp_limit: int
+    replace_with: str
+        method to use when replacing the spikes. Options are 'interpolation' and 'trend'.
+    max_consec_spikes: int
         limit of consecutive spike points to be interpolated. After this spikes are left as they are in the output.
     accepted_percent: float
         limit percentage of spike points in the data. If spike points represent a higher percentage
         than the run fails the spikes check.
     chunk_size: str
         string representing time length of chunks used in the spikes and standard deviation check. Default is "2Min".
-        Putting None will not separate in chunks. It's recommended to use rolling functions in this case.
-    window_size: int
-        window size for rolling mean used in the standard deviation test.
-    rev_arrang_test: bool
+        Putting None will not separate in chunks. It's recommended to use rolling functions in this case (might be slow).
+    RAT: bool
         whether or not to perform the reverse arrangement test on data.
-    RATvars: list
+    RAT_vars: list
         list containing the name of variables to go through the reverse arrangement test. If None, all variables are tested.
     RAT_points: int
         number of final points to apply the RAT. If 50, the run will be averaged to a 50-points run.
     RAT_significance:
         significance level to apply the RAT.
+    RAT_detrend_kw:
+        keywords to be passed to pymicra.detrend specifically to be used on the RA test. {"how":"linear"}
+        is strongly recommended for this case.
     trueverbose: bool
         whether or not to show details on the successful runs.
     falseverbose: bool
@@ -203,10 +177,9 @@ def qcontrol(files, datalogger_config,
     ext_summary: pandas.DataFrame
         dict with the extended summary, which has the path of the files that got "stuck" in each test along with the successful ones
     """
-    from io import timeSeries
+    from . import timeSeries
     from os.path import basename, join
     from dateutil.parser import parse
-    import data
     import pandas as pd
     import numpy as np
     from algs import auxiliar as algs
@@ -214,47 +187,23 @@ def qcontrol(files, datalogger_config,
     if trueshow:
         import matplotlib.pyplot as plt
 
-    if bdate: bdate=parse(bdate)
-    if edate: edate=parse(edate)
+    if begin_date: begin_date=parse(begin_date)
+    if end_date: end_date=parse(end_date)
+
+    lines_name='lines'
+    nan_name='NaNs'
+    bound_name='boundaries'
+    spikes_name='spikes'
+    replace_name = 'replacement'
+    STD_name='STD'
+    RAT_name = 'Rev Arrang'
+    maxdif_name='difference'
 
     #--------------
     # If the path to the dlc is provided, we read it as a dataloggerConfig object
     if isinstance(datalogger_config, str):
-        from io import read_dlc
-        datalogger_config = read_dlc(datalogger_config)
-    #--------------
-
-    #--------------
-    # We first create the dataframe to hols our limit values and the numbers dict, which
-    # is what we use to produce our summary
-    tables=pd.DataFrame()
-    numbers = {'total': [], 'successful': []}
-    #--------------
-
-    #--------------
-    # We update numbers and tables based on the tests we will perform.
-    # If a test is not marked to be perform, it will not be on this list.
-    if bdate or edate:
-        numbers['dates'] = []
-    if spikes_check:
-        numbers['spikes'] = []
-    if file_lines:
-        numbers['lines'] = []
-    if std_limits:
-        tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
-        numbers['STD'] = []
-    if low_limits:
-        tables = tables.append( pd.DataFrame(low_limits, index=['low_limits']) )
-        numbers['lowest value' ] = []
-    if upp_limits:
-        tables = tables.append( pd.DataFrame(upp_limits, index=['upp_limits']) )
-        numbers['highest value' ] = []
-    if dif_limits:
-        tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
-        numbers['difference'] = []
-    if rev_arrang_test:
-        numbers['RAT'] = []
-    tables = tables.fillna(value=np.nan)
+        from . import dataloggerConfig
+        datalogger_config = dataloggerConfig(datalogger_config)
     #--------------
 
     #-------------------------------------
@@ -268,52 +217,93 @@ def qcontrol(files, datalogger_config,
         raise TypeError('Check varNames of the dataloggerConfig object.')
     #-------------------------------------
 
+    #--------------
+    # We first create the dataframe to hols our limit values and the numbers dict, which
+    # is what we use to produce our summary
+    tables = pd.DataFrame(columns=usedvars)
+    replaced = pd.DataFrame(columns=usedvars)
+    numbers = {'total': [], 'successful': []}
+    #--------------
+
+    #--------------
+    # We update numbers and tables based on the tests we will perform.
+    # If a test is not marked to be perform, it will not be on this list.
+    if file_lines:
+        numbers[ lines_name ] = []
+    if nans_test:
+        numbers[ nan_name ] = []
+
+    if upper_limits:
+        tables = tables.append( pd.DataFrame(upper_limits, index=['upper_limits']) )
+        numbers[ bound_name ] = []
+    if lower_limits:
+        tables = tables.append( pd.DataFrame(lower_limits, index=['lower_limits']) )
+        numbers[ bound_name ] = []
+
+
+    if spikes_test:
+        numbers[ spikes_name ] = []
+
+    if max_replacement_count:
+        numbers[ replace_name ] = []
+
+    if std_limits:
+        tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
+        numbers[ STD_name ] = []
+
+    if RAT:
+        numbers[ RAT_name ] = []
+
+    if dif_limits:
+        tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
+        numbers[ maxdif_name ] = []
+
+    tables = tables.fillna(value=np.nan)
+    #--------------
+
     #-------------------------------------
     # BEGINNING OF MAIN PROGRAM
     #-------------------------------------
 
     for filepath in files:
-        print
         filename=basename(filepath)
-        print filename
-        numbers['total'].append(filename)
+        print(filename)
+
         #---------------
-        # BEGINNING OF DATE CHECK
-        if bdate or edate:
+        # DATE CHECK
+        if begin_date or end_date:
             cdate = algs.name2date(filename, datalogger_config)
-            if bdate:
-                if cdate<bdate:
-                    if falseverbose: print filename, 'failed dates check'
-                    numbers['dates'].append(filename)
+            if begin_date:
+                if cdate<begin_date:
+                    print('Skipped because of begin_date.\n')
                     continue
-            if edate: 
-                if cdate>edate:
-                    if falseverbose: print filename, 'failed dates check'
-                    numbers['dates'].append(filename)
+            if end_date: 
+                if cdate>end_date:
+                    print('Skipped because of end_date.\n')
                     continue
-            #-----------------
-            # If we get here, then test is successful
-            if trueverbose: print filename, 'passed dates check'
-            #-----------------
+        #----------------
+
+        #----------------
+        # If the test passes the date check then we include it in the total amount
+        numbers['total'].append(filename)
         #----------------
     
         #-------------------------------
-        # BEGINNING LINE NUMBERS TEST
+        # LINE NUMBERS TEST
         if file_lines:
-            result=algs.check_numlines(filepath, numlines=file_lines)
+            valid = tests.check_numlines(filepath, numlines=file_lines, falseverbose=falseverbose)
+
+            result, failed = algs.testValid(valid, testname=lines_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             if result == False:
-                if falseverbose: print filepath,'failed lines test'
-                numbers['lines'].append(filename)
+                numbers[ lines_name ].append(filename)
                 continue
-            else:
-                if trueverbose: print filename, 'passed lines check'
         #-------------------------------
     
         #-------------------------------
         # OPENNING OF THE FILE HAPPENS HERE
         # TRY-EXCEPT IS A SAFETY NET BECAUSE OF THE POOR DECODING (2015-06-21 00:00 appears as 2015-06-20 24:00)
         try:
-            fin=timeSeries(filepath, datalogger_config, parse_dates_kw={'correct_fracs':True, 'clean':False})
+            fin=timeSeries(filepath, datalogger_config, **read_files_kw)
         except ValueError, e:
             if str(e)=='unconverted data remains: 0' and cdate.hour==23:
                 continue
@@ -322,94 +312,107 @@ def qcontrol(files, datalogger_config,
         #-------------------------------
 
         #-------------------------------
-        # We save the full input for writting it later
+        # We save the full input for writting it later and exclude unnused variables
         fullfin=fin.copy()
-        fin=fin[usedvars]      # Exclude unnused variables
+        fin=fin[usedvars].copy()
+        replaced.loc[filename] = 0
         #-------------------------------
 
-        #-------------------------------
-        # BEGINNING OF LOWEST VALUE CHECK
-        if low_limits:
-            valid= ~(fin < tables.loc['low_limits']).any(axis=0)
+        #-----------------
+        # CHECK NANS
+        if nans_test:
+            valid, nans_replaced = tests.check_nans(fin, max_percent=accepted_percent, replace_with=replace_with)
 
-            result, failed=algs.testValid(valid, testname='lowest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='lowest value', filename=filename, falseshow=falseshow)
-            if result==False: continue
-        #-------------------------------
-    
-        #-------------------------------
-        # BEGINNING OF HIGHEST VALUE CHECK
-        if upp_limits:
-            valid= ~(fin > tables.loc['upp_limits']).any(axis=0)
+            result, failed = algs.testValid(valid, testname=nan_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=nan_name, filename=filename, falseshow=falseshow)
 
-            result, failed=algs.testValid(valid, testname='highest value', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='highest value', filename=filename, falseshow=falseshow)
-            if result==False: continue
-        #-------------------------------
-
-        #----------------------------------
-        # BEGINNING OF STANDARD DEVIATION CHECK
-        if std_limits:
-            df=fin.copy()
-            df=df-pd.rolling_mean(df,window=window_size, center=True)
-            stds_list=df.resample(chunk_size, np.std).dropna()
-            valid= ~(stds_list<tables.loc['std_limits']).any(axis=0)
-
-            result, failed = algs.testValid(valid, testname='STD', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             #--------------
-            # This specifies which part of the run failed on this test
-            if falseverbose and (result==False):
-                print (not result)*'The failed variables and times:\n{0}'.format(~(stds_list<tables.loc['std_limits']))
+            # Add nans that were replaced to the full replaced list
+            replaced.loc[ filename ] += nans_replaced
             #--------------
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='STD', filename=filename, falseshow=falseshow)
+
+            if result==False: continue
+        #-----------------
+
+        #-------------------------------
+        # BEGINNING OF LOWER AND UPPER VALUES CHECK (BOUNDARIES TEST)
+        if lower_limits or upper_limits:
+            fin, valid, limits_replaced = tests.check_limits(fin, tables, max_percent=accepted_percent, replace_with=replace_with)
+
+            result, failed = algs.testValid(valid, testname=bound_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=bound_name, filename=filename, falseshow=falseshow)
+
+            #--------------
+            # Add high/low values that were replaced to the full replaced list
+            replaced.loc[ filename ] += limits_replaced
+            #--------------
+
             if result==False: continue
         #----------------------------------
-    
-        #---------------------------------
-        # BEGINNING OF REVERSE ARRANGEMENT TEST
-        if rev_arrang_test:
-            if RATvars:
-                valid_chunks= fin[RATvars].apply(data.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
-            elif RATvars==None:
-                valid_chunks= fin.apply(data.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
-            else:
-                valid_chunks= fin.any(axis=0)
-
-            result, failed = algs.testValid(valid_chunks, testname='reverse arrangement', trueverbose=trueverbose, filepath=filepath)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='RAT', filename=filename, falseshow=falseshow)
-            if result==False: continue
-        #---------------------------------
-    
-        #--------------------------------
-        # BEGINNING OF MAXIMUM DIFFERENCE METHOD
-        if dif_limits:
-            trend=data.trend(fin, mode='linear')
-            maxdif=trend.iloc[0]-trend.iloc[-1]
-            maxdif=maxdif.abs()
-            chunks_valid= tables.loc['dif_limits'] - maxdif
-            chunks_valid= ~(chunks_valid < 0)
-
-            result, failed = algs.testValid(chunks_valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='difference', filename=filename, falseshow=falseshow)
-            if result==False: continue
-        #--------------------------------
  
-        #-------------------------------
+        #-----------------
         # BEGINNING OF SPIKES CHECK
-        if spikes_check:
-            chunks = algs.splitData(fin, chunk_size)
-            fin,valid_cols=check_spikes(chunks, visualize=visualize_spikes, vis_col=spikes_vis_col, cut_func=spikes_func, interp_limit=interp_limit)
+        if spikes_test:
+            fin, valid, spikes_replaced = tests.check_spikes(fin, detrend=spikes_detrend, detrend_kw=spikes_detrend_kw,
+                            visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size, replace_with=replace_with,
+                            cut_func=spikes_func, max_consec_spikes=max_consec_spikes, max_percent=accepted_percent)
 
-            valid= valid_cols >= (1.-(accepted_percent/100.))
+            result, failed = algs.testValid(valid, testname=spikes_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=spikes_name, filename=filename, falseshow=falseshow)
 
-            result, failed=algs.testValid(valid, testname='spikes', trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname='spikes', filename=filename, falseshow=falseshow)
+            #--------------
+            # Add spikes that were replaced to the full replaced list
+            replaced.loc[ filename ] += spikes_replaced
+            #--------------
+
             if result==False: continue
-        #-------------------------------
+        #-----------------
    
         #-----------------
+        # REPLACEMENT COUNT TEST
+        if max_replacement_count:
+            valid = tests.check_replaced(replaced.iloc[-1], max_count=max_replacement_count)
+
+            result, failed = algs.testValid(valid, testname=replace_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=replace_name, filename=filename, falseshow=falseshow)
+            if result==False: continue
+        #-----------------
+
+        #----------------------------------
+        # STANDARD DEVIATION TEST
+        if std_limits:
+            valid = tests.check_std(fin, tables, detrend=std_detrend, detrend_kw=std_detrend_kw, chunk_size=chunk_size, falseverbose=falseverbose)
+
+            result, failed = algs.testValid(valid, testname=STD_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=STD_name, filename=filename, falseshow=falseshow)
+            if result==False: continue
+        #----------------------------------
+    
+        #------------------------------
+        # REVERSE ARRANGEMENT TEST
+        if RAT:
+            valid = tests.check_RA(fin, detrend=RAT_detrend, detrend_kw=RAT_detrend_kw,
+                                    RAT_vars=None, RAT_points=RAT_points, RAT_significance=RAT_significance)
+
+            result, failed = algs.testValid(valid, testname=RAT_name, trueverbose=trueverbose, filepath=filepath)
+            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=RAT_name , filename=filename, falseshow=falseshow)
+            if result==False: continue
+        #-------------------------------
+    
+        #-------------------------------
+        # STATIONARITY TEST
+        if dif_limits:
+            valid = tests.check_stationarity(fin, tables, detrend=maxdif_detrend, detrend_kw=maxdif_detrend_kw,
+                                        trend=maxdif_trend, trend_kw=maxdif_trend_kw)
+
+            result, failed = algs.testValid(valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
+            numbers=algs.applyResult(result, failed, fin, control=numbers, testname=maxdif_name, filename=filename, falseshow=falseshow)
+            if result==False: continue
+        #-------------------------------
+
+        #-----------------
         # END OF TESTS
-        print 'Successful run!'
+        print('Passed all tests')
         if trueshow:
             if trueshow_vars:
                 fin.loc[:, trueshow_vars]
@@ -422,20 +425,21 @@ def qcontrol(files, datalogger_config,
         #-----------------
         # FINALLY, we write the result in the output directory in the same format
         if outdir:
-            print 'Re-writing',filepath
+            print('Re-writing',filepath)
             fullfin[usedvars] = fin[usedvars]       # This is because some spikes were removed during the process
             fullfin.to_csv(join(outdir, basename(filepath)),
                        header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
         #-----------------
+        print()
     
     #-------------
     # We create the summary dataframe
-    summary= {k: [len(v)] for k, v in numbers.items()}
+    #summary= {k: [len(v)] for k, v in numbers.items()}
     summary=pd.DataFrame({'numbers': map(len,numbers.values())}, index=numbers.keys())
     summary['percent']=100.*summary['numbers']/summary.loc['total','numbers']
     #-------------
 
-    print summary
+    print(summary)
     summary.to_csv(summary_file, na_rep='NaN')
     return numbers
  
@@ -528,7 +532,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
             chunks, index = algs.splitData(df, frequency, return_index=True)
             for idx, chunk in zip(index,chunks):
                 out = idx.strftime(outpath)
-                if verbose: print 'Writting chunk to ',out
+                if verbose: print('Writting chunk to ',out)
                 chunk.to_csv(out, index=False, header=False)
         return
     
@@ -539,7 +543,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
         if header==None: header=0
     #------------
         for fin in files:
-            print 'Now opening',fin
+            print('Now opening',fin)
             #------------
             # Creates a sequence of equaly-spaced dates based on the frequency and nicely rounded-up
             ft, lt = algs.first_last(fin)
@@ -562,7 +566,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                         lines.append(line)
                     elif (cdate>=labeldates[1]):
                         if verbose:
-                            print labeldates[0]
+                            print(labeldates[0])
                         #------------
                         # labels first and last runs separately, so they can be identified and put together later
                         if len(labeldates) == nfiles:
@@ -616,14 +620,14 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
                 first = fedges.pop(idx)
                 first_lines = open(first,'rt').readlines()
                 if verbose:
-                    print 'Concatenating ', last, ' and ', first
+                    print('Concatenating ', last, ' and ', first)
                 with open(root, 'wt') as fou:
                     fou.writelines(last_lines)
                     fou.writelines(first_lines)
 
-        print 'List of bad files:', badfiles
+        print('List of bad files:', badfiles)
         if verbose:
-            print 'Done!'
+            print('Done!')
         return
 
 
@@ -686,9 +690,9 @@ def correctDrift(drifted, correct_drifted_vars=None, correct=None,
                 if pd.infer_freq(correct.index) == pd.infer_freq(drifted.index):
                     slow, fast = map(np.array, [slow, fast] )
                 else:
-                    print 'Frequencies must be the same, however, inferred frequencies appear to be different. Plese check.'
+                    print('Frequencies must be the same, however, inferred frequencies appear to be different. Plese check.')
             except TypeError:
-                print 'Cannot determine if frequencies are the same. We will continue but you should check'
+                print('Cannot determine if frequencies are the same. We will continue but you should check')
                 slow, fast = map(np.array, [slow, fast] )
             #----------------
     
@@ -712,7 +716,7 @@ def correctDrift(drifted, correct_drifted_vars=None, correct=None,
             correc=pd.DataFrame(columns=[ '{}_{}'.format(slw, fst) ], index=['angular', 'linear'], data=coefs).transpose()
             cors.append(correc)
         cors = pd.concat(cors, join='outer')
-        print cors
+        print(cors)
     #----------------
 
         #----------------
