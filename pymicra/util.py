@@ -387,6 +387,17 @@ def qcontrol(files, datalogger_config,
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname=STD_name, filename=filename, falseshow=falseshow)
             if result==False: continue
         #----------------------------------
+   
+        #-------------------------------
+        # STATIONARITY TEST
+        if dif_limits:
+            valid = tests.check_stationarity(fin, tables, detrend=maxdif_detrend, detrend_kw=maxdif_detrend_kw,
+                                        trend=maxdif_trend, trend_kw=maxdif_trend_kw)
+
+            result, failed = algs.testValid(valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
+            numbers=algs.applyResult(result, failed, fin, control=numbers, testname=maxdif_name, filename=filename, falseshow=falseshow)
+            if result==False: continue
+        #-------------------------------
     
         #------------------------------
         # REVERSE ARRANGEMENT TEST
@@ -398,18 +409,7 @@ def qcontrol(files, datalogger_config,
             numbers = algs.applyResult(result, failed, fin, control=numbers, testname=RAT_name , filename=filename, falseshow=falseshow)
             if result==False: continue
         #-------------------------------
-    
-        #-------------------------------
-        # STATIONARITY TEST
-        if dif_limits:
-            valid = tests.check_stationarity(fin, tables, detrend=maxdif_detrend, detrend_kw=maxdif_detrend_kw,
-                                        trend=maxdif_trend, trend_kw=maxdif_trend_kw)
-
-            result, failed = algs.testValid(valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname=maxdif_name, filename=filename, falseshow=falseshow)
-            if result==False: continue
-        #-------------------------------
-
+ 
         #-----------------
         # END OF TESTS
         print('Passed all tests')
