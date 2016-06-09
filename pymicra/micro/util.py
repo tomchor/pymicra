@@ -468,7 +468,7 @@ def eddyCov3(data, units, wpl=True,
 
     #---------
     # Calculate the fluxes
-    out = pd.DataFrame(index=[data.index[0]])
+    out = pd.DataFrame(index=[ data.index[0] ])
     out[ defs.momentum_flux ]               = -rho_air_mean * cov[u][w]
     out[ defs.sensible_heat_flux ]          = rho_air_mean * cp * cov[theta_fluc][w]
     out[ defs.virtual_sensible_heat_flux ]  = rho_air_mean * cp * cov[theta_v_fluc][w]
@@ -516,14 +516,9 @@ def eddyCov3(data, units, wpl=True,
 
     #-----------------
     # Here we calculate the flux units
-
-    #fluxunits['LE'] = fluxunits['LE'] * pm.constants.units['molar_mass']
-    #coef = (fluxunits['LE'].to(pm.ureg('watts/meter**2'))).magnitude
-    #fluxunits['LE'] = pm.ureg('watts/meter**2')
     out.loc[:, 'LE'] = algs.convert_to(out['LE'], fluxunits, 'watts/meter**2', inplace=True, key='LE')
     out.loc[:, 'Hv'] = algs.convert_to(out['Hv'], fluxunits, 'watts/meter**2', inplace=True, key='Hv')
     out.loc[:, 'H'] = algs.convert_to(out['H'], fluxunits, 'watts/meter**2', inplace=True, key='H')
-
     #-----------------
 
     units.update(fluxunits)
