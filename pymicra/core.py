@@ -189,9 +189,8 @@ class siteConfig(object):
     def __str__(self):
         """
         """
-        print('Description:', self.description)
-        print('Lat, Lon:', self.latitude, self.longitude)
-        return 'Altitude'+ str(self.altitude)
+        import pandas as pd
+        return pd.Series(self.__dict__).__str__()
 
     __repr__ = __str__
 
