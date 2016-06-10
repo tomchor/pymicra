@@ -192,6 +192,8 @@ class siteConfig(object):
         print('Lat, Lon:', self.latitude, self.longitude)
         return 'Altitude'+ str(self.altitude)
 
+    __repr__ = __str__
+
 class notation(object):
     """
     This creates an object that holds the default notation for pymicra.

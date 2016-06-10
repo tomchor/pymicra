@@ -226,45 +226,45 @@ def qcontrol(files, datalogger_config,
     #-------------------------------------
 
     #--------------
-    # We first create the dataframe to hols our limit values and the numbers dict, which
+    # We first create the dataframe to hols our limit values and the discarded dict, which
     # is what we use to produce our summary
     tables = pd.DataFrame(columns=usedvars)
     replaced = pd.DataFrame(columns=usedvars)
-    numbers = {'total': [], 'successful': []}
+    discarded = {'total': [], 'successful': []}
     #--------------
 
     #--------------
-    # We update numbers and tables based on the tests we will perform.
+    # We update discarded and tables based on the tests we will perform.
     # If a test is not marked to be perform, it will not be on this list.
     if file_lines:
-        numbers[ lines_name ] = []
+        discarded[ lines_name ] = []
     if nans_test:
-        numbers[ nan_name ] = []
+        discarded[ nan_name ] = []
 
     if upper_limits:
         tables = tables.append( pd.DataFrame(upper_limits, index=['upper_limits']) )
-        numbers[ bound_name ] = []
+        discarded[ bound_name ] = []
     if lower_limits:
         tables = tables.append( pd.DataFrame(lower_limits, index=['lower_limits']) )
-        numbers[ bound_name ] = []
+        discarded[ bound_name ] = []
 
 
     if spikes_test:
-        numbers[ spikes_name ] = []
+        discarded[ spikes_name ] = []
 
     if max_replacement_count:
-        numbers[ replace_name ] = []
+        discarded[ replace_name ] = []
 
     if std_limits:
         tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
-        numbers[ STD_name ] = []
+        discarded[ STD_name ] = []
 
     if RAT:
-        numbers[ RAT_name ] = []
+        discarded[ RAT_name ] = []
 
     if dif_limits:
         tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
-        numbers[ maxdif_name ] = []
+        discarded[ maxdif_name ] = []
 
     tables = tables.fillna(value=np.nan)
     #--------------
@@ -293,7 +293,7 @@ def qcontrol(files, datalogger_config,
 
         #----------------
         # If the test passes the date check then we include it in the total amount
-        numbers['total'].append(filename)
+        discarded['total'].append(filename)
         #----------------
     
         #-------------------------------
@@ -303,7 +303,7 @@ def qcontrol(files, datalogger_config,
 
             result, failed = algs.testValid(valid, testname=lines_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             if result == False:
-                numbers[ lines_name ].append(filename)
+                discarded[ lines_name ].append(filename)
                 continue
         #-------------------------------
     
@@ -332,7 +332,7 @@ def qcontrol(files, datalogger_config,
             valid, nans_replaced = tests.check_nans(fin, max_percent=accepted_percent, replace_with=replace_with)
 
             result, failed = algs.testValid(valid, testname=nan_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=nan_name, filename=filename, falseshow=falseshow)
+            discarded = algs.applyResult(result, failed, fin, control=discarded, testname=nan_name, filename=filename, falseshow=falseshow)
 
             #--------------
             # Add nans that were replaced to the full replaced list
@@ -348,7 +348,7 @@ def qcontrol(files, datalogger_config,
             fin, valid, limits_replaced = tests.check_limits(fin, tables, max_percent=accepted_percent, replace_with=replace_with)
 
             result, failed = algs.testValid(valid, testname=bound_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=bound_name, filename=filename, falseshow=falseshow)
+            discarded = algs.applyResult(result, failed, fin, control=discarded, testname=bound_name, filename=filename, falseshow=falseshow)
 
             #--------------
             # Add high/low values that were replaced to the full replaced list
@@ -366,7 +366,7 @@ def qcontrol(files, datalogger_config,
                             cut_func=spikes_func, max_consec_spikes=max_consec_spikes, max_percent=accepted_percent)
 
             result, failed = algs.testValid(valid, testname=spikes_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=spikes_name, filename=filename, falseshow=falseshow)
+            discarded = algs.applyResult(result, failed, fin, control=discarded, testname=spikes_name, filename=filename, falseshow=falseshow)
 
             #--------------
             # Add spikes that were replaced to the full replaced list
@@ -382,7 +382,7 @@ def qcontrol(files, datalogger_config,
             valid = tests.check_replaced(replaced.iloc[-1], max_count=max_replacement_count)
 
             result, failed = algs.testValid(valid, testname=replace_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=replace_name, filename=filename, falseshow=falseshow)
+            discarded = algs.applyResult(result, failed, fin, control=discarded, testname=replace_name, filename=filename, falseshow=falseshow)
             if result==False: continue
         #-----------------
 
@@ -392,7 +392,7 @@ def qcontrol(files, datalogger_config,
             valid = tests.check_std(fin, tables, detrend=std_detrend, detrend_kw=std_detrend_kw, chunk_size=chunk_size, falseverbose=falseverbose)
 
             result, failed = algs.testValid(valid, testname=STD_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=STD_name, filename=filename, falseshow=falseshow)
+            discarded = algs.applyResult(result, failed, fin, control=discarded, testname=STD_name, filename=filename, falseshow=falseshow)
             if result==False: continue
         #----------------------------------
    
@@ -403,7 +403,7 @@ def qcontrol(files, datalogger_config,
                                         trend=maxdif_trend, trend_kw=maxdif_trend_kw)
 
             result, failed = algs.testValid(valid, testname='difference', trueverbose=trueverbose, filepath=filepath)
-            numbers=algs.applyResult(result, failed, fin, control=numbers, testname=maxdif_name, filename=filename, falseshow=falseshow)
+            discarded=algs.applyResult(result, failed, fin, control=discarded, testname=maxdif_name, filename=filename, falseshow=falseshow)
             if result==False: continue
         #-------------------------------
     
@@ -414,7 +414,7 @@ def qcontrol(files, datalogger_config,
                                     RAT_vars=None, RAT_points=RAT_points, RAT_significance=RAT_significance)
 
             result, failed = algs.testValid(valid, testname=RAT_name, trueverbose=trueverbose, filepath=filepath)
-            numbers = algs.applyResult(result, failed, fin, control=numbers, testname=RAT_name , filename=filename, falseshow=falseshow)
+            discarded = algs.applyResult(result, failed, fin, control=discarded, testname=RAT_name , filename=filename, falseshow=falseshow)
             if result==False: continue
         #-------------------------------
  
@@ -427,7 +427,7 @@ def qcontrol(files, datalogger_config,
             else:
                 fin.plot()
             plt.show()
-        numbers['successful'].append(filename)
+        discarded['successful'].append(filename)
         #-----------------
 
         #-----------------
@@ -442,16 +442,16 @@ def qcontrol(files, datalogger_config,
     
     #-------------
     # We create the summary dataframe
-    #summary= {k: [len(v)] for k, v in numbers.items()}
-    summary=pd.DataFrame({'numbers': map(len,numbers.values())}, index=numbers.keys())
-    summary['percent']=100.*summary['numbers']/summary.loc['total', 'numbers']
+    #summary= {k: [len(v)] for k, v in discarded.items()}
+    summary=pd.DataFrame({'discarded': map(len,discarded.values())}, index=discarded.keys())
+    summary['percent']=100.*summary['discarded']/summary.loc['total', 'discarded']
     #-------------
 
     print(summary)
     summary = summary.loc[ order ].dropna()
-    summary.numbers = df.numbers.astype(int)
+    summary.discarded = df.discarded.astype(int)
     summary.to_csv(summary_file, na_rep='NaN')
-    return numbers
+    return discarded
  
 
 def printUnit(string, mode='L', trim=True, greek=True):
@@ -467,11 +467,7 @@ def printUnit(string, mode='L', trim=True, greek=True):
     greek: bool
         yet to be implemented
     """
-    try:
-        from pint.unit import UnitRegistry
-    except ImportError:
-        raise ImportError('You must install python-pint in order to use this function')
-    ur=UnitRegistry()
+    from . import ureg as ur
     ur.default_format=mode
     u=ur[string]
     u='{:~L}'.format(u)
