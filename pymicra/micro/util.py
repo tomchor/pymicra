@@ -19,7 +19,7 @@ specific evaporation heat?
 """
 
 def preProcess(data, units, notation_defs=None,
-        rho_air_from_theta_v=True, inplace=True, solutes=[]):
+        rho_air_from_theta_v=True, inplace=True, theta=None, solutes=[]):
     '''
     Pre-processes data by calculating moist and dry air densities, specific humidity
     mass density and other important variables
@@ -100,8 +100,11 @@ def preProcess(data, units, notation_defs=None,
             data = physics.airDensity_from_theta_v(data, units, notation=defs, inplace=True)
             print('Done!')
         else:
-            print('calculation of air density from theta has to be implemented')
-            pass
+            if theta==None:
+                print('Trying to calculate rho_air using theta from this dataset ... ', end='')
+            else:
+                print('Trying to calculate rho_air using auxiliar theta measurement ... ', end='')
+            print('\nCalculation of air density from theta has to be implemented. Please try rho_air_from_theta_v=True.')
             #algs.airDensity_from_theta()
     #---------
 
