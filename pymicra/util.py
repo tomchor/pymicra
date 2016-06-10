@@ -193,14 +193,19 @@ def qcontrol(files, datalogger_config,
     if begin_date: begin_date=parse(begin_date)
     if end_date: end_date=parse(end_date)
 
+    total_name='total'
     lines_name='lines'
     nan_name='NaNs'
     bound_name='boundaries'
     spikes_name='spikes'
     replace_name = 'replacement'
     STD_name='STD'
-    RAT_name = 'Rev Arrang'
     maxdif_name='difference'
+    RAT_name = 'Rev Arrang'
+    successful='successful'
+
+    order = [total_name, lines_names, nan_name, bound_name, spikes_name, replacement_name, STD_name, 
+                maxdif_name, RAT_name, successful_name]
 
     #--------------
     # If the path to the dlc is provided, we read it as a dataloggerConfig object
@@ -439,10 +444,12 @@ def qcontrol(files, datalogger_config,
     # We create the summary dataframe
     #summary= {k: [len(v)] for k, v in numbers.items()}
     summary=pd.DataFrame({'numbers': map(len,numbers.values())}, index=numbers.keys())
-    summary['percent']=100.*summary['numbers']/summary.loc['total','numbers']
+    summary['percent']=100.*summary['numbers']/summary.loc['total', 'numbers']
     #-------------
 
     print(summary)
+    summary = summary.loc[ order ].dropna()
+    summary.numbers = df.numbers.astype(int)
     summary.to_csv(summary_file, na_rep='NaN')
     return numbers
  

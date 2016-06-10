@@ -184,15 +184,13 @@ class siteConfig(object):
         self.longitude = longitude
         self.altitude = altitude
 
-    def show(self):
+
+    def __str__(self):
         """
-        Shows the characteristics of the site on screen
         """
         print('Description:', self.description)
         print('Lat, Lon:', self.latitude, self.longitude)
-        print('Altitude:', self.altitude)
-
-
+        return 'Altitude'+ str(self.altitude)
 
 class notation(object):
     """
