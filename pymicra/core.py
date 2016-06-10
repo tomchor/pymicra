@@ -134,7 +134,7 @@ class siteConfig(object):
     location, canopy height and etc)
     """
     def __init__(self, from_file=None,
-             instruments_height=None, canopy_height=None,
+             instruments_height=None, measurement_height=None, canopy_height=None,
              displacement_height=None, roughness_length=None,
              latitude=None, longitude=None, altitude=None, description=None):
         """
@@ -142,7 +142,7 @@ class siteConfig(object):
         -----------
             from_file: str
                 path to .site file with the configurations of the experiment. All atributes are taken from there.
-            instruments_height: float
+            measurement_height: float
                 the mainn height of the instruments in meters considered for calculations.
                 Generally it's the height of the sonic anemometer.
             canopy_height: float
@@ -166,6 +166,7 @@ class siteConfig(object):
 
         self.description = description
         self.instruments_height = instruments_height    #meters
+        self.measurement_height = measurement_height    #meters
         self.canopy_height = canopy_height              #meters
         self.roughness_length = roughness_length
 
@@ -212,8 +213,10 @@ class notation(object):
     concentration='conc_%s'
     molar_concentration='mconc_%s'
     density='rho_%s'
+    mass_density=density
     molar_density='mrho_%s'
     mixing_ratio='r_%s'
+    mass_mixing_ratio=mixing_ratio
     molar_mixing_ratio='mr_%s'
 
     u='u'
@@ -254,14 +257,20 @@ class notation(object):
         for subst in ['h2o', 'co2', 'ch4', 'o3', 'moist_air', 'dry_air']:
             for mode, comp in zip(['', '_mean' ], ['', 'self.mean %']):
                 exec('self.{0}{1}_density = {2} self.density % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_mass_density = {2} self.mass_density % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_molar_density = {2} self.molar_density % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_mixing_ratio = {2} self.mixing_ratio % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_mass_mixing_ratio = {2} self.mass_mixing_ratio % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_molar_mixing_ratio = {2} self.molar_mixing_ratio % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_concentration = {2} self.concentration % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_molar_concentration = {2} self.molar_concentration % self.{0}'.format(subst, mode, comp))
 
             exec('self.{0}_density_fluctuations =  self.fluctuations % self.{0}_density'.format(subst))
+            exec('self.{0}_mass_density_fluctuations =  self.fluctuations % self.{0}_mass_density'.format(subst))
             exec('self.{0}_molar_density_fluctuations = self.fluctuations % self.{0}_molar_density'.format(subst))
             exec('self.{0}_mixing_ratio_fluctuations = self.fluctuations % self.{0}_mixing_ratio'.format(subst))
+            exec('self.{0}_mass_mixing_ratio_fluctuations = self.fluctuations % self.{0}_mass_mixing_ratio'.format(subst))
+            exec('self.{0}_molar_mixing_ratio_fluctuations = self.fluctuations % self.{0}_molar_mixing_ratio'.format(subst))
             exec('self.{0}_concentration_fluctuations = self.fluctuations % self.{0}_concentration'.format(subst))
             exec('self.{0}_molar_concentration_fluctuations = self.fluctuations % self.{0}_molar_concentration'.format(subst))
 

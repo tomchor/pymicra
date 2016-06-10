@@ -199,7 +199,7 @@ def read_site(sitefile):
     Reads .site configuration file, which holds siteConfig definitions
 
     The .site should have definitions as regular python syntax (in meters!):
-        instruments_height    = 10
+        measurement_height  = 10
         canopy_height       = 5
         displacement_height = 3
         roughness_length    = 1.0
