@@ -55,6 +55,9 @@ def qcontrol(files, datalogger_config,
 
     Non-trivial tests (in this order):
     ------------------
+    lines test:
+        checks each file to see if they have a certain number of lines. Files with a different number of lines
+        fail this test. Active this test by passing the file_lines keyword.
     NaNs test:
         checks for any NaN values. NaNs are replaced with interpolation or linear trend. If the percentage
         of NaNs is greater than accepted_percent, run is discarded. Activate it by passing nans_test=True.
@@ -65,20 +68,20 @@ def qcontrol(files, datalogger_config,
         runs with more than a certain percetage of spikes are left out. 
         Activate it by passing a spikes_test keyword. Adjust the test with the spikes_func
         visualize_spikes, spikes_vis_col, max_consec_spikes, accepted_percent and chunk_size keywords.
-    replacement count:
+    replacement count test:
         checks the total amount of points that were replaced (including NaN, boundaries and spikes test)
         against the max_replacement_count keyword. Fails if any columns has more replacements than that.
-    standard deviation check:
+    standard deviation (STD) check:
         runs with a standard deviation lower than a pre-determined value (generally close to the
         sensor precision) are left out.
         Activate it by passing a std_limits keyword.
+    maximum difference test:
+        runs whose trend have a maximum difference greater than a certain value are left out.
+        This excludes non-stationary runs. Activate it by passing a dif_limits keyword.
     reverse arrangement test (RAT):
         runs that fail the reverse arrangement test for any variable are left out.
         Activate it by passing a RAT keyword.
-    stationarity test:
-        runs whose trend have a maximum difference greater than a certain value are left out.
-        This excludes non-stationary runs. Activate it by passing a dif_limits keyword.
-
+ 
     Parameters:
     -----------
     files: list
