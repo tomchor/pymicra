@@ -7,10 +7,8 @@ This package was designed to make it easier to work with micrometeorological dat
 ## Required Packages
 * Pandas
 * Numpy
-* setuptools (for installation only)
-
-## Recommended Packages
 * Pint
+* setuptools (for installation only)
 
 ## License
 This package is licensed under GNU General Public License V3.0 (http://choosealicense.com/licenses/gpl-3.0/)
