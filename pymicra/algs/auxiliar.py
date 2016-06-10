@@ -338,7 +338,7 @@ def file_len(fname):
 
 
 
-def applyResult(result, failed, df, control=None, testname=None, filename=None, falseshow=False):
+def applyResult(result, failed, df, control=None, testname=None, filename=None, falseshow=False, index_n=None):
     """
     Auxiliar function to be used with util.qcontrol
 
@@ -362,8 +362,10 @@ def applyResult(result, failed, df, control=None, testname=None, filename=None, 
         if falseshow:
             df[failed].plot()
             plt.show()
-        if control:
+        if type(control)==dict:
             control[testname].append(filename)
+        else:
+            control.loc[ index_n, testname ] = filename
     return control
 
 
