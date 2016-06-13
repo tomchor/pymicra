@@ -489,9 +489,12 @@ def qcontrol(files, datalogger_config,
     
     #-----------------
     # But this doesnt work for the count of runs that had replacement, because zero is also a non-NaN value
-    summary.loc[ replaced_nans_name ] = control[ replaced_nans_name ].astype(bool).sum()
-    summary.loc[ replaced_spikes_name ] = control[ replaced_spikes_name ].astype(bool).sum()
-    summary.loc[ replaced_bound_name ] = control[ replaced_bound_name ].astype(bool).sum()
+    if nans_test:
+        summary.loc[ replaced_nans_name ] = control[ replaced_nans_name ].astype(bool).sum()
+    if spikes_test:
+        summary.loc[ replaced_spikes_name ] = control[ replaced_spikes_name ].astype(bool).sum()
+    if lower_limits or upper_limits:
+        summary.loc[ replaced_bound_name ] = control[ replaced_bound_name ].astype(bool).sum()
     #-------------
 
     #-------------
