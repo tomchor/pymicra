@@ -209,6 +209,7 @@ class notation(object):
     mean='%s_mean'
     fluctuations="%s'"
     star='%s_star'
+    std='%s_std'
     concentration='conc_%s'
     molar_concentration='mconc_%s'
     density='rho_%s'
@@ -282,4 +283,5 @@ class notation(object):
             exec('self.{0}_fluctuations = self.fluctuations % self.{0}'.format(subst))
             exec('self.{0}_mean = self.mean % self.{0}'.format(subst))
             exec('self.{0}_star = self.star % self.{0}'.format(subst))
+            exec('self.{0}_std = self.std % self.{0}'.format(subst))
 

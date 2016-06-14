@@ -26,7 +26,7 @@ except ImportError:
     pass
 #---------
 
-from io import timeSeries, read_dlc, read_site, toUnitsCsv, readUnitsCsv
+from io import timeSeries, read_dlc, read_site, readUnitsCsv
 from util import qcontrol, separateFiles, correctDrift
 from micro import *
 from data import *
