@@ -208,6 +208,7 @@ class notation(object):
     """
     mean='%s_mean'
     fluctuations="%s'"
+    fluctuation=fluctuations
     star='%s_star'
     std='%s_std'
     concentration='conc_%s'
