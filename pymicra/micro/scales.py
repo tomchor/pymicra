@@ -113,7 +113,7 @@ def get_scales(dataframe, siteConf, notation_defs=None,
 
     theta_v_star    = cov.loc[theta_v_fluc, w] / u_star
     theta_v_mean    = data[theta_v].mean()
-    theta_v_std     = data[theta_v].std()
+    theta_v_std     = data[theta_v_fluc].std()
 
     q_star  = cov.loc[qfluct,w] / u_star
     q_mean  = data[q].mean()
