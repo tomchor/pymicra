@@ -227,7 +227,7 @@ def getScales(data, siteConf, units, notation=None,
         #---------
         # We need the mean of the specific humidity and temperature
         if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
-            raise TypeError('Units for both the virtual temp fluctuations and the thermodynamic temperature must be the same')
+            raise TypeError('\nUnits for both the virtual temperature fluctuations and the thermodynamic temperature fluctuations must be the same')
         data_q_mean =   data[ defs.specific_humidity ].mean()
         data[ theta_fluc ] = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1.+0.61*data_q_mean)
         theta_fluc_unit = units[ theta_v_fluc ]
@@ -245,7 +245,7 @@ def getScales(data, siteConf, units, notation=None,
     
     #---------
     # Now to calculate the characteristic lengths, scales and etc
-    print('Calculating the friction velocity and turbulent scales ... ', end='')
+    print('Calculating the STDs and turbulent scales of wind, temperature and humidity ... ', end='')
     out = pd.DataFrame(index=[data.index[0]])
 
     u_star  = np.sqrt(-cov.loc[u_fluc, w_fluc])
@@ -253,7 +253,6 @@ def getScales(data, siteConf, units, notation=None,
     out[ defs.u_std ]   = data[ u_fluc ].std()
 
     theta_v_star = cov.loc[theta_v_fluc, w_fluc] / u_star
-    theta_v_mean    = data[theta_v].mean()
     out[ defs.virtual_temp_star ]   = theta_v_star
     out[ defs.virtual_temp_std ]    = data[ theta_v_fluc ].std()
 
@@ -261,27 +260,50 @@ def getScales(data, siteConf, units, notation=None,
     out[ defs.thermodyn_temp_std ]  = data[ theta_fluc ].std()
 
     q_star  = cov.loc[ q_fluc, w_fluc ] / u_star
-    #q_mean  = data[q].mean()
     q_std   = data[ q_fluc ].std()
 
-    c_stars =[]
-    c_stds  =[]
     print('done!')
     #---------
 
     #---------
+    # Now we set the units of the legths
+    outunits = {}
+    outunits[ defs.u_star ]  = units[ u_fluc ]
+    outunits[ defs.u_std ]   = units[ u_fluc ]
+
+    outunits[ defs.virtual_temp_star ]   = units[ theta_v_fluc ]
+    outunits[ defs.virtual_temp_std ]    = units[ theta_v_fluc ]
+
+    outunits[ defs.thermodyn_temp_star ] = units[ theta_fluc ]
+    outunits[ defs.thermodyn_temp_std ]  = units[ theta_fluc ]
+
+    q_star  = cov.loc[ q_fluc, w_fluc ] / u_star
+    q_std   = data[ q_fluc ].std()
+    #---------
+
+    #---------
     # The solutes have to be calculated separately
-    for c_fluc, c in zip(solutesf, solutes):
-        print('Calculating the turbulent scale of %s ... '%c, end='')
-        c_stars.append( cov.loc[c_fluc, w_fluc] / u_star )
-        c_stds.append( data[ c_fluc ].std() )
+    sol_star = []
+    sol_std  = []
+    for sol_fluc, sol in zip(solutesf, solutes):
+        print('Calculating the turbulent scale and STD of %s ... ' % sol, end='')
+        #sol_star.append( cov.loc[sol_fluc, w_fluc] / u_star )
+        #sol_std.append( data[ sol_fluc ].std() )
+        out[ defs.star % sol ]      = cov.loc[sol_fluc, w_fluc] / u_star
+        out[ defs.std % sol ]       = data[ sol_fluc ].std()
+        outunits[ defs.star % sol ] = units[ sol_fluc ]
+        outunits[ defs.std % sol ]  = units[ sol_fluc ]
         print('done!')
     #---------
 
     #---------
     # Now we calculate the obukhov length and the similarity variable
-    Lm = MonObuLen(theta_v_star, theta_v_mean, u_star, g=constants.gravity)
-    zeta = MonObuSimVar(Lm, siteConf)
+    theta_v_mean    = data[theta_v].mean()
+    out[ defs.MonObuLen ] = MonObuLen(theta_v_star, theta_v_mean, u_star, g=constants.gravity)
+    out[ defs.similarityVar ] = MonObuSimVar(Lm, siteConf)
+
+    outunits[ defs.MonObuLen ] = cunits[ 'gravity' ]
+    outunits[ defs.similarityVar ] = ureg['meter']/outunits[ defs.MonObuLen ]
     #---------
 
     #---------
@@ -293,7 +315,7 @@ def getScales(data, siteConf, units, notation=None,
         out=pd.DataFrame(dic, index=[data.index[0]])
         #-----------
         # We have to input the solutes separately
-        for solute, c_star, c_std in zip(solutes, c_stars, c_stds):
+        for solute, c_star, c_std in zip(solutes, sol_star, sol_std):
                 out[ '{}_std'.format(solute) ] = c_std
                 out[ '{}_star'.format(solute)] = c_star
         #-----------
