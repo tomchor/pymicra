@@ -606,27 +606,21 @@ def eddyCov_from_scales(data, units, wpl=True,
     q_star          =   defs.specific_humidity_star
     solute_stars    = [ defs.molar_density % defs.star % solute for solute in solutes ]
     #---------
-    exit()
+
     #---------
     # Now we try to calculate or identify the turbulent scale of theta
     theta_mean = data[ defs.thermodyn_temp ].mean()
-    if theta_fluc not in data.columns:
+    if theta_star not in data.columns:
         print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
         #---------
         # We need the mean of the specific humidity and temperature
-        if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
-            raise TypeError('Units for both the virtual temp fluctuations and the thermodynamic temperature must be the same')
+        if not (units[ theta_v_star ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
+            raise TypeError('Units for both the virtual temp and the thermodynamic temperature turbulent scales must be the same')
         data_q_mean =   data[ defs.specific_humidity ].mean()
-        data[ theta_fluc ] = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1.+0.61*data_q_mean)
-        theta_fluc_unit = units[ theta_v_fluc ]
+        data[ theta_star ] = (data[theta_v_star] - 0.61*theta_mean*data[q_star])/(1.+0.61*data_q_mean)
+        theta_star_unit = units[ theta_v_star ]
         print('done!')
         #---------
-    #---------
-
-    #---------
-    # First we construct the covariance matrix (slower but more readable than doing it separately)
-    # maybe figure out later a way that is both faster and more readable
-    cov = data[[u_fluc, w_fluc, theta_v_fluc, mrho_h2o_fluc, rho_h2o_fluc, theta_fluc] + solutesf ].cov()
     #---------
 
     #---------
