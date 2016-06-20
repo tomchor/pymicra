@@ -10,7 +10,7 @@ numpy, datetime and several other packages.
 
 """
 
-def rotCoor(data, notation_defs=None):
+def rotCoor(data, notation=None):
     """
     Rotates the coordinates of wind data
     ----------------------
@@ -19,19 +19,16 @@ def rotCoor(data, notation_defs=None):
     ----------
     data: pandas DataFrame 
         the dataFrame to be rotated
-    notation_defs: notations object
+    notation: notation object
         a notation object to know which are the wind variables
     """
     from math import atan2, sqrt
     import numpy as np
+    import algs
 
     #-------
     # Getting the names for u, v, w
-    if notation_defs==None:
-        from core import notation
-        defs=notation()
-    else:
-        defs=notation_defs
+    defs = algs.get_notation(notation)
     wind_vars = [ defs.u, defs.v, defs.w ]
     #-------
 

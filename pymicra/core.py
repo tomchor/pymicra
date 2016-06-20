@@ -198,7 +198,7 @@ class siteConfig(object):
     __repr__ = __str__
 
 
-class notation(object):
+class Notation(object):
     """
     This creates an object that holds the default notation for pymicra.
     Example of usage:
@@ -274,17 +274,18 @@ class notation(object):
                 exec('self.{0}{1}_mixing_ratio = {2} self.mixing_ratio % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_concentration = {2} self.concentration % self.{0}'.format(subst, mode, comp))
 
-            exec('self.{0}_mass_density_fluctuations =  self.fluctuations % self.{0}_mass_density'.format(subst))
-            exec('self.{0}_molar_density_fluctuations = self.fluctuations % self.{0}_molar_density'.format(subst))
-            exec('self.{0}_mass_mixing_ratio_fluctuations = self.fluctuations % self.{0}_mass_mixing_ratio'.format(subst))
-            exec('self.{0}_molar_mixing_ratio_fluctuations = self.fluctuations % self.{0}_molar_mixing_ratio'.format(subst))
-            exec('self.{0}_mass_concentration_fluctuations = self.fluctuations % self.{0}_mass_concentration'.format(subst))
-            exec('self.{0}_molar_concentration_fluctuations = self.fluctuations % self.{0}_molar_concentration'.format(subst))
-
-            exec('self.{0}_density_fluctuations =  self.fluctuations % self.{0}_density'.format(subst))
-            exec('self.{0}_mixing_ratio_fluctuations = self.fluctuations % self.{0}_mixing_ratio'.format(subst))
-            exec('self.{0}_concentration_fluctuations = self.fluctuations % self.{0}_concentration'.format(subst))
-
+            for mode in ['fluctuations', 'star', 'std']:
+                exec('self.{0}_mass_density_{1} =  self.{1} % self.{0}_mass_density'.format(subst,mode))
+                exec('self.{0}_molar_density_{1} = self.{1} % self.{0}_molar_density'.format(subst,mode))
+                exec('self.{0}_mass_mixing_ratio_{1} = self.{1} % self.{0}_mass_mixing_ratio'.format(subst,mode))
+                exec('self.{0}_molar_mixing_ratio_{1} = self.{1} % self.{0}_molar_mixing_ratio'.format(subst,mode))
+                exec('self.{0}_mass_concentration_{1} = self.{1} % self.{0}_mass_concentration'.format(subst,mode))
+                exec('self.{0}_molar_concentration_{1} = self.{1} % self.{0}_molar_concentration'.format(subst,mode))
+    
+                exec('self.{0}_density_{1} =  self.{1} % self.{0}_density'.format(subst,mode))
+                exec('self.{0}_mixing_ratio_{1} = self.{1} % self.{0}_mixing_ratio'.format(subst,mode))
+                exec('self.{0}_concentration_{1} = self.{1} % self.{0}_concentration'.format(subst,mode))
+    
 
 
         for subst in ['co2', 'ch4', 'o3']:

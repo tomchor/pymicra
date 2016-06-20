@@ -120,7 +120,7 @@ def getScales(data, siteConf, units, notation=None,
     # First we construct the covariance matrix (slower but more readable than doing it separately)
     # maybe figure out later a way that is both faster and more readable
     print('Calculating the covariances ... ', end='')
-    cov = data[[u_fluc, w_fluc, theta_v_fluc, theta_fluc, q_fluc] + solutesf ].cov()
+    cov = data[[u_fluc, w_fluc, theta_v_fluc, theta_fluc, q_fluc, mrho_h2o_fluc] + solutesf ].cov()
     print('done!')
     #-----------
     
@@ -140,11 +140,11 @@ def getScales(data, siteConf, units, notation=None,
     out[ defs.thermodyn_temp_star ] = cov.loc[theta_fluc, w_fluc] / u_star
     out[ defs.thermodyn_temp_std ]  = data[ theta_fluc ].std()
 
-    q_star  = cov.loc[ q_fluc, w_fluc ] / u_star
-    q_std   = data[ q_fluc ].std()
+    out[ defs.specific_humidity_star ]  = cov.loc[ q_fluc, w_fluc ] / u_star
+    out[ defs.specific_humidity_std ]   = data[ q_fluc ].std()
 
-    out[ defs.molar_density_star ] = cov.loc[ mrho_h2o_fluc, w_fluc ] / u_star
-    out[ defs.molar_density_std ] = data[ mrho_h2o ].std()
+    out[ defs.h2o_molar_density_star ] = cov.loc[ mrho_h2o_fluc, w_fluc ] / u_star
+    out[ defs.h2o_molar_density_std ]  = data[ mrho_h2o_fluc ].std()
 
     print('done!')
     #---------
@@ -161,14 +161,15 @@ def getScales(data, siteConf, units, notation=None,
     outunits[ defs.thermodyn_temp_star ] = units[ theta_v_fluc ]
     outunits[ defs.thermodyn_temp_std ]  = units[ theta_v_fluc ]
 
-    q_star  = cov.loc[ q_fluc, w_fluc ] / u_star
-    q_std   = data[ q_fluc ].std()
+    outunits[ defs.specific_humidity_star ]  = units[ q_fluc ]
+    outunits[ defs.specific_humidity_std ]   = units[ q_fluc ]
+
+    outunits[ defs.h2o_molar_density_star ] = units[ mrho_h2o_fluc ]
+    outunits[ defs.h2o_molar_density_std ]  = units[ mrho_h2o_fluc ]
     #---------
 
     #---------
     # The solutes have to be calculated separately
-    sol_star = []
-    sol_std  = []
     for sol_fluc, sol in zip(solutesf, solutes):
         print('Calculating the turbulent scale and STD of %s ... ' % sol, end='')
         out[ defs.molar_density % defs.star % sol ]      = cov.loc[sol_fluc, w_fluc] / u_star
@@ -187,7 +188,7 @@ def getScales(data, siteConf, units, notation=None,
     out[ defs.MonObuLen ]       = Lm
     out[ defs.similarityVar ]   = MonObuSimVar(Lm, siteConf)
 
-    outunits[ defs.MonObuLen ] = cunits[ 'gravity' ]
+    outunits[ defs.MonObuLen ] = (outunits[ defs.u_star ]**2.)/cunits[ 'gravity' ]
     outunits[ defs.similarityVar ] = ureg['meter']/outunits[ defs.MonObuLen ]
     print('done!')
     #---------
@@ -231,16 +232,17 @@ def get_scales(dataframe, siteConf, notation_defs=None,
     CHECKLIST:
     ADD MIXED-LAYER CONVECTION SCALES FOR VELOCITY (w*) AND TEMPERATURE (t*) MAYBE
     """
-    from ..core import notation
+    from .. import algs
     from .. import constants
     from .. import physics
     import pandas as pd
     import numpy as np
 
-    if notation_defs==None:
-        defs=notation()
-    else:
-        defs=notation_defs
+    #if notation_defs==None:
+    #    defs=notation()
+    #else:
+    #    defs=notation_defs
+    defs = algs.get_notation(notation)
     data = dataframe.copy()
     
     #---------

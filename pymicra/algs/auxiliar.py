@@ -701,8 +701,10 @@ def get_notation(notation_def):
     if notation_def != None:
         return notation_def
     else:
+        #from .. import notation
+        #return notation()
         from .. import notation
-        return notation()
+        return notation
 
 
 def latexify(variables, math_mode=True):

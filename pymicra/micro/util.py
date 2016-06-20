@@ -18,7 +18,7 @@ specific evaporation heat?
 * water to dry air mixing ratio
 """
 
-def preProcess(data, units, notation_defs=None,
+def preProcess(data, units, notation=None,
         rho_air_from_theta_v=True, inplace=True, theta=None, solutes=[]):
     '''
     Pre-processes data by calculating moist and dry air densities, specific humidity
@@ -30,13 +30,12 @@ def preProcess(data, units, notation_defs=None,
         dataframe with micrometeorological measurements
     units: dict
         units dictionary with the columns of data as keys
-    notation_defs: pymicra.notation
+    notation: pymicra.notation
         defining notation used in data
     rho_air_from_theta_v: bool
         whether to use theta_v to calculate air density or theta
     '''
     from .. import constants
-    from .. import notation
     from .. import algs
     from .. import physics
     from .. import ureg
@@ -51,10 +50,7 @@ def preProcess(data, units, notation_defs=None,
 
     #---------
     # Define useful notation to look for
-    if notation_defs==None:
-        defs=notation()
-    else:
-        defs=notation_defs
+    defs = algs.get_notation(notation)
     #---------
 
     print('Beginning of pre-processing ...')
@@ -222,8 +218,9 @@ def eddyCov(data, wpl=True,
         list that holds every solute considered for flux
     """
     from .. import constants
-    from ..core import notation
+    #from ..core import notation
     import pandas as pd
+    from .. import algs
 
     if from_fluctuations:
         return eddyCov3(data, wpl=wpl, notation_defs=notation_defs, solutes=solutes)
@@ -233,10 +230,11 @@ def eddyCov(data, wpl=True,
 
     #---------
     # Define useful notation to look for
-    if notation_defs==None:
-        defs=notation()
-    else:
-        defs=notation_defs
+    defs=algs.get_notation(notation_defs)
+#    if notation_defs==None:
+#        defs=notation()
+#    else:
+#        defs=notation_defs
     star = defs.star
     #---------
 
@@ -315,18 +313,20 @@ def eddyCov2(data, wpl=True,
         list that holds every solute considered for flux
     """
     from .. import constants
-    from ..core import notation
+    #from ..core import notation
     import pandas as pd
+    from .. import algs
 
     cp = constants.cp_dry
     lamb = constants.latent_heat_water
 
     #---------
     # Define useful notation to look for
-    if notation_defs==None:
-        defs=notation()
-    else:
-        defs=notation_defs
+    defs = algs.get_notation(notation_defs)
+#    if notation_defs==None:
+#        defs=notation()
+#    else:
+#        defs=notation_defs
     fluct = defs.fluctuation
     mean = defs.mean
     #---------
