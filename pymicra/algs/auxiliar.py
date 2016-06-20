@@ -138,53 +138,6 @@ def fitByDate(data, degree=1, rule=None):
     return out
 
 
-#---------
-# Definition of dataframe method to fit
-def _polyfit(self, degree=1, rule=None):
-    """
-    This method fits an n-degree polynomial to the dataset. The index can
-    be a DateTimeIndex or not
-
-    Parameters
-    ----------
-    data: pd.DataFrame, pd.Series
-        dataframe whose columns have to be fitted
-    degree: int
-        degree of the polynomial. Default is 1.
-    rule: str
-        pandas offside string. Ex.: "10min".
-    """
-    import pandas as pd
-
-    data = self.copy()
-    if isinstance(self, pd.Series):
-        data = pd.DataFrame(data)
-    #-----------
-    # If rule == None it should return a list of 1
-    dflist=splitData(data, rule=rule)
-    #-----------
-
-    out=pd.DataFrame()
-    if isinstance(data.index, pd.DatetimeIndex):
-        for data in dflist:
-            xx=data.index.to_julian_date()
-            aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
-            out=out.append(aux)
-    else:
-         for data in dflist:
-            xx=data.index.values
-            aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
-            out=out.append(aux)
- 
-    if isinstance(self, pd.Series):
-        return out.iloc[:, 0]
-    else:
-        return out
-pd.DataFrame.polyfit = _polyfit
-pd.Series.polyfit = _polyfit
-#---------
-
-
 def stripDown(str, final='', args=['_', '-']):
     """
     Auxiliar function to strip down keywords from symbols
@@ -446,8 +399,6 @@ def parseDates(data, dataloggerConfig=None,
         aux=data[date_col_names[0]].astype(int).astype(str)
     for col in date_col_names[1:]:
         aux+=connector + data[col].astype(str)
-    #print(date_col_names)
-    #print(data[date_col_names])
     dates=pd.to_datetime(aux, format=date_format)
     #-------------------------------------
 
@@ -689,102 +640,6 @@ def find_nearest(array, value):
 def mad(data, axis=None):
     import numpy as np
     return np.median(np.absolute(data - np.median(data, axis)), axis)
-
-#--------
-# Define xplot method for pandas dataframes
-def _xplot(self, xcol, reverse_x=False, return_ax=False, 
-            fixed_cols=[], fcols_styles=[], latexfy=False, **kwargs):
-    """
-    A smarter way to plot things with the x axis being one of the columns. Very useful for
-    comparison of models and results
-
-    Parameters:
-    -----------
-    xcol: str
-        the name of the column you want in the x axis
-    reverse_x: bool
-        whether to plot -xcol instead of xcol in the x-axis
-    return_ax: bool
-        whther to return pyplot's axis object for the plot
-    fixed_cols: list of strings
-        columns to plot in every subplot (only if you use subplot=True on keywords)
-    fcols_styles: list of string
-        styles to use for fixed_cols
-    latexfy: cool
-        whether to attempt to transform names of columns into latex format
-    **kwargs:
-        kwargs to poss to pandas.plot method
-
-    LATEXFY IS STILL BUGGY
-    """
-    df = self.copy()
-
-    #-----------
-    # Try to display letters in the latex mathematical environment
-    if latexfy:
-        from ..constants import greek_alphabet
-        cols2 = []
-        for i, col in enumerate(df.columns):
-            cols2.append(col)
-            for code, letter in greek_alphabet.iteritems():
-                cols2[-1] = cols2[-1].replace(letter,code)
-            cols2[-1] = "$"+cols2[-1]+"$"
-        df.columns = cols2
-        for code, letter in greek_alphabet.iteritems():
-            xcol = xcol.replace(letter,code)
-        xcol = "$"+xcol+"$"
-    #-----------
-
-    #-----------
-    # If you want ti plot against -xcol instead of xcol (useful for log plots)
-    if reverse_x:
-        newx = '-'+str(xcol)
-        df[newx] = -df[xcol]
-        df = df.drop(xcol, axis=1)
-        xcol = newx
-    #-----------
-
-    subcols = df.columns.drop(fixed_cols)
-    #--------
-    # Checks for double xlim kwarg
-    if kwargs.has_key('xlim'):
-        xlim = kwargs['xlim']
-        kwargs.pop('xlim')
-    else:
-        xlim=[df[xcol].min(), df[xcol].max()]
-    #--------
-
-    #--------
-    # Here we actually plot the dataFrame
-    try:
-        axes = df[subcols].sort_values(xcol, axis=0).plot(x=xcol, xlim=xlim, **kwargs)
-    except:
-        axes = df[subcols].sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
-    #--------
-
-    #-------
-    # Plot the fixed cols in each of the subplots
-    if fixed_cols:
-        #-------
-        # The code won't work without style string
-        if len(fcols_styles) == len(fixed_cols):
-            pass
-        else:
-            fcols_styles = ['b-']*len(fixed_cols)
-        #-------
-
-        for fcol, fstyle in zip(fixed_cols, fcols_styles):
-            df2 = df.sort_values(fcol, axis=0)
-            for ax in axes[0]:
-                ax.plot(df2[xcol], df2[fcol], fstyle, label=xcol)
-    #-------
-
-    if return_ax:
-        return axes
-    else:
-        return
-pd.DataFrame.xplot = _xplot
-#--------
 
 
 def parseUnits(unitstr):

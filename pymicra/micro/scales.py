@@ -143,6 +143,9 @@ def getScales(data, siteConf, units, notation=None,
     q_star  = cov.loc[ q_fluc, w_fluc ] / u_star
     q_std   = data[ q_fluc ].std()
 
+    out[ defs.molar_density_star ] = cov.loc[ mrho_h2o_fluc, w_fluc ] / u_star
+    out[ defs.molar_density_std ] = data[ mrho_h2o ].std()
+
     print('done!')
     #---------
 

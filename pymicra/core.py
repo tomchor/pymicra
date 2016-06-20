@@ -212,17 +212,19 @@ class notation(object):
     """
     mean='%s_mean'
     fluctuations="%s'"
-    fluctuation=fluctuations
     star='%s_star'
     std='%s_std'
-    concentration='conc_%s'
+    mass_concentration='conc_%s'
     molar_concentration='mconc_%s'
-    density='rho_%s'
-    mass_density=density
+    mass_density='rho_%s'
     molar_density='mrho_%s'
-    mixing_ratio='r_%s'
-    mass_mixing_ratio=mixing_ratio
+    mass_mixing_ratio='r_%s'
     molar_mixing_ratio='mr_%s'
+
+    #fluctuation=fluctuations
+    density=mass_density
+    concentration=mass_concentration
+    mixing_ratio=mass_mixing_ratio
 
     u='u'
     v='v'
@@ -261,23 +263,27 @@ class notation(object):
         """
         for subst in ['h2o', 'co2', 'ch4', 'o3', 'moist_air', 'dry_air']:
             for mode, comp in zip(['', '_mean' ], ['', 'self.mean %']):
-                exec('self.{0}{1}_density = {2} self.density % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_mass_density = {2} self.mass_density % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_molar_density = {2} self.molar_density % self.{0}'.format(subst, mode, comp))
-                exec('self.{0}{1}_mixing_ratio = {2} self.mixing_ratio % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_mass_mixing_ratio = {2} self.mass_mixing_ratio % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_molar_mixing_ratio = {2} self.molar_mixing_ratio % self.{0}'.format(subst, mode, comp))
-                exec('self.{0}{1}_concentration = {2} self.concentration % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_mass_concentration = {2} self.mass_concentration % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_molar_concentration = {2} self.molar_concentration % self.{0}'.format(subst, mode, comp))
 
-            exec('self.{0}_density_fluctuations =  self.fluctuations % self.{0}_density'.format(subst))
+                exec('self.{0}{1}_density = {2} self.density % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_mixing_ratio = {2} self.mixing_ratio % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_concentration = {2} self.concentration % self.{0}'.format(subst, mode, comp))
+
             exec('self.{0}_mass_density_fluctuations =  self.fluctuations % self.{0}_mass_density'.format(subst))
             exec('self.{0}_molar_density_fluctuations = self.fluctuations % self.{0}_molar_density'.format(subst))
-            exec('self.{0}_mixing_ratio_fluctuations = self.fluctuations % self.{0}_mixing_ratio'.format(subst))
             exec('self.{0}_mass_mixing_ratio_fluctuations = self.fluctuations % self.{0}_mass_mixing_ratio'.format(subst))
             exec('self.{0}_molar_mixing_ratio_fluctuations = self.fluctuations % self.{0}_molar_mixing_ratio'.format(subst))
-            exec('self.{0}_concentration_fluctuations = self.fluctuations % self.{0}_concentration'.format(subst))
+            exec('self.{0}_mass_concentration_fluctuations = self.fluctuations % self.{0}_mass_concentration'.format(subst))
             exec('self.{0}_molar_concentration_fluctuations = self.fluctuations % self.{0}_molar_concentration'.format(subst))
+
+            exec('self.{0}_density_fluctuations =  self.fluctuations % self.{0}_density'.format(subst))
+            exec('self.{0}_mixing_ratio_fluctuations = self.fluctuations % self.{0}_mixing_ratio'.format(subst))
+            exec('self.{0}_concentration_fluctuations = self.fluctuations % self.{0}_concentration'.format(subst))
 
 
 

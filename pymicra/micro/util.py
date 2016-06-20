@@ -75,20 +75,20 @@ def preProcess(data, units, notation_defs=None,
 
     #---------
     # Check for h2o mass density
-    if defs.h2o_density not in data.columns:
+    if defs.h2o_mass_density not in data.columns:
         print("Didn't locate mass density of h2o. Trying to calculate it ... ", end='')
-        data.loc[:, defs.h2o_density ] = data.loc[:, defs.h2o_molar_density ]*Mh2o
-        units.update({ defs.h2o_density : units[ defs.h2o_molar_density ]*molar_mass_unit })
+        data.loc[:, defs.h2o_mass_density ] = data.loc[:, defs.h2o_molar_density ]*Mh2o
+        units.update({ defs.h2o_mass_density : units[ defs.h2o_molar_density ]*molar_mass_unit })
         print("Done!")
-    data.loc[:, defs.h2o_density] = algs.convert_to(data[ defs.h2o_density ], units, 'kg/m**3', inplace=True, key=defs.h2o_density)
+    data.loc[:, defs.h2o_mass_density] = algs.convert_to(data[ defs.h2o_mass_density ], units, 'kg/m**3', inplace=True, key=defs.h2o_mass_density)
     #---------
 
     #---------
     # Check for h2o molar density
     if defs.h2o_molar_density not in data.columns:
         print("Didn't locate molar density of h2o. Trying to calculate it ... ", end='')
-        data.loc[:, defs.h2o_molar_density ] = data.loc[:, defs.h2o_density ]/Mh2o
-        units.update({ defs.h2o_molar_density : units[ defs.h2o_density ]/molar_mass_unit })
+        data.loc[:, defs.h2o_molar_density ] = data.loc[:, defs.h2o_mass_density ]/Mh2o
+        units.update({ defs.h2o_molar_density : units[ defs.h2o_mass_density ]/molar_mass_unit })
         print("Done!")
     #---------
 
@@ -120,7 +120,7 @@ def preProcess(data, units, notation_defs=None,
     #---------
     # Calculation of specific humidity is done here
     if (defs.specific_humidity not in data.columns):
-        print('Calculating specific humidty = rho_h2o / rho_air ... ', end='')
+        print('Calculating specific humidity = rho_h2o / rho_air ... ', end='')
         data.loc[:, defs.specific_humidity] = data[ defs.h2o_density ] / data[ defs.moist_air_density ]
         units.update({ defs.specific_humidity : units[ defs.h2o_density ] / units[ defs.moist_air_density ] })
         print('Done!')
@@ -129,9 +129,9 @@ def preProcess(data, units, notation_defs=None,
     #---------
     # Calculation of mixing ratio is done here
     if (defs.h2o_mixing_ratio not in data.columns):
-        print('Calculating h2o mixing ratio = rho_h2o / rho_dry ... ', end='')
-        data.loc[:, defs.h2o_mixing_ratio] = data[ defs.h2o_density ] / data[ defs.dry_air_density ]
-        units.update({ defs.h2o_mixing_ratio : units[ defs.h2o_density ] / units[ defs.dry_air_density ] })
+        print('Calculating h2o mass mixing ratio = rho_h2o / rho_dry ... ', end='')
+        data.loc[:, defs.h2o_mass_mixing_ratio] = data[ defs.h2o_density ] / data[ defs.dry_air_density ]
+        units.update({ defs.h2o_mass_mixing_ratio : units[ defs.h2o_density ] / units[ defs.dry_air_density ] })
         print('Done!')
     #---------
 
@@ -147,10 +147,10 @@ def preProcess(data, units, notation_defs=None,
     #---------
     # Here we deal with the SOLUTES!
     for solute in solutes:
-        sol_density = eval('defs.{}_density'.format(solute))
+        sol_density = eval('defs.{}_mass_density'.format(solute))
         sol_molar_density = eval('defs.{}_molar_density'.format(solute))
-        sol_concentration = eval('defs.{}_concentration'.format(solute))
-        sol_mixing_ratio = eval('defs.{}_mixing_ratio'.format(solute))
+        sol_concentration = eval('defs.{}_mass_concentration'.format(solute))
+        sol_mixing_ratio = eval('defs.{}_mass_mixing_ratio'.format(solute))
         M_sol = constants.molar_mass[solute]
 
         #---------
@@ -175,7 +175,7 @@ def preProcess(data, units, notation_defs=None,
         #---------
         # Calculation of SOLUTE concentration (g/g) is done here
         if (sol_concentration not in data.columns):
-            print('Calculating {0} concentration (g/g) = rho_{0} / rho_air ... '.format(solute), end='')
+            print('Calculating {0} mass concentration (g/g) = rho_{0} / rho_air ... '.format(solute), end='')
             data.loc[:, sol_concentration] = data[ sol_density ] / data[ defs.moist_air_density ]
             units.update({ sol_concentration : units[ sol_density ] / units[ defs.moist_air_density ] })
             print("Done!")
@@ -184,7 +184,7 @@ def preProcess(data, units, notation_defs=None,
         #---------
         # Calculation of SOLUTE mixing ratio is done here
         if (sol_mixing_ratio not in data.columns):
-            print('Calculating {0} mixing ratio = rho_{0} / rho_dry ... '.format(solute), end='')
+            print('Calculating {0} mass mixing ratio = rho_{0} / rho_dry ... '.format(solute), end='')
             data.loc[:, sol_mixing_ratio] = data[ sol_density ] / data[ defs.dry_air_density ]
             units.update({ sol_mixing_ratio : units[ sol_density ] / units[ defs.dry_air_density ] })
             print("Done!")
@@ -594,21 +594,21 @@ def eddyCov_from_scales(data, units, wpl=True,
         units = units.copy()
     cunits = constants.units
 
-    print('Beginning Eddy Covariance method...')
+    print('Beginning retrieval of fluxes ...')
     #---------
     # Define name of variables to look for based on the notation
-    u_fluc          =   defs.u_fluctuations
-    w_fluc          =   defs.w_fluctuations
-    mrho_h2o_fluc   =   defs.h2o_molar_density_fluctuations
-    rho_h2o_fluc    =   defs.h2o_density_fluctuations
-    theta_fluc      =   defs.thermodyn_temp_fluctuations
-    theta_v_fluc    =   defs.virtual_temp_fluctuations
-    q_fluc          =   defs.specific_humidity_fluctuations
-    solutesf        = [ defs.molar_density % defs.fluctuations % solute for solute in solutes ]
+    u_star          =   defs.u_star
+    w_star          =   defs.w_star
+    mrho_h2o_star   =   defs.h2o_molar_density_star
+    rho_h2o_star    =   defs.h2o_density_star
+    theta_star      =   defs.thermodyn_temp_star
+    theta_v_star    =   defs.virtual_temp_star
+    q_star          =   defs.specific_humidity_star
+    solute_stars    = [ defs.molar_density % defs.star % solute for solute in solutes ]
     #---------
-
+    exit()
     #---------
-    # Now we try to calculate or identify the fluctuations of theta
+    # Now we try to calculate or identify the turbulent scale of theta
     theta_mean = data[ defs.thermodyn_temp ].mean()
     if theta_fluc not in data.columns:
         print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
