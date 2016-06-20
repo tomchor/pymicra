@@ -168,11 +168,11 @@ def getScales(data, siteConf, units, notation=None,
     sol_std  = []
     for sol_fluc, sol in zip(solutesf, solutes):
         print('Calculating the turbulent scale and STD of %s ... ' % sol, end='')
-        out[ defs.star % sol ]      = cov.loc[sol_fluc, w_fluc] / u_star
-        out[ defs.std % sol ]       = data[ sol_fluc ].std()
+        out[ defs.molar_density % defs.star % sol ]      = cov.loc[sol_fluc, w_fluc] / u_star
+        out[ defs.molar_density % defs.std % sol ]       = data[ sol_fluc ].std()
 
-        outunits[ defs.star % sol ] = units[ sol_fluc ]
-        outunits[ defs.std % sol ]  = units[ sol_fluc ]
+        outunits[ defs.molar_density % defs.star % sol ] = units[ sol_fluc ]
+        outunits[ defs.molar_density % defs.std % sol ]  = units[ sol_fluc ]
         print('done!')
     #---------
 
