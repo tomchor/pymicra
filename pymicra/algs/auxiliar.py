@@ -849,3 +849,19 @@ def get_notation(notation_def):
         from .. import notation
         return notation()
 
+
+def latexify(variables, math_mode=True):
+    '''
+    '''
+    from ..constants import greek_alphabet
+
+    latex = []
+    for var in variables:
+        new = var
+        for letter in greek_alphabet.values():
+            new = new.replace(letter, r'\{}'.format(letter))
+        if math_mode:
+            latex.append('${}$'.format(new))
+        else:
+            latex.append(new)
+    return latex
