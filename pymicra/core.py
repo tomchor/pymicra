@@ -172,7 +172,7 @@ class siteConfig(object):
 
         #---------
         # If there's no displacement height, we try to calculate it
-        if displacement_height:
+        if displacement_height != None:
             self.displacement_height=displacement_height
         else:
             if canopy_height:
@@ -188,11 +188,15 @@ class siteConfig(object):
 
     def __str__(self):
         """
+        Creates nice representation for printing siteConfig objects based on pandas.Series
         """
         import pandas as pd
-        return pd.Series(self.__dict__).__str__()
+        string = '<pymicra.siteConfig> object: {}\n----\n'.format(self.description)
+        string+= pd.Series(self.__dict__).__str__()
+        return string
 
     __repr__ = __str__
+
 
 class notation(object):
     """
@@ -285,4 +289,10 @@ class notation(object):
             exec('self.{0}_mean = self.mean % self.{0}'.format(subst))
             exec('self.{0}_star = self.star % self.{0}'.format(subst))
             exec('self.{0}_std = self.std % self.{0}'.format(subst))
+
+    def __str__(self):
+        import pandas as pd
+        string = pd.Series(self.__dict__).__str__()
+        return string
+    __repr__ = __str__
 
