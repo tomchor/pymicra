@@ -52,7 +52,7 @@ def ppxv2density(ser, T, p, units, solute=None):
     units.update({solute:unit})
     return out, units
 
-def airDensity_from_theta_v(data, units, notation=None, inplace=True):
+def airDensity_from_theta_v(data, units, notation=None, inplace=True, use_means=False):
     '''
     Calculates moist air density using p = rho R_dry T_virtual
     '''
@@ -67,7 +67,10 @@ def airDensity_from_theta_v(data, units, notation=None, inplace=True):
 
     #---------
     # Calculates air density and its unit with theta_v and R_dry
-    data.loc[:, defs.moist_air_density ] = data[ defs.pressure ]/(R_dry * data[ defs.virtual_temp ])
+    if use_means:
+        data.loc[:, defs.moist_air_density ] = data[ defs.pressure ].mean()/(R_dry * data[ defs.virtual_temp ].mean())
+    else:
+        data.loc[:, defs.moist_air_density ] = data[ defs.pressure ]/(R_dry * data[ defs.virtual_temp ])
     units.update({ defs.moist_air_density : units[ defs.pressure ]/(constants.units['R_spec']*units[ defs.virtual_temp ]) })
     #---------
 
@@ -117,16 +120,25 @@ def dryAirDensity_from_p(data, units, notation=None, inplace=True):
         return data, units
 
 
-def airDensity_from_theta(rho_h2o, pressure, temp, dataunits, full=False):
-    from . import constants
+def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=False):
+    '''
+    Calculates moist air density using theta measurements
+    '''
     from . import algs
+    from . import constants
 
-    dataunits = dataunits.copy()
-    Rh2o = constants.R_spec['h2o']
-    Rdry = constants.R_spec['dry']
+    defs = algs.get_notation(notation)
+    data = data.copy()
+    #if not inplace:
+    #    units = units.copy()
+    R_dry = constants.R_spec['dry']
+    R_h2o = constants.R_spec['h2o']
 
-    p_h2o = rho_h2o*Rh2o*temp 
-    dataunits['p_h2o'] = dataunits['h2o']*constants.units['R_spec']*dataunits['T']
+    if not theta:
+        theta = data[ defs.thermodyn_temp ]
+
+    p_h2o = data[ defs.h2o_mass_density ] * R_h2o * theta
+    #units['p_h2o'] = units['h2o']*constants.units['R_spec']*dataunits['T']
 
     p_h2o, unit = algs.convert_to(p_h2o, dataunits['p_h2o'], 'kPa')
     dataunits['p_h2o'] = unit
@@ -139,10 +151,10 @@ def airDensity_from_theta(rho_h2o, pressure, temp, dataunits, full=False):
     dataunits['p_dry'] = dataunits['p']# - dataunits['p_h2o']
     #-----------
 
-    rho_dry = p_dry/(Rdry*temp)
-    dataunits['rho_dry'] = dataunits['p_dry']/(constants.units['R_spec']*dataunits['T'])
-    rho_dry = algs.convert_to(rho_dry, dataunits, 'kg/m**3', key='rho_dry', inplace=True)
-    rho_h2o = algs.convert_to(rho_h2o, dataunits, 'kg/m**3', key='h2o', inplace=True)   
+    rho_dry = p_dry/(R_dry*temp)
+    #dataunits['rho_dry'] = dataunits['p_dry']/(constants.units['R_spec']*dataunits['T'])
+    #rho_dry = algs.convert_to(rho_dry, dataunits, 'kg/m**3', key='rho_dry', inplace=True)
+    #rho_h2o = algs.convert_to(rho_h2o, dataunits, 'kg/m**3', key='h2o', inplace=True)   
 
     #-----------
     # Mantaining units with subtraction or addition is tricky

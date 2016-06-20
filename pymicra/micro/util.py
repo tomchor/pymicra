@@ -18,7 +18,7 @@ specific evaporation heat?
 * water to dry air mixing ratio
 """
 
-def preProcess(data, units, notation=None,
+def preProcess(data, units, notation=None, use_means=False,
         rho_air_from_theta_v=True, inplace=True, theta=None, solutes=[]):
     '''
     Pre-processes data by calculating moist and dry air densities, specific humidity
@@ -93,7 +93,7 @@ def preProcess(data, units, notation=None,
     if (defs.moist_air_density not in data.columns):
         if rho_air_from_theta_v:
             print('Calculating rho_air = p/(Rdry * theta_v) ... ', end='')
-            data = physics.airDensity_from_theta_v(data, units, notation=defs, inplace=True)
+            data = physics.airDensity_from_theta_v(data, units, notation=defs, inplace=True, use_means=use_means)
             print('Done!')
         else:
             if theta:
@@ -101,14 +101,14 @@ def preProcess(data, units, notation=None,
             else:
                 print('Trying to calculate rho_air using theta from this dataset ... ', end='')
             print('\nCalculation of air density from theta has to be implemented. Please try rho_air_from_theta_v=True.')
-            #algs.airDensity_from_theta()
+            a = algs.airDensity_from_theta(data, units, notation=defs, inplaces=False, use_means=use_means)
     #---------
 
     #---------
     # Calculation of rho_dry is done here
     if (defs.dry_air_density not in data.columns):
         print('Calculating rho_dry_air = rho_air - rho_h2o ... ', end='')
-        data.loc[:, defs.dry_air_density ] = data[ defs.moist_air_density ] - data[ defs.h2o_density ]
+        data.loc[:, defs.dry_air_density ] = data[ defs.moist_air_density ] - data[ defs.h2o_mass_density ]
         units.update({ defs.dry_air_density : units[ defs.moist_air_density ] })
         print('Done!')
     #---------
