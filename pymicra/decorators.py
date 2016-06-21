@@ -1,25 +1,70 @@
-class ConvertArgumentTypes(object):
+from functools import wraps
+
+
+def pdgeneral_in(func):
     """
-    Converts function arguments to specified types.
-    
-    Example:
-    @ConvertArgumentTypes(int, float, c=int, d=str)
-    def z(a,b,c=0,d=""):
-            return a + b, (c,d)
     """
-    def __init__(self,*args, **kw):
-        self.args = args
-        self.kw = kw
-    def __call__(self, f):
-        def func(*args, **kw):
-            nargs = [x[0](x[1]) for x in zip(self.args, args)]
-            invalidkw = [x for x in kw if x not in self.kw]
-            if len(invalidkw) > 0:
-                raise TypeError, f.func_name + "() got an unexpected keyword argument '%s'" % invalidkw[0]
-            kw = dict([(x,self.kw[x](kw[x])) for x in kw])
-            v = f(*nargs, **kw)
-            return v
-        return func
+    import pandas as pd
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if isinstance(args[0], pd.Series):
+            ser = args[0]
+            args = tuple([pd.DataFrame(ser, dtype=ser.dtype)]) + args[1:]
+        elif not isinstance(args[0], pd.DataFrame):
+            raise TypeError('Input must be a pandas.Series or pandas.DataFrame')
+        result = func(*args, **kwargs)
+        return result
+    return wrapper
+
+
+def pdgeneral_io(func):
+    """
+    """
+    import pandas as pd
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if isinstance(args[0], pd.Series):
+            ser = args[0]
+            args = tuple([pd.DataFrame(ser, dtype=ser.dtype)]) + args[1:]
+
+            result = func(*args, **kwargs)
+
+            if isinstance (result, pd.DataFrame):
+                result = pd.Series(result.iloc[:, 0].values)
+
+            elif isinstance (result, pd.Series):
+                pass
+
+            elif isinstance(result, list):
+                result[0] = pd.Series(result[0].iloc[:, 0].values)
+
+            elif isinstance(result, tuple):
+                result = tuple([pd.Series(result[0].iloc[:, 0].values)]) + result[1:]
+
+            return result
+
+        elif not isinstance(args[0], pd.DataFrame):
+            raise TypeError('Input must be a pandas.Series or pandas.DataFrame')
+        else:
+            result = func(*args, **kwargs)
+            return result
+    return wrapper
+
+def pdgeneral(convert_out=True):
+    if convert_out:
+        return pdgeneral_io
+    else:
+        return pdgeneral_in
+
+
+
+#@pdgeneral(convert_out=True)
+#def square(df, n, func=pow):
+#    df = df.copy()
+#    for c in df.columns:
+#        df[c] = df[c]**n
+#    return df, n
+
 
 def autoassign(*names, **kwargs):
     """

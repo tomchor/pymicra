@@ -25,6 +25,7 @@ try:
 except ImportError:
     pass
 #---------
+import decorators
 
 from io import timeSeries, read_dlc, read_site, readUnitsCsv
 from util import qcontrol, separateFiles, correctDrift

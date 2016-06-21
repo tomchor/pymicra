@@ -134,6 +134,8 @@ class siteConfig(object):
     Keeper of the configurations and constants of an experiment. (such as height of instruments,
     location, canopy height and etc)
     """
+    from . import decorators
+    @decorators.autoassign
     def __init__(self, from_file=None,
              instruments_height=None, measurement_height=None, canopy_height=None,
              displacement_height=None, roughness_length=None,
@@ -165,11 +167,11 @@ class siteConfig(object):
             return
         #---------
 
-        self.description = description
-        self.instruments_height = instruments_height    #meters
-        self.measurement_height = measurement_height    #meters
-        self.canopy_height = canopy_height              #meters
-        self.roughness_length = roughness_length
+        #self.description = description
+        #self.instruments_height = instruments_height    #meters
+        #self.measurement_height = measurement_height    #meters
+        #self.canopy_height = canopy_height              #meters
+        #self.roughness_length = roughness_length
 
         #---------
         # If there's no displacement height, we try to calculate it
@@ -182,9 +184,9 @@ class siteConfig(object):
                 self.displacement_height = None
         #---------
             
-        self.latitude = latitude
-        self.longitude = longitude
-        self.altitude = altitude
+        #self.latitude = latitude
+        #self.longitude = longitude
+        #self.altitude = altitude
 
 
     def __str__(self):
@@ -192,7 +194,7 @@ class siteConfig(object):
         Creates nice representation for printing siteConfig objects based on pandas.Series
         """
         import pandas as pd
-        string = '<pymicra.siteConfig> object: {}\n----\n'.format(self.description)
+        string = '<pymicra.siteConfig> object\n{}\n----\n'.format(self.description)
         string+= pd.Series(self.__dict__).__str__()
         return string
     __repr__ = __str__
