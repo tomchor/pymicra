@@ -1,7 +1,4 @@
 from __future__ import print_function
-#!/usr/bin/python
-"""
-"""
 
 class dataloggerConfig(object):
     """
@@ -125,7 +122,11 @@ class dataloggerConfig(object):
         self.units=units
         self.description=description
         self.filename_format=filename_format
-        return
+
+
+    def __str__(self):
+        return '<pymicra.dataloggerConfig>\n{}'.format(self.description)
+    __repr__ = __str__
 
 
 class siteConfig(object):
@@ -194,7 +195,6 @@ class siteConfig(object):
         string = '<pymicra.siteConfig> object: {}\n----\n'.format(self.description)
         string+= pd.Series(self.__dict__).__str__()
         return string
-
     __repr__ = __str__
 
 
@@ -221,7 +221,6 @@ class Notation(object):
     mass_mixing_ratio='r_%s'
     molar_mixing_ratio='mr_%s'
 
-    #fluctuation=fluctuations
     density=mass_density
     concentration=mass_concentration
     mixing_ratio=mass_mixing_ratio

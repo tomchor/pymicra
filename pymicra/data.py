@@ -333,24 +333,6 @@ def bulkCorr(data):
     return r
 
 
-#----------
-# Definition of bulk_correlation according to
-# Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
-# doi:10.1029/2012WR012127
-#def _bulk_corr(self):
-#    import numpy as np
-#    df = self.copy()
-#    cov = df.cov()
-#    out = cov.copy()
-#    for c in out.columns:
-#        out.loc[:, c] = out.loc[:, c]/np.sqrt(cov.loc[c, c])
-#    for idx in out.index:
-#        out.loc[idx, :] = out.loc[idx, :]/np.sqrt(cov.loc[idx, idx])
-#    return out
-#import pandas as pd
-#pd.DataFrame.bulk_corr = _bulk_corr
-#del pd      # prevents pandas to being pre-loaded in data.py
-#----------
 
 
 def reverse_arrangement(array, points_number=None, alpha=0.05, verbose=False):
