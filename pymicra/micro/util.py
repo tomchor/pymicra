@@ -101,7 +101,7 @@ def preProcess(data, units, notation=None, use_means=False,
             else:
                 print('Trying to calculate rho_air using theta from this dataset ... ', end='')
             print('\nCalculation of air density from theta has to be implemented. Please try rho_air_from_theta_v=True.')
-            a = algs.airDensity_from_theta(data, units, notation=defs, inplaces=False, use_means=use_means)
+            a = physics.airDensity_from_theta(data, units, notation=defs, inplaces=False, use_means=use_means)
     #---------
 
     #---------

@@ -386,14 +386,14 @@ def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscal
     return xsm, ysm
 
 
-def get_index(x, y):
+def get_index(x, to_look_for):
     """
     Just like the .index method of lists, except it works for multiple values
 
     Parameter:
     x: list or array
         the main array
-    y: list of array
+    to_look_for: list of array
         the subset of the main whose indexes are desired
 
     Returns:
@@ -403,7 +403,7 @@ def get_index(x, y):
     """
     import numpy as np
 
-    return np.nonzero([ col in y for col in x ])
+    return np.nonzero([ col in to_look_for for col in x ])
 
 
 def name2date(filename, dlconfig):
@@ -571,6 +571,18 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
         return data*coef
     else:
         return data*coef, outunit
+
+
+def get_notation(notation_def):
+    '''
+    Auxiliar function ro retrieve notation
+    '''
+    if notation_def != None:
+        return notation_def
+    else:
+        from .. import notation
+        return notation
+ 
 
 
 def latexify(variables, math_mode=True):
