@@ -1,15 +1,73 @@
 
-
-def add(elems, units):
+def multiply(elems, units, inplace=False, unitdict=None, key=None):
     """
+    Multiply elements considering their units
+    """
+    return operate(elems, units, inplace=inplace, unitdict=unitdict, key=key, operation='*')
+
+def add(elems, units, inplace=False, unitdict=None, key=None):
+    """
+    Add elements considering their units
+    """
+    return operate(elems, units, inplace=inplace, unitdict=unitdict, key=key, operation='+')
+
+def divide(elems, units, inplace=False, unitdict=None, key=None):
+    """
+    Divide elements considering their units
+    """
+    return operate(elems, units, inplace=inplace, unitdict=unitdict, key=key, operation='/')
+
+
+
+def operate(elems, units, inplace=False, unitdict=None, key=None, operation='+'):
+    """
+    Operate on elements considering their units
+
+    Parameters:
+    -----------
+    elems: list, tuple
+        list of pandas.Series
+    units: list, tuple
+        list of pint.units ordered as the elems list
+    inplace: bool
+        sets dictionary inplace
+    unitdict: dict
+        dict to be set inplace
+    key: str
+        name of variables to be set inplace as dict key
     """
     import pandas as pd
+    import numpy as np
+    from .. import ureg
 
     idx = elems[0].index
-    result = pd.Series(index=idx)
-    for elem, unit in zip(elems, units):
-        elem = elem.reindex(idx)
-        result += elem.values*
+
+    if operation=='+':
+        result = elems[0].values*units[0]
+        for elem, unit in zip(elems[1:], units[1:]):
+            elem = elem.reindex(idx)
+            result += elem.values*unit
+
+    if operation=='*':
+        result = elems[0].values*units[0]
+        for elem, unit in zip(elems[1:], units[1:]):
+            elem = elem.reindex(idx)
+            result *= elem.values*unit
+
+    if operation=='/':
+        result = elems[0].values*units[0]
+        for elem, unit in zip(elems[1:], units[1:]):
+            elem = elem.reindex(idx)
+            result /= elem.values*unit
+
+    out = pd.Series(result.magnitude)
+    funit = ureg.Quantity(1, result.units)
+
+    if inplace==True:
+        unitdict.update({key : funit})
+        return out
+    else:
+        return out, funit
 
 
 
