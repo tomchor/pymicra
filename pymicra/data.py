@@ -237,6 +237,59 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
         return df, units
 
 
+from . import decorators
+@decorators.pdgeneral(convert_out=True)
+def spectra(data, frequency=10, anti_aliasing=False):
+    """
+    Calculates the spectrum for a set of data
+
+    Parameters
+    ----------
+    data: pandas.DataFrame or pandas.Series
+        dataframe with one (will return the spectrum) or two (will return to cross-spectrum) columns
+    frequency: float
+        frequency of measurement of signal to pass to numpy.fft.rfftfreq
+    anti_aliasing: bool
+        whether or not to apply anti-aliasing according to Gobbi, Chamecki & Dias, 2006 (doi:10.1029/2005WR004374)
+    outname: str
+        name of the output column
+
+    Returns:
+    --------
+    spectrum: dataframe
+        whose column is the spectrum or coespectrum of the input dataframe
+    """
+    import numpy as np
+    import pandas as pd
+
+    N = len(data)
+    specs = pd.DataFrame(columns = data.columns)
+
+    #---------
+    # Calculate spectra here
+    for col in data.columns:
+        specs.loc[:, col] = np.real(np.fft.rfft(data.loc[:,col])**2.)
+    #---------
+
+    #---------
+    # Anti-aliasing is done here
+    if anti_aliasing:
+        RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
+        specs = specs.multiply(RA**2., axis='columns')
+    #---------
+
+    #---------
+    # Now we normalize the spectrum and calculate their frequency
+    specs *= 2./(frequency*N)
+    freq = np.fft.rfftfreq(len(data), d=1./frequency)
+    specs.index = freq
+    specs.index.name='frequencies'
+    #---------
+
+    return specs
+
+
+
 def spectrum(data, frequency=10, anti_aliasing=False, outname=None):
     """
     Calculates the spectrum for a set of data
