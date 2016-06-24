@@ -40,6 +40,8 @@ def _integrate_series(self, how='trapz', dateindex=False, **kwargs):
 
 #----------
 # Definition of the .integrate method for dataframes
+from .. import decorators
+@decorators.pdgeneral(convert_out=True)
 def _integrate_df(self, how='trapz', dateindex=False, **kwargs):
     '''
     Numerically integrate a given dataframe
@@ -84,7 +86,8 @@ def _integrate_df(self, how='trapz', dateindex=False, **kwargs):
         return df.iloc[0]
     else:
         return df
-pd.Series.integrate = _integrate_series
+#pd.Series.integrate = _integrate_series
+pd.Series.integrate = _integrate_df
 pd.DataFrame.integrate = _integrate_df
 #----------
 

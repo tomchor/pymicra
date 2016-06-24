@@ -19,8 +19,14 @@ def pdgeneral_in(func):
 
 def pdgeneral_io(func):
     """
+    If the input is a series transform it to a dtaframe then transform the output from dataframe
+    back into a series. If the input is a series and the output is a one-element series, transform it to a float.
+
+    Currently the output functionality works only when the output is one variable, not an array
+    of elements.
     """
     import pandas as pd
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         if isinstance(args[0], pd.Series):
@@ -33,7 +39,10 @@ def pdgeneral_io(func):
                 result = pd.Series(result.iloc[:, 0].values)
 
             elif isinstance (result, pd.Series):
-                pass
+                if result.size==1:
+                    result = float(result)
+                else:
+                    pass
 
             elif isinstance(result, list):
                 result[0] = pd.Series(result[0].iloc[:, 0].values)
@@ -48,6 +57,7 @@ def pdgeneral_io(func):
         else:
             result = func(*args, **kwargs)
             return result
+
     return wrapper
 
 def pdgeneral(convert_out=True):
@@ -57,13 +67,6 @@ def pdgeneral(convert_out=True):
         return pdgeneral_in
 
 
-
-#@pdgeneral(convert_out=True)
-#def square(df, n, func=pow):
-#    df = df.copy()
-#    for c in df.columns:
-#        df[c] = df[c]**n
-#    return df, n
 
 
 def autoassign(*names, **kwargs):
