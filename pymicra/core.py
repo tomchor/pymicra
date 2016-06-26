@@ -251,6 +251,10 @@ class Notation(object):
     water_vapor_flux = 'E'
     latent_heat_flux = 'LE'
     flux_of = 'F_%s'
+    cross_spectrum = 'Cr_%s_%s'
+    spectrum = 'Sp_%s'
+    co_spectrum = 'Co_%s_%s'
+    quadrature_spectrum = 'Qu_%s_%s'
 
     def __init__(self):
         """

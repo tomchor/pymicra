@@ -237,9 +237,7 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
         return df, units
 
 
-from . import decorators
-@decorators.pdgeneral(convert_out=True)
-def spectra(data, frequency=10, anti_aliasing=False):
+def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):
     """
     Calculates the spectrum for a set of data
 
@@ -247,6 +245,70 @@ def spectra(data, frequency=10, anti_aliasing=False):
     ----------
     data: pandas.DataFrame or pandas.Series
         dataframe with one (will return the spectrum) or two (will return to cross-spectrum) columns
+    frequency: float
+        frequency of measurement of signal to pass to numpy.fft.rfftfreq
+    anti_aliasing: bool
+        whether or not to apply anti-aliasing according to Gobbi, Chamecki & Dias, 2006 (doi:10.1029/2005WR004374)
+    notation: notation object
+        notation to be used
+
+    Returns:
+    --------
+    spectrum: dataframe
+        whose column is the spectrum or coespectrum of the input dataframe
+    """
+    from . import notation
+    from . import algs
+    import numpy as np
+    import pandas as pd
+    from itertools import combinations
+
+    notation=algs.get_notation(notation)
+
+    N = len(data)
+    combs = list(combinations(data.columns, 2))
+    names = [ notation.cross_spectrum % (a, b) for a, b in combs ]
+
+    specs = pd.DataFrame(columns = names)
+
+    #---------
+    # Calculate spectra here
+    for (a, b) in combs: 
+        spec_name = notation.cross_spectrum % (a, b)
+        spec = np.fft.rfft(data.loc[:,a])
+        specs.loc[:, spec_name ] = np.conj(spec) * np.fft.rfft(data.loc[:,b])
+    #---------
+
+    #---------
+    # Anti-aliasing is done here
+    if anti_aliasing:
+        RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
+        specs = specs.multiply(RA**2., axis='rows')
+    #---------
+
+    #---------
+    # Now we normalize the spectrum and calculate their frequency
+    specs *= 2./(frequency*N)
+    freq = np.fft.rfftfreq(len(data), d=1./frequency)
+    specs.index = freq
+    specs.index.name='frequencies'
+    #---------
+
+    return specs
+
+
+
+
+from . import decorators
+@decorators.pdgeneral(convert_out=True)
+def spectra(data, frequency=10, notation=None, anti_aliasing=True):
+    """
+    Calculates the cross-spectra for a set of data
+
+    Parameters
+    ----------
+    data: pandas.DataFrame or pandas.Series
+        dataframe with more than one columns
     frequency: float
         frequency of measurement of signal to pass to numpy.fft.rfftfreq
     anti_aliasing: bool
@@ -259,23 +321,33 @@ def spectra(data, frequency=10, anti_aliasing=False):
     spectrum: dataframe
         whose column is the spectrum or coespectrum of the input dataframe
     """
+    from . import notation
+    from . import algs
     import numpy as np
     import pandas as pd
 
+    if len(data.columns) < 2:
+        raise TypeError('DataFrame has to has more than 1 column.')
+
+    notation = algs.get_notation(notation)
+
     N = len(data)
-    specs = pd.DataFrame(columns = data.columns)
+
+    names = [ notation.spectrum % a for a in data.columns ]
+    specs = pd.DataFrame(columns = names)
 
     #---------
-    # Calculate spectra here
+    # Calculate cross-spectra here
     for col in data.columns:
-        specs.loc[:, col] = np.real(np.fft.rfft(data.loc[:,col])**2.)
+        name = notation.spectrum % col
+        specs.loc[:, name ] = np.real(np.fft.rfft(data.loc[:, col ])**2.)
     #---------
 
     #---------
     # Anti-aliasing is done here
     if anti_aliasing:
         RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
-        specs = specs.multiply(RA**2., axis='columns')
+        specs = specs.multiply(RA**2., axis='rows')
     #---------
 
     #---------
