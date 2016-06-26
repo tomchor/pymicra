@@ -313,12 +313,10 @@ def spectra(data, frequency=10, notation=None, anti_aliasing=True):
         frequency of measurement of signal to pass to numpy.fft.rfftfreq
     anti_aliasing: bool
         whether or not to apply anti-aliasing according to Gobbi, Chamecki & Dias, 2006 (doi:10.1029/2005WR004374)
-    outname: str
-        name of the output column
 
     Returns:
     --------
-    spectrum: dataframe
+    spectra: dataframe
         whose column is the spectrum or coespectrum of the input dataframe
     """
     from . import notation
@@ -338,9 +336,9 @@ def spectra(data, frequency=10, notation=None, anti_aliasing=True):
 
     #---------
     # Calculate cross-spectra here
-    for col in data.columns:
-        name = notation.spectrum % col
-        specs.loc[:, name ] = np.real(np.fft.rfft(data.loc[:, col ])**2.)
+    for name, col in zip(names, data.columns):
+        spec = np.fft.rfft(data.loc[:, col ])
+        specs.loc[:, name ] = np.conj(spec) * spec
     #---------
 
     #---------
