@@ -672,7 +672,7 @@ def eddyCov3(data, units, wpl=True,
 
 
 
-def flux_from_scales(data, units, wpl=True,
+def fluxes_from_scales(data, units, wpl=True,
         notation=None, inplace=True, solutes=[]):
     """
     Get fluxes from the turbulent scales
@@ -686,10 +686,14 @@ def flux_from_scales(data, units, wpl=True,
     -----------
     data: pandas.DataFrame
         dataframe with the characteristic lengths calculated
-    notation_defs: pymicra.notation
+    units: dict
+        dictionary with variable and their units
+    notation: pymicra.notation
         object that holds the notation used in the dataframe
     wpl: boolean
         whether or not to apply WPL correction on the latent heat flux and solutes flux
+    inplace: bool
+        whether or not to treat units inplace
     solutes: list
         list that holds every solute considered for flux
     """
@@ -711,7 +715,6 @@ def flux_from_scales(data, units, wpl=True,
     #---------
     # Define name of variables to look for based on the notation
     u_star          =   defs.u_star
-    w_star          =   defs.w_star
     mrho_h2o_star   =   defs.h2o_molar_density_star
     rho_h2o_star    =   defs.h2o_density_star
     theta_star      =   defs.thermodyn_temp_star
@@ -746,11 +749,11 @@ def flux_from_scales(data, units, wpl=True,
     # Calculate the fluxes
     print('Calculating fluxes ... ', end='')
     out = pd.DataFrame(index=[ data.index[0] ])
-    out[ defs.momentum_flux ]               = -rho_air_mean * cov[ u_fluc ][ w_fluc ]
-    out[ defs.sensible_heat_flux ]          = rho_air_mean * cp * cov[theta_fluc][w_fluc]
-    out[ defs.virtual_sensible_heat_flux ]  = rho_air_mean * cp * cov[theta_v_fluc][w_fluc]
-    out[ defs.water_vapor_flux ]            = cov[mrho_h2o_fluc][w_fluc]
-    out[ defs.latent_heat_flux ]            = lamb( theta_mean ) * cov[rho_h2o_fluc][w_fluc]
+    out[ defs.momentum_flux ]               = -rho_air_mean * data[ u_star ] * data[ u_star ]
+    out[ defs.sensible_heat_flux ]          = rho_air_mean * cp * data[ theta_star ] * data[ u_star ]
+    out[ defs.virtual_sensible_heat_flux ]  = rho_air_mean * cp * data[ theta_v_star] * data[ u_star ]
+    out[ defs.water_vapor_flux ]            = data[ mrho_h2o_star ] * data[ u_star ]
+    out[ defs.latent_heat_flux ]            = lamb(theta_mean) * data[ rho_h2o_star ] * data[ u_star ]
     print('done!')
     #---------
 
@@ -777,6 +780,7 @@ def flux_from_scales(data, units, wpl=True,
         print('Applying WPL correction for water vapor ... ', end='')
         mu = constants.R_spec['h2o']/constants.R_spec['dry']
         rho_h2o_mean = data[ defs.h2o_density ].mean()
+
         #---------
         # If water vapor mixing ratio is present, use it. Otherwise we try to calculate it
         if defs.h2o_mixing_ratio in data.columns:
