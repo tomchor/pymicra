@@ -34,6 +34,19 @@ def preProcess(data, units, notation=None, use_means=False,
         defining notation used in data
     rho_air_from_theta_v: bool
         whether to use theta_v to calculate air density or theta
+    inplace: bool
+        treat units inplace or not
+    theta: pandas.Series
+        auxiliar theta measurement to be used if rho_air_from_theta_v==False
+    theta_unit: pint.quantity
+        auxiliar theta measurement's unit to be used if rho_air_from_theta_v==False
+    solutes: list
+        list of string where each string is a solute to be considered
+
+    Returns:
+    --------
+    data: pandas.DataFrame
+        dataframe with original columns and new calculated ones
     '''
     from .. import constants
     from .. import algs
@@ -562,57 +575,93 @@ def eddyCov3(data, units, wpl=True,
     #------------------------
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
-        print('Applying WPL correction for water vapor ... ', end='')
+        print('Applying WPL correction for water vapor flux ... ', end='')
         mu = constants.R_spec['h2o']/constants.R_spec['dry']
         mrho_h2o_mean = data[ defs.h2o_molar_density ].mean()
 
         #---------
+        # If there are solutes to correct we save the original E to use in the calculation
+        if solutes:
+            E_orig = out[ defs.water_vapor_flux ]
+            E_orig_unit = fluxunits[ defs.water_vapor_flux ]
+        #---------
+
+        #---------
         # If water vapor mixing ratio is present, use it. Otherwise we try to calculate it
         if defs.h2o_molar_mixing_ratio in data.columns:
-            r_h2o = data[ defs.h2o_molar_mixing_ratio ].mean()
-        elif units[ defs.h2o_density ] == units[ defs.dry_air_density ]:
-            r_h2o = mrho_h2o_mean/mrho_dry_mean
+            mr_h2o = data[ defs.h2o_molar_mixing_ratio ].mean()
+        elif units[ defs.h2o_molar_density ] == units[ defs.dry_air_molar_density ]:
+            mr_h2o = mrho_h2o_mean/mrho_dry_medan
         else:
             raise TypeError('Either water mixing ratio should be provided, or dry air and water density should be the same')
         #---------
         
+        #---------
+        # We calculate WPL little by little to make it easy to handle the units
         aux1 = out[ defs.water_vapor_flux ]
-        aux2 = mrho_h2o_mean * (cov[theta_fluc][w_fluc]/theta_mean)
-        unt2 = units[ defs.h2o_molar_density ] * units[ defs.thermodyn_temp ]
-        print(aux2, unt2)
-        exit()
-        out.loc[:, defs.water_vapor_flux ] = (1. +mu*r_h2o)*( out[ defs.water_vapor_flux ] + rho_h2o_mean * (cov[theta_fluc][w_fluc]/theta_mean) )
-        print('done!')
+        unt1 = fluxunits[ defs.water_vapor_flux ]
 
+        aux2 = mrho_h2o_mean * (cov[theta_fluc][w_fluc]/theta_mean)
+        unt2 = units[ defs.h2o_molar_density ] * units[ w_fluc ]
+
+        aux3, unt3 = algs.add([aux1, aux2], [unt1, unt2], inplace=False)
+
+        out.loc[:, defs.water_vapor_flux ] = (1. +mu*mr_h2o)* aux3
+        fluxunits[ defs.water_vapor_flux ] = unt3
+        print('done!')
+        #---------
+
+        #---------
+        # Now we re-calculate LE based on the corrected E
+        print('Applying WPL correction for latent heat flux ... ', end='')
+        out.loc[:, defs.latent_heat_flux ] = lamb(theta_mean) * out[ defs.water_vapor_flux ] * constants.molar_mass['h2o']
+        fluxunits[ defs.latent_heat_flux ] = cunits[ 'latent_heat_water' ] * fluxunits[ defs.water_vapor_flux ] * cunits['molar_mass']
+        print('done!')
+        #---------
 
         #---------
         # NEEDS IMPROVEMENT
         #---------
         for solute in solutes:
             print('Applying WPL correction for {} ... '.format(solute), end='')
+            sol_molar_density_mean    =   data[ defs.molar_density % solute ].mean()
+
             #---------
-            # Check if mixing ratio units are correct
-            if units[ defs.density % solute ] == units[ defs.dry_air_density ]:
-                rho_sol_mean    =   data[ defs.molar_density % solute ].mean()
-                rc = rho_sol_mean/rho_dry_mean
+            # Obtaining solute mass mixing ratio
+            if defs.molar_mixing_ratio % solute in data.columns:
+                mr_sol = data[ defs.molar_mixing_ratio % solute ].mean()
+                mr_sol_unit = units[ defs.molar_mixing_ratio % solute ]
+            elif units[ defs.molar_density % solute ] == units[ defs.dry_air_molar_density ]:
+                mr_sol = sol_molar_density_mean/rho_dry_mean
+                mr_sol_unit = 'mole/mole'
             else:
                 raise TypeError('Either water mixing ratio should be provided, or dry air and water density should be the same')
             #---------
 
-            out.loc[:, defs.flux_of % solute ] = \
-                out[ defs.flux_of % solute ] + \
-                rho_sol_mean*(1. + mu*r_h2o)*(cov[theta_fluc][w_fluc])/theta_mean + \
-                mu*rc*out[ defs.water_vapor_flux ]
-            print('done!')
-    #------------------------
+            #---------
+            # Again, we calculate WPL little by little to make it easy to handle the units
+            aux1 = out[ defs.flux_of % solute ]
+            unt1 = fluxunits[ defs.flux_of % solute ]
 
-    #-----------------
+            aux2 = sol_molar_density_mean*(1. + mu*mr_h2o)*(cov[theta_fluc][w_fluc])/theta_mean
+            unt2 = units[ defs.molar_density % solute ] * units[ w_fluc ]
+
+            aux3 = mu * mr_sol* E_orig
+            unt3 = mr_sol_unit * E_orig_unit
+ 
+            out.loc[:, defs.flux_of % solute ] = algs.add([aux1, aux2, aux3], [unt1, unt2, unt3],
+                                                    inplace=True, unitdict=fluxunits, key=defs.flux_of % solute)
+            print('done!')
+            #---------
+    #------------
+
+    #------------
     # Here we convert the units to watts/m2
     convert_to ={defs.latent_heat_flux : 'watts/meter**2',
                 defs.virtual_sensible_heat_flux : 'watts/meter**2',
                 defs.sensible_heat_flux : 'watts/meter**2'}
     out = out.convert_cols(convert_to, fluxunits, inplace=True)
-    #-----------------
+    #------------
 
     print('Done with Eddy Covariance.\n')
     if inplace:
@@ -623,7 +672,7 @@ def eddyCov3(data, units, wpl=True,
 
 
 
-def eddyCov_from_scales(data, units, wpl=True,
+def flux_from_scales(data, units, wpl=True,
         notation=None, inplace=True, solutes=[]):
     """
     Get fluxes from the turbulent scales

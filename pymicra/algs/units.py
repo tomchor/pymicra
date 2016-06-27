@@ -46,20 +46,29 @@ def operate(elems, units, inplace=False, unitdict=None, key=None, operation='+')
     if operation=='+':
         result = elems[0].values*units[0]
         for elem, unit in zip(elems[1:], units[1:]):
-            elem = elem.reindex(idx)
-            result += elem.values*unit
+            if type(elem) == pd.Series:
+                elem = elem.reindex(idx)
+                result += elem.values*unit
+            else:
+                result += elem*unit
 
     if operation=='*':
         result = elems[0].values*units[0]
         for elem, unit in zip(elems[1:], units[1:]):
-            elem = elem.reindex(idx)
-            result *= elem.values*unit
+            if type(elem) == pd.Series:
+                elem = elem.reindex(idx)
+                result *= elem.values*unit
+            else:
+                result *= elem*unit
 
     if operation=='/':
         result = elems[0].values*units[0]
         for elem, unit in zip(elems[1:], units[1:]):
-            elem = elem.reindex(idx)
-            result /= elem.values*unit
+            if type(elem) == pd.Series:
+                elem = elem.reindex(idx)
+                result /= elem.values*unit
+            else:
+                result /= elem*unit
 
     out = pd.Series(result.magnitude)
     funit = ureg.Quantity(1, result.units)
