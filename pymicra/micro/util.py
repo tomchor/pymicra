@@ -19,7 +19,7 @@ specific evaporation heat?
 """
 
 def preProcess(data, units, notation=None, use_means=False,
-        rho_air_from_theta_v=True, inplace=True, theta=None, solutes=[]):
+        rho_air_from_theta_v=True, inplace=True, theta=None, theta_unit=None, solutes=[]):
     '''
     Pre-processes data by calculating moist and dry air densities, specific humidity
     mass density and other important variables
@@ -91,25 +91,38 @@ def preProcess(data, units, notation=None, use_means=False,
     #---------
     # Calculation of rho_air is done here
     if (defs.moist_air_density not in data.columns):
+        print('Moist air density not present in dataset')
         if rho_air_from_theta_v:
             print('Calculating rho_air = p/(Rdry * theta_v) ... ', end='')
             data = physics.airDensity_from_theta_v(data, units, notation=defs, inplace=True, use_means=use_means)
-            print('Done!')
         else:
             if theta:
                 print('Trying to calculate rho_air using auxiliar theta measurement ... ', end='')
+                data = physics.airDensity_from_theta(data, units, notation=defs, inplace=True, use_means=use_means, theta=theta, theta_unit=theta_unit)
             else:
                 print('Trying to calculate rho_air using theta from this dataset ... ', end='')
-            print('\nCalculation of air density from theta has to be implemented. Please try rho_air_from_theta_v=True.')
-            a = physics.airDensity_from_theta(data, units, notation=defs, inplaces=False, use_means=use_means)
+                data = physics.airDensity_from_theta(data, units, notation=defs, inplace=True, use_means=use_means, theta=None)
+        print('Done!')
     #---------
 
     #---------
-    # Calculation of rho_dry is done here
-    if (defs.dry_air_density not in data.columns):
-        print('Calculating rho_dry_air = rho_air - rho_h2o ... ', end='')
-        data.loc[:, defs.dry_air_density ] = data[ defs.moist_air_density ] - data[ defs.h2o_mass_density ]
-        units.update({ defs.dry_air_density : units[ defs.moist_air_density ] })
+    # Calculation of dry air mass density is done here
+    if (defs.dry_air_mass_density not in data.columns):
+        print('Calculating dry_air mass_density = rho_air - rho_h2o ... ', end='')
+        data.loc[:, defs.dry_air_mass_density ] = algs.add([ data[defs.moist_air_mass_density], -data[defs.h2o_mass_density] ], 
+                        [ units[defs.moist_air_mass_density], units[defs.h2o_mass_density] ], inplace=True, unitdict=units, key=defs.dry_air_mass_density)
+        print('Done!')
+    #---------
+
+    #---------
+    # Calculation of dry air molar density is done here
+    if (defs.dry_air_molar_density not in data.columns):
+        print('Dry air molar density not in dataset')
+        if defs.dry_air_mass_density not in data.columns:
+            print("Can't calculate it. Dry air mass density not present")
+        print('Calculating dry_air molar_density = rho_dry / dry_air_molar_mass ... ', end='')
+        data.loc[:, defs.dry_air_molar_density ] = data[ defs.dry_air_mass_density ]/constants.molar_mass['dry']
+        units.update({ defs.dry_air_molar_density : (units[ defs.dry_air_mass_density ]/molar_mass_unit).to_base_units() })
         print('Done!')
     #---------
  
@@ -120,15 +133,31 @@ def preProcess(data, units, notation=None, use_means=False,
         data.loc[:, defs.specific_humidity] = data[ defs.h2o_density ] / data[ defs.moist_air_density ]
         units.update({ defs.specific_humidity : units[ defs.h2o_density ] / units[ defs.moist_air_density ] })
         print('Done!')
-        
+    #---------
 
     #---------
-    # Calculation of mixing ratio is done here
-    if (defs.h2o_mixing_ratio not in data.columns):
+    # Calculation of h2o mass mixing ratio is done here
+    if (defs.h2o_mass_mixing_ratio not in data.columns):
         print('Calculating h2o mass mixing ratio = rho_h2o / rho_dry ... ', end='')
-        data.loc[:, defs.h2o_mass_mixing_ratio] = data[ defs.h2o_density ] / data[ defs.dry_air_density ]
-        units.update({ defs.h2o_mass_mixing_ratio : units[ defs.h2o_density ] / units[ defs.dry_air_density ] })
+        data.loc[:, defs.h2o_mass_mixing_ratio] = data[ defs.h2o_mass_density ] / data[ defs.dry_air_mass_density ]
+        units.update({ defs.h2o_mass_mixing_ratio : units[ defs.h2o_mass_density ] / units[ defs.dry_air_mass_density ] })
         print('Done!')
+    #---------
+
+    #---------
+    # Calculation of h2o mass mixing ratio is done here
+    if (defs.h2o_molar_mixing_ratio not in data.columns):
+        print('Calculating h2o mass mixing ratio = rho_h2o / rho_dry ... ', end='')
+        data.loc[:, defs.h2o_molar_mixing_ratio] = data[ defs.h2o_molar_density ] / data[ defs.dry_air_molar_density ]
+        units.update({ defs.h2o_molar_mixing_ratio : units[ defs.h2o_molar_density ] / units[ defs.dry_air_molar_density ] })
+        print('Done!')
+    #---------
+
+    #---------
+    # Converting dry_air_molar_density and dry_air_molar_mixing_ratio to mol/meter**3 and mole/mole, respectively
+    convert_to={defs.h2o_molar_mixing_ratio : 'mole/mole',
+                defs.dry_air_molar_density : 'mole/meter**3'}
+    data = data.convert_cols(convert_to, units, inplace=True)
     #---------
 
     #---------
@@ -143,48 +172,68 @@ def preProcess(data, units, notation=None, use_means=False,
     #---------
     # Here we deal with the SOLUTES!
     for solute in solutes:
-        sol_density = eval('defs.{}_mass_density'.format(solute))
+        sol_mass_density = eval('defs.{}_mass_density'.format(solute))
         sol_molar_density = eval('defs.{}_molar_density'.format(solute))
-        sol_concentration = eval('defs.{}_mass_concentration'.format(solute))
-        sol_mixing_ratio = eval('defs.{}_mass_mixing_ratio'.format(solute))
+        sol_mass_concentration = eval('defs.{}_mass_concentration'.format(solute))
+        sol_mass_mixing_ratio = eval('defs.{}_mass_mixing_ratio'.format(solute))
+        sol_molar_mixing_ratio = eval('defs.{}_molar_mixing_ratio'.format(solute))
         M_sol = constants.molar_mass[solute]
 
         #---------
         # Check for solute mass density
-        if sol_density not in data.columns:
+        if sol_mass_density not in data.columns:
             print("Didn't locate mass density of {}. Trying to calculate it ... ".format(solute), end='')
-            data.loc[:, sol_density ] = data.loc[:, sol_molar_density ]*M_sol
-            units.update({ sol_density : units[ sol_molar_density ]*molar_mass_unit })
+            data.loc[:, sol_mass_density ] = data.loc[:, sol_molar_density ]*M_sol
+            units.update({ sol_mass_density : units[ sol_molar_density ]*molar_mass_unit })
             print("Done!")
-        data.loc[:, sol_density] = algs.convert_to(data[ sol_density ], units, 'kg/m**3', inplace=True, key=sol_density)
+        data.loc[:, sol_mass_density] = algs.convert_to(data[ sol_mass_density ], units, 'kg/m**3', inplace=True, key=sol_mass_density)
         #---------
     
         #---------
         # Check for solute molar density
         if sol_molar_density not in data.columns:
             print("Didn't locate molar density of {}. Trying to calculate it".format(solute))
-            data.loc[:, sol_molar_density ] = data.loc[:, sol_density ]/M_sol
-            units.update({ sol_molar_density : units[ sol_density ]/molar_mass_unit })
+            data.loc[:, sol_molar_density ] = data.loc[:, sol_mass_density ]/M_sol
+            units.update({ sol_molar_density : units[ sol_mass_density ]/molar_mass_unit })
             print("Done!")
         #---------
 
         #---------
-        # Calculation of SOLUTE concentration (g/g) is done here
-        if (sol_concentration not in data.columns):
+        # Calculation of SOLUTE MASS concentration (g/g) is done here
+        if (sol_mass_concentration not in data.columns):
             print('Calculating {0} mass concentration (g/g) = rho_{0} / rho_air ... '.format(solute), end='')
-            data.loc[:, sol_concentration] = data[ sol_density ] / data[ defs.moist_air_density ]
-            units.update({ sol_concentration : units[ sol_density ] / units[ defs.moist_air_density ] })
+            data.loc[:, sol_mass_concentration] = data[ sol_mass_density ] / data[ defs.moist_air_mass_density ]
+            units.update({ sol_mass_concentration : units[ sol_mass_density ] / units[ defs.moist_air_mass_density ] })
             print("Done!")
+        #---------
             
     
         #---------
-        # Calculation of SOLUTE mixing ratio is done here
-        if (sol_mixing_ratio not in data.columns):
+        # Calculation of SOLUTE MASS mixing ratio is done here
+        if (sol_mass_mixing_ratio not in data.columns):
             print('Calculating {0} mass mixing ratio = rho_{0} / rho_dry ... '.format(solute), end='')
-            data.loc[:, sol_mixing_ratio] = data[ sol_density ] / data[ defs.dry_air_density ]
-            units.update({ sol_mixing_ratio : units[ sol_density ] / units[ defs.dry_air_density ] })
+            data.loc[:, sol_mass_mixing_ratio] = data[ sol_mass_density ] / data[ defs.dry_air_mass_density ]
+            units.update({ sol_mass_mixing_ratio : units[ sol_mass_density ] / units[ defs.dry_air_mass_density ] })
             print("Done!")
         #---------
+
+        #---------
+        # Calculation of SOLUTE MOLAR mixing ratio is done here
+        if (sol_molar_mixing_ratio not in data.columns):
+            print('Calculating {0} molar mixing ratio = mrho_{0} / mrho_dry ... '.format(solute), end='')
+            data.loc[:, sol_molar_mixing_ratio] = data[ sol_molar_density ] / data[ defs.dry_air_molar_density ]
+            units.update({ sol_molar_mixing_ratio : units[ sol_molar_density ] / units[ defs.dry_air_molar_density ] })
+            print("Done!")
+        #---------
+
+        #---------
+        # Converting molar, mass mixing ratio and mass concentration to unitless
+        convert_to={sol_molar_mixing_ratio : 'mole/mole',
+                    sol_mass_mixing_ratio : 'g/g',
+                    sol_mass_concentration : 'g/g'}
+        data = data.convert_cols(convert_to, units, inplace=True)
+        #---------
+ 
     #---------
         
     print('Pre-processing complete.\n')
@@ -436,7 +485,7 @@ def eddyCov3(data, units, wpl=True,
 
     defs = algs.get_notation(notation)
     data = data.copy()
-    if not inplace:
+    if (not inplace) and units:
         units = units.copy()
     cunits = constants.units
 
@@ -515,20 +564,30 @@ def eddyCov3(data, units, wpl=True,
     if wpl:
         print('Applying WPL correction for water vapor ... ', end='')
         mu = constants.R_spec['h2o']/constants.R_spec['dry']
-        rho_h2o_mean = data[ defs.h2o_density ].mean()
+        mrho_h2o_mean = data[ defs.h2o_molar_density ].mean()
+
         #---------
         # If water vapor mixing ratio is present, use it. Otherwise we try to calculate it
-        if defs.h2o_mixing_ratio in data.columns:
-            r_h2o = data[ defs.h2o_mixing_ratio ].mean()
+        if defs.h2o_molar_mixing_ratio in data.columns:
+            r_h2o = data[ defs.h2o_molar_mixing_ratio ].mean()
         elif units[ defs.h2o_density ] == units[ defs.dry_air_density ]:
-            r_h2o = rho_h2o_mean/rho_dry_mean
+            r_h2o = mrho_h2o_mean/mrho_dry_mean
         else:
             raise TypeError('Either water mixing ratio should be provided, or dry air and water density should be the same')
         #---------
         
+        aux1 = out[ defs.water_vapor_flux ]
+        aux2 = mrho_h2o_mean * (cov[theta_fluc][w_fluc]/theta_mean)
+        unt2 = units[ defs.h2o_molar_density ] * units[ defs.thermodyn_temp ]
+        print(aux2, unt2)
+        exit()
         out.loc[:, defs.water_vapor_flux ] = (1. +mu*r_h2o)*( out[ defs.water_vapor_flux ] + rho_h2o_mean * (cov[theta_fluc][w_fluc]/theta_mean) )
         print('done!')
 
+
+        #---------
+        # NEEDS IMPROVEMENT
+        #---------
         for solute in solutes:
             print('Applying WPL correction for {} ... '.format(solute), end='')
             #---------

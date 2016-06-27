@@ -87,6 +87,7 @@ def airDensity_from_theta_v(data, units, notation=None, inplace=True, use_means=
 def dryAirDensity_from_p(data, units, notation=None, inplace=True):
     '''
     Calculates dry air density
+    NEEDS IMPROVEMENT REGARDING HANDLING ON UNITS
     '''
     from . import algs
     from . import constants
@@ -111,8 +112,10 @@ def dryAirDensity_from_p(data, units, notation=None, inplace=True):
     p_dry = p_air - p_h2o
     #-----------
 
+    #-----------
     data.loc[:, defs.dry_air_density ] = p_dry/(Rdry * data[ defs.thermodyn_temp ])
     units.update({ defs.dry_air_density : p_air_unit/(Runit * units[ defs.thermodyn_temp ])})
+    #-----------
 
     if inplace:
         return data
@@ -120,55 +123,80 @@ def dryAirDensity_from_p(data, units, notation=None, inplace=True):
         return data, units
 
 
-def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=False):
+def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=False, theta=None, theta_unit=None):
     '''
     Calculates moist air density using theta measurements
+
+    Parameters:
+    -----------
+    data: pandas.DataFrame
+        dataset to add rho_air
+    units: dict
+        units dictionary
+    notation: pymicra.notation
+        notation to be used
+    inplace: bool
+        whether or not to treat units inplace
+    use_means: bool
+        use the mean of theta or not when calculating
+    theta: pandas.Series
+        auxiliar theta measurement
+    theta_unit: pint.quantity
+        auxiliar theta's unit
     '''
     from . import algs
     from . import constants
 
     defs = algs.get_notation(notation)
     data = data.copy()
-    #if not inplace:
-    #    units = units.copy()
+    outunits = {}
+
     R_dry = constants.R_spec['dry']
     R_h2o = constants.R_spec['h2o']
+    R_spec_unit = constants.units['R_spec']
 
     if not theta:
         theta = data[ defs.thermodyn_temp ]
+        theta_unit = units[ defs.thermodyn_temp ]
 
+    if use_means:
+        theta = theta.mean()
+
+    #-----------
+    # We calculate the water vapor partial pressure
     p_h2o = data[ defs.h2o_mass_density ] * R_h2o * theta
-    #units['p_h2o'] = units['h2o']*constants.units['R_spec']*dataunits['T']
-
-    p_h2o, unit = algs.convert_to(p_h2o, dataunits['p_h2o'], 'kPa')
-    dataunits['p_h2o'] = unit
-    pressure, unit = algs.convert_to(pressure, dataunits['p'], 'kPa')
-    dataunits['p'] = unit
-
-    #-----------
-    # Mantaining units with subtraction or addition is tricky
-    p_dry = pressure - p_h2o
-    dataunits['p_dry'] = dataunits['p']# - dataunits['p_h2o']
+    p_h2o_unit = (units[ defs.h2o_mass_density ]*R_spec_unit*theta_unit).to('kPa')
     #-----------
 
-    rho_dry = p_dry/(R_dry*temp)
-    #dataunits['rho_dry'] = dataunits['p_dry']/(constants.units['R_spec']*dataunits['T'])
-    #rho_dry = algs.convert_to(rho_dry, dataunits, 'kg/m**3', key='rho_dry', inplace=True)
-    #rho_h2o = algs.convert_to(rho_h2o, dataunits, 'kg/m**3', key='h2o', inplace=True)   
-
     #-----------
-    # Mantaining units with subtraction or addition is tricky
-    rho_air = rho_dry + rho_h2o
-    dataunits['rho_air'] = dataunits['rho_dry']# + dataunits['h2o']
+    # We subtract p_h2o from p_dry using pymicra.algs.add because addition with different units is tricky
+    p_dry, p_dry_unit = algs.add([ data[defs.pressure], -p_h2o ], [ units[defs.pressure], p_h2o_unit ], inplace=False)
     #-----------
 
-    rho_air, unit = algs.convert_to(rho_air, dataunits['rho_air'], 'kg/m**3')
-    dataunits['rho_air'] = unit
+    #-----------
+    # We calculate dry air mass density
+    data[ defs.dry_air_mass_density ] = p_dry/(R_dry*theta)
+    outunits[ defs.dry_air_mass_density ] = (p_dry_unit/(R_spec_unit*theta_unit)).to('kg/m**3')
+    #-----------
 
-    if full:
-        return rho_air, rho_dry, p_dry, p_h2o, dataunits
+    #-----------
+    # We add rho_dry to rho_h2o using pymicra.algs.add because addition with different units is tricky
+    data.loc[:, defs.moist_air_mass_density ] = algs.add([data[defs.dry_air_mass_density], data[defs.h2o_mass_density]],
+                        [outunits[defs.dry_air_mass_density], units[defs.h2o_mass_density]], inplace=True, unitdict=outunits, key=defs.moist_air_mass_density)
+    #-----------
+
+    #-----------
+    # Adjust the units
+    conversions = { defs.moist_air_density : 'kg/m**3',
+                    defs.dry_air_density : 'kg/m**3'}
+    data = data.convert_cols(conversions, outunits, inplace=True)
+    #-----------
+
+    if inplace:
+        units.update(outunits)
+        return data
     else:
-        return rho_air, dataunits
+        return data, outunits
 
 
 def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, dr=None):

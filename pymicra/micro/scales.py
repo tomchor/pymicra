@@ -195,6 +195,7 @@ def getScales(data, siteConf, units, notation=None,
 
     #---------
     # Finally we construct the output dataframe
+    print()
     if inplace:
         units.update(outunits)
         if output_as_df:
