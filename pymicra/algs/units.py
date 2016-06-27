@@ -1,3 +1,4 @@
+from .. import decorators
 
 def multiply(elems, units, inplace=False, unitdict=None, key=None):
     """
@@ -105,7 +106,7 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
     inplace: bool 
         if inunit is a dict, the dict is update in place. "key" keyword must be provided 
     key: str 
-        if inunit is a dict, it is the name of the variable to be chamged 
+        if inunit is a dict, it is the name of the variable to be changed 
     ''' 
     from .. import Q_ 
  
@@ -121,4 +122,46 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
         return data*coef 
     else: 
         return data*coef, outunit 
+
+
+@decorators.pdgeneral(convert_out=True)
+def convert_cols(data, guide, units, inplace=False):
+    ''' 
+    Converts data from one unit to the other 
+ 
+    Parameters: 
+    ----------- 
+    data: pandas.DataFrame
+        to be chanhed from one unit to the other 
+    guide: dict
+        {names of columns : units to converted to}
+    units: dict
+        units dictionary
+    inplace: bool 
+        if inunit is a dict, the dict is update in place. "key" keyword must be provided 
+    ''' 
+    from .. import algs
+
+    data = data.copy()
+
+    #-------
+    # An attempt to make it work with Series
+    if len(data.columns)==1 and (type(guide) != dict):
+        guide = { data.columns[0] : guide }
+    guide = algs.parseUnits(guide)
+    #-------
+
+    #-------
+    # We first turn it into a numpy array to make the conversion using pint natively
+    for col, outunit in guide.iteritems():
+        aux = data[ col ].values * units[ col ]
+        aux = aux.to(outunit)
+        data.loc[:, col] = aux
+    #-------
+        
+    if inplace: 
+        units.update(guide) 
+        return data 
+    else: 
+        return data, outunit 
 

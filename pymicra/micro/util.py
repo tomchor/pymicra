@@ -415,10 +415,14 @@ def eddyCov3(data, units, wpl=True,
     -----------
     data: pandas.DataFrame
         dataframe with the characteristic lengths calculated
-    notation_defs: pymicra.notation
-        object that holds the notation used in the dataframe
+    units: dict
+        units dictionary
     wpl: boolean
         whether or not to apply WPL correction on the latent heat flux and solutes flux
+    notation: pymicra.notation
+        object that holds the notation used in the dataframe
+    inplace: bool
+        whether or not to treat the units inplace
     solutes: list
         list that holds every solute considered for flux
     """
@@ -545,9 +549,10 @@ def eddyCov3(data, units, wpl=True,
 
     #-----------------
     # Here we convert the units to watts/m2
-    out.loc[:, defs.latent_heat_flux ] = algs.convert_to(out[ defs.latent_heat_flux ], fluxunits, 'watts/meter**2', inplace=True, key='LE')
-    out.loc[:, defs.virtual_sensible_heat_flux ] = algs.convert_to(out['Hv'], fluxunits, 'watts/meter**2', inplace=True, key='Hv')
-    out.loc[:, defs.sensible_heat_flux ] = algs.convert_to(out['H'], fluxunits, 'watts/meter**2', inplace=True, key='H')
+    convert_to ={defs.latent_heat_flux : 'watts/meter**2',
+                defs.virtual_sensible_heat_flux : 'watts/meter**2',
+                defs.sensible_heat_flux : 'watts/meter**2'}
+    out = out.convert_cols(convert_to, fluxunits, inplace=True)
     #-----------------
 
     print('Done with Eddy Covariance.\n')

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 """
 """
+from . import decorators
 
 #---------------
 # Creates a method to write to a unitsCsv
@@ -208,6 +209,7 @@ pd.DataFrame.xplot = _xplot
 
 #---------
 # Definition of dataframe method to fit
+@decorators.pdgeneral(convert_out=True)
 def _polyfit(self, degree=1, rule=None):
     """
     This method fits an n-degree polynomial to the dataset. The index can
@@ -224,31 +226,35 @@ def _polyfit(self, degree=1, rule=None):
     """
     import pandas as pd
     from algs import fitWrap
+    from . import algs
 
     data = self.copy()
-    if isinstance(self, pd.Series):
-        data = pd.DataFrame(data)
+    #if isinstance(self, pd.Series):
+    #    data = pd.DataFrame(data)
+
     #-----------
     # If rule == None it should return a list of 1
-    dflist=splitData(data, rule=rule)
+    dflist = algs.splitData(data, rule=rule)
     #-----------
 
     out=pd.DataFrame()
     if isinstance(data.index, pd.DatetimeIndex):
-        for data in dflist:
-            xx=data.index.to_julian_date()
-            aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
-            out=out.append(aux)
+        xx=data.index.to_julian_date()
+        #for data in dflist:
+        #    aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
+        #    out=out.append(aux)
     else:
-         for data in dflist:
-            xx=data.index.values
-            aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
-            out=out.append(aux)
+        xx=data.index.values
+
+    for data in dflist:
+        aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
+        out=out.append(aux)
  
-    if isinstance(self, pd.Series):
-        return out.iloc[:, 0]
-    else:
-        return out
+    #if isinstance(self, pd.Series):
+    #    return out.iloc[:, 0]
+    #else:
+    #    return out
+    return out
 pd.DataFrame.polyfit = _polyfit
 pd.Series.polyfit = _polyfit
 #---------
@@ -264,5 +270,12 @@ pd.DataFrame.trend = trend
 pd.Series.trend  = trend
 #---------
 
+
+#---------
+# Define convert_cols method here
+from .algs import convert_cols
+pd.DataFrame.convert_cols = convert_cols
+pd.Series.convert_to = convert_cols
+#---------
 
 del pd
