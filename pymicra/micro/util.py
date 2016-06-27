@@ -523,7 +523,7 @@ def eddyCov3(data, units, wpl=True,
         #---------
         # We need the mean of the specific humidity and temperature
         if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
-            raise TypeError('Units for both the virtual temp fluctuations and the thermodynamic temperature must be the same')
+            raise TypeError('Units for both the virtual temp fluctuations and the thermodynamic temperature must be Kelvin')
         data_q_mean =   data[ defs.specific_humidity ].mean()
         data[ theta_fluc ] = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1.+0.61*data_q_mean)
         theta_fluc_unit = units[ theta_v_fluc ]
@@ -582,8 +582,8 @@ def eddyCov3(data, units, wpl=True,
         #---------
         # If there are solutes to correct we save the original E to use in the calculation
         if solutes:
-            E_orig = out[ defs.water_vapor_flux ]
-            E_orig_unit = fluxunits[ defs.water_vapor_flux ]
+            E_orig = out[ defs.water_vapor_flux ].copy()
+            E_orig_unit = fluxunits[ defs.water_vapor_flux ].copy()
         #---------
 
         #---------
