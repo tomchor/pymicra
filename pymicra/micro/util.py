@@ -385,11 +385,7 @@ def eddyCov2(data, wpl=True,
     #---------
     # Define useful notation to look for
     defs = algs.get_notation(notation_defs)
-#    if notation_defs==None:
-#        defs=notation()
-#    else:
-#        defs=notation_defs
-    fluct = defs.fluctuation
+    fluct = defs.fluctuations
     mean = defs.mean
     #---------
 
@@ -400,7 +396,7 @@ def eddyCov2(data, wpl=True,
     q_fluc          =   fluct % defs.specific_humidity
     theta_fluc      =   fluct % defs.thermodyn_temp
     theta_v_fluc    =   fluct % defs.virtual_temp
-    solutesf        = [ fluct % solute for solute in solutes ]
+    solutesf        = [ defs.mass_density % fluct % solute for solute in solutes ]
     #---------
 
     #---------
@@ -521,9 +517,13 @@ def eddyCov3(data, units, wpl=True,
     if theta_fluc not in data.columns:
         print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
         #---------
-        # We need the mean of the specific humidity and temperature
+        # We check the units of theta_v and theta
         if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
             raise TypeError('Units for both the virtual temp fluctuations and the thermodynamic temperature must be Kelvin')
+        #---------
+
+        #---------
+        # Estimate theta fluctuations from theta_v
         data_q_mean =   data[ defs.specific_humidity ].mean()
         data[ theta_fluc ] = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1.+0.61*data_q_mean)
         theta_fluc_unit = units[ theta_v_fluc ]
@@ -551,7 +551,7 @@ def eddyCov3(data, units, wpl=True,
     out[ defs.sensible_heat_flux ]          = rho_air_mean * cp * cov[theta_fluc][w_fluc]
     out[ defs.virtual_sensible_heat_flux ]  = rho_air_mean * cp * cov[theta_v_fluc][w_fluc]
     out[ defs.water_vapor_flux ]            = cov[mrho_h2o_fluc][w_fluc]
-    out[ defs.latent_heat_flux ]            = lamb( theta_mean ) * cov[rho_h2o_fluc][w_fluc]
+    out[ defs.latent_heat_flux ]            = lamb(theta_mean) * cov[rho_h2o_fluc][w_fluc]
     print('done!')
     #---------
 
@@ -591,14 +591,14 @@ def eddyCov3(data, units, wpl=True,
         if defs.h2o_molar_mixing_ratio in data.columns:
             mr_h2o = data[ defs.h2o_molar_mixing_ratio ].mean()
         elif units[ defs.h2o_molar_density ] == units[ defs.dry_air_molar_density ]:
-            mr_h2o = mrho_h2o_mean/mrho_dry_medan
+            mr_h2o = mrho_h2o_mean/mrho_dry_mean
         else:
             raise TypeError('Either water mixing ratio should be provided, or dry air and water density should be the same')
         #---------
         
         #---------
         # We calculate WPL little by little to make it easy to handle the units
-        aux1 = out[ defs.water_vapor_flux ]
+        aux1 = E_orig
         unt1 = fluxunits[ defs.water_vapor_flux ]
 
         aux2 = mrho_h2o_mean * (cov[theta_fluc][w_fluc]/theta_mean)
@@ -633,7 +633,7 @@ def eddyCov3(data, units, wpl=True,
                 mr_sol_unit = units[ defs.molar_mixing_ratio % solute ]
             elif units[ defs.molar_density % solute ] == units[ defs.dry_air_molar_density ]:
                 mr_sol = sol_molar_density_mean/rho_dry_mean
-                mr_sol_unit = 'mole/mole'
+                mr_sol_unit = ureg('mole/mole')
             else:
                 raise TypeError('Either water mixing ratio should be provided, or dry air and water density should be the same')
             #---------
@@ -643,7 +643,7 @@ def eddyCov3(data, units, wpl=True,
             aux1 = out[ defs.flux_of % solute ]
             unt1 = fluxunits[ defs.flux_of % solute ]
 
-            aux2 = sol_molar_density_mean*(1. + mu*mr_h2o)*(cov[theta_fluc][w_fluc])/theta_mean
+            aux2 = sol_molar_density_mean * (1. + mu*mr_h2o) * (cov[theta_fluc][w_fluc])/theta_mean
             unt2 = units[ defs.molar_density % solute ] * units[ w_fluc ]
 
             aux3 = mu * mr_sol* E_orig
