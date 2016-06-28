@@ -1,3 +1,21 @@
+from __future__ import print_function
+
+def correctLag(data, notation=None, lag_bounds=[0, 100]):
+    """
+    Identifies and correct lags between data, assuming the 
+    vertical wind velocity has lag 0.
+    """
+    from .. import algs
+    from .. import data
+    data = data.copy()
+    defs = algs.get_notation(notation)
+
+    variables = data.columns.drop(defs.w)
+    for variable in variables:
+        (Co, Qu) = data.crossSpectrum(data[[defs.w, variable]], frequency=10, anti_aliasing=True)
+
+    return data
+
 def phaseCorrection(cross_spec, T):
     return hfc_Dias_ea_16(cross_spec, T)
 
