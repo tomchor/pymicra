@@ -1,8 +1,3 @@
-#!/usr/bin/python
-"""
-Maybe add all these variables that EddyPro calculates:
-http://www.licor.com/env/help/EddyPro3/Content/Topics/Calculating_Micromet_Variables.htm
-"""
 from __future__ import print_function
 
 def MonObuVar(L_m, siteConf):

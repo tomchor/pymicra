@@ -82,10 +82,10 @@ def operate(elems, units, inplace=False, unitdict=None, key=None, operation='+')
 
 
 def parseUnits(unitstr):
-    '''
+    """
     Gets unit from string, list of strings, or dict's values, using the UnitRegistry
     defined in __init__.py
-    '''
+    """
     try:
         from .. import ureg, Q_
     except ImportError:

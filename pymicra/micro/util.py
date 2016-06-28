@@ -15,7 +15,6 @@ water vapor heat capacity at constant pressure?
 refining ambient temperature?
 moist air heat capacity at constant pressure?
 specific evaporation heat?
-* water to dry air mixing ratio
 """
 
 def preProcess(data, units, notation=None, use_means=False,
@@ -593,7 +592,7 @@ def eddyCov3(data, units, wpl=True,
         elif units[ defs.h2o_molar_density ] == units[ defs.dry_air_molar_density ]:
             mr_h2o = mrho_h2o_mean/mrho_dry_mean
         else:
-            raise TypeError('Either water mixing ratio should be provided, or dry air and water density should be the same')
+            raise TypeError('Either water molar mixing ratio should be provided, or dry air and water density should be the same')
         #---------
         
         #---------

@@ -128,6 +128,8 @@ def _xplot(self, xcol, reverse_x=False, return_ax=False,
 
     Parameters:
     -----------
+    self: pandas.DataFrame
+        datframe to be plotted
     xcol: str
         the name of the column you want in the x axis
     reverse_x: bool
@@ -141,17 +143,19 @@ def _xplot(self, xcol, reverse_x=False, return_ax=False,
     latexify: cool
         whether to attempt to transform names of columns into latex format
     **kwargs:
-        kwargs to poss to pandas.plot method
+        kwargs to pass to pandas.plot method
 
     LATEXFY IS STILL BUGGY
     """
+    from . import algs
+
     df = self.copy()
 
     #-----------
     # Try to display letters in the latex mathematical environment
     if latexfy:
-	df.columns = latexify(df.columns)
-        xcol = latexify([xcol])[0]
+	df.columns = algs.latexify(df.columns)
+        xcol = algs.latexify([xcol])[0]
     #-----------
 
     #-----------
@@ -279,3 +283,4 @@ pd.Series.convert_to = convert_cols
 #---------
 
 del pd
+del decorators
