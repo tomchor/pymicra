@@ -189,7 +189,7 @@ def qcontrol(files, datalogger_config,
     from dateutil.parser import parse
     import pandas as pd
     import numpy as np
-    from algs import auxiliar as algs
+    from . import algs
 
     if trueshow:
         import matplotlib.pyplot as plt
