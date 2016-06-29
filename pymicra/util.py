@@ -15,7 +15,7 @@ TODO LIST
 import tests
 
 def qcontrol(files, datalogger_config,
-             read_files_kw={'parse_dates':False},
+             read_files_kw={'parse_dates':False, 'clean_dates':False, 'only_named_cols':False},
              accepted_nans_percent=1.,
              accepted_spikes_percent=1.,
              accepted_bound_percent=1.,

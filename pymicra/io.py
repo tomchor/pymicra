@@ -10,7 +10,7 @@ from __future__ import print_function
 # INPUT OF DATA
 #-------------------------------------------
 #-------------------------------------------
-def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
+def readDataFile(fname, varNames=None, only_named_cols=True, **kwargs):
     """
     Author: Tomas Chor
 
@@ -30,25 +30,19 @@ def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
     import pandas as pd
 
     #------------
-    # Read only used columns if possible
-    if type(varNames) == dict:
-        usedcols = sorted(varNames.keys())
-        #------------
-        # This makes it easier to read dates
-        if dates_as_string:
-            dtypes={ i : str for i,key in enumerate(varNames.values()) if r'%' in key }
-        else:
-            dtypes=None
-        #------------
-    else:
+    # This makes it easier to read dates
+    try:
+        dtypes={ i : str for i,key in enumerate(varNames.values()) if r'%' in key }
+    except:
+        dtypes=None
+    #------------
+
+    #------------
+    # If only_named_cols == True, read all columns in the file
+    if not only_named_cols:
         usedcols = None
-        #------------
-        # This makes it easier to read dates
-        if dates_as_string:
-            dtypes={ i : str for i,key in enumerate(varNames) if r'%' in key }
-        else:
-            dtypes=None
-        #------------
+    else:
+        usedcols = sorted(varNames.keys())
     #------------
 
     #------------
@@ -60,10 +54,11 @@ def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
         data=pd.read_csv(fname, usecols=usedcols, **kwargs)
     #------------
 
-    if type(varNames) == list:
-        data.columns=varNames + list(data.columns[len(varNames):])
-    elif type(varNames) == dict:
-        data.columns = [ varNames[el] for el in data.columns ]
+    #------------
+    # Renaming columns according to our variables
+    data = data.rename(columns = varNames)
+    #------------
+
     return data
 
 
@@ -105,7 +100,7 @@ def readDataFiles(flist, verbose=0, **kwargs):
 
 
 def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
-        read_data_kw={}, parse_dates_kw={}, clean_dates=True, return_units=False):
+        read_data_kw={}, parse_dates_kw={}, clean_dates=True, return_units=False, only_named_cols=True):
     """
     Creates a micrometeorological time series from a file or list of files.
 
@@ -139,9 +134,11 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     skiprows=datalogger.skiprows
     columns_separator=datalogger.columns_separator
     if columns_separator=='whitespace':
-        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, delim_whitespace=True, varNames=datalogger.varNames, **read_data_kw)
+        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, delim_whitespace=True, 
+            varNames=datalogger.varNames, only_named_cols=only_named_cols, **read_data_kw)
     else:
-        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, sep=columns_separator, varNames=datalogger.varNames, **read_data_kw)
+        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, sep=columns_separator, 
+            varNames=datalogger.varNames, only_named_cols=only_named_cols, **read_data_kw)
     #------------
 
     #------------
