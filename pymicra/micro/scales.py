@@ -49,7 +49,7 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
 
 
 def getScales(data, siteConf, units, notation=None,
-        theta_from_theta_v=True, solutes=[], output_as_df=True, inplace=True):
+        theta_fluct_from_theta_v=True, solutes=[], output_as_df=True, inplace=True):
     """
     Calculates characteristic lengths for data
 
@@ -98,7 +98,7 @@ def getScales(data, siteConf, units, notation=None,
     #---------
     # Now we try to calculate or identify the fluctuations of theta
     theta_mean = data[ defs.thermodyn_temp ].mean()
-    if (theta_fluc not in data.columns) or theta_from_theta_v:
+    if (theta_fluc not in data.columns) or theta_fluct_from_theta_v:
         print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
         #---------
         # We need the mean of the specific humidity and temperature

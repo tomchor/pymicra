@@ -459,7 +459,7 @@ def eddyCov2(data, wpl=True,
 
 
 def eddyCov3(data, units, wpl=True,
-        notation=None, inplace=True, solutes=[]):
+        notation=None, theta_fluct_from_theta_v=True, inplace=True, solutes=[]):
     """
     Get fluxes from the turbulent fluctuations
     
@@ -513,7 +513,7 @@ def eddyCov3(data, units, wpl=True,
     #---------
     # Now we try to calculate or identify the fluctuations of theta
     theta_mean = data[ defs.thermodyn_temp ].mean()
-    if theta_fluc not in data.columns:
+    if (theta_fluc not in data.columns) or theta_fluct_from_theta_v:
         print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
         #---------
         # We check the units of theta_v and theta
@@ -580,9 +580,8 @@ def eddyCov3(data, units, wpl=True,
 
         #---------
         # If there are solutes to correct we save the original E to use in the calculation
-        if solutes:
-            E_orig = out[ defs.water_vapor_flux ].copy()
-            E_orig_unit = fluxunits[ defs.water_vapor_flux ].copy()
+        E_orig = out[ defs.water_vapor_flux ].copy()
+        E_orig_unit = fluxunits[ defs.water_vapor_flux ].copy()
         #---------
 
         #---------
@@ -598,7 +597,7 @@ def eddyCov3(data, units, wpl=True,
         #---------
         # We calculate WPL little by little to make it easy to handle the units
         aux1 = E_orig
-        unt1 = fluxunits[ defs.water_vapor_flux ]
+        unt1 = E_orig_unit
 
         aux2 = mrho_h2o_mean * (cov[theta_fluc][w_fluc]/theta_mean)
         unt2 = units[ defs.h2o_molar_density ] * units[ w_fluc ]
