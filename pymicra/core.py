@@ -304,7 +304,9 @@ class Notation(object):
 
     def __str__(self):
         import pandas as pd
+        pd.options.display.max_rows=9999
         string = pd.Series(self.__dict__).__str__()
+        pd.reset_option('max_rows')
         return string
     __repr__ = __str__
 
