@@ -571,7 +571,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
     from os import path
     import io
     import pandas as pd
-    from algs import auxiliar as algs
+    from . import algs
 
     #-----------------------
     # First considerations

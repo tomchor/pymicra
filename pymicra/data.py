@@ -56,6 +56,8 @@ def rotCoor(data, notation=None):
     return data
 
 
+from . import decorators
+@decorators.pdgeneral(convert_out=True)
 def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=True, **kwargs):
     """
     Wrapper to return the trend given data. Can be achieved using a moving avg, block avg or polynomial fitting
@@ -141,8 +143,8 @@ def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=
         raise KeyError('Method of trending not found. Check how keyword options with help(trend).')
         #-------
 
-
-def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None, inplace=True, **kwargs):
+@decorators.pdgeneral(convert_out=True)
+def detrend(data, how='linear', rule=None, notation=None, units=None, inplace=True, **kwargs):
     """
     Returns the detrended fluctuations of a given dataset
 
@@ -154,8 +156,6 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
         how of average to apply. Currently {'movingmean', 'movingmedian', 'block', 'linear', 'poly'}.
     rule: pandas offset string
         the blocks for which the trends should be calculated in the block and linear type
-    suffix: string
-        suffix to add to variable names after fluctuation is extracted
     window: pandas date offset string or int
         if moving mean/median is chosen, this tells us the window size to pass to pandas. If int,
         this is the number of points used in the window. If string we will to guess the number of
@@ -176,6 +176,7 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
 
     how=algs.stripDown(how.lower(), args='-_')
     df=data.copy()
+    defs = algs.get_notation(notation)
 
     #-----------
     # We can only use scipy's detrend function safely if index in not datetime
@@ -186,9 +187,9 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
         # If possible, try to use scipy's optimized functions
         if how=='linear' and rule==None:
             try:
-                df=df.apply(signal.detrend, axis=0, type=how)
+                df = df.apply(signal.detrend, axis=0, type=how)
             except:
-                df=df-trend(df, how=how, rule=rule, **kwargs)
+                df = df - trend(df, how=how, rule=rule, **kwargs)
 
         elif (any(w==how for w in ['block', 'blockaverage', 'blockmean'])) and (rule==None):
             try:
@@ -206,21 +207,14 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
 
     #-----------
     # We rename the columns names to indicate that they are fluctuations
-    if suffix != None:
-        #-----------
-        # If units are provided, we include the units for the fluctuations
-        if units:
-            newunits = { el + suffix : units[el] for el in df.columns }
-        #-----------
-        df = df.add_suffix(suffix)
-    else:
-        #-----------
-        # If units are provided, we include the units for the fluctuations
-        if units:
-            newunits = { defs.fluctuations % el : units[el] for el in df.columns }
-        #-----------
-        defs = algs.get_notation(notation)
-        df.columns = [ defs.fluctuations % el for el in df.columns ]
+    if units:
+        newunits = { defs.fluctuations % el : units[el] for el in df.columns }
+    #-----------
+    
+    #-----------
+    # Rename the columns
+    #df.columns = [ defs.fluctuations % el for el in df.columns ]
+    df = df.rename(columns = lambda x: defs.fluctuations % x)
     #-----------
 
     #-----------

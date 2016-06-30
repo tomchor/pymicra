@@ -118,7 +118,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     verbose: int, bool
         verbose level
     """
-    from algs import auxiliar as algs
+    from . import algs
 
     #--------------
     # If datalogger is a string it should be the path to a .dlc file

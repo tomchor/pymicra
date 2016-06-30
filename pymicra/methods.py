@@ -229,7 +229,7 @@ def _polyfit(self, degree=1, rule=None):
         pandas offside string. Ex.: "10min".
     """
     import pandas as pd
-    from algs import fitWrap
+    from .algs import fitWrap
     from . import algs
 
     data = self.copy()
