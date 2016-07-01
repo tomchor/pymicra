@@ -54,12 +54,6 @@ def check_maxdif(data, tables, detrend=True, detrend_kw={'how':'movingmean', 'wi
     valid = tables.loc['dif_limits'] - maxdif
     valid = ~(valid < 0)
 
-    #print(valid)
-    #if (~valid).any():
-        #print(~valid)
-        #detrended['theta_v' ].plot()
-        #plt.show()
-
     return valid
 
 

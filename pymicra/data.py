@@ -144,7 +144,7 @@ def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=
         #-------
 
 @decorators.pdgeneral(convert_out=True)
-def detrend(data, how='linear', rule=None, notation=None, units=None, inplace=True, **kwargs):
+def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=None, inplace=True, **kwargs):
     """
     Returns the detrended fluctuations of a given dataset
 
@@ -213,7 +213,8 @@ def detrend(data, how='linear', rule=None, notation=None, units=None, inplace=Tr
     
     #-----------
     # Rename the columns
-    df = df.rename(columns = lambda x: defs.fluctuations % x)
+    if suffix != '':
+        df = df.rename(columns = lambda x: defs.fluctuations % x)
     #-----------
 
     #-----------
