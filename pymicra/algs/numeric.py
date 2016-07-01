@@ -108,7 +108,8 @@ def _diff_df(self, how='central', axis=0):
         axis on which to differentiate
     """
     import numpy as np
-    import auxiliar as aux
+    #import auxiliar as aux
+    from .. import algs as algs
     import pandas as pd
 
     #---------
@@ -125,7 +126,7 @@ def _diff_df(self, how='central', axis=0):
     #---------
     if how=='central':
         ix = x[1:-1]
-        diff=aux.diff_central
+        diff=algs.diff_central
     elif how=='fwd':
         ix=x[:-1]
         diff=lambda x,y: y/x
