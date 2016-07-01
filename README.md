@@ -1,14 +1,16 @@
 # Pymicra - A Python tool for Micrometeorological Analyses
 
-This package was designed to make it easier to work with micrometeorological data. Pymicra is currently fully written in python and it's aimed towards aggregating all of the commonly needed functionality work with micrometeorological data into one productivity-enhancing tool.
+This package was designed to make it easier to work with micrometeorological data. Pymicra is currently fully written in python and it's aimed towards aggregating all of functionality that is commonly needed to work with micrometeorological data into one productivity-enhancing tool.
 
-The package is extensively (almost entirely) based on Pandas, which itself is based on Numpy.
+The package is extensively (almost entirely) based on Pandas, mostly the `pandas.DataFrame` class. For control of units, we use Pint and for some numerical functions not contained in Pandas, Numpy or Scipy are generally used.
 
 ## Required Packages
 Most required packages already come with python. However, packages that generally have to be manually installed beforehand are:
 
 * Pandas
 * Pint
+* Numpy
+* Scipy
 * setuptools (for installation only)
 
 ## License
@@ -22,9 +24,10 @@ Currently, this is a sum up of what Pymicra does:
   - Rotation of coordinates (2D).
   - Detrending of data in the most common ways (block averages, moving averages and polynomial detrending).
   - Correction of sensor drift.
+  - Automatic calculation of most auxiliary variables based on actual measurements (air density, dry air density, etc.).
   - Calculation of spectra and cross-spectra.
   - Calculation fluxes and characteristic scales.
-  - Apply WPL correction.
+  - WPL correction.
   - Provide all the common constants generally used in micrometeorology.
   - Plus all native features of Pandas (interpolation, resampling, grouping, statistical tests, slicing, handling of missing data and etc.)
 
@@ -35,15 +38,15 @@ Download the package an unpack in somewhere. Then open a terminal and move to th
 
 To remove Pymicra, the easiest way is to use pip (`sudo apt-get install python-pip`) with the command `sudo pip uninstall pymicra`.
 
-## Suggested notation (already default)
-To work with Pandas (and hence Pymicra) each column of data preferably has to have its own name, so it is important that the names the user uses for columns match the ones that Pymicra uses (although a different-from-default notation can be passed to Pymicra). The next lines describe some general quantities, followed by the name that should be used inside straight brackets, followed by the units that compose it. The names provided are the default names and will be subjected to change by the user.
- - concentration [conc] - (mass of substance)/(mass of air)
- - density [rho] - (mass of substance)/(volume of air)
- - molar density [mrho] - (molar mass of substance)/(volume of air)
- - mixing ratio [r] - (mass of substance)/(mass of dry air)
+## Default notation
+To work Pymicra each column of data has to have its own name, so it is important that the names the user uses for columns match the ones that Pymicra uses (although a different-from-default notation can be passed to Pymicra). The next lines describe some general quantities, followed by the name that should be used inside straight brackets, followed by the units that compose it. The names provided are the default names and will be subjected to change by the user. You should  check the notation by using `print(pymicra.notation)`, but here's a quick introductory list:
 
-We take humidity as the only exception to the rule above, following instead for the concentration of H2O:
- - specific humidity [q] - (mass of h2o)/(mass of air)
+ - mass concentration [conc] - (mass of substance)/(mass of air)
+ - mass density [rho] - (mass of substance)/(volume of air)
+ - molar density [mrho] - (moles of substance)/(volume of air)
+ - mass mixing ratio [r] - (mass of substance)/(mass of dry air)
+ - molar mixing ratio [mr] - (moles of substance)/(moles of dry air)
+ - specific humidity [q] - (mass of h2o)/(mass of moist air)
 
 We also assume that the Reynolds decomposition of any variable "a" takes the form
     
