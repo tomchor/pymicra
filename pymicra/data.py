@@ -208,12 +208,11 @@ def detrend(data, how='linear', rule=None, notation=None, units=None, inplace=Tr
     #-----------
     # We rename the columns names to indicate that they are fluctuations
     if units:
-        newunits = { defs.fluctuations % el : units[el] for el in df.columns }
+        newunits = { defs.fluctuations % el : units[el] if el in units.keys() else None for el in df.columns }
     #-----------
     
     #-----------
     # Rename the columns
-    #df.columns = [ defs.fluctuations % el for el in df.columns ]
     df = df.rename(columns = lambda x: defs.fluctuations % x)
     #-----------
 
