@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from __future__ import print_function
+from . import decorators as _decors
 """
 Author: Tomas Chor
 Date: 2015-08-07
@@ -56,8 +57,7 @@ def rotCoor(data, notation=None):
     return data
 
 
-from . import decorators
-@decorators.pdgeneral(convert_out=True)
+@_decors.pdgeneral(convert_out=True)
 def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=True, **kwargs):
     """
     Wrapper to return the trend given data. Can be achieved using a moving avg, block avg or polynomial fitting
@@ -143,7 +143,7 @@ def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=
         raise KeyError('Method of trending not found. Check how keyword options with help(trend).')
         #-------
 
-@decorators.pdgeneral(convert_out=True)
+@_decors.pdgeneral(convert_out=True)
 def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=None, inplace=True, **kwargs):
     """
     Returns the detrended fluctuations of a given dataset
@@ -293,8 +293,7 @@ def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):
 
 
 
-from . import decorators
-@decorators.pdgeneral(convert_out=True)
+@_decors.pdgeneral(convert_out=True)
 def spectra(data, frequency=10, notation=None, anti_aliasing=True):
     """
     Calculates the cross-spectra for a set of data

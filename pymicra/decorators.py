@@ -36,7 +36,7 @@ def pdgeneral_io(func):
             result = func(*args, **kwargs)
 
             if isinstance (result, pd.DataFrame):
-                result = pd.Series(result.iloc[:, 0].values)
+                result = pd.Series(result.iloc[:, 0].values, index=result.index)
 
             elif isinstance (result, pd.Series):
                 if result.size==1:
@@ -44,11 +44,12 @@ def pdgeneral_io(func):
                 else:
                     pass
 
-            elif isinstance(result, list):
-                result[0] = pd.Series(result[0].iloc[:, 0].values)
-
-            elif isinstance(result, tuple):
-                result = tuple([pd.Series(result[0].iloc[:, 0].values)]) + result[1:]
+            elif type(result) in [ list, tuple ]:
+                outser = pd.Series(results[0].iloc[:, 0].values, index=result[0].index)
+                if isinstance(result, list):
+                    result[0] = outser
+                else:
+                    result = tuple([outser]) + result[1:]
 
             return result
 
