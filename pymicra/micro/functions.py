@@ -1,25 +1,6 @@
-#!/usr/bin/python
 from __future__ import print_function
-"""
-Author: Tomas Chor
-Date: 2015-08-07
--------------------------
 
-This module works with micrometeorological data using pandas, numpy, datetime and several other packages
-
--------------------------
-
-TO-DO LIST
-
-Maybe add all these variables that EddyPro calculates:
-http://www.licor.com/env/help/EddyPro3/Content/Topics/Calculating_Micromet_Variables.htm
-
-"""
-
-def nondimensionalSTD(zeta, **kwargs):
-    return phi_c(zeta, **kwargs)
-
-def phi_c(zeta, x=None):
+def nondimensionalSTD(zeta, x=None):
     """
     The nondimensional standard deviation function, defined as:
 
@@ -27,26 +8,26 @@ def phi_c(zeta, x=None):
 
     From zahn.ea
     """
+    #----------
+    # Unstable conditions
     if zeta<0:
         if x=='u' or x=='w':
             return 1.25*(1. - 3.*zeta)**(1./3.)
         else:
             return 2.*(1. - 9.5*zeta)**(-1./3.)
+    #----------
+
+    #----------
+    # Stable conditions
     else:
         if x=='u' or x=='w':
             return 1.25
         else:
             return 2. 
+    #----------
 
 
-def nondimensionalGrad(zeta, **kwargs):
-    """
-    Redirects to phi, but is preferred
-    """
-    return phi(zeta, **kwargs)
-
-
-def phi(zeta, x=None, C_unstable=None, C_stable=None):
+def nondimensionalGrad(zeta, x=None):
     """
     The nondimensional gradients, defined as:
 
@@ -58,16 +39,24 @@ def phi(zeta, x=None, C_unstable=None, C_stable=None):
 
     TODO: generalize coefficients
     """
+
+    #----------
+    # Unstable conditions
     if zeta<0:
         if x=='tau' or x=='M':
             return (1. - 16.*zeta)**(-1./4.)
         else:
             return (1. - 16.*zeta)**(-1./2.)
+    #----------
+
+    #----------
+    # Stable conditions
     if zeta>=0:
         if zeta<1.:
             return 1. + 5.*zeta
         if zeta>=1.:
             return 6.
+    #----------
 
 
 

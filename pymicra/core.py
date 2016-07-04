@@ -1,7 +1,4 @@
 from __future__ import print_function
-#!/usr/bin/python
-"""
-"""
 
 class dataloggerConfig(object):
     """
@@ -125,7 +122,11 @@ class dataloggerConfig(object):
         self.units=units
         self.description=description
         self.filename_format=filename_format
-        return
+
+
+    def __str__(self):
+        return '<pymicra.dataloggerConfig>\n{}'.format(self.description)
+    __repr__ = __str__
 
 
 class siteConfig(object):
@@ -133,8 +134,10 @@ class siteConfig(object):
     Keeper of the configurations and constants of an experiment. (such as height of instruments,
     location, canopy height and etc)
     """
+    from . import decorators
+    @decorators.autoassign
     def __init__(self, from_file=None,
-             instruments_height=None, canopy_height=None,
+             instruments_height=None, measurement_height=None, canopy_height=None,
              displacement_height=None, roughness_length=None,
              latitude=None, longitude=None, altitude=None, description=None):
         """
@@ -142,7 +145,7 @@ class siteConfig(object):
         -----------
             from_file: str
                 path to .site file with the configurations of the experiment. All atributes are taken from there.
-            instruments_height: float
+            measurement_height: float
                 the mainn height of the instruments in meters considered for calculations.
                 Generally it's the height of the sonic anemometer.
             canopy_height: float
@@ -164,14 +167,15 @@ class siteConfig(object):
             return
         #---------
 
-        self.description = description
-        self.instruments_height = instruments_height    #meters
-        self.canopy_height = canopy_height              #meters
-        self.roughness_length = roughness_length
+        #self.description = description
+        #self.instruments_height = instruments_height    #meters
+        #self.measurement_height = measurement_height    #meters
+        #self.canopy_height = canopy_height              #meters
+        #self.roughness_length = roughness_length
 
         #---------
         # If there's no displacement height, we try to calculate it
-        if displacement_height:
+        if displacement_height != None:
             self.displacement_height=displacement_height
         else:
             if canopy_height:
@@ -180,21 +184,23 @@ class siteConfig(object):
                 self.displacement_height = None
         #---------
             
-        self.latitude = latitude
-        self.longitude = longitude
-        self.altitude = altitude
+        #self.latitude = latitude
+        #self.longitude = longitude
+        #self.altitude = altitude
 
-    def show(self):
+
+    def __str__(self):
         """
-        Shows the characteristics of the site on screen
+        Creates nice representation for printing siteConfig objects based on pandas.Series
         """
-        print('Description:', self.description)
-        print('Lat, Lon:', self.latitude, self.longitude)
-        print('Altitude:', self.altitude)
+        import pandas as pd
+        string = '<pymicra.siteConfig> object\n{}\n----\n'.format(self.description)
+        string+= pd.Series(self.__dict__).__str__()
+        return string
+    __repr__ = __str__
 
 
-
-class notation(object):
+class Notation(object):
     """
     This creates an object that holds the default notation for pymicra.
     Example of usage:
@@ -209,12 +215,17 @@ class notation(object):
     mean='%s_mean'
     fluctuations="%s'"
     star='%s_star'
-    concentration='conc_%s'
+    std='%s_std'
+    mass_concentration='conc_%s'
     molar_concentration='mconc_%s'
-    density='rho_%s'
+    mass_density='rho_%s'
     molar_density='mrho_%s'
-    mixing_ratio='r_%s'
+    mass_mixing_ratio='r_%s'
     molar_mixing_ratio='mr_%s'
+
+    density=mass_density
+    concentration=mass_concentration
+    mixing_ratio=mass_mixing_ratio
 
     u='u'
     v='v'
@@ -240,6 +251,10 @@ class notation(object):
     water_vapor_flux = 'E'
     latent_heat_flux = 'LE'
     flux_of = 'F_%s'
+    cross_spectrum = 'Cr_%s_%s'
+    spectrum = 'Sp_%s'
+    co_spectrum = 'Co_%s_%s'
+    quadrature_spectrum = 'Qu_%s_%s'
 
     def __init__(self):
         """
@@ -253,18 +268,29 @@ class notation(object):
         """
         for subst in ['h2o', 'co2', 'ch4', 'o3', 'moist_air', 'dry_air']:
             for mode, comp in zip(['', '_mean' ], ['', 'self.mean %']):
-                exec('self.{0}{1}_density = {2} self.density % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_mass_density = {2} self.mass_density % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_molar_density = {2} self.molar_density % self.{0}'.format(subst, mode, comp))
-                exec('self.{0}{1}_mixing_ratio = {2} self.mixing_ratio % self.{0}'.format(subst, mode, comp))
-                exec('self.{0}{1}_concentration = {2} self.concentration % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_mass_mixing_ratio = {2} self.mass_mixing_ratio % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_molar_mixing_ratio = {2} self.molar_mixing_ratio % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_mass_concentration = {2} self.mass_concentration % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_molar_concentration = {2} self.molar_concentration % self.{0}'.format(subst, mode, comp))
 
-            exec('self.{0}_density_fluctuations =  self.fluctuations % self.{0}_density'.format(subst))
-            exec('self.{0}_molar_density_fluctuations = self.fluctuations % self.{0}_molar_density'.format(subst))
-            exec('self.{0}_mixing_ratio_fluctuations = self.fluctuations % self.{0}_mixing_ratio'.format(subst))
-            exec('self.{0}_concentration_fluctuations = self.fluctuations % self.{0}_concentration'.format(subst))
-            exec('self.{0}_molar_concentration_fluctuations = self.fluctuations % self.{0}_molar_concentration'.format(subst))
+                exec('self.{0}{1}_density = {2} self.density % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_mixing_ratio = {2} self.mixing_ratio % self.{0}'.format(subst, mode, comp))
+                exec('self.{0}{1}_concentration = {2} self.concentration % self.{0}'.format(subst, mode, comp))
 
+            for mode in ['fluctuations', 'star', 'std']:
+                exec('self.{0}_mass_density_{1} =  self.{1} % self.{0}_mass_density'.format(subst,mode))
+                exec('self.{0}_molar_density_{1} = self.{1} % self.{0}_molar_density'.format(subst,mode))
+                exec('self.{0}_mass_mixing_ratio_{1} = self.{1} % self.{0}_mass_mixing_ratio'.format(subst,mode))
+                exec('self.{0}_molar_mixing_ratio_{1} = self.{1} % self.{0}_molar_mixing_ratio'.format(subst,mode))
+                exec('self.{0}_mass_concentration_{1} = self.{1} % self.{0}_mass_concentration'.format(subst,mode))
+                exec('self.{0}_molar_concentration_{1} = self.{1} % self.{0}_molar_concentration'.format(subst,mode))
+    
+                exec('self.{0}_density_{1} =  self.{1} % self.{0}_density'.format(subst,mode))
+                exec('self.{0}_mixing_ratio_{1} = self.{1} % self.{0}_mixing_ratio'.format(subst,mode))
+                exec('self.{0}_concentration_{1} = self.{1} % self.{0}_concentration'.format(subst,mode))
+    
 
 
         for subst in ['co2', 'ch4', 'o3']:
@@ -274,4 +300,13 @@ class notation(object):
             exec('self.{0}_fluctuations = self.fluctuations % self.{0}'.format(subst))
             exec('self.{0}_mean = self.mean % self.{0}'.format(subst))
             exec('self.{0}_star = self.star % self.{0}'.format(subst))
+            exec('self.{0}_std = self.std % self.{0}'.format(subst))
+
+    def __str__(self):
+        import pandas as pd
+        pd.options.display.max_rows=9999
+        string = pd.Series(self.__dict__).__str__()
+        pd.reset_option('max_rows')
+        return string
+    __repr__ = __str__
 

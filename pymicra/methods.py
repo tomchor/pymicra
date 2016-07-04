@@ -1,41 +1,11 @@
 #!/usr/bin/python
 """
 """
-
-
-def to_UnitsCsv(data, units, filename, to_tex=False, **kwargs):
-    """
-    Writes s csv with the units of the variables as a second line
-
-    Parameters:
-    ----------
-
-    data: pandas.DataFrame
-        dataframe of data
-    units: dict
-        dictionary containing { nameOfVar : unit }
-    filename: string
-        path of output file
-    to_tex: bool
-        whether or not to convert the string of the unit to TeX format (useful for printing)
-    """
-    import pandas as pd
-
-    if to_tex:
-        from util import printUnit as pru
-        units={ k : pru(v) for k,v in units.iteritems() }
-    cols=data.columns
-    unts=[ units[c] if c in units.keys() else ' ' for c in cols ]
-    columns=pd.MultiIndex.from_tuples(zip(cols, unts))
-    df=data.copy()
-    df.columns=columns
-    df.to_csv(filename, **kwargs)
-    return
-
+from . import decorators
 
 #---------------
 # Creates a method to write to a unitsCsv
-def _to_unitsCsv(self, units, filename, to_tex=False, **kwargs):
+def _to_unitsCsv(self, units, filename, **kwargs):
     """
     Wrapper around toUnitsCsv to create a method to print the contents of
     a dataframe plus its units into a unitsCsv file.
@@ -48,13 +18,20 @@ def _to_unitsCsv(self, units, filename, to_tex=False, **kwargs):
         dictionary with the names of each column and their unit
     filename: str
         path to which write the unitsCsv
-    to_tex: bool
-        whether to try and transform the units into TeX format
     kwargs:
         to be passed to pandas' method .to_csv
     """
-    to_UnitsCsv(self, units, filename, to_tex=to_tex, **kwargs)
+    import pandas as pd
+
+    data = self.copy()
+    cols = data.columns
+    unts = [ str(units[c]) if c in units.keys() else ' ' for c in cols ]
+    columns = pd.MultiIndex.from_tuples(zip(cols, unts))
+    data = data.copy()
+    data.columns = columns
+    data.to_csv(filename, **kwargs)
     return
+
 import pandas as pd
 pd.DataFrame.to_unitsCsv = _to_unitsCsv
 #---------------
@@ -141,4 +118,169 @@ pd.DataFrame.binned=binwrapper
 pd.Series.binned=binwrapper
 #---------------
 
+#--------
+# Define xplot method for pandas dataframes
+def _xplot(self, xcol, reverse_x=False, return_ax=False, 
+            fixed_cols=[], fcols_styles=[], latexify=False, **kwargs):
+    """
+    A smarter way to plot things with the x axis being one of the columns. Very useful for
+    comparison of models and results
+
+    Parameters:
+    -----------
+    self: pandas.DataFrame
+        datframe to be plotted
+    xcol: str
+        the name of the column you want in the x axis
+    reverse_x: bool
+        whether to plot -xcol instead of xcol in the x-axis
+    return_ax: bool
+        whther to return pyplot's axis object for the plot
+    fixed_cols: list of strings
+        columns to plot in every subplot (only if you use subplot=True on keywords)
+    fcols_styles: list of string
+        styles to use for fixed_cols
+    latexify: cool
+        whether to attempt to transform names of columns into latex format
+    **kwargs:
+        kwargs to pass to pandas.plot method
+
+    LATEXFY IS STILL BUGGY
+    """
+    from . import algs
+
+    df = self.copy()
+
+    #-----------
+    # Try to display letters in the latex mathematical environment
+    if latexfy:
+	df.columns = algs.latexify(df.columns)
+        xcol = algs.latexify([xcol])[0]
+    #-----------
+
+    #-----------
+    # If you want ti plot against -xcol instead of xcol (useful for log plots)
+    if reverse_x:
+        newx = '-'+str(xcol)
+        df[newx] = -df[xcol]
+        df = df.drop(xcol, axis=1)
+        xcol = newx
+    #-----------
+
+    subcols = df.columns.drop(fixed_cols)
+    #--------
+    # Checks for double xlim kwarg
+    if kwargs.has_key('xlim'):
+        xlim = kwargs['xlim']
+        kwargs.pop('xlim')
+    else:
+        xlim=[df[xcol].min(), df[xcol].max()]
+    #--------
+
+    #--------
+    # Here we actually plot the dataFrame
+    try:
+        axes = df[subcols].sort_values(xcol, axis=0).plot(x=xcol, xlim=xlim, **kwargs)
+    except:
+        axes = df[subcols].sort(xcol).plot(x=xcol, xlim=xlim, **kwargs)
+    #--------
+
+    #-------
+    # Plot the fixed cols in each of the subplots
+    if fixed_cols:
+        #-------
+        # The code won't work without style string
+        if len(fcols_styles) == len(fixed_cols):
+            pass
+        else:
+            fcols_styles = ['b-']*len(fixed_cols)
+        #-------
+
+        for fcol, fstyle in zip(fixed_cols, fcols_styles):
+            df2 = df.sort_values(fcol, axis=0)
+            for ax in axes[0]:
+                ax.plot(df2[xcol], df2[fcol], fstyle, label=xcol)
+    #-------
+
+    if return_ax:
+        return axes
+    else:
+        return
+pd.DataFrame.xplot = _xplot
+#--------
+
+
+
+#---------
+# Definition of dataframe method to fit
+@decorators.pdgeneral(convert_out=True)
+def _polyfit(self, degree=1, rule=None):
+    """
+    This method fits an n-degree polynomial to the dataset. The index can
+    be a DateTimeIndex or not
+
+    Parameters
+    ----------
+    data: pd.DataFrame, pd.Series
+        dataframe whose columns have to be fitted
+    degree: int
+        degree of the polynomial. Default is 1.
+    rule: str
+        pandas offside string. Ex.: "10min".
+    """
+    import pandas as pd
+    from .algs import fitWrap
+    from . import algs
+
+    data = self.copy()
+    #if isinstance(self, pd.Series):
+    #    data = pd.DataFrame(data)
+
+    #-----------
+    # If rule == None it should return a list of 1
+    dflist = algs.splitData(data, rule=rule)
+    #-----------
+
+    out=pd.DataFrame()
+    if isinstance(data.index, pd.DatetimeIndex):
+        xx=data.index.to_julian_date()
+        #for data in dflist:
+        #    aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
+        #    out=out.append(aux)
+    else:
+        xx=data.index.values
+
+    for data in dflist:
+        aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
+        out=out.append(aux)
+ 
+    #if isinstance(self, pd.Series):
+    #    return out.iloc[:, 0]
+    #else:
+    #    return out
+    return out
+pd.DataFrame.polyfit = _polyfit
+pd.Series.polyfit = _polyfit
+#---------
+
+#---------
+# Detrend and trend methods for Series and DataFrames
+from .data import detrend
+pd.DataFrame.detrend = detrend
+pd.Series.detrend  = detrend
+
+from .data import trend
+pd.DataFrame.trend = trend
+pd.Series.trend  = trend
+#---------
+
+
+#---------
+# Define convert_cols method here
+from .algs import convert_cols
+pd.DataFrame.convert_cols = convert_cols
+pd.Series.convert_to = convert_cols
+#---------
+
 del pd
+del decorators

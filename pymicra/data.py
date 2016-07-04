@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from __future__ import print_function
+from . import decorators as _decors
 """
 Author: Tomas Chor
 Date: 2015-08-07
@@ -10,7 +11,7 @@ numpy, datetime and several other packages.
 
 """
 
-def rotCoor(data, notation_defs=None):
+def rotCoor(data, notation=None):
     """
     Rotates the coordinates of wind data
     ----------------------
@@ -19,19 +20,16 @@ def rotCoor(data, notation_defs=None):
     ----------
     data: pandas DataFrame 
         the dataFrame to be rotated
-    notation_defs: notations object
+    notation: notation object
         a notation object to know which are the wind variables
     """
     from math import atan2, sqrt
     import numpy as np
+    import algs
 
     #-------
     # Getting the names for u, v, w
-    if notation_defs==None:
-        from core import notation
-        defs=notation()
-    else:
-        defs=notation_defs
+    defs = algs.get_notation(notation)
     wind_vars = [ defs.u, defs.v, defs.w ]
     #-------
 
@@ -59,6 +57,7 @@ def rotCoor(data, notation_defs=None):
     return data
 
 
+@_decors.pdgeneral(convert_out=True)
 def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=True, **kwargs):
     """
     Wrapper to return the trend given data. Can be achieved using a moving avg, block avg or polynomial fitting
@@ -144,8 +143,8 @@ def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=
         raise KeyError('Method of trending not found. Check how keyword options with help(trend).')
         #-------
 
-
-def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None, inplace=True, **kwargs):
+@_decors.pdgeneral(convert_out=True)
+def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=None, inplace=True, **kwargs):
     """
     Returns the detrended fluctuations of a given dataset
 
@@ -157,8 +156,6 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
         how of average to apply. Currently {'movingmean', 'movingmedian', 'block', 'linear', 'poly'}.
     rule: pandas offset string
         the blocks for which the trends should be calculated in the block and linear type
-    suffix: string
-        suffix to add to variable names after fluctuation is extracted
     window: pandas date offset string or int
         if moving mean/median is chosen, this tells us the window size to pass to pandas. If int,
         this is the number of points used in the window. If string we will to guess the number of
@@ -179,6 +176,7 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
 
     how=algs.stripDown(how.lower(), args='-_')
     df=data.copy()
+    defs = algs.get_notation(notation)
 
     #-----------
     # We can only use scipy's detrend function safely if index in not datetime
@@ -189,9 +187,9 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
         # If possible, try to use scipy's optimized functions
         if how=='linear' and rule==None:
             try:
-                df=df.apply(signal.detrend, axis=0, type=how)
+                df = df.apply(signal.detrend, axis=0, type=how)
             except:
-                df=df-trend(df, how=how, rule=rule, **kwargs)
+                df = df - trend(df, how=how, rule=rule, **kwargs)
 
         elif (any(w==how for w in ['block', 'blockaverage', 'blockmean'])) and (rule==None):
             try:
@@ -209,21 +207,14 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
 
     #-----------
     # We rename the columns names to indicate that they are fluctuations
-    if suffix != None:
-        #-----------
-        # If units are provided, we include the units for the fluctuations
-        if units:
-            newunits = { el + suffix : units[el] for el in df.columns }
-        #-----------
-        df = df.add_suffix(suffix)
-    else:
-        #-----------
-        # If units are provided, we include the units for the fluctuations
-        if units:
-            newunits = { defs.fluctuations % el : units[el] for el in df.columns }
-        #-----------
-        defs = algs.get_notation(notation)
-        df.columns = [ defs.fluctuations % el for el in df.columns ]
+    if units:
+        newunits = { defs.fluctuations % el : units[el] if el in units.keys() else None for el in df.columns }
+    #-----------
+    
+    #-----------
+    # Rename the columns
+    if suffix != '':
+        df = df.rename(columns = lambda x: defs.fluctuations % x)
     #-----------
 
     #-----------
@@ -238,6 +229,128 @@ def detrend(data, how='linear', rule=None, suffix="'", notation=None, units=None
         return df
     else:
         return df, units
+
+
+def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):
+    """
+    Calculates the spectrum for a set of data
+
+    Parameters
+    ----------
+    data: pandas.DataFrame or pandas.Series
+        dataframe with one (will return the spectrum) or two (will return to cross-spectrum) columns
+    frequency: float
+        frequency of measurement of signal to pass to numpy.fft.rfftfreq
+    anti_aliasing: bool
+        whether or not to apply anti-aliasing according to Gobbi, Chamecki & Dias, 2006 (doi:10.1029/2005WR004374)
+    notation: notation object
+        notation to be used
+
+    Returns:
+    --------
+    spectrum: dataframe
+        whose column is the spectrum or coespectrum of the input dataframe
+    """
+    from . import notation
+    from . import algs
+    import numpy as np
+    import pandas as pd
+    from itertools import combinations
+
+    notation=algs.get_notation(notation)
+
+    N = len(data)
+    combs = list(combinations(data.columns, 2))
+    names = [ notation.cross_spectrum % (a, b) for a, b in combs ]
+
+    specs = pd.DataFrame(columns = names)
+
+    #---------
+    # Calculate spectra here
+    for (a, b) in combs: 
+        spec_name = notation.cross_spectrum % (a, b)
+        spec = np.fft.rfft(data.loc[:,a])
+        specs.loc[:, spec_name ] = np.conj(spec) * np.fft.rfft(data.loc[:,b])
+    #---------
+
+    #---------
+    # Anti-aliasing is done here
+    if anti_aliasing:
+        RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
+        specs = specs.multiply(RA**2., axis='rows')
+    #---------
+
+    #---------
+    # Now we normalize the spectrum and calculate their frequency
+    specs *= 2./(frequency*N)
+    freq = np.fft.rfftfreq(len(data), d=1./frequency)
+    specs.index = freq
+    specs.index.name='frequencies'
+    #---------
+
+    return specs
+
+
+
+
+@_decors.pdgeneral(convert_out=True)
+def spectra(data, frequency=10, notation=None, anti_aliasing=True):
+    """
+    Calculates the cross-spectra for a set of data
+
+    Parameters
+    ----------
+    data: pandas.DataFrame or pandas.Series
+        dataframe with more than one columns
+    frequency: float
+        frequency of measurement of signal to pass to numpy.fft.rfftfreq
+    anti_aliasing: bool
+        whether or not to apply anti-aliasing according to Gobbi, Chamecki & Dias, 2006 (doi:10.1029/2005WR004374)
+
+    Returns:
+    --------
+    spectra: dataframe
+        whose column is the spectrum or coespectrum of the input dataframe
+    """
+    from . import notation
+    from . import algs
+    import numpy as np
+    import pandas as pd
+
+    if len(data.columns) < 2:
+        raise TypeError('DataFrame has to has more than 1 column.')
+
+    notation = algs.get_notation(notation)
+
+    N = len(data)
+
+    names = [ notation.spectrum % a for a in data.columns ]
+    specs = pd.DataFrame(columns = names)
+
+    #---------
+    # Calculate cross-spectra here
+    for name, col in zip(names, data.columns):
+        spec = np.fft.rfft(data.loc[:, col ])
+        specs.loc[:, name ] = np.conj(spec) * spec
+    #---------
+
+    #---------
+    # Anti-aliasing is done here
+    if anti_aliasing:
+        RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
+        specs = specs.multiply(RA**2., axis='rows')
+    #---------
+
+    #---------
+    # Now we normalize the spectrum and calculate their frequency
+    specs *= 2./(frequency*N)
+    freq = np.fft.rfftfreq(len(data), d=1./frequency)
+    specs.index = freq
+    specs.index.name='frequencies'
+    #---------
+
+    return specs
+
 
 
 def spectrum(data, frequency=10, anti_aliasing=False, outname=None):
@@ -336,24 +449,6 @@ def bulkCorr(data):
     return r
 
 
-#----------
-# Definition of bulk_correlation according to
-# Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
-# doi:10.1029/2012WR012127
-#def _bulk_corr(self):
-#    import numpy as np
-#    df = self.copy()
-#    cov = df.cov()
-#    out = cov.copy()
-#    for c in out.columns:
-#        out.loc[:, c] = out.loc[:, c]/np.sqrt(cov.loc[c, c])
-#    for idx in out.index:
-#        out.loc[idx, :] = out.loc[idx, :]/np.sqrt(cov.loc[idx, idx])
-#    return out
-#import pandas as pd
-#pd.DataFrame.bulk_corr = _bulk_corr
-#del pd      # prevents pandas to being pre-loaded in data.py
-#----------
 
 
 def reverse_arrangement(array, points_number=None, alpha=0.05, verbose=False):

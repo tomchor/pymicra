@@ -1,3 +1,21 @@
+from __future__ import print_function
+
+def correctLag(data, notation=None, lag_bounds=[0, 100]):
+    """
+    Identifies and correct lags between data, assuming the 
+    vertical wind velocity has lag 0.
+    """
+    from .. import algs
+    from .. import data
+    data = data.copy()
+    defs = algs.get_notation(notation)
+
+    variables = data.columns.drop(defs.w)
+    for variable in variables:
+        (Co, Qu) = data.crossSpectrum(data[[defs.w, variable]], frequency=10, anti_aliasing=True)
+
+    return data
+
 def phaseCorrection(cross_spec, T):
     return hfc_Dias_ea_16(cross_spec, T)
 
@@ -86,7 +104,32 @@ def Ogive(df, no_nan=True):
     return out
 
 
-def recspe(slow_spec, freqs, T):
+
+def recspeAux(df, T):
+    """
+    Wrapper to make hfc_zeroQuad work in a pandas.DataFrame
+    """
+    import numpy as np
+
+    freqs=np.array(df.index)
+    for c in df.columns:
+        spec =np.array(df[c])
+        df[c]=hfc_zeroQuad(spec, freqs, T)
+    return df
+
+
+def _anti_aliasing(spec):
+    '''
+    Minimizes aliasing effects on spectra and cross-spectra
+
+    df: pandas.DataFrame
+        containing spectrum or cross-spectrum
+    '''
+    RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
+    return spec * RA**2.
+
+
+def _recspe(slow_spec, freqs, T):
     """
     Applied a correction factor to the spectrum of a slow-measured variable
     based on the response-time T
@@ -106,25 +149,3 @@ def recspe(slow_spec, freqs, T):
     return slow_spec*(1.0 + 4.*(np.pi**2.)*(freqs**2.) * (T**2.))
 
 
-def recspeAux(df, T):
-    """
-    Wrapper to make recspe work in a pandas.DataFrame
-    """
-    import numpy as np
-
-    freqs=np.array(df.index)
-    for c in df.columns:
-        spec =np.array(df[c])
-        df[c]=recspe(spec, freqs, T)
-    return df
-
-
-def anti_aliasing(spec):
-    '''
-    Minimizes aliasing effects on spectra and cross-spectra
-
-    df: pandas.DataFrame
-        containing spectrum or cross-spectrum
-    '''
-    RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
-    return spec * RA**2.

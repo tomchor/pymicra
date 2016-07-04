@@ -1,18 +1,16 @@
-from __future__ import print_function
-#!/usr/bin/python
 """
 Author: Tomas Chor
 Date: 2015-08-07
 -------------------------
-
 """
+from __future__ import print_function
 
 #-------------------------------------------
 #-------------------------------------------
 # INPUT OF DATA
 #-------------------------------------------
 #-------------------------------------------
-def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
+def readDataFile(fname, varNames=None, only_named_cols=True, **kwargs):
     """
     Author: Tomas Chor
 
@@ -32,25 +30,19 @@ def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
     import pandas as pd
 
     #------------
-    # Read only used columns if possible
-    if type(varNames) == dict:
-        usedcols = sorted(varNames.keys())
-        #------------
-        # This makes it easier to read dates
-        if dates_as_string:
-            dtypes={ i : str for i,key in enumerate(varNames.values()) if r'%' in key }
-        else:
-            dtypes=None
-        #------------
-    else:
+    # This makes it easier to read dates
+    try:
+        dtypes={ i : str for i,key in enumerate(varNames.values()) if r'%' in key }
+    except:
+        dtypes=None
+    #------------
+
+    #------------
+    # If only_named_cols == True, read all columns in the file
+    if not only_named_cols:
         usedcols = None
-        #------------
-        # This makes it easier to read dates
-        if dates_as_string:
-            dtypes={ i : str for i,key in enumerate(varNames) if r'%' in key }
-        else:
-            dtypes=None
-        #------------
+    else:
+        usedcols = sorted(varNames.keys())
     #------------
 
     #------------
@@ -62,10 +54,11 @@ def readDataFile(fname, varNames=None, dates_as_string=True, **kwargs):
         data=pd.read_csv(fname, usecols=usedcols, **kwargs)
     #------------
 
-    if type(varNames) == list:
-        data.columns=varNames + list(data.columns[len(varNames):])
-    elif type(varNames) == dict:
-        data.columns = [ varNames[el] for el in data.columns ]
+    #------------
+    # Renaming columns according to our variables
+    data = data.rename(columns = varNames)
+    #------------
+
     return data
 
 
@@ -107,7 +100,7 @@ def readDataFiles(flist, verbose=0, **kwargs):
 
 
 def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
-        read_data_kw={}, parse_dates_kw={}, clean_dates=True, return_units=False):
+        read_data_kw={}, parse_dates_kw={}, clean_dates=True, return_units=True, only_named_cols=True):
     """
     Creates a micrometeorological time series from a file or list of files.
 
@@ -125,7 +118,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     verbose: int, bool
         verbose level
     """
-    from algs import auxiliar as algs
+    from . import algs
 
     #--------------
     # If datalogger is a string it should be the path to a .dlc file
@@ -141,9 +134,11 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     skiprows=datalogger.skiprows
     columns_separator=datalogger.columns_separator
     if columns_separator=='whitespace':
-        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, delim_whitespace=True, varNames=datalogger.varNames, **read_data_kw)
+        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, delim_whitespace=True, 
+            varNames=datalogger.varNames, only_named_cols=only_named_cols, **read_data_kw)
     else:
-        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, sep=columns_separator, varNames=datalogger.varNames, **read_data_kw)
+        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, sep=columns_separator, 
+            varNames=datalogger.varNames, only_named_cols=only_named_cols, **read_data_kw)
     #------------
 
     #------------
@@ -156,13 +151,12 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     #------------
     # We clean the dates (if not cleaned already
     if clean_dates:
-        #timeseries = timeseries.drop(datalogger.date_col_names, axis=1)
         if verbose: print('Cleaning the date columns')
         timeseries = timeseries[ [ col for col in timeseries.columns if col not in datalogger.date_col_names ] ]
     #------------
 
     if return_units:
-        return timeseries, datalogger.units
+        return timeseries, datalogger.units.copy()
     else:
         return timeseries
 
@@ -199,7 +193,7 @@ def read_site(sitefile):
     Reads .site configuration file, which holds siteConfig definitions
 
     The .site should have definitions as regular python syntax (in meters!):
-        instruments_height    = 10
+        measurement_height  = 10
         canopy_height       = 5
         displacement_height = 3
         roughness_length    = 1.0
@@ -226,7 +220,6 @@ def read_site(sitefile):
     except:
         return siteConfig(**sitevars)
     #--------
-
 
 
 def readUnitsCsv(filename, names=0, units=1, **kwargs):
@@ -264,62 +257,6 @@ def readUnitsCsv(filename, names=0, units=1, **kwargs):
 # OUTPUT OF DATA
 #-------------------------------------------
 #-------------------------------------------
-def toUnitsCsv(data, units, filename, to_tex=False, **kwargs):
-    """
-    Writes s csv with the units of the variables as a second line
-
-    Parameters:
-    ----------
-
-    data: pandas.DataFrame
-        dataframe of data
-    units: dict
-        dictionary containing { nameOfVar : unit }
-    filename: string
-        path of output file
-    to_tex: bool
-        whether or not to convert the string of the unit to TeX format (useful for printing)
-    """
-    import pandas as pd
-
-    if to_tex:
-        from util import printUnit as pru
-        units={ k : pru(v) for k,v in units.iteritems() }
-    cols=data.columns
-    unts=[ units[c] if c in units.keys() else ' ' for c in cols ]
-    columns=pd.MultiIndex.from_tuples(zip(cols, unts))
-    df=data.copy()
-    df.columns=columns
-    df.to_csv(filename, **kwargs)
-    return
-
-#---------------
-# Creates a method to write to a unitsCsv
-def _to_unitsCsv(self, units, filename, to_tex=False, **kwargs):
-    """
-    Wrapper around toUnitsCsv to create a method to print the contents of
-    a dataframe plus its units into a unitsCsv file.
-    
-    Parameters:
-    -----------
-    self: dataframe
-        dataframe to write
-    units: dict
-        dictionary with the names of each column and their unit
-    filename: str
-        path to which write the unitsCsv
-    to_tex: bool
-        whether to try and transform the units into TeX format
-    kwargs:
-        to be passed to pandas' method .to_csv
-    """
-    toUnitsCsv(self, units, filename, to_tex=to_tex, **kwargs)
-    return
-
-import pandas as pd
-pd.DataFrame.to_unitsCsv = _to_unitsCsv
-del pd
-#---------------
 
 def get_printable(data, units, to_tex_cols=True, to_tex_units=True):
     """
@@ -336,15 +273,6 @@ def get_printable(data, units, to_tex_cols=True, to_tex_units=True):
     df=data.copy()
     df.columns=columns
     return df
-
-
-def _write_as_dlc(df, dlc):
-    """
-    Still to be writen:
-    should write a DataFrame in the exact format described by a dataloggerConfig object
-    """
-    cols=dlc.columns
-    df = df[ cols ]
 
 
 

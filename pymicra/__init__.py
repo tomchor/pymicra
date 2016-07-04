@@ -12,6 +12,7 @@
  It is recommended that pint is installed for better handling the
  units inside the functions.
 """
+
 #---------
 # Here we create a "global" unitregistry for pymicra
 try:
@@ -24,8 +25,9 @@ try:
 except ImportError:
     pass
 #---------
+import decorators
 
-from io import timeSeries, read_dlc, read_site, toUnitsCsv, readUnitsCsv
+from io import timeSeries, read_dlc, read_site, readUnitsCsv
 from util import qcontrol, separateFiles, correctDrift
 from micro import *
 from data import *
@@ -34,11 +36,11 @@ from core import *
 import io
 import physics
 import util
-import util2
 import constants
 from micro import spectral
 import micro
 import algs
 import methods
-__version__ = '0.1.4'
+__version__ = '0.2.0'
 
+notation = Notation()
