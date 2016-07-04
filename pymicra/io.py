@@ -161,6 +161,33 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
         return timeseries
 
 
+def read_fileConfig(dlcfile):
+    """
+    Reads metadata configuration file
+
+    WARNING! When defining the .dlc note that by default columns that are enclosed between doublequotes
+    will appear without the doublequotes. So if your file is of the form :
+
+    "2013-04-05 00:00:00", .345, .344, ...
+
+    Then the .dlc should have: varNames=['%Y-%m-%d %H:%M:%S','u','v']. This is the default csv format of
+    CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
+    """
+    from .core import fileConfig
+
+    globs={}
+    dlcvars={}
+    try:
+        execfile(dlcfile, globs, dlcvars)
+    except NameError:
+        print('This version of python does not have an execfile function. This workaround should work but is yet to be fully tested')
+        with open(dlcfile) as f:
+            code=compile(f.read(), dlcfile, 'exec')
+            exec(code, globs, dlcvars)
+    return fileConfig(**dlcvars)
+
+
+
 def read_dlc(dlcfile):
     """
     Reads datalogger configuration file

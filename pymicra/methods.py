@@ -1,7 +1,7 @@
 #!/usr/bin/python
 """
 """
-from . import decorators
+from . import decorators as _decors
 
 #---------------
 # Creates a method to write to a unitsCsv
@@ -213,7 +213,7 @@ pd.DataFrame.xplot = _xplot
 
 #---------
 # Definition of dataframe method to fit
-@decorators.pdgeneral(convert_out=True)
+@_decors.pdgeneral(convert_out=True)
 def _polyfit(self, degree=1, rule=None):
     """
     This method fits an n-degree polynomial to the dataset. The index can
@@ -283,4 +283,3 @@ pd.Series.convert_to = convert_cols
 #---------
 
 del pd
-del decorators
