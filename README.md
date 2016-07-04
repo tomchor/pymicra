@@ -32,7 +32,7 @@ Currently, this is a sum up of what Pymicra does:
   - Plus all native features of Pandas (interpolation, resampling, grouping, statistical tests, slicing, handling of missing data and etc.)
 
 ## Installation
-To install Pymicra we recommend to install the `setuptools` package, which can be done with `sudo apt-get install python-setuptools` depending on your Linux distribution.
+To install Pymicra we recommend to install the `setuptools` package, which can be done with `sudo apt-get install python-setuptools, depending on your Linux distribution.
 
 Download the package an unpack in somewhere. Then open a terminal and move to the directory created, whose name should be `pymicra`. Then run `sudo python setup.py install`. This should be enough to install the package.
 
