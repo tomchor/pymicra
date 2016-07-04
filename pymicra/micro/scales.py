@@ -15,6 +15,7 @@ def MonObuSimVar(L_m, siteConf):
     where d is the displacement height or zero-plane displacement
     and L_m is the Monin-Obukhov Length.
     """
+
     z=siteConf.measurement_height
     d=siteConf.displacement_height
     zeta = (z-d)/L_m
@@ -88,7 +89,7 @@ def getScales(data, siteConf, units, notation=None,
     u_fluc          =   defs.u_fluctuations
     w_fluc          =   defs.w_fluctuations
     mrho_h2o_fluc   =   defs.h2o_molar_density_fluctuations
-    rho_h2o_fluc    =   defs.h2o_density_fluctuations
+    rho_h2o_fluc    =   defs.h2o_mass_density_fluctuations
     theta_fluc      =   defs.thermodyn_temp_fluctuations
     theta_v_fluc    =   defs.virtual_temp_fluctuations
     q_fluc          =   defs.specific_humidity_fluctuations

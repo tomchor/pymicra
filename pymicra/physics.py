@@ -68,15 +68,15 @@ def airDensity_from_theta_v(data, units, notation=None, inplace=True, use_means=
     #---------
     # Calculates air density and its unit with theta_v and R_dry
     if use_means:
-        data.loc[:, defs.moist_air_density ] = data[ defs.pressure ].mean()/(R_dry * data[ defs.virtual_temp ].mean())
+        data.loc[:, defs.moist_air_mass_density ] = data[ defs.pressure ].mean()/(R_dry * data[ defs.virtual_temp ].mean())
     else:
-        data.loc[:, defs.moist_air_density ] = data[ defs.pressure ]/(R_dry * data[ defs.virtual_temp ])
-    units.update({ defs.moist_air_density : units[ defs.pressure ]/(constants.units['R_spec']*units[ defs.virtual_temp ]) })
+        data.loc[:, defs.moist_air_mass_density ] = data[ defs.pressure ]/(R_dry * data[ defs.virtual_temp ])
+    units.update({ defs.moist_air_mass_density : units[ defs.pressure ]/(constants.units['R_spec']*units[ defs.virtual_temp ]) })
     #---------
 
     #---------
     # We pass it to the standard mass density unit: kg/m**3
-    data.loc[:, defs.moist_air_density ] = algs.convert_to(data[ defs.moist_air_density ], units, 'kg/m**3', inplace=True, key=defs.moist_air_density)
+    data.loc[:, defs.moist_air_mass_density ] = algs.convert_to(data[ defs.moist_air_mass_density ], units, 'kg/m**3', inplace=True, key=defs.moist_air_mass_density)
     #---------
 
     if inplace:
@@ -101,8 +101,8 @@ def dryAirDensity_from_p(data, units, notation=None, inplace=True):
     Rh2o = constants.R_spec['h2o']
     Runit = constants.units['R_spec']
 
-    p_h2o = data[ defs.h2o_density ]*Rh2o*data[ defs.thermodyn_temp ]
-    p_h2o_unit = units[ defs.h2o_density ]*Runit*units[ defs.thermodyn_temp ]
+    p_h2o = data[ defs.h2o_mass_density ]*Rh2o*data[ defs.thermodyn_temp ]
+    p_h2o_unit = units[ defs.h2o_mass_density ]*Runit*units[ defs.thermodyn_temp ]
 
     #-----------
     # Before adding or subtracting we need to make sure both units are the same
@@ -113,8 +113,8 @@ def dryAirDensity_from_p(data, units, notation=None, inplace=True):
     #-----------
 
     #-----------
-    data.loc[:, defs.dry_air_density ] = p_dry/(Rdry * data[ defs.thermodyn_temp ])
-    units.update({ defs.dry_air_density : p_air_unit/(Runit * units[ defs.thermodyn_temp ])})
+    data.loc[:, defs.dry_air_mass_density ] = p_dry/(Rdry * data[ defs.thermodyn_temp ])
+    units.update({ defs.dry_air_mass_density : p_air_unit/(Runit * units[ defs.thermodyn_temp ])})
     #-----------
 
     if inplace:
@@ -187,8 +187,8 @@ def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=Fa
 
     #-----------
     # Adjust the units
-    conversions = { defs.moist_air_density : 'kg/m**3',
-                    defs.dry_air_density : 'kg/m**3'}
+    conversions = { defs.moist_air_mass_density : 'kg/m**3',
+                    defs.dry_air_mass_density : 'kg/m**3'}
     data = data.convert_cols(conversions, outunits, inplace=True)
     #-----------
 

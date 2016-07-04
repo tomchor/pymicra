@@ -102,7 +102,7 @@ def preProcess(data, units, notation=None, use_means=False,
 
     #---------
     # Calculation of rho_air is done here
-    if (defs.moist_air_density not in data.columns):
+    if (defs.moist_air_mass_density not in data.columns):
         print('Moist air density not present in dataset')
         if rho_air_from_theta_v:
             print('Calculating rho_air = p/(Rdry * theta_v) ... ', end='')
@@ -142,8 +142,8 @@ def preProcess(data, units, notation=None, use_means=False,
     # Calculation of specific humidity is done here
     if (defs.specific_humidity not in data.columns):
         print('Calculating specific humidity = rho_h2o / rho_air ... ', end='')
-        data.loc[:, defs.specific_humidity] = data[ defs.h2o_density ] / data[ defs.moist_air_density ]
-        units.update({ defs.specific_humidity : units[ defs.h2o_density ] / units[ defs.moist_air_density ] })
+        data.loc[:, defs.specific_humidity] = data[ defs.h2o_mass_density ] / data[ defs.moist_air_mass_density ]
+        units.update({ defs.specific_humidity : units[ defs.h2o_mass_density ] / units[ defs.moist_air_mass_density ] })
         print('Done!')
     #---------
 
@@ -503,7 +503,7 @@ def eddyCov3(data, units, wpl=True,
     u_fluc          =   defs.u_fluctuations
     w_fluc          =   defs.w_fluctuations
     mrho_h2o_fluc   =   defs.h2o_molar_density_fluctuations
-    rho_h2o_fluc    =   defs.h2o_density_fluctuations
+    rho_h2o_fluc    =   defs.h2o_mass_density_fluctuations
     theta_fluc      =   defs.thermodyn_temp_fluctuations
     theta_v_fluc    =   defs.virtual_temp_fluctuations
     q_fluc          =   defs.specific_humidity_fluctuations
@@ -538,8 +538,8 @@ def eddyCov3(data, units, wpl=True,
 
     #---------
     # Define auxiliar variables
-    rho_air_mean    =   data[ defs.moist_air_density ].mean()
-    rho_dry_mean    =   data[ defs.dry_air_density ].mean()
+    rho_air_mean    =   data[ defs.moist_air_mass_density ].mean()
+    rho_dry_mean    =   data[ defs.dry_air_mass_density ].mean()
     #---------
 
     #---------
@@ -557,9 +557,9 @@ def eddyCov3(data, units, wpl=True,
     #-----------------
     # And then the flux units
     fluxunits = {}
-    fluxunits[ defs.momentum_flux ]         = units[ defs.moist_air_density ] * units[ u_fluc ]*units[ w_fluc ]
-    fluxunits[ defs.sensible_heat_flux ]    = units[ defs.moist_air_density ] * cunits['cp_water'] * theta_fluc_unit * units[ w_fluc ]
-    fluxunits[ defs.virtual_sensible_heat_flux ] = units[ defs.moist_air_density ] * cunits['cp_water'] * units[ theta_v_fluc ]*units[ w_fluc ]
+    fluxunits[ defs.momentum_flux ]         = units[ defs.moist_air_mass_density ] * units[ u_fluc ]*units[ w_fluc ]
+    fluxunits[ defs.sensible_heat_flux ]    = units[ defs.moist_air_mass_density ] * cunits['cp_water'] * theta_fluc_unit * units[ w_fluc ]
+    fluxunits[ defs.virtual_sensible_heat_flux ] = units[ defs.moist_air_mass_density ] * cunits['cp_water'] * units[ theta_v_fluc ]*units[ w_fluc ]
     fluxunits[ defs.water_vapor_flux ]      = units[ defs.h2o_molar_density ]*units[ w_fluc ]
     fluxunits[ defs.latent_heat_flux ]      = cunits[ 'latent_heat_water' ]*units[ rho_h2o_fluc ]*units[ w_fluc ]
     #-----------------
@@ -714,7 +714,7 @@ def fluxes_from_scales(data, units, wpl=True,
     # Define name of variables to look for based on the notation
     u_star          =   defs.u_star
     mrho_h2o_star   =   defs.h2o_molar_density_star
-    rho_h2o_star    =   defs.h2o_density_star
+    rho_h2o_star    =   defs.h2o_mass_density_star
     theta_star      =   defs.thermodyn_temp_star
     theta_v_star    =   defs.virtual_temp_star
     q_star          =   defs.specific_humidity_star
@@ -739,8 +739,8 @@ def fluxes_from_scales(data, units, wpl=True,
 
     #---------
     # Define auxiliar variables
-    rho_air_mean    =   data[ defs.moist_air_density ].mean()
-    rho_dry_mean    =   data[ defs.dry_air_density ].mean()
+    rho_air_mean    =   data[ defs.moist_air_mass_density ].mean()
+    rho_dry_mean    =   data[ defs.dry_air_mass_density ].mean()
     #---------
 
     #---------
@@ -758,9 +758,9 @@ def fluxes_from_scales(data, units, wpl=True,
     #-----------------
     # And then the flux units
     fluxunits = {}
-    fluxunits[ defs.momentum_flux ]         = units[ defs.moist_air_density ] * units[ u_fluc ]*units[ w_fluc ]
-    fluxunits[ defs.sensible_heat_flux ]    = units[ defs.moist_air_density ] * cunits['cp_water'] * theta_fluc_unit * units[ w_fluc ]
-    fluxunits[ defs.virtual_sensible_heat_flux ] = units[ defs.moist_air_density ] * cunits['cp_water'] * units[ theta_v_fluc ]*units[ w_fluc ]
+    fluxunits[ defs.momentum_flux ]         = units[ defs.moist_air_mass_density ] * units[ u_fluc ]*units[ w_fluc ]
+    fluxunits[ defs.sensible_heat_flux ]    = units[ defs.moist_air_mass_density ] * cunits['cp_water'] * theta_fluc_unit * units[ w_fluc ]
+    fluxunits[ defs.virtual_sensible_heat_flux ] = units[ defs.moist_air_mass_density ] * cunits['cp_water'] * units[ theta_v_fluc ]*units[ w_fluc ]
     fluxunits[ defs.water_vapor_flux ]      = units[ defs.h2o_molar_density ]*units[ w_fluc ]
     fluxunits[ defs.latent_heat_flux ]      = cunits[ 'latent_heat_water' ]*units[ rho_h2o_fluc ]*units[ w_fluc ]
     #-----------------
@@ -777,13 +777,13 @@ def fluxes_from_scales(data, units, wpl=True,
     if wpl:
         print('Applying WPL correction for water vapor ... ', end='')
         mu = constants.R_spec['h2o']/constants.R_spec['dry']
-        rho_h2o_mean = data[ defs.h2o_density ].mean()
+        rho_h2o_mean = data[ defs.h2o_mass_density ].mean()
 
         #---------
         # If water vapor mixing ratio is present, use it. Otherwise we try to calculate it
         if defs.h2o_mixing_ratio in data.columns:
             r_h2o = data[ defs.h2o_mixing_ratio ].mean()
-        elif units[ defs.h2o_density ] == units[ defs.dry_air_density ]:
+        elif units[ defs.h2o_mass_density ] == units[ defs.dry_air_mass_density ]:
             r_h2o = rho_h2o_mean/rho_dry_mean
         else:
             raise TypeError('Either water mixing ratio should be provided, or dry air and water density should be the same')
@@ -796,7 +796,7 @@ def fluxes_from_scales(data, units, wpl=True,
             print('Applying WPL correction for {} ... '.format(solute), end='')
             #---------
             # Check if mixing ratio units are correct
-            if units[ defs.density % solute ] == units[ defs.dry_air_density ]:
+            if units[ defs.density % solute ] == units[ defs.dry_air_mass_density ]:
                 rho_sol_mean    =   data[ defs.molar_density % solute ].mean()
                 rc = rho_sol_mean/rho_dry_mean
             else:
