@@ -161,7 +161,7 @@ class siteConfig(object):
         """
         import pandas as pd
         string = '<pymicra.siteConfig> object\n{}\n----\n'.format(self.description)
-        string+= pd.Series(self.__dict__).__str__()
+        string+= pd.Series(self.__dict__).drop('description').__str__()
         return string
     __repr__ = __str__
 
