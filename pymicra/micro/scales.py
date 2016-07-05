@@ -84,6 +84,7 @@ def getScales(data, siteConf, units, notation=None,
     cunits = constants.units
 
     print('Beginning to extract turbulent scales...')
+
     #---------
     # First we define the names of the columns according to notation
     u_fluc          =   defs.u_fluctuations
@@ -97,29 +98,39 @@ def getScales(data, siteConf, units, notation=None,
     #---------
 
     #---------
-    # Now we try to calculate or identify the fluctuations of theta
-    theta_mean = data[ defs.thermodyn_temp ].mean()
-    if (theta_fluc not in data.columns) or theta_fluct_from_theta_v:
-        print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
-        #---------
-        # We need the mean of the specific humidity and temperature
-        if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
-            raise TypeError('\nUnits for both the virtual temperature fluctuations and the thermodynamic temperature fluctuations must be the same')
-        data_q_mean =   data[ defs.specific_humidity ].mean()
-        data[ theta_fluc ] = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1. + 0.61*data_q_mean)
-        theta_fluc_unit = units[ theta_v_fluc ]
-        print('done!')
-        #---------
-    #---------
+    # Check if data is already covariances or not. If not, calculate covariances.
+    if (data.shape[0] == data.shape[1]) and all(data.index == data.columns):
+        print('Data seems to be covariances. Will it use as covariances ...')
+        cov = data.copy()
 
-    #-----------
-    # First we construct the covariance matrix (slower but more readable than doing it separately)
-    # maybe figure out later a way that is both faster and more readable
-    print('Calculating the covariances ... ', end='')
-    cov = data[[u_fluc, w_fluc, theta_v_fluc, theta_fluc, q_fluc, mrho_h2o_fluc] + solutesf ].cov()
-    print('done!')
-    #-----------
+    else:
+        print('Data seems to be raw data. Will calculate covariances ...')
+        #---------
+        # Now we try to calculate or identify the fluctuations of theta
+        theta_mean = data[ defs.thermodyn_temp ].mean()
+        if (theta_fluc not in data.columns) or theta_fluct_from_theta_v:
+            print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
+            #---------
+            # We need the mean of the specific humidity and temperature
+            if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
+                raise TypeError('\nUnits for both the virtual temperature fluctuations and the thermodynamic temperature fluctuations must be the same')
+            data_q_mean =   data[ defs.specific_humidity ].mean()
+            data[ theta_fluc ] = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1. + 0.61*data_q_mean)
+            theta_fluc_unit = units[ theta_v_fluc ]
+            print('done!')
+            #---------
+        #---------
     
+        #-----------
+        # First we construct the covariance matrix (slower but more readable than doing it separately)
+        # maybe figure out later a way that is both faster and more readable
+        print('Calculating the covariances ... ', end='')
+        cov = data[[u_fluc, w_fluc, theta_v_fluc, theta_fluc, q_fluc, mrho_h2o_fluc] + solutesf ].cov()
+        print('done!')
+        #-----------
+    #---------
+       
+
     #---------
     # Now to calculate the characteristic lengths, scales and etc
     print('Calculating the STDs and turbulent scales of wind, temperature and humidity ... ', end='')
@@ -127,20 +138,15 @@ def getScales(data, siteConf, units, notation=None,
 
     u_star  = np.sqrt(-cov.loc[u_fluc, w_fluc])
     out[ defs.u_star ]  = u_star
-    out[ defs.u_std ]   = data[ u_fluc ].std()
 
     theta_v_star = cov.loc[theta_v_fluc, w_fluc] / u_star
     out[ defs.virtual_temp_star ]   = theta_v_star
-    out[ defs.virtual_temp_std ]    = data[ theta_v_fluc ].std()
 
     out[ defs.thermodyn_temp_star ] = cov.loc[theta_fluc, w_fluc] / u_star
-    out[ defs.thermodyn_temp_std ]  = data[ theta_fluc ].std()
 
     out[ defs.specific_humidity_star ]  = cov.loc[ q_fluc, w_fluc ] / u_star
-    out[ defs.specific_humidity_std ]   = data[ q_fluc ].std()
 
     out[ defs.h2o_molar_density_star ] = cov.loc[ mrho_h2o_fluc, w_fluc ] / u_star
-    out[ defs.h2o_molar_density_std ]  = data[ mrho_h2o_fluc ].std()
 
     print('done!')
     #---------

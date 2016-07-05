@@ -5,7 +5,7 @@ from pymicra.__init__ import __version__
 Python Micrometeorological Analysis tool - Pymicra
 """
 
-dependencies=['Pandas>=0.15', 'Numpy']
+dependencies=['Pandas==0.17.1', 'Numpy', 'pint==0.7.2']
 
 #-----------
 # Be ready to work with or without setuptools
@@ -13,7 +13,7 @@ try:
     from setuptools import setup, find_packages
     print("Setuptools installed. Proceeding with installation...\n")
 except ImportError:
-    raise ImportError("No setuptools installed!\nPlease install setuptools in order to proceed with installation.")
+    raise ImportError("No setuptools installed!\nPlease install setuptools in order to proceed with installation. Try: sudo apt-get install python-setuptools")
 #-----------
 
 #-----------

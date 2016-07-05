@@ -458,16 +458,11 @@ def eddyCov2(data, wpl=True,
 
 
 
-def eddyCov3(data, units, wpl=True,
+def eddyCov3(data, units, wpl=True, get_scales=True, site_config=None, output_as_df=True,
         notation=None, theta_fluct_from_theta_v=True, inplace=True, solutes=[]):
     """
     Get fluxes from the turbulent fluctuations
     
-    WARNING! If using wpl=True, be sure that all masses are consistent!
-        For example, if q = [g/g], rho_h2o = [g/m3] and rho_co2 = [g/m3] and so on.
-        Avoid mixing kg/m3 with g/m3 (e.g. for co2 and h2o) and mg/kg with g/g (e.g. for
-        co2 and h2o).
-
     Parameters:
     -----------
     data: pandas.DataFrame
@@ -476,7 +471,11 @@ def eddyCov3(data, units, wpl=True,
         units dictionary
     wpl: boolean
         whether or not to apply WPL correction on the latent heat flux and solutes flux
-    notation: pymicra.notation
+    get_scales: bool
+        whether or not to use getScales to return turbulent scales
+    site_config: pymica.siteConfig
+        siteConfig object to pass to getScales if get_scales==True
+    notation: pymicra.Notation
         object that holds the notation used in the dataframe
     inplace: bool
         whether or not to treat the units inplace
@@ -492,12 +491,15 @@ def eddyCov3(data, units, wpl=True,
     lamb = constants.latent_heat_water
 
     defs = algs.get_notation(notation)
+    defsdic = defs.__dict__
+
     data = data.copy()
     if (not inplace) and units:
         units = units.copy()
     cunits = constants.units
 
     print('Beginning Eddy Covariance method...')
+
     #---------
     # Define name of variables to look for based on the notation
     u_fluc          =   defs.u_fluctuations
@@ -507,7 +509,7 @@ def eddyCov3(data, units, wpl=True,
     theta_fluc      =   defs.thermodyn_temp_fluctuations
     theta_v_fluc    =   defs.virtual_temp_fluctuations
     q_fluc          =   defs.specific_humidity_fluctuations
-    solutesf        = [ defs.molar_density % defs.fluctuations % solute for solute in solutes ]
+    solutesf        = [ defsdic['%s_molar_density_fluctuations' % solute] for solute in solutes ]
     #---------
 
     #---------
@@ -545,7 +547,8 @@ def eddyCov3(data, units, wpl=True,
     #---------
     # Calculate the fluxes
     print('Calculating fluxes ... ', end='')
-    out = pd.DataFrame(index=[ data.index[0] ])
+    idx0 = data.index[0]
+    out = pd.DataFrame(index=[ idx0 ])
     out[ defs.momentum_flux ]               = -rho_air_mean * cov[ u_fluc ][ w_fluc ]
     out[ defs.sensible_heat_flux ]          = rho_air_mean * cp * cov[theta_fluc][w_fluc]
     out[ defs.virtual_sensible_heat_flux ]  = rho_air_mean * cp * cov[theta_v_fluc][w_fluc]
@@ -567,14 +570,14 @@ def eddyCov3(data, units, wpl=True,
     #---------
     # Calculate flux for each solute
     for solute, solutef in zip(solutes, solutesf):
-        out[ defs.flux_of % solute ] =  cov[ solutef ][ w_fluc ]
-        fluxunits[ defs.flux_of % solute ] = units[ solutef ]*units[ w_fluc ]
+        out[ defsdic[ '%s_flux' % solute ] ] =  cov[ solutef ][ w_fluc ]
+        fluxunits[ defsdic[ '%s_flux' % solute ] ] = units[ solutef ]*units[ w_fluc ]
     #---------
 
     #------------------------
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
-        print('Applying WPL correction for water vapor flux ... ', end='')
+        print('Applying WPL correction for water vapor flux ... ', end='\n')
         mu = constants.R_spec['h2o']/constants.R_spec['dry']
         mrho_h2o_mean = data[ defs.h2o_molar_density ].mean()
 
@@ -606,22 +609,30 @@ def eddyCov3(data, units, wpl=True,
 
         out.loc[:, defs.water_vapor_flux ] = (1. +mu*mr_h2o)* aux3
         fluxunits[ defs.water_vapor_flux ] = unt3
-        print('done!')
         #---------
 
         #---------
         # Now we re-calculate LE based on the corrected E
-        print('Applying WPL correction for latent heat flux ... ', end='')
-        out.loc[:, defs.latent_heat_flux ] = lamb(theta_mean) * out[ defs.water_vapor_flux ] * constants.molar_mass['h2o']
+        print('Applying WPL correction for latent heat flux ... ', end='\n')
+        out[ defs.latent_heat_flux ] = lamb(theta_mean) * out[ defs.water_vapor_flux ] * constants.molar_mass['h2o']
         fluxunits[ defs.latent_heat_flux ] = cunits[ 'latent_heat_water' ] * fluxunits[ defs.water_vapor_flux ] * cunits['molar_mass']
+        #---------
+
+        #---------
+        # Recalculating covs with WPL
+        print("Re-calculating cov(%s, w') according to WPL correction ... " % solutef, end='')
+        wplcov = cov.copy()
+        wplcov.loc[ mrho_h2o_fluc, w_fluc ] = out.loc[idx0, defs.water_vapor_flux ]/rho_air_mean
+        wplcov.loc[ w_fluc, mrho_h2o_fluc ] = out.loc[idx0, defs.water_vapor_flux ]/rho_air_mean
         print('done!')
         #---------
 
         #---------
         # NEEDS IMPROVEMENT
-        #---------
-        for solute in solutes:
-            print('Applying WPL correction for {} ... '.format(solute), end='')
+        for solutef, solute in zip(solutesf, solutes):
+            sol_flux = defsdic[ '%s_flux' % solute ]
+
+            print('Applying WPL correction for {} ... '.format(sol_flux), end='\n')
             sol_molar_density_mean    =   data[ defs.molar_density % solute ].mean()
 
             #---------
@@ -647,10 +658,17 @@ def eddyCov3(data, units, wpl=True,
             aux3 = mu * mr_sol* E_orig
             unt3 = mr_sol_unit * E_orig_unit
  
-            out.loc[:, defs.flux_of % solute ] = algs.add([aux1, aux2, aux3], [unt1, unt2, unt3],
+            out[ defs.flux_of % solute ] = algs.add([aux1, aux2, aux3], [unt1, unt2, unt3],
                                                     inplace=True, unitdict=fluxunits, key=defs.flux_of % solute)
+
+            print("Re-calculating cov(%s, w') according to WPL correction ... " % solutef, end='')
+            wplcov.loc[ solutef, w_fluc ] = out.loc[idx0, sol_flux ]
+            wplcov.loc[ w_fluc, solutef ] = out.loc[idx0, sol_flux ]
+ 
+
             print('done!')
             #---------
+        #---------
     #------------
 
     #------------
@@ -660,6 +678,18 @@ def eddyCov3(data, units, wpl=True,
                 defs.sensible_heat_flux : 'watts/meter**2'}
     out = out.convert_cols(convert_to, fluxunits, inplace=True)
     #------------
+
+    #------------
+    # We calculate the turbulent scales
+    if get_scales:
+        assert site_config is not None, 'Must prove site_config keyword if get_scales==True'
+        from ..micro import getScales
+        outser = out.iloc[0].copy()
+        scales, scaleunits = getScales(cov, site_config, units, notation=defs, inplace=False, solutes=solutes)
+    #------------
+
+    if not output_as_df:
+        out = out.iloc[0].copy()
 
     print('Done with Eddy Covariance.\n')
     if inplace:
