@@ -232,7 +232,6 @@ def qcontrol(files, datalogger_config,
     # is what we use to produce our summary
     tables = pd.DataFrame(columns=usedvars)
     replaced = pd.DataFrame(columns=usedvars)
-    #discarded = {total_name: [], successful_name: []}
     control = pd.DataFrame({total_name: [], successful_name: []})
     #--------------
 
@@ -240,46 +239,36 @@ def qcontrol(files, datalogger_config,
     # We update discarded and tables based on the tests we will perform.
     # If a test is not marked to be perform, it will not be on this list.
     if file_lines:
-        #discarded[ lines_name ] = []
         control[ lines_name ] = []
     if nans_test:
-        #discarded[ nan_name ] = []
         control[ nan_name ] = []
         control[ replaced_nans_name ] = []
 
     if upper_limits:
         tables = tables.append( pd.DataFrame(upper_limits, index=['upper_limits']) )
-        #discarded[ bound_name ] = []
         control[ bound_name ] = []
         control[ replaced_bound_name ] = []
     if lower_limits:
         tables = tables.append( pd.DataFrame(lower_limits, index=['lower_limits']) )
-        #discarded[ bound_name ] = []
         control[ bound_name ] = []
         control[ replaced_bound_name ] = []
 
-
     if spikes_test:
-        #discarded[ spikes_name ] = []
         control[ spikes_name ] = []
         control[ replaced_spikes_name ] = []
 
     if max_replacement_count:
-        #discarded[ replacement_name ] = []
         control[ replacement_name ] = []
 
     if std_limits:
         tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
-        #discarded[ STD_name ] = []
         control[ STD_name ] = []
 
     if RAT:
-        #discarded[ RAT_name ] = []
         control[ RAT_name ] = []
 
     if dif_limits:
         tables = tables.append( pd.DataFrame(dif_limits, index=['dif_limits']) )
-        #discarded[ maxdif_name ] = []
         control[ maxdif_name ] = []
 
     tables = tables.fillna(value=np.nan)
@@ -309,7 +298,6 @@ def qcontrol(files, datalogger_config,
 
         #----------------
         # If the test passes the date check then we include it in the total amount
-        #discarded['total'].append(filename)
         control.loc[idx, total_name ] = filename
         #----------------
     
@@ -350,7 +338,6 @@ def qcontrol(files, datalogger_config,
             valid, nans_replaced = tests.check_nans(fin, max_percent=accepted_nans_percent, replace_with=replace_with)
 
             result, failed = algs.testValid(valid, testname=nan_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            #discarded = algs.applyResult(result, failed, fin, control=discarded, testname=nan_name, filename=filename, falseshow=falseshow)
             control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=nan_name, filename=filename, falseshow=falseshow)
 
             #--------------
@@ -368,7 +355,6 @@ def qcontrol(files, datalogger_config,
             fin, valid, limits_replaced = tests.check_limits(fin, tables, max_percent=accepted_bound_percent, replace_with=replace_with)
 
             result, failed = algs.testValid(valid, testname=bound_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            #discarded = algs.applyResult(result, failed, fin, control=discarded, testname=bound_name, filename=filename, falseshow=falseshow)
             control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=bound_name, filename=filename, falseshow=falseshow)
 
             #--------------
@@ -388,7 +374,6 @@ def qcontrol(files, datalogger_config,
                             cut_func=spikes_func, max_consec_spikes=max_consec_spikes, max_percent=accepted_spikes_percent)
 
             result, failed = algs.testValid(valid, testname=spikes_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            #discarded = algs.applyResult(result, failed, fin, control=discarded, testname=spikes_name, filename=filename, falseshow=falseshow)
             control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=spikes_name, filename=filename, falseshow=falseshow)
 
             #--------------
@@ -406,7 +391,6 @@ def qcontrol(files, datalogger_config,
             valid = tests.check_replaced(replaced.iloc[-1], max_count=max_replacement_count)
 
             result, failed = algs.testValid(valid, testname=replacement_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            #discarded = algs.applyResult(result, failed, fin, control=discarded, testname=replacement_name, filename=filename, falseshow=falseshow)
             control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=replacement_name, filename=filename, falseshow=falseshow)
 
             if result==False: continue
@@ -418,7 +402,6 @@ def qcontrol(files, datalogger_config,
             valid = tests.check_std(fin, tables, detrend=std_detrend, detrend_kw=std_detrend_kw, chunk_size=chunk_size, falseverbose=falseverbose)
 
             result, failed = algs.testValid(valid, testname=STD_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            #discarded = algs.applyResult(result, failed, fin, control=discarded, testname=STD_name, filename=filename, falseshow=falseshow)
             control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=STD_name, filename=filename, falseshow=falseshow)
 
             if result==False: continue
@@ -431,7 +414,6 @@ def qcontrol(files, datalogger_config,
                                         trend=maxdif_trend, trend_kw=maxdif_trend_kw)
 
             result, failed = algs.testValid(valid, testname=maxdif_name, trueverbose=trueverbose, filepath=filepath)
-            #discarded=algs.applyResult(result, failed, fin, control=discarded, testname=maxdif_name, filename=filename, falseshow=falseshow)
             control=algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=maxdif_name, filename=filename, falseshow=falseshow)
 
             if result==False: continue
@@ -444,7 +426,6 @@ def qcontrol(files, datalogger_config,
                                     RAT_vars=None, RAT_points=RAT_points, RAT_significance=RAT_significance)
 
             result, failed = algs.testValid(valid, testname=RAT_name, trueverbose=trueverbose, filepath=filepath)
-            #discarded = algs.applyResult(result, failed, fin, control=discarded, testname=RAT_name , filename=filename, falseshow=falseshow)
             control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=RAT_name , filename=filename, falseshow=falseshow)
 
             if result==False: continue
