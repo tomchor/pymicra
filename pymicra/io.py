@@ -10,7 +10,7 @@ from __future__ import print_function
 # INPUT OF DATA
 #-------------------------------------------
 #-------------------------------------------
-def readDataFile(fname, varNames=None, only_named_cols=True, **kwargs):
+def readDataFile(fname, variables=None, only_named_cols=True, **kwargs):
     """
     Author: Tomas Chor
 
@@ -20,7 +20,7 @@ def readDataFile(fname, varNames=None, only_named_cols=True, **kwargs):
         dictionary with kwargs of pandas' read_csv function
         see http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html for more detail
 
-    varNames: list or dict
+    variables: list or dict
         list or dictionary containing the names of each variable in the file (if dict, the keys must be ints)
         
     Returns
@@ -32,7 +32,7 @@ def readDataFile(fname, varNames=None, only_named_cols=True, **kwargs):
     #------------
     # This makes it easier to read dates
     try:
-        dtypes={ i : str for i,key in enumerate(varNames.values()) if r'%' in key }
+        dtypes={ i : str for i,key in enumerate(variables.values()) if r'%' in key }
     except:
         dtypes=None
     #------------
@@ -42,7 +42,7 @@ def readDataFile(fname, varNames=None, only_named_cols=True, **kwargs):
     if not only_named_cols:
         usedcols = None
     else:
-        usedcols = sorted(varNames.keys())
+        usedcols = sorted(variables.keys())
     #------------
 
     #------------
@@ -56,7 +56,7 @@ def readDataFile(fname, varNames=None, only_named_cols=True, **kwargs):
 
     #------------
     # Renaming columns according to our variables
-    data = data.rename(columns = varNames)
+    data = data.rename(columns = variables)
     #------------
 
     return data
@@ -133,12 +133,13 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     header_lines=datalogger.header_lines
     skiprows=datalogger.skiprows
     columns_separator=datalogger.columns_separator
+
     if columns_separator=='whitespace':
         timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, delim_whitespace=True, 
-            varNames=datalogger.varNames, only_named_cols=only_named_cols, **read_data_kw)
+            variables = datalogger.variables, only_named_cols=only_named_cols, **read_data_kw)
     else:
         timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, sep=columns_separator, 
-            varNames=datalogger.varNames, only_named_cols=only_named_cols, **read_data_kw)
+            variables = datalogger.variables, only_named_cols=only_named_cols, **read_data_kw)
     #------------
 
     #------------
@@ -165,12 +166,12 @@ def read_fileConfig(dlcfile):
     """
     Reads metadata configuration file
 
-    WARNING! When defining the .dlc note that by default columns that are enclosed between doublequotes
+    WARNING! When defining the .config file note that by default columns that are enclosed between doublequotes
     will appear without the doublequotes. So if your file is of the form :
 
     "2013-04-05 00:00:00", .345, .344, ...
 
-    Then the .dlc should have: varNames=['%Y-%m-%d %H:%M:%S','u','v']. This is the default csv format of
+    Then the .dlc should have: variables = {0:'%Y-%m-%d %H:%M:%S'}. This is the default csv format of
     CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
     """
     from .core import fileConfig

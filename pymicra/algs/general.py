@@ -454,7 +454,7 @@ def line2date(line, dlconfig):
     import numpy as np
     import re
 
-    varnames=dlconfig.varNames
+    #varnames = dlconfig.variables
     connector = dlconfig.date_connector
     date_col_names = dlconfig.date_col_names
     date_cols = dlconfig.date_cols

@@ -10,9 +10,6 @@ class fileConfig(object):
     from_file: str
         path of .cfg file (configuration file) to read from. This will ignore all other
         keywords.
-
-    varNames: DEPRECATED
-        use variables now.
     variables: list of strings or dict
         If a list: should be a list of strings with the names of the variables. If the variable
         is part if the date, then it should be provided as a datetime directive,
@@ -21,54 +18,44 @@ class fileConfig(object):
         see https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
         If a dict: the keys should be the numbers of the columns and the items should follow
         the rules for a list.
-
     date_cols: list of ints
         should be indexes of the subset of varNames that corresponds to the variables that compose
         the timestamp. If it is not provided the program will try to guess by getting
         all variable names that have a percentage sign (%).
-
     date_connector: string
         generally not really necessary. It is used to join and then parse the date_cols.
-
     columns_separator: string
-        used to assemble the date. Should only be used if the default char creates conflict. If
-        the file is tabular-separated then this should be "whitespace".
-
-    header_lines: int
+        used to assemble the date. If the file is tabular-separated then this should be "whitespace".
+    header_lines: int or list
         up to which line of the file is a header. See pandas.read_csv header option.
-
-    first_time_skip: int
-        how many units of frequency the first line of the file is offset (generally zero).
-
     filename_format: string
         tells the format of the file with the standard notation for date and time and with variable
         parts as "?". E.g. if the files are 56_20150101.csv, 57_20150102.csv etc filename_format should be:
             ??_%Y%m%d.csv
         this is useful primarily for the quality control feature.
-
     units: dictionary
         very important: a dictionary whose keys are the columns of the file and whose items are
         the units in which they appear.
-
     description: string
         brief description of the datalogger configuration file.
+    varNames: DEPRECATED
+        use variables now.
     """
 
     @_decors.autoassign
     def __init__(self,
             from_file=None,
-            varNames=None,
             variables=None,
             date_cols=None,
             frequency=None,
-            date_connector=None,
+            date_connector='-',
             columns_separator=None,
             header_lines=None,
-            first_time_skip=False,
             units=None,
             skiprows=None,
             filename_format=None,
-            description='Generic datalogger configuration file. Type help(dataloggerConfig) to read intructions'):
+            varNames=None,
+            description='Generic datalogger configuration file. Type help(fileConfig) to read intructions'):
         """
         Initiates the class
         """
@@ -88,11 +75,14 @@ class fileConfig(object):
             if not isinstance(units, dict):
                 raise TypeError('units should be a dictionary. Ex.: {"u" : "m/s", "v" : "m/s", "theta" : "K" }')
             else:
-                units = algs.parseUnits(units)
+                self.units = algs.parseUnits(units)
         #-------------------------
 
+        #------------------
+        # Recuperates deprecated option varNames
         if (not variables) and varNames:
             self.variables = varNames
+        #------------------
 
         self.get_date_cols()
 
@@ -106,7 +96,7 @@ class fileConfig(object):
         if self.date_cols:
             self.date_col_names = [ self.variables[ idx ] for idx in self.date_cols ]
         else:
-            date_cols = { k : it for (k, it) in varNames.iteritems() if '%' in it }
+            date_cols = { k : it for (k, it) in self.variables.iteritems() if '%' in it }
             self.date_col_names = date_cols.values()
             self.date_cols = date_cols.keys()
 
@@ -174,6 +164,7 @@ class siteConfig(object):
         string+= pd.Series(self.__dict__).__str__()
         return string
     __repr__ = __str__
+
 
 
 class Notation(object):
@@ -285,6 +276,8 @@ class Notation(object):
         pd.reset_option('max_rows')
         return string
     __repr__ = __str__
+
+
 
 class dataloggerConfig(object):
     """

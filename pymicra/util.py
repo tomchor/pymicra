@@ -1,5 +1,4 @@
 from __future__ import print_function
-#!/usr/bin/python
 """
 Author: Tomas Chor
 Date: 2015-08-07
@@ -50,18 +49,16 @@ def qcontrol(files, datalogger_config,
     All others depend on their respective keywords.
 
 
-    Trivial tests:
+    Consistency tests:
     --------------
     date check:
         files outside a date_range are left out (end_date and begin_date keywords)
     lines test:
-        files with a number of lines that is different from the correct number are out.
-
-    Non-trivial tests (in this order):
-    ------------------
-    lines test:
         checks each file to see if they have a certain number of lines. Files with a different number of lines
         fail this test. Active this test by passing the file_lines keyword.
+
+    Quality tests (in this order):
+    ------------------
     NaNs test:
         checks for any NaN values. NaNs are replaced with interpolation or linear trend. If the percentage
         of NaNs is greater than accepted_nans_percent, run is discarded. Activate it by passing nans_test=True.
@@ -217,19 +214,17 @@ def qcontrol(files, datalogger_config,
     #--------------
     # If the path to the dlc is provided, we read it as a dataloggerConfig object
     if isinstance(datalogger_config, str):
-        from . import dataloggerConfig
-        datalogger_config = dataloggerConfig(datalogger_config)
+        from . import fileConfig
+        datalogger_config = fileConfig(datalogger_config)
     #--------------
 
     #-------------------------------------
     # Identifying columns that are not part of the datetime
-    variables_list=datalogger_config.varNames
+    variables_list=datalogger_config.variables
     if type(variables_list) == dict:
         usedvars=[ v for v in variables_list.values() if r'%' not in v ]
-    elif type(variables_list) == list:
-        usedvars=[ v for v in variables_list[1:] if r'%' not in v ]
     else:
-        raise TypeError('Check varNames of the dataloggerConfig object.')
+        raise TypeError('Check variables of the fileConfig object.')
     #-------------------------------------
 
     #--------------

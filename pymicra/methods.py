@@ -50,10 +50,7 @@ def _as_dlc(self, outfile, dlc):
         df[ datecol ] = df.index.strftime(datecol)
     #---------------
 
-    if isinstance(dlc.varNames, list):
-        df = df[ dlc.varNames ]
-    elif isinstance(dlc.varNames, dict):
-        df = df[ dlc.varNames.values ]
+    df = df[ dlc.variables.values ]
 
     df.to_csv(outfile, header=dlc.header_lines, 
             sep=dlc.columns_separator, index=False, quoting=3, na_rep='nan')

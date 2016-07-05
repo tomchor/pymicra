@@ -1,69 +1,7 @@
 from __future__ import print_function
 """
 """
-#import pandas as pd
-#import numpy as np
 
-#
-#def splitData(data, rule='30min', return_index=False, **kwargs):
-#    """
-#    Splits a given pandas DataFrame into a series of "rule"-spaced DataFrames
-#
-#    Parameters
-#    ----------
-#    data: pandas dataframe
-#        data to be split
-#    rule: str or int 
-#        If it is a string, it should be a pandas string offset.
-#            Some possible values (that should be followed by an integer) are:
-#            D   calendar day frequency
-#            W   weekly frequency
-#            M   month end frequency
-#            MS  month start frequency
-#            Q   quarter end frequency
-#            BQ  business quarter endfrequency
-#            QS  quarter start frequency
-#            A   year end frequency
-#            AS  year start frequency
-#            H   hourly frequency
-#            T   minutely frequency
-#            Min minutely frequency
-#            S   secondly frequency
-#            L   milliseconds
-#            U   microseconds
-#
-#        If it is a int, it should be the number of lines desired in each separated piece.
-#
-#        If it is None, then the dataframe isn't separated and a list containing only the
-#        full dataframe is returned.
-#        
-#        check it complete at http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
-#        """
-#    import pandas as pd
-#
-#    #---------
-#    # Choose how to separate the data
-#    if rule == None:
-#        out = [ data ]
-#    elif type(rule) == int:
-#        out = [ data.iloc[ rule*i : rule*(i+1) ] for i in range(0, len(data)/rule) ]
-#    else:
-#        from itertools import izip_longest as izip
-#        #---------
-#        # We first create the index in which we base our separation
-#        # THIS STEP CAN PROBABLY BE IMPROVED
-#        res_dates = pd.Series(index=data.index).resample(rule, **kwargs).index
-#        intervals = izip(res_dates, res_dates[1:], fillvalue=data.index[-1] + pd.DateOffset(microseconds=2))
-#        #---------
-#
-#        out = [ data.loc[ bdate:edate - pd.DateOffset(microseconds=1) ] for bdate, edate in intervals ]
-#    #---------
-#
-#    if return_index:
-#        return out, res_dates
-#    else:
-#        return out
-#
 #
 #def resample(df, rule, how=None, **kwargs):
 #    '''
