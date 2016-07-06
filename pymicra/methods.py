@@ -274,9 +274,9 @@ pd.Series.trend  = trend
 
 #---------
 # Define convert_cols method here
-from .algs import convert_cols
-pd.DataFrame.convert_cols = convert_cols
-pd.Series.convert_to = convert_cols
+from . import algs as _algs
+pd.DataFrame.convert_cols = _algs.convert_cols
+pd.Series.convert_indexes = _algs.convert_indexes
 #---------
 
 del pd

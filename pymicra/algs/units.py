@@ -133,7 +133,7 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
         return data*coef, outunit 
 
 
-@decorators.pdgeneral(convert_out=True)
+#@decorators.pdgeneral(convert_out=True)
 def convert_cols(data, guide, units, inplace=False):
     ''' 
     Converts data from one unit to the other 
@@ -172,5 +172,39 @@ def convert_cols(data, guide, units, inplace=False):
         units.update(guide) 
         return data 
     else: 
-        return data, outunit 
+        return data, guide 
+
+def convert_indexes(data, guide, units, inplace=False):
+    ''' 
+    Converts data from one unit to the other 
+ 
+    Parameters: 
+    ----------- 
+    data: pandas.Series
+        to be chanhed from one unit to the other 
+    guide: dict
+        {names of columns : units to converted to}
+    units: dict
+        units dictionary
+    inplace: bool 
+        if inunit is a dict, the dict is update in place. "key" keyword must be provided 
+    ''' 
+    from .. import algs
+
+    data = data.copy()
+    guide = algs.parseUnits(guide)
+
+    #-------
+    # We first turn it into a numpy array to make the conversion using pint natively
+    for idx, outunit in guide.iteritems():
+        aux = data[ idx ] * units[ idx ]
+        aux = aux.to(outunit)
+        data.loc[ idx ] = aux.magnitude
+    #-------
+        
+    if inplace: 
+        units.update(guide) 
+        return data 
+    else: 
+        return data, guide 
 
