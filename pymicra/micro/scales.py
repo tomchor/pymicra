@@ -2,11 +2,11 @@ from __future__ import print_function
 
 def MonObuVar(L_m, siteConf):
     """
-    Redirects to MonObuSimVar
+    Redirects to stabilityParam
     """
-    return MonObuSimVar(L_m, siteConf)
+    return stabilityParam(L_m, siteConf)
 
-def MonObuSimVar(L_m, siteConf):
+def stabilityParam(L_m, siteConf):
     """
     Calculates the Monin-Obukhov Similarity Variable
     defined as
@@ -21,8 +21,12 @@ def MonObuSimVar(L_m, siteConf):
     zeta = (z-d)/L_m
     return zeta
 
-
 def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
+    """
+    """
+    return obukhovLen(theta_v_star, theta_v_mean, u_star, g=g)
+
+def obukhovLen(theta_v_star, theta_v_mean, u_star, g=None):
     """
     Calculates the Monin-Obukhov Length
     according to:
@@ -49,7 +53,7 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
 
 
 
-def getScales(data, siteConf, units, notation=None,
+def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None,
         theta_fluct_from_theta_v=True, solutes=[], output_as_df=True, inplace=True):
     """
     Calculates characteristic lengths for data
@@ -60,17 +64,15 @@ def getScales(data, siteConf, units, notation=None,
     Parameters:
     -----------
     data: pandas.DataFrame
-        dataset to be used. Must have a minimum of columns in order for it to work
+        dataset to be used. It must either be the raw and turbulent data, or the covariances of such data
     siteConf: pymicra.siteConfig object
-        has the site configurations to calculate the MonObuLen
+        has the site configurations to calculate the obukhovLen
     units: dict
         dict units for the input data
     output_as_df: boolean
         True if you want the output to be a one-line pandas.DataFrame. A pd.Series
         will be output if False.
 
-    CHECKLIST:
-    ADD MIXED-LAYER CONVECTION SCALES FOR VELOCITY (w*) AND TEMPERATURE (t*) MAYBE
     """
     from .. import constants
     from .. import algs
@@ -79,6 +81,7 @@ def getScales(data, siteConf, units, notation=None,
     import numpy as np
 
     defs = algs.get_notation(notation)
+    defsdic = defs.__dict__
     data = data.copy()
     outunits = {}
     cunits = constants.units
@@ -95,25 +98,32 @@ def getScales(data, siteConf, units, notation=None,
     theta_v_fluc    =   defs.virtual_temp_fluctuations
     q_fluc          =   defs.specific_humidity_fluctuations
     solutesf        = [ defs.molar_density % defs.fluctuations % solute for solute in solutes ]
+    solutestars     = [ defsdic[ '%s_molar_density_star' % solute ] for solute in solutes ]
     #---------
 
     #---------
-    # Check if data is already covariances or not. If not, calculate covariances.
+    # If data is already covariances we go from there
     if (data.shape[0] == data.shape[1]) and all(data.index == data.columns):
         print('Data seems to be covariances. Will it use as covariances ...')
         cov = data.copy()
+        outname = None
+    #---------
 
+    #---------
+    # If data is raw data, calculate covariances.
     else:
         print('Data seems to be raw data. Will calculate covariances ...')
+
         #---------
         # Now we try to calculate or identify the fluctuations of theta
+        outname = data.index[0]
         theta_mean = data[ defs.thermodyn_temp ].mean()
         if (theta_fluc not in data.columns) or theta_fluct_from_theta_v:
             print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
             #---------
             # We need the mean of the specific humidity and temperature
             if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
-                raise TypeError('\nUnits for both the virtual temperature fluctuations and the thermodynamic temperature fluctuations must be the same')
+                raise TypeError('\nUnits for both the virtual temperature fluctuations and the thermodynamic temperature fluctuations must be Kelvin')
             data_q_mean =   data[ defs.specific_humidity ].mean()
             data[ theta_fluc ] = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1. + 0.61*data_q_mean)
             theta_fluc_unit = units[ theta_v_fluc ]
@@ -133,8 +143,8 @@ def getScales(data, siteConf, units, notation=None,
 
     #---------
     # Now to calculate the characteristic lengths, scales and etc
-    print('Calculating the STDs and turbulent scales of wind, temperature and humidity ... ', end='')
-    out = pd.DataFrame(index=[data.index[0]])
+    print('Calculating the turbulent scales of wind, temperature and humidity ... ', end='')
+    out = pd.Series(name=outname)
 
     u_star  = np.sqrt(-cov.loc[u_fluc, w_fluc])
     out[ defs.u_star ]  = u_star
@@ -143,11 +153,7 @@ def getScales(data, siteConf, units, notation=None,
     out[ defs.virtual_temp_star ]   = theta_v_star
 
     out[ defs.thermodyn_temp_star ] = cov.loc[theta_fluc, w_fluc] / u_star
-
-    out[ defs.specific_humidity_star ]  = cov.loc[ q_fluc, w_fluc ] / u_star
-
     out[ defs.h2o_molar_density_star ] = cov.loc[ mrho_h2o_fluc, w_fluc ] / u_star
-
     print('done!')
     #---------
 
@@ -155,44 +161,36 @@ def getScales(data, siteConf, units, notation=None,
     # Now we set the units of the legths
     outunits = {}
     outunits[ defs.u_star ]  = units[ u_fluc ]
-    outunits[ defs.u_std ]   = units[ u_fluc ]
-
     outunits[ defs.virtual_temp_star ]   = units[ theta_v_fluc ]
-    outunits[ defs.virtual_temp_std ]    = units[ theta_v_fluc ]
-
     outunits[ defs.thermodyn_temp_star ] = units[ theta_v_fluc ]
-    outunits[ defs.thermodyn_temp_std ]  = units[ theta_v_fluc ]
-
-    outunits[ defs.specific_humidity_star ]  = units[ q_fluc ]
-    outunits[ defs.specific_humidity_std ]   = units[ q_fluc ]
-
     outunits[ defs.h2o_molar_density_star ] = units[ mrho_h2o_fluc ]
-    outunits[ defs.h2o_molar_density_std ]  = units[ mrho_h2o_fluc ]
     #---------
 
     #---------
     # The solutes have to be calculated separately
-    for sol_fluc, sol in zip(solutesf, solutes):
-        print('Calculating the turbulent scale and STD of %s ... ' % sol, end='')
-        out[ defs.molar_density % defs.star % sol ]      = cov.loc[sol_fluc, w_fluc] / u_star
-        out[ defs.molar_density % defs.std % sol ]       = data[ sol_fluc ].std()
-
-        outunits[ defs.molar_density % defs.star % sol ] = units[ sol_fluc ]
-        outunits[ defs.molar_density % defs.std % sol ]  = units[ sol_fluc ]
+    for sol_star, sol_fluc, sol in zip(solutestars, solutesf, solutes):
+        print('Calculating the turbulent scale of %s ... ' % sol, end='')
+        out[ sol_star ] = cov.loc[sol_fluc, w_fluc] / u_star
+        outunits[ sol_star  ] = units[ sol_fluc ]
         print('done!')
     #---------
 
     #---------
     # Now we calculate the obukhov length and the similarity variable
-    print('Calculating Monin-Obukhov length and stability variable ... ', end='')
-    theta_v_mean    = data[ defs.virtual_temp ].mean()
-    Lm = MonObuLen(theta_v_star, theta_v_mean, u_star, g=constants.gravity)
-    out[ defs.MonObuLen ]       = Lm
-    out[ defs.similarityVar ]   = MonObuSimVar(Lm, siteConf)
+    print('Calculating Obukhov length and stability parameter ... ', end='')
+    Lm = obukhovLen(theta_v_star, theta_v_mean, u_star, g=constants.gravity)
+    out[ defs.obukhov_length ]      = Lm
+    out[ defs.stability_parameter ] = stabilityParam(Lm, siteConf)
 
-    outunits[ defs.MonObuLen ] = (outunits[ defs.u_star ]**2.)/cunits[ 'gravity' ]
-    outunits[ defs.similarityVar ] = ureg['meter']/outunits[ defs.MonObuLen ]
+    outunits[ defs.obukhov_length ] = (outunits[ defs.u_star ]**2.)/cunits[ 'gravity' ]
+    outunits[ defs.stability_parameter ] = ureg['meter']/outunits[ defs.obukhov_length ]
     print('done!')
+    #---------
+
+    #---------
+    # Create a one-row dataframe if output_as_df is True
+    if output_as_df:
+        out = out.to_frame().T
     #---------
 
     #---------
@@ -200,17 +198,10 @@ def getScales(data, siteConf, units, notation=None,
     print()
     if inplace:
         units.update(outunits)
-        if output_as_df:
-            return out
-        else:
-            return out.iloc[0]
+        return out
     else:
-        if output_as_df:
-            return out, outunits
-        else:
-            return out.iloc[0], outunits
+        return out, outunits
     #---------
-
 
 
 def get_scales(dataframe, siteConf, notation_defs=None,
@@ -302,8 +293,8 @@ def get_scales(dataframe, siteConf, notation_defs=None,
 
     #---------
     # Now we calculate the obukhov length and the similarity variable
-    Lm=MonObuLen(theta_v_star, theta_v_mean, u_star, g=constants.gravity)
-    zeta=MonObuSimVar(Lm, siteConf)
+    Lm = obukhovLen(theta_v_star, theta_v_mean, u_star, g=constants.gravity)
+    zeta = stabilityParam(Lm, siteConf)
     #---------
 
     #---------

@@ -210,14 +210,16 @@ class Notation(object):
     moist_air = 'air'
     dry_air   = 'dry'
 
-    similarityVar = 'zeta'
-    MonObuLen = 'Lm'
+    stability_parameter = 'zeta'
+    stability_variable = stability_parameter
+    obukhov_length = 'Lm'
     momentum_flux = 'tau'
     sensible_heat_flux = 'H'
     virtual_sensible_heat_flux = 'Hv'
     water_vapor_flux = 'E'
     latent_heat_flux = 'LE'
     flux_of = 'F_%s'
+
     cross_spectrum = 'Cr_%s_%s'
     spectrum = 'Sp_%s'
     cospectrum = 'Co_%s_%s'
