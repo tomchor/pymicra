@@ -549,7 +549,6 @@ def eddyCov3(data, units, wpl=True, get_scales=True, site_config=None, output_as
     # Calculate the fluxes
     print('Calculating fluxes ... ', end='')
     idx0 = data.index[0]
-    #out = pd.DataFrame(index=[ idx0 ])
     out = pd.Series(name=idx0)
     out[ defs.momentum_flux ]               = -rho_air_mean * cov[ u_fluc ][ w_fluc ]
     out[ defs.sensible_heat_flux ]          = rho_air_mean * cp * cov[theta_fluc][w_fluc]
@@ -628,9 +627,9 @@ def eddyCov3(data, units, wpl=True, get_scales=True, site_config=None, output_as
 
         #---------
         # Recalculating covs with WPL
-        print("Re-calculating cov(%s, w') according to WPL correction ... " % solutef, end='')
+        print("Re-calculating cov(%s, w') according to WPL correction ... " % mrho_h2o_fluc, end='')
         wplcov = cov.copy()
-        w_h2o_units = units["w'"] * units["mrho_h2o'"]
+        w_h2o_units = units[ w_fluc ] * units[ rho_h2o_fluc ]
         wplcov.loc[ mrho_h2o_fluc, w_fluc ] = (out[ defs.water_vapor_flux ] * fluxunits[ defs.water_vapor_flux ]).to(w_h2o_units).magnitude
         wplcov.loc[ w_fluc, mrho_h2o_fluc ] = wplcov.loc[ mrho_h2o_fluc, w_fluc ]
         print('done!')
