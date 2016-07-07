@@ -115,7 +115,7 @@ class siteConfig(object):
     def __init__(self, from_file=None,
              instruments_height=None, measurement_height=None, canopy_height=None,
              displacement_height=None, roughness_length=None,
-             latitude=None, longitude=None, altitude=None, description=None):
+             latitude=None, longitude=None, altitude=None, description=None, **kwargs):
         """
         Parameters:
         -----------
