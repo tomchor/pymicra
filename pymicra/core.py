@@ -200,6 +200,7 @@ class Notation(object):
     thermodyn_temp='theta'
     virtual_temp='theta_v'
     sonic_temp='theta_s'
+    potential_temp='theta_p'
     pressure='p'
     relative_humidity='rh'
     specific_humidity='q'
@@ -266,7 +267,7 @@ class Notation(object):
         for subst in ['co2', 'ch4', 'o3']:
             dic['%s_flux' % subst] = self.flux_of % subst
 
-        for subst in ['u', 'v', 'w', 'thermodyn_temp', 'virtual_temp', 'sonic_temp', 'specific_humidity', 'relative_humidity', 'pressure']:
+        for subst in ['u', 'v', 'w', 'thermodyn_temp', 'virtual_temp', 'sonic_temp', 'potential_temp', 'specific_humidity', 'relative_humidity', 'pressure']:
             exec('self.{0}_fluctuations = self.fluctuations % self.{0}'.format(subst))
             exec('self.{0}_mean = self.mean % self.{0}'.format(subst))
             exec('self.{0}_star = self.star % self.{0}'.format(subst))
