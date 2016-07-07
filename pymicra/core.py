@@ -199,6 +199,7 @@ class Notation(object):
     w='w'
     thermodyn_temp='theta'
     virtual_temp='theta_v'
+    sonic_temp='theta_s'
     pressure='p'
     relative_humidity='rh'
     specific_humidity='q'
@@ -235,6 +236,8 @@ class Notation(object):
         """
         This useful method builds the full notation based on the base notation
         """
+
+        dic = self.__dict__
         for subst in ['h2o', 'co2', 'ch4', 'o3', 'moist_air', 'dry_air']:
             for mode, comp in zip(['', '_mean' ], ['', 'self.mean %']):
                 exec('self.{0}{1}_mass_density = {2} self.mass_density % self.{0}'.format(subst, mode, comp))
@@ -244,7 +247,6 @@ class Notation(object):
                 exec('self.{0}{1}_mass_concentration = {2} self.mass_concentration % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_molar_concentration = {2} self.molar_concentration % self.{0}'.format(subst, mode, comp))
 
-                #exec('self.{0}{1}_density = {2} self.density % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_mixing_ratio = {2} self.mixing_ratio % self.{0}'.format(subst, mode, comp))
                 exec('self.{0}{1}_concentration = {2} self.concentration % self.{0}'.format(subst, mode, comp))
 
@@ -256,16 +258,15 @@ class Notation(object):
                 exec('self.{0}_mass_concentration_{1} = self.{1} % self.{0}_mass_concentration'.format(subst,mode))
                 exec('self.{0}_molar_concentration_{1} = self.{1} % self.{0}_molar_concentration'.format(subst,mode))
     
-                #exec('self.{0}_density_{1} =  self.{1} % self.{0}_density'.format(subst,mode))
                 exec('self.{0}_mixing_ratio_{1} = self.{1} % self.{0}_mixing_ratio'.format(subst,mode))
                 exec('self.{0}_concentration_{1} = self.{1} % self.{0}_concentration'.format(subst,mode))
     
 
 
         for subst in ['co2', 'ch4', 'o3']:
-            exec('self.{0}_flux = self.flux_of % self.{0}'.format(subst))
+            dic['%s_flux' % subst] = self.flux_of % subst
 
-        for subst in ['u', 'v', 'w', 'thermodyn_temp', 'virtual_temp', 'specific_humidity', 'relative_humidity', 'pressure']:
+        for subst in ['u', 'v', 'w', 'thermodyn_temp', 'virtual_temp', 'sonic_temp', 'specific_humidity', 'relative_humidity', 'pressure']:
             exec('self.{0}_fluctuations = self.fluctuations % self.{0}'.format(subst))
             exec('self.{0}_mean = self.mean % self.{0}'.format(subst))
             exec('self.{0}_star = self.star % self.{0}'.format(subst))
