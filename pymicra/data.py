@@ -11,7 +11,7 @@ numpy, datetime and several other packages.
 
 """
 
-def rotCoor(data, notation=None):
+def rotate2D(data, notation=None):
     """
     Rotates the coordinates of wind data
     ----------------------
@@ -22,6 +22,54 @@ def rotCoor(data, notation=None):
         the dataFrame to be rotated
     notation: notation object
         a notation object to know which are the wind variables
+    """
+    from math import atan2, sqrt
+    import numpy as np
+    import algs
+
+    #-------
+    # Getting the names for u, v, w
+    defs = algs.get_notation(notation)
+    wind_vars = [ defs.u, defs.v, defs.w ]
+    #-------
+
+    #-------
+    # Definition of the coefficients used to created the rotation matrix
+    wind_vec = data[wind_vars].mean().values
+    m_u, m_v, m_w = wind_vec
+    alpha = atan2(m_v,m_u)
+    beta =-atan2(m_w, sqrt((m_u**2.)+(m_v**2.)))
+    #-------
+
+    #-------
+    # Definition of rotation matrix
+    DC= np.zeros((3,3))
+    DC[0,0],DC[0,1],DC[0,2] = np.cos(alpha)*np.cos(beta), np.cos(beta)*np.sin(alpha),-np.sin(beta)
+    DC[1,0],DC[1,1],DC[1,2] =-np.sin(alpha)          , np.cos(alpha)          , 0.
+    DC[2,0],DC[2,1],DC[2,2] = np.cos(alpha)*np.sin(beta), np.sin(alpha)*np.sin(beta), np.cos(beta)
+    #-------
+
+    #-------
+    # Application of rotation as a matrix product
+    data[wind_vars] = np.dot(DC, data[wind_vars].values.T).T
+    #-------
+
+    return data
+
+
+def rotCoor(data, notation=None, how='2d'):
+    """
+    Rotates the coordinates of wind data
+    ----------------------
+
+    Parameters
+    ----------
+    data: pandas DataFrame 
+        the dataFrame to be rotated
+    notation: notation object
+        a notation object to know which are the wind variables
+    how: string
+        how to perform the rotation. Currently accepts "2d"
     """
     from math import atan2, sqrt
     import numpy as np

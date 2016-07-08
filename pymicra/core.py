@@ -214,7 +214,7 @@ class Notation(object):
 
     stability_parameter = 'zeta'
     stability_variable = stability_parameter
-    obukhov_length = 'Lm'
+    obukhov_length = 'Lo'
     momentum_flux = 'tau'
     sensible_heat_flux = 'H'
     virtual_sensible_heat_flux = 'Hv'
@@ -222,7 +222,7 @@ class Notation(object):
     latent_heat_flux = 'LE'
     flux_of = 'F_%s'
 
-    cross_spectrum = 'Cr_%s_%s'
+    cross_spectrum = 'X_%s_%s'
     spectrum = 'Sp_%s'
     cospectrum = 'Co_%s_%s'
     quadrature = 'Qu_%s_%s'

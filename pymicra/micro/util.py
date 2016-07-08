@@ -514,6 +514,16 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         return out, fluxunits
 
 
+def rotateCoor(data, notation=None, how='2d'):
+    """
+    """
+    from .. import data
+
+    if how=='2d':
+        return rotate2D(data, notation=notation, how=how)
+    else:
+        return None
+
 #
 #def fluxes_from_scales(data, units, wpl=True,
 #        notation=None, inplace=True, solutes=[]):
