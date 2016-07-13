@@ -7,16 +7,88 @@ Module that contains physical functions for general use
 TO DO LIST:
 
 * ADD GENERAL SOLAR ZENITH CALCULATION
-* MAYBE ADD PINT FUNCTIONALITY
 * ADD FOOTPRINT CALCULATION?
 """
 
-def theta_from_theta_s(theta_s, q):
+def theta_from_theta_s(data, units, notation=None, return_df=True):
     """
     From Schotanus, Nieuwstadt, de Bruin; DOI 10.1007/BF00164332
+
+    theta_s = theta (1 + 0.51 q) (1 - (vn/c)**2)**0.5
+    theta_s ~ theta (1 + 0.51 q)
+
+    Parameter:
+    ----------
+    data: pandas.dataframe
+        dataset
+    units: dict
+        units dictionary
+    notation: pymicra.Notation
     """
-    theta = theta_s/(1. + 0.51*q)
-    return theta
+    from . import algs
+
+    defs = algs.get_notation(notation)
+    data = data.copy()
+    theta = data[ defs.sonic_temp ]/(1. + 0.51*data[ defs.specific_humidity ])
+    if return_df:
+        data.loc[:, defs.thermodyn_temp ] = theta
+        return data
+    else:
+        return theta
+
+
+def theta_from_theta_v(data, units, notation=None, return_df=True):
+    """
+
+    theta_v ~ theta (1 + 0.61 q)
+
+    Parameter:
+    ----------
+    data: pandas.dataframe
+        dataset
+    units: dict
+        units dictionary
+    notation: pymicra.Notation
+    """
+    from . import algs
+
+    defs = algs.get_notation(notation)
+    data = data.copy()
+    theta = data[ defs.sonic_temp ]/(1. + 0.61*data[ defs.specific_humidity ])
+    if return_df:
+        data.loc[:, defs.thermodyn_temp ] = theta
+        return data
+    else:
+        return theta
+
+
+
+def theta_std_from_theta_v_fluc(data, units, notation=None, return_df=True):
+    """
+    Derived from theta_v = theta(1 + 0.61 q)
+
+    Parameters:
+    -----------
+    theta_v: array
+    q: array
+    theta_v_mean: float
+    q_mean: float
+    theta_mean: float
+    """
+    from . import algs
+
+    defs = algs.get_notation(notation)
+    data = data.copy()
+
+    denom = (1. + 0.61*data[ defs.mean_specific_humidity ])**2.
+    num1 = data[ defs.virtual_temp ]**2.
+    num2 = 2.*0.61*theta_mean*np.nanmean(theta_v * q)
+    num3 = ((0.61*theta_mean)**2.) * np.nanmean(q*q)
+    var = (num1 - num2 + num3)/denom
+    return np.sqrt(var)
+
+
+
 
 def theta_std_from_theta_v(theta_v, q, theta_v_mean, q_mean, theta_mean):
     """
