@@ -11,8 +11,15 @@ TO DO LIST:
 * ADD FOOTPRINT CALCULATION?
 """
 
+def theta_from_theta_s(theta_s, q):
+    """
+    From Schotanus, Nieuwstadt, de Bruin; DOI 10.1007/BF00164332
+    """
+    theta = theta_s/(1. + 0.51*q)
+    return theta
+
 def theta_std_from_theta_v(theta_v, q, theta_v_mean, q_mean, theta_mean):
-    '''
+    """
     Derived from theta_v = theta(1 + 0.61 q)
 
     Parameters:
@@ -22,7 +29,7 @@ def theta_std_from_theta_v(theta_v, q, theta_v_mean, q_mean, theta_mean):
     theta_v_mean: float
     q_mean: float
     theta_mean: float
-    '''
+    """
     import numpy as np
     denom = (1. + 0.61*q_mean)**2.
     num1 = np.nanmean(theta_v*theta_v) 
@@ -53,9 +60,9 @@ def ppxv2density(ser, T, p, units, solute=None):
     return out, units
 
 def airDensity_from_theta_v(data, units, notation=None, inplace=True, use_means=False):
-    '''
+    """
     Calculates moist air density using p = rho R_dry T_virtual
-    '''
+    """
     from . import algs
     from . import constants
 
@@ -85,10 +92,10 @@ def airDensity_from_theta_v(data, units, notation=None, inplace=True, use_means=
         return data, units
 
 def dryAirDensity_from_p(data, units, notation=None, inplace=True):
-    '''
+    """
     Calculates dry air density
     NEEDS IMPROVEMENT REGARDING HANDLING ON UNITS
-    '''
+    """
     from . import algs
     from . import constants
 
@@ -124,7 +131,7 @@ def dryAirDensity_from_p(data, units, notation=None, inplace=True):
 
 
 def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=False, theta=None, theta_unit=None):
-    '''
+    """
     Calculates moist air density using theta measurements
 
     Parameters:
@@ -143,7 +150,7 @@ def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=Fa
         auxiliar theta measurement
     theta_unit: pint.quantity
         auxiliar theta's unit
-    '''
+    """
     from . import algs
     from . import constants
 
