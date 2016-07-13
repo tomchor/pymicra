@@ -66,24 +66,13 @@ def preProcess(data, units, notation=None, use_means=False,
     #---------
 
     print('Beginning of pre-processing ...')
-    #---------
-    # First convert the temperature if it is still in Celsius
-    temps = { col:'kelvin' for col in data.columns if col in [defs.thermodyn_temp, defs.virtual_temp, defs.sonic_temp, defs.potentuial_temp] }
-    print(units)
-    data = data.convert_cols(temps, units, inplace=True)
-    print(units)
-    exit()
-#    if (defs.thermodyn_temp in data.columns) and (units[ defs.thermodyn_temp ] == ureg[ 'degC' ]):
-#        print('Converting theta to kelvin ... ', end='')
-#        data.loc[:, defs.thermodyn_temp ] = data[ defs.thermodyn_temp ].apply(physics.CtoK)
-#        units.update({ defs.thermodyn_temp : ureg['kelvin'] })
-#        print('Done!')
 
-#    if (defs.thermodyn_temp in data.columns) and (units[ defs.virtual_temp ] == ureg[ 'degC' ]):
-#       print('Converting theta_v to kelvin ... ', end='')
-#        data.loc[:, defs.virtual_temp ] = data[ defs.virtual_temp ].apply(physics.CtoK)
-#        units.update({ defs.virtual_temp : ureg['kelvin'] })
-#        print('Done!')
+    #---------
+    # First convert any temperature if it is still in Celsius
+    temps = { col:'kelvin' for col in data.columns if col in [defs.thermodyn_temp, defs.virtual_temp, defs.sonic_temp, defs.potential_temp] }
+    print('Converting {} to kelvin ... '.format(' and '.join(temps.keys())), end='')
+    data = data.convert_cols(temps, units, inplace=True)
+    print("Done!")
     #---------
 
     #---------
@@ -93,7 +82,8 @@ def preProcess(data, units, notation=None, use_means=False,
         data.loc[:, defs.h2o_mass_density ] = data.loc[:, defs.h2o_molar_density ]*Mh2o
         units.update({ defs.h2o_mass_density : units[ defs.h2o_molar_density ]*molar_mass_unit })
         print("Done!")
-    data.loc[:, defs.h2o_mass_density] = algs.convert_to(data[ defs.h2o_mass_density ], units, 'kg/m**3', inplace=True, key=defs.h2o_mass_density)
+    #data.loc[:, defs.h2o_mass_density] = algs.convert_to(data[ defs.h2o_mass_density ], units, 'kg/m**3', inplace=True, key=defs.h2o_mass_density)
+    data = data.convert_cols({defs.h2o_mass_density:'kg/m**3'}, units, inplace=True)
     #---------
 
     #---------
@@ -203,7 +193,7 @@ def preProcess(data, units, notation=None, use_means=False,
             data.loc[:, sol_mass_density ] = data.loc[:, sol_molar_density ]*M_sol
             units.update({ sol_mass_density : units[ sol_molar_density ]*molar_mass_unit })
             print("Done!")
-        data.loc[:, sol_mass_density] = algs.convert_to(data[ sol_mass_density ], units, 'kg/m**3', inplace=True, key=sol_mass_density)
+        data = data.convert_cols({sol_mass_density:'kg/m**3'}, units, inplace=True)
         #---------
     
         #---------
@@ -387,7 +377,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         #---------
         # If there are solutes to correct we save the original E to use in the calculation
         E_orig = out[ defs.water_vapor_flux ].copy()
-        E_orig_unit = fluxunits[ defs.water_vapor_flux ].copy()
+        E_orig_unit = fluxunits[ defs.water_vapor_flux ]
         #---------
 
         #---------

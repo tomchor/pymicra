@@ -28,7 +28,7 @@ for key, val in molar_mass.iteritems():
 del key, val
 units.update({'R_spec' : 'J/(g * K)'})
 
-units.update({'mu':'1'})
+units.update({'mu':'dimensionless'})
 
 cp_dry=1.0035  # specific heat of dry air at constant pressure
 units.update({'cp_dry' : 'J/(g * K)'})

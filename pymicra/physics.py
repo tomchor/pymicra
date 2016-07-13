@@ -155,7 +155,7 @@ def airDensity_from_theta_v(data, units, notation=None, inplace=True, use_means=
 
     #---------
     # We pass it to the standard mass density unit: kg/m**3
-    data.loc[:, defs.moist_air_mass_density ] = algs.convert_to(data[ defs.moist_air_mass_density ], units, 'kg/m**3', inplace=True, key=defs.moist_air_mass_density)
+    data = data.convert_cols({defs.moist_air_mass_density:'kg/m**3'}, units, inplace=True)
     #---------
 
     if inplace:

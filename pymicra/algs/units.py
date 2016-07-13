@@ -86,18 +86,14 @@ def parseUnits(unitstr):
     Gets unit from string, list of strings, or dict's values, using the UnitRegistry
     defined in __init__.py
     """
-    try:
-        from .. import ureg, Q_
-    except ImportError:
-        print('You should have pint installed to use units!')
-        return unitstr
+    from .. import ureg
 
     if isinstance(unitstr, str):
-        return ureg[unitstr]
+        return ureg[unitstr].u
     elif isinstance(unitstr, list):
-        return [ ureg[el] for el in unitstr ]
+        return [ ureg[el].u for el in unitstr ]
     elif isinstance(unitstr, dict):
-        return { key: ureg[el] for key, el in unitstr.items() }
+        return { key: ureg[el].u for key, el in unitstr.items() }
 
 
 def convert_to(data, inunit, outunit, inplace=False, key=None): 
@@ -150,6 +146,7 @@ def convert_cols(data, guide, units, inplace=False):
         if inunit is a dict, the dict is update in place. "key" keyword must be provided 
     ''' 
     from .. import algs
+    from .. import Q_
 
     data = data.copy()
 
@@ -163,7 +160,7 @@ def convert_cols(data, guide, units, inplace=False):
     #-------
     # We first turn it into a numpy array to make the conversion using pint natively
     for col, outunit in guide.iteritems():
-        aux = data[ col ].values * units[ col ]
+        aux = Q_(data[ col ].values, units[ col ])
         aux = aux.to(outunit)
         data.loc[:, col] = aux
     #-------
