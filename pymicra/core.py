@@ -1,6 +1,7 @@
 from __future__ import print_function
 from . import decorators as _decors
 
+
 class fileConfig(object):
     """
     This class defines a specific configuration of a data file
@@ -55,7 +56,7 @@ class fileConfig(object):
             skiprows=None,
             filename_format=None,
             varNames=None,
-            description='Generic datalogger configuration file. Type help(fileConfig) to read intructions'):
+            description='Type help(fileConfig) to read intructions'):
         """
         Initiates the class
         """
@@ -194,32 +195,6 @@ class Notation(object):
     concentration=mass_concentration
     mixing_ratio=mass_mixing_ratio
 
-    u='u'
-    v='v'
-    w='w'
-    thermodyn_temp='theta'
-    virtual_temp='theta_v'
-    sonic_temp='theta_s'
-    potential_temp='theta_p'
-    pressure='p'
-    relative_humidity='rh'
-    specific_humidity='q'
-
-    h2o='h2o'
-    co2='co2'
-    ch4='ch4'
-    o3 = 'o3'
-    moist_air = 'air'
-    dry_air   = 'dry'
-
-    stability_parameter = 'zeta'
-    stability_variable = stability_parameter
-    obukhov_length = 'Lo'
-    momentum_flux = 'tau'
-    sensible_heat_flux = 'H'
-    virtual_sensible_heat_flux = 'Hv'
-    water_vapor_flux = 'E'
-    latent_heat_flux = 'LE'
     flux_of = 'F_%s'
 
     cross_spectrum = 'X_%s_%s'
@@ -227,10 +202,42 @@ class Notation(object):
     cospectrum = 'Co_%s_%s'
     quadrature = 'Qu_%s_%s'
 
-    def __init__(self):
+    @_decors.autoassign
+    def __init__(self, **kwargs):
         """
         When initialized, calls the build method to build the full notation
         """
+
+        self.u='u'
+        self.v='v'
+        self.w='w'
+        self.rotated_u=self.u
+        self.rotated_v=self.u
+        self.rotated_w=self.u
+    
+        self.thermodynamic_temperature='theta'
+        self.virtual_temperature='theta_v'
+        self.sonic_temperature='theta_s'
+        self.potential_temperature='theta_p'
+        self.pressure='p'
+        self.relative_humidity='rh'
+        self.specific_humidity='q'
+    
+        self.h2o='h2o'
+        self.co2='co2'
+        self.ch4='ch4'
+        self.o3 = 'o3'
+        self.moist_air = 'air'
+        self.dry_air   = 'dry'
+    
+        self.stability_parameter = 'zeta'
+        self.obukhov_length = 'Lo'
+        self.momentum_flux = 'tau'
+        self.sensible_heat_flux = 'H'
+        self.virtual_sensible_heat_flux = 'Hv'
+        self.water_vapor_flux = 'E'
+        self.latent_heat_flux = 'LE'
+    
         self.build()
 
     def build(self):
@@ -240,38 +247,55 @@ class Notation(object):
 
         dic = self.__dict__
         for subst in ['h2o', 'co2', 'ch4', 'o3', 'moist_air', 'dry_air']:
-            for mode, comp in zip(['', '_mean' ], ['', 'self.mean %']):
-                exec('self.{0}{1}_mass_density = {2} self.mass_density % self.{0}'.format(subst, mode, comp))
-                exec('self.{0}{1}_molar_density = {2} self.molar_density % self.{0}'.format(subst, mode, comp))
-                exec('self.{0}{1}_mass_mixing_ratio = {2} self.mass_mixing_ratio % self.{0}'.format(subst, mode, comp))
-                exec('self.{0}{1}_molar_mixing_ratio = {2} self.molar_mixing_ratio % self.{0}'.format(subst, mode, comp))
-                exec('self.{0}{1}_mass_concentration = {2} self.mass_concentration % self.{0}'.format(subst, mode, comp))
-                exec('self.{0}{1}_molar_concentration = {2} self.molar_concentration % self.{0}'.format(subst, mode, comp))
+            for mode, comp in zip(['', 'mean_' ], ['', 'self.mean %']):
+                exec('self.{1}{0}_mass_density = {2} self.mass_density % self.{0}'.format(subst, mode, comp))
+                exec('self.{1}{0}_molar_density = {2} self.molar_density % self.{0}'.format(subst, mode, comp))
+                exec('self.{1}{0}_mass_mixing_ratio = {2} self.mass_mixing_ratio % self.{0}'.format(subst, mode, comp))
+                exec('self.{1}{0}_molar_mixing_ratio = {2} self.molar_mixing_ratio % self.{0}'.format(subst, mode, comp))
+                exec('self.{1}{0}_mass_concentration = {2} self.mass_concentration % self.{0}'.format(subst, mode, comp))
+                exec('self.{1}{0}_molar_concentration = {2} self.molar_concentration % self.{0}'.format(subst, mode, comp))
 
-                exec('self.{0}{1}_mixing_ratio = {2} self.mixing_ratio % self.{0}'.format(subst, mode, comp))
-                exec('self.{0}{1}_concentration = {2} self.concentration % self.{0}'.format(subst, mode, comp))
 
             for mode in ['fluctuations', 'star', 'std']:
-                exec('self.{0}_mass_density_{1} =  self.{1} % self.{0}_mass_density'.format(subst,mode))
-                exec('self.{0}_molar_density_{1} = self.{1} % self.{0}_molar_density'.format(subst,mode))
-                exec('self.{0}_mass_mixing_ratio_{1} = self.{1} % self.{0}_mass_mixing_ratio'.format(subst,mode))
-                exec('self.{0}_molar_mixing_ratio_{1} = self.{1} % self.{0}_molar_mixing_ratio'.format(subst,mode))
-                exec('self.{0}_mass_concentration_{1} = self.{1} % self.{0}_mass_concentration'.format(subst,mode))
-                exec('self.{0}_molar_concentration_{1} = self.{1} % self.{0}_molar_concentration'.format(subst,mode))
-    
-                exec('self.{0}_mixing_ratio_{1} = self.{1} % self.{0}_mixing_ratio'.format(subst,mode))
-                exec('self.{0}_concentration_{1} = self.{1} % self.{0}_concentration'.format(subst,mode))
+                exec('self.{0}_mass_density_{1} = self.{1} % self.{0}_mass_density'.format(subst, mode))
+                exec('self.{0}_molar_density_{1} = self.{1} % self.{0}_molar_density'.format(subst, mode))
+                exec('self.{0}_mass_mixing_ratio_{1} = self.{1} % self.{0}_mass_mixing_ratio'.format(subst, mode))
+                exec('self.{0}_molar_mixing_ratio_{1} = self.{1} % self.{0}_molar_mixing_ratio'.format(subst, mode))
+                exec('self.{0}_mass_concentration_{1} = self.{1} % self.{0}_mass_concentration'.format(subst, mode))
+                exec('self.{0}_molar_concentration_{1} = self.{1} % self.{0}_molar_concentration'.format(subst, mode))
     
 
 
         for subst in ['co2', 'ch4', 'o3']:
             dic['%s_flux' % subst] = self.flux_of % subst
 
-        for subst in ['u', 'v', 'w', 'thermodyn_temp', 'virtual_temp', 'sonic_temp', 'potential_temp', 'specific_humidity', 'relative_humidity', 'pressure']:
+        substances = ['u', 'v', 'w', 'thermodynamic_temperature', 'virtual_temperature', 
+                    'sonic_temperature', 'potential_temperature', 'specific_humidity', 'relative_humidity', 'pressure']
+        for subst in substances:
             exec('self.{0}_fluctuations = self.fluctuations % self.{0}'.format(subst))
-            exec('self.{0}_mean = self.mean % self.{0}'.format(subst))
+            exec('self.mean_{0} = self.mean % self.{0}'.format(subst))
             exec('self.{0}_star = self.star % self.{0}'.format(subst))
             exec('self.{0}_std = self.std % self.{0}'.format(subst))
+
+        self._apply_aliases()
+
+
+    def _apply_aliases(self):
+        """
+        Applies short names using aliases
+        """
+        aliases = { 'thermodynamic':'thermodyn',
+                    'temperature':'temp',
+                    'parameter':'variable' }
+
+        dic = self.__dict__
+        for key, val in dic.items():
+            short=key
+            for lon in aliases.keys():
+                short = short.replace(lon, aliases[lon])
+            if key!=short:
+                dic.update({short:val})
+
 
     def __str__(self):
         import pandas as pd
@@ -413,3 +437,13 @@ class dataloggerConfig(object):
     __repr__ = __str__
 
 
+class Dataset(object):
+    """
+    Attempt to create a Dataset object
+    """
+    def __init__(self, df):
+        self = df.copy()
+
+    def __div__(self):
+        import pandas as pd
+        return pd.DataFrame(self)
