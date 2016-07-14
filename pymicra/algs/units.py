@@ -39,7 +39,6 @@ def operate(elems, units, inplace=False, unitdict=None, key=None, operation='+')
     """
     import pandas as pd
     import numpy as np
-    from .. import ureg
 
     idx = elems[0].index
 
@@ -70,8 +69,8 @@ def operate(elems, units, inplace=False, unitdict=None, key=None, operation='+')
             else:
                 result /= elem*unit
 
-    out = pd.Series(result.magnitude)
-    funit = ureg.Quantity(1, result.units)
+    out = pd.Series(result.magnitude, index=idx)
+    funit = result.units
 
     if inplace==True:
         unitdict.update({key : funit})
@@ -121,7 +120,7 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
         Q = inunit.to(outunit) 
  
     coef = Q.magnitude 
-    outunit = Q_(1, Q.units) 
+    outunit = Q.units
     if inplace: 
         inunit.update({key : outunit}) 
         return data*coef 
@@ -129,7 +128,6 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
         return data*coef, outunit 
 
 
-#@decorators.pdgeneral(convert_out=True)
 def convert_cols(data, guide, units, inplace=False):
     ''' 
     Converts data from one unit to the other 

@@ -251,7 +251,9 @@ def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=Fa
     #-----------
     # We calculate the water vapor partial pressure
     p_h2o = data[ defs.h2o_mass_density ] * R_h2o * theta
-    p_h2o_unit = (units[ defs.h2o_mass_density ]*R_spec_unit*theta_unit).to('kPa')
+    p_h2o_unit = units[ defs.h2o_mass_density ]*R_spec_unit*theta_unit
+    #pv, pvu = algs.multiply([ data[defs.h2o_mass_density], R_h2o, theta ], [ units[defs.h2o_mass_density], R_spec_unit, theta_unit ])
+    #print(p_h2o, p_h2o_unit)
     #-----------
 
     #-----------
@@ -262,7 +264,8 @@ def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=Fa
     #-----------
     # We calculate dry air mass density
     data[ defs.dry_air_mass_density ] = p_dry/(R_dry*theta)
-    outunits[ defs.dry_air_mass_density ] = (p_dry_unit/(R_spec_unit*theta_unit)).to('kg/m**3')
+    outunits[ defs.dry_air_mass_density ] = p_dry_unit/(R_spec_unit*theta_unit)
+    data = data.convert_cols({defs.dry_air_mass_density : 'kg/m**3'}, outunits, inplace=True)
     #-----------
 
     #-----------

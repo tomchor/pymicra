@@ -94,7 +94,6 @@ class fileConfig(object):
         Guesses what are the columns that contain the dates by searching
         for percentage signs in them
         """
-
         if self.date_cols:
             self.date_col_names = [ self.variables[ idx ] for idx in self.date_cols ]
         else:

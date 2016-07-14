@@ -128,7 +128,8 @@ def preProcess(data, units, notation=None, use_means=False,
             print("Can't calculate it. Dry air mass density not present")
         print('Calculating dry_air molar_density = rho_dry / dry_air_molar_mass ... ', end='')
         data.loc[:, defs.dry_air_molar_density ] = data[ defs.dry_air_mass_density ]/constants.molar_mass['dry']
-        units.update({ defs.dry_air_molar_density : (units[ defs.dry_air_mass_density ]/molar_mass_unit).to_base_units() })
+        units.update({ defs.dry_air_molar_density : units[ defs.dry_air_mass_density ]/molar_mass_unit })
+        data = data.convert_cols({defs.dry_air_molar_density:'mole/m**3'}, units, inplace=True)
         print('Done!')
     #---------
  
