@@ -10,6 +10,7 @@ TO DO LIST:
 * ADD FOOTPRINT CALCULATION?
 """
 
+
 def theta_from_theta_s(data, units, notation=None, return_df=True):
     """
     From Schotanus, Nieuwstadt, de Bruin; DOI 10.1007/BF00164332
@@ -82,11 +83,16 @@ def theta_std_from_theta_v_fluc(data, units, notation=None, return_df=True):
 
     denom = (1. + 0.61*data[ defs.mean_specific_humidity ])**2.
     num1 = data[ defs.virtual_temp ]**2.
+
+    if defs.mean_thermodyn_temp in data.columns:
+        theta_mean = data[ defs.mean_thermodyn_temp ]
+    else:
+        theta_mean = data[ defs.thermodyn_temp ].mean()
+
     num2 = 2.*0.61*theta_mean*np.nanmean(theta_v * q)
     num3 = ((0.61*theta_mean)**2.) * np.nanmean(q*q)
     var = (num1 - num2 + num3)/denom
     return np.sqrt(var)
-
 
 
 
@@ -130,6 +136,7 @@ def ppxv2density(ser, T, p, units, solute=None):
     out, unit = algs.convert_to(out, unit, 'kg/m**3')
     units.update({solute:unit})
     return out, units
+
 
 def airDensity_from_theta_v(data, units, notation=None, inplace=True, use_means=False):
     """
@@ -418,32 +425,8 @@ def perfGas(p=None, rho=None, R=None, T=None, gas=None):
     return
 
 
-def wetAirDens(p=None, T=None, q=None):
-    """
-    From R. S. Davis, Equation for the Determination of the Density of Moist Air (1981/91).
-    Available at http://www.nist.gov/calibrations/upload/metv29i1p67-2.pdf
-    """
-    from constants import R_spec
 
-    R_dry=R_spec['dry']
-    R_h2o=R_spec['h2o']
-    rho_wet=(p/(R_dry*T)) * (1. - q*(1. - R_dry/R_h2o))
-    return rho_wet
-
-
-def virtualTemp(T, total_pres, water_pres):
-    """
-    Gets virtual temperature from thermodynamic temperature, total pressure and water vapor pressure
-    mu=R_dry/R_water_vapor is approx 0.622
-    """
-    from constants import R_spec
-
-    mu = R_spec['dry']/R_spec['h2o']
-    virt_temp = T /(1. -(water_pres/total_pres)*(1.-mu))
-    return virt_temp
-
-
-def R_humidAir(q):
+def R_moistAir(q):
     """
     Calculates the gas constant for umid air from the specific humidity q
 
@@ -458,6 +441,7 @@ def R_humidAir(q):
         the specific gas constant for humid air in J/(g*K)
     """
     from constants import R_spec
+
     return q* R_spec['h2o'] + (1.0 - q)*R_spec['dry_air']
 
 
