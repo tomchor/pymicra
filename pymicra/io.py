@@ -98,6 +98,9 @@ def readDataFiles(flist, verbose=0, **kwargs):
     return data
 
 
+def Dataset(*args, **kwargs):
+    return timeSeries(*args, **kwargs)
+
 
 def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
         read_data_kw={}, parse_dates_kw={}, clean_dates=True, return_units=True, only_named_cols=True):

@@ -203,7 +203,7 @@ class Notation(object):
     quadrature = 'Qu_%s_%s'
 
     @_decors.autoassign
-    def __init__(self, **kwargs):
+    def __init__(self, solutes=['h2o', 'co2', 'ch4', 'o3', 'n2o'], **kwargs):
         """
         When initialized, calls the build method to build the full notation
         """
@@ -227,6 +227,8 @@ class Notation(object):
         self.co2='co2'
         self.ch4='ch4'
         self.o3 = 'o3'
+        self.n2o='n2o'
+
         self.moist_air = 'air'
         self.dry_air   = 'dry'
     
@@ -245,8 +247,9 @@ class Notation(object):
         This useful method builds the full notation based on the base notation
         """
 
-        dic = self.__dict__
-        for subst in ['h2o', 'co2', 'ch4', 'o3', 'moist_air', 'dry_air']:
+        #-------------
+        # Iterates over every "air" variable
+        for subst in ['h2o', 'co2', 'ch4', 'o3', 'n2o', 'moist_air', 'dry_air']:
             for mode, comp in zip(['', 'mean_' ], ['', 'self.mean %']):
                 exec('self.{1}{0}_mass_density = {2} self.mass_density % self.{0}'.format(subst, mode, comp))
                 exec('self.{1}{0}_molar_density = {2} self.molar_density % self.{0}'.format(subst, mode, comp))
@@ -263,10 +266,12 @@ class Notation(object):
                 exec('self.{0}_molar_mixing_ratio_{1} = self.{1} % self.{0}_molar_mixing_ratio'.format(subst, mode))
                 exec('self.{0}_mass_concentration_{1} = self.{1} % self.{0}_mass_concentration'.format(subst, mode))
                 exec('self.{0}_molar_concentration_{1} = self.{1} % self.{0}_molar_concentration'.format(subst, mode))
+        #-------------
     
 
 
-        for subst in ['co2', 'ch4', 'o3']:
+        dic = self.__dict__
+        for subst in ['co2', 'ch4', 'o3', 'n2o']:
             dic['%s_flux' % subst] = self.flux_of % subst
 
         substances = ['u', 'v', 'w', 'thermodynamic_temperature', 'virtual_temperature', 
@@ -277,7 +282,10 @@ class Notation(object):
             exec('self.{0}_star = self.star % self.{0}'.format(subst))
             exec('self.{0}_std = self.std % self.{0}'.format(subst))
 
+        #-------------
+        # Here we apply the aliases on the attributes to make it easier to write some long names
         self._apply_aliases()
+        #-------------
 
 
     def _apply_aliases(self):
@@ -298,6 +306,9 @@ class Notation(object):
 
 
     def __str__(self):
+        """
+        Currently displays Notations as a very long pandas.Series
+        """
         import pandas as pd
         pd.options.display.max_rows=9999
         string = pd.Series(self.__dict__).__str__()

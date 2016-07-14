@@ -2,6 +2,7 @@
 """
 """
 from . import decorators as _decors
+import pandas as _pd
 
 #---------------
 # Creates a method to write to a unitsCsv
@@ -32,8 +33,7 @@ def _to_unitsCsv(self, units, filename, **kwargs):
     data.to_csv(filename, **kwargs)
     return
 
-import pandas as pd
-pd.DataFrame.to_unitsCsv = _to_unitsCsv
+_pd.DataFrame.to_unitsCsv = _to_unitsCsv
 #---------------
 
 
@@ -71,8 +71,7 @@ def _bulk_corr(self):
     for idx in out.index:
         out.loc[idx, :] = out.loc[idx, :]/np.sqrt(cov.loc[idx, idx])
     return out
-import pandas as pd
-pd.DataFrame.bulk_corr = _bulk_corr
+_pd.DataFrame.bulk_corr = _bulk_corr
 #----------
 
 
@@ -111,8 +110,8 @@ def binwrapper(self, clean_index=True, **kwargs):
         return out.iloc[:, 0]
     else:
         return out
-pd.DataFrame.binned=binwrapper
-pd.Series.binned=binwrapper
+_pd.DataFrame.binned=binwrapper
+_pd.Series.binned=binwrapper
 #---------------
 
 #--------
@@ -203,7 +202,7 @@ def _xplot(self, xcol, reverse_x=False, return_ax=False,
         return axes
     else:
         return
-pd.DataFrame.xplot = _xplot
+_pd.DataFrame.xplot = _xplot
 #--------
 
 
@@ -256,27 +255,26 @@ def _polyfit(self, degree=1, rule=None):
     #else:
     #    return out
     return out
-pd.DataFrame.polyfit = _polyfit
-pd.Series.polyfit = _polyfit
+_pd.DataFrame.polyfit = _polyfit
+_pd.Series.polyfit = _polyfit
 #---------
 
 #---------
 # Detrend and trend methods for Series and DataFrames
 from .data import detrend
-pd.DataFrame.detrend = detrend
-pd.Series.detrend  = detrend
+_pd.DataFrame.detrend = detrend
+_pd.Series.detrend  = detrend
 
 from .data import trend
-pd.DataFrame.trend = trend
-pd.Series.trend  = trend
+_pd.DataFrame.trend = trend
+_pd.Series.trend  = trend
 #---------
 
 
 #---------
 # Define convert_cols method here
 from . import algs as _algs
-pd.DataFrame.convert_cols = _algs.convert_cols
-pd.Series.convert_indexes = _algs.convert_indexes
+_pd.DataFrame.convert_cols = _algs.convert_cols
+_pd.Series.convert_indexes = _algs.convert_indexes
 #---------
 
-del pd
