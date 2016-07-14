@@ -105,12 +105,13 @@ class fileConfig(object):
 
     def check_consistency(self):
         """
-        Checks consistency of data
+        Checks consistency of fileConfig
         Currently only checks every key of self.units dictionary agaisnt values of variables dict.
         """
         for key in self.units.keys():
             if key not in self.variables.values():
                 print('fileConfig WARNING!:\n    {} is defined in "units" but not defined in "variables"!'.format(key))
+
 
     def __str__(self):
         return '<pymicra.fileConfig>\n{}'.format(self.description)
