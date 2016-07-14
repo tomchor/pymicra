@@ -98,7 +98,7 @@ def readDataFiles(flist, verbose=0, **kwargs):
     return data
 
 
-def Dataset(*args, **kwargs):
+def dataset(*args, **kwargs):
     return timeSeries(*args, **kwargs)
 
 

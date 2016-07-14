@@ -86,6 +86,7 @@ class fileConfig(object):
         #------------------
 
         self.get_date_cols()
+        self.check_consistency()
 
 
     def get_date_cols(self):
@@ -101,6 +102,15 @@ class fileConfig(object):
             self.date_col_names = date_cols.values()
             self.date_cols = date_cols.keys()
 
+
+    def check_consistency(self):
+        """
+        Checks consistency of data
+        Currently only checks every key of self.units dictionary agaisnt values of variables dict.
+        """
+        for key in self.units.keys():
+            if key not in self.variables.values():
+                print('fileConfig WARNING!:\n    {} is defined in "units" but not defined in "variables"!'.format(key))
 
     def __str__(self):
         return '<pymicra.fileConfig>\n{}'.format(self.description)

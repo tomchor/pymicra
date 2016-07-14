@@ -230,8 +230,7 @@ def inverse_normal_cdf(mu, sigma):
 
 
 def parseDates(data, dataloggerConfig=None,
-        date_col_names=None, connector='-', first_time_skip=0,
-        clean=True, correct_fracs=None, complete_zeroes=False, verbose=False):
+        date_col_names=None, clean=True, correct_fracs=None, complete_zeroes=False, verbose=False):
     """
     Author: Tomas Chor
     date: 2015-08-10
@@ -265,7 +264,7 @@ def parseDates(data, dataloggerConfig=None,
     if dataloggerConfig:
         date_col_names = dataloggerConfig.date_col_names
         connector = dataloggerConfig.date_connector
-        first_time_skip = dataloggerConfig.first_time_skip
+        first_time_skip = 0#dataloggerConfig.first_time_skip
     elif date_col_names==None:
         raise NameError('Must provide either dataloggerConfig or date_col_names')
     #------------------------------------

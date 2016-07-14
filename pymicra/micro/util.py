@@ -514,7 +514,7 @@ def rotateCoor(data, notation=None, how='2d'):
     from .. import data as pmdata
 
     if how=='2d':
-        return pmdata.rotate2D(data, notation=notation, how=how)
+        return pmdata.rotate2D(data, notation=notation)
     else:
         return None
 

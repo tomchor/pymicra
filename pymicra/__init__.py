@@ -44,3 +44,9 @@ import methods
 __version__ = '0.2.0'
 
 notation = Notation()
+
+#---------
+# Some quick pandas display configurations
+import pandas as _pd
+_pd.options.display.max_rows=30
+_pd.options.display.width=130
