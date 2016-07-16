@@ -26,7 +26,7 @@ def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
     """
     return obukhovLen(theta_v_star, theta_v_mean, u_star, g=g)
 
-def obukhovLen(theta_v_star, theta_v_mean, u_star, g=None):
+def obukhovLen(theta_v_star, theta_v_mean, u_star, units=None):
     """
     Calculates the Monin-Obukhov Length
     according to:
@@ -45,8 +45,7 @@ def obukhovLen(theta_v_star, theta_v_mean, u_star, g=None):
     """
     from .. import constants
 
-    if g==None:
-        g = constants.gravity
+    g = constants.gravity
     kappa = constants.kappa
     Lm = - ( (u_star**2) * theta_v_mean) / (kappa *g* theta_v_star)
     return Lm
@@ -154,6 +153,8 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None,
 
     out[ defs.thermodyn_temp_star ] = cov.loc[theta_fluc, w_fluc] / u_star
     out[ defs.h2o_molar_density_star ] = cov.loc[ mrho_h2o_fluc, w_fluc ] / u_star
+
+    out[ defs.specific_humidity_star ] = cov.loc[ q_fluc, w_fluc ] / u_star
     print('done!')
     #---------
 
@@ -164,6 +165,7 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None,
     outunits[ defs.virtual_temp_star ]   = units[ theta_v_fluc ]
     outunits[ defs.thermodyn_temp_star ] = units[ theta_v_fluc ]
     outunits[ defs.h2o_molar_density_star ] = units[ mrho_h2o_fluc ]
+    outunits[ defs.specific_humidity_star ] = units[ q_fluc ]
     #---------
 
     #---------
@@ -176,9 +178,18 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None,
     #---------
 
     #---------
+    # We check for the mean virtual temperature
+    if not theta_v_mean:
+        if defs.mean_virtual_temperature in data.columns:
+            theta_v_mean = data[ defs.mean_virtual_temperature ].mean()
+        else:
+            theta_v_mean = data[ defs.virtual_temperature ].mean()
+    #---------
+
+    #---------
     # Now we calculate the obukhov length and the similarity variable
     print('Calculating Obukhov length and stability parameter ... ', end='')
-    Lm = obukhovLen(theta_v_star, theta_v_mean, u_star, g=constants.gravity)
+    Lm = obukhovLen(theta_v_star, theta_v_mean, u_star)
     out[ defs.obukhov_length ]      = Lm
     out[ defs.stability_parameter ] = stabilityParam(Lm, siteConf)
 

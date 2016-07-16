@@ -49,4 +49,4 @@ notation = Notation()
 # Some quick pandas display configurations
 import pandas as _pd
 _pd.options.display.max_rows=30
-_pd.options.display.width=130
+_pd.options.display.width=160
