@@ -138,7 +138,7 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None,
         print('done!')
         #-----------
     #---------
-       
+
 
     #---------
     # Now to calculate the characteristic lengths, scales and etc

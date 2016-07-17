@@ -81,7 +81,6 @@ def preProcess(data, units, notation=None, use_means=False,
         data.loc[:, defs.h2o_mass_density ] = data.loc[:, defs.h2o_molar_density ]*Mh2o
         units.update({ defs.h2o_mass_density : units[ defs.h2o_molar_density ]*molar_mass_unit })
         print("Done!")
-    #data.loc[:, defs.h2o_mass_density] = algs.convert_to(data[ defs.h2o_mass_density ], units, 'kg/m**3', inplace=True, key=defs.h2o_mass_density)
     data = data.convert_cols({defs.h2o_mass_density:'kg/m**3'}, units, inplace=True)
     #---------
 
@@ -371,7 +370,6 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
         print('Applying WPL correction for water vapor flux ... ', end='\n')
-        mu = constants.R_spec['h2o']/constants.R_spec['dry']
         mrho_h2o_mean = data[ defs.h2o_molar_density ].mean()
 
         #---------
@@ -406,7 +404,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         unt3 = aux3/aux3.magnitude
         aux3 = aux3.magnitude
 
-        out.loc[ defs.water_vapor_flux ] = (1. +mu*mr_h2o)* aux3
+        out.loc[ defs.water_vapor_flux ] = (1. + mr_h2o)* aux3
         fluxunits[ defs.water_vapor_flux ] = unt3
         #---------
 
@@ -430,7 +428,6 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         #---------
         # NEEDS IMPROVEMENT
         for sol_flux, solutef, solute in zip(solutefluxes, solutesf, solutes):
-
             print('Applying WPL correction for {} ... '.format(sol_flux), end='\n')
             sol_molar_density_mean    =   data[ defs.molar_density % solute ].mean()
 
@@ -453,10 +450,10 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
             aux1 = out[ defs.flux_of % solute ]
             unt1 = fluxunits[ defs.flux_of % solute ]
 
-            aux2 = sol_molar_density_mean * (1. + mu*mr_h2o) * (cov[theta_fluc][w_fluc])/theta_mean
+            aux2 = sol_molar_density_mean * (1. + mr_h2o) * (cov[theta_fluc][w_fluc])/theta_mean
             unt2 = units[ defs.molar_density % solute ] * units[ w_fluc ]
 
-            aux3 = mu * mr_sol* E_orig
+            aux3 = mr_sol* E_orig
             unt3 = mr_sol_unit * E_orig_unit
  
             aux4 = aux1*unt1 + aux2*unt2 + aux3*unt3
