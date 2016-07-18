@@ -327,7 +327,10 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     #---------
     # First we construct the covariance matrix (slower but more readable than doing it separately)
     # maybe figure out later a way that is both faster and more readable
-    cov = data[[u_fluc, w_fluc, theta_v_fluc, mrho_h2o_fluc, rho_h2o_fluc, theta_fluc] + solutesf ].cov()
+    if get_turbulent_scales:
+        cov = data[[u_fluc, w_fluc, theta_v_fluc, mrho_h2o_fluc, rho_h2o_fluc, theta_fluc, q_fluc] + solutesf ].cov()
+    else:
+        cov = data[[u_fluc, w_fluc, theta_v_fluc, mrho_h2o_fluc, rho_h2o_fluc, theta_fluc] + solutesf ].cov()
     #---------
 
     #---------
@@ -486,7 +489,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         assert site_config is not None, 'Must provide site_config keyword if get_turbulent_scales==True'
         from ..micro import turbulentScales
         theta_v_mean = data[ defs.virtual_temp ].mean()
-        scales, scaleunits = turbulentScales(cov, site_config, units, notation=defs, inplace=False, 
+        scales, scaleunits = turbulentScales(wplcov, site_config, units, notation=defs, inplace=False, 
                                 solutes=solutes, theta_v_mean=theta_v_mean, output_as_df=False)
         out = pd.concat([out, scales])
         fluxunits.update(scaleunits)
