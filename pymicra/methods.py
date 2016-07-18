@@ -175,7 +175,7 @@ def _xplot(self, xcol, reverse_x=False, return_ax=False,
 
     #-----------
     # Try to display letters in the latex mathematical environment
-    if latexfy:
+    if latexify:
 	df.columns = algs.latexify(df.columns)
         xcol = algs.latexify([xcol])[0]
     #-----------
