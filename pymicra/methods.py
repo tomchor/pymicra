@@ -35,6 +35,33 @@ def _to_unitsCsv(self, units, filename, **kwargs):
 _pd.DataFrame.to_unitsCsv = _to_unitsCsv
 #---------------
 
+#---------------
+def _with_units(data, units):
+    """
+    Wrapper around toUnitsCsv to create a method to print the contents of
+    a dataframe plus its units into a unitsCsv file.
+    
+    Parameters:
+    -----------
+    self: dataframe
+        dataframe to write
+    units: dict
+        dictionary with the names of each column and their unit
+    """
+    import pandas as pd
+
+    data = data.copy()
+    cols = data.columns
+    unts = [ '<{}>'.format(units[c]) if c in units.keys() else '<?>' for c in cols ]
+    columns = pd.MultiIndex.from_tuples(zip(cols, unts))
+    data.columns = columns
+    return data
+_pd.DataFrame.with_units = _with_units
+#---------------
+
+from .io import _get_printable
+_pd.DataFrame.printable = _get_printable
+
 
 #---------------
 def _as_dlc(self, outfile, dlc):

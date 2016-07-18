@@ -1,0 +1,9 @@
+description         = "Configurations for LICOR's exprimental landfill site"
+
+latitude=40.91210175
+longitude=-96.64060211
+
+measurement_height    = 2.75  # m
+canopy_height       = 0.0   # m
+displacement_height = 0.0   # m
+roughness_length    = .01   # m

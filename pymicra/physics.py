@@ -165,10 +165,11 @@ def airDensity_from_theta_v(data, units, notation=None, inplace=True, use_means=
     else:
         return data, units
 
+
 def dryAirDensity_from_p(data, units, notation=None, inplace=True):
     """
     Calculates dry air density
-    NEEDS IMPROVEMENT REGARDING HANDLING ON UNITS
+    NEEDS IMPROVEMENT REGARDING HANDLING OF UNITS
     """
     from . import algs
     from . import constants

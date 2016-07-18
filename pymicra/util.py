@@ -485,7 +485,7 @@ def qcontrol(files, datalogger_config,
     return control
  
 
-def printUnit(string, mode='L', trim=True, greek=True):
+def _printUnit(string, mode='L', trim=True, greek=True):
     """
     Returns string formatted for LaTeX or other uses.
 
@@ -500,7 +500,7 @@ def printUnit(string, mode='L', trim=True, greek=True):
     """
     from . import ureg as ur
     ur.default_format=mode
-    u=ur[string]
+    u=string
     u='{:~L}'.format(u)
     if trim:
         u=u[3:].strip()
