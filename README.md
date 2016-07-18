@@ -13,9 +13,6 @@ Most required packages already come with python. However, packages that generall
 * Scipy
 * setuptools (for installation only)
 
-## License
-This package is licensed under GNU General Public License V3.0 (http://choosealicense.com/licenses/gpl-3.0/)
-
 ## Main Features
 Currently, this is a sum up of what Pymicra does:
 
