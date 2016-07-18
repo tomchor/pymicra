@@ -280,6 +280,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
 
     cp = constants.cp_dry
     lamb = constants.latent_heat_water
+    Mh2o = constants.molar_mass['h2o']
 
     defs = algs.get_notation(notation)
     defsdic = defs.__dict__
@@ -301,7 +302,9 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     theta_v_fluc    =   defs.virtual_temp_fluctuations
     q_fluc          =   defs.specific_humidity_fluctuations
     solutesf        = [ defsdic['%s_molar_density_fluctuations' % solute] for solute in solutes ]
-    solutefluxes    = [ defsdic[ '%s_flux' % solute ] for solute in solutes ]
+    solutefluxes    = [ defsdic['%s_flux' % solute] for solute in solutes ]
+    solutestars     = [ defsdic['%s_molar_density_star' % solute] for solute in solutes ]
+    concsolutestars = [ defsdic['%s_mass_concentration_star' % solute] for solute in solutes ]
     #---------
 
     #---------
@@ -327,10 +330,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     #---------
     # First we construct the covariance matrix (slower but more readable than doing it separately)
     # maybe figure out later a way that is both faster and more readable
-    if get_turbulent_scales:
-        cov = data[[u_fluc, w_fluc, theta_v_fluc, mrho_h2o_fluc, rho_h2o_fluc, theta_fluc, q_fluc] + solutesf ].cov()
-    else:
-        cov = data[[u_fluc, w_fluc, theta_v_fluc, mrho_h2o_fluc, rho_h2o_fluc, theta_fluc] + solutesf ].cov()
+    cov = data[[u_fluc, w_fluc, theta_v_fluc, mrho_h2o_fluc, rho_h2o_fluc, theta_fluc] + solutesf ].cov()
     #---------
 
     #---------
@@ -404,7 +404,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         unt2 = units[ defs.h2o_molar_density ] * units[ w_fluc ]
 
         aux3 = aux1*unt1 + aux2*unt2
-        unt3 = aux3/aux3.magnitude
+        unt3 = (aux3/aux3.magnitude).u
         aux3 = aux3.magnitude
 
         out.loc[ defs.water_vapor_flux ] = (1. + mr_h2o)* aux3
@@ -460,7 +460,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
             unt3 = mr_sol_unit * E_orig_unit
  
             aux4 = aux1*unt1 + aux2*unt2 + aux3*unt3
-            unt4 = aux4/aux4.magnitude
+            unt4 = (aux4/aux4.magnitude).u
             aux4 = aux4.magnitude
 
             out[ sol_flux ] = aux4
@@ -491,14 +491,32 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         theta_v_mean = data[ defs.virtual_temp ].mean()
         scales, scaleunits = turbulentScales(wplcov, site_config, units, notation=defs, inplace=False, 
                                 solutes=solutes, theta_v_mean=theta_v_mean, output_as_df=False)
+
+        #-------
+        # Here we calculate q_star and solute_star with WPL
+        print('Calculating turbulent scales of mass concentration ... ', end='')
+        scales[ defs.specific_humidity_star ] = scales[ defs.h2o_molar_density_star ]*Mh2o / rho_air_mean
+        scaleunits[ defs.specific_humidity_star ] = scaleunits[ defs.h2o_molar_density_star ]*cunits['molar_mass'] / units[defs.moist_air_mass_density]
+        for solute, sol_star, concsol_star in zip(solutes, solutestars, concsolutestars):
+            Msol = constants.molar_mass[solute]
+            scales[ concsol_star ] = scales[ sol_star ] * Msol / rho_air_mean
+            scaleunits[ concsol_star ] = scaleunits[ sol_star ] * cunits['molar_mass'] / units[defs.moist_air_mass_density]
+
+        #-------
+
+        toconvert = { star:'dimensionless' for star in ([ defs.specific_humidity_star]+concsolutestars) }
+        scales = scales.convert_indexes(toconvert, scaleunits, inplace=True)
+
         out = pd.concat([out, scales])
         fluxunits.update(scaleunits)
+        print('done!')
     #------------
 
     #------------
     # Crate a one-row dataframe if output_as_df is True
     if output_as_df:
         out = out.to_frame().T
+        out.index = [idx0]
     #------------
 
     print('Done with Eddy Covariance.\n')

@@ -96,8 +96,9 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None,
     theta_fluc      =   defs.thermodyn_temp_fluctuations
     theta_v_fluc    =   defs.virtual_temp_fluctuations
     q_fluc          =   defs.specific_humidity_fluctuations
-    solutesf        = [ defs.molar_density % defs.fluctuations % solute for solute in solutes ]
-    solutestars     = [ defsdic[ '%s_molar_density_star' % solute ] for solute in solutes ]
+    solutesf        = [ defsdic['%s_molar_density_fluctuations' % solute] for solute in solutes ]
+    solutestars     = [ defsdic['%s_molar_density_star' % solute] for solute in solutes ]
+    concsolutesf    = [ defsdic['%s_mass_concentration_fluctuations' % solute] for solute in solutes ]
     #---------
 
     #---------
@@ -154,7 +155,7 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None,
     out[ defs.thermodyn_temp_star ] = cov.loc[theta_fluc, w_fluc] / u_star
     out[ defs.h2o_molar_density_star ] = cov.loc[ mrho_h2o_fluc, w_fluc ] / u_star
 
-    out[ defs.specific_humidity_star ] = cov.loc[ q_fluc, w_fluc ] / u_star
+    #out[ defs.specific_humidity_star ] = cov.loc[ q_fluc, w_fluc ] / u_star
     print('done!')
     #---------
 
@@ -165,7 +166,7 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None,
     outunits[ defs.virtual_temp_star ]   = units[ theta_v_fluc ]
     outunits[ defs.thermodyn_temp_star ] = units[ theta_v_fluc ]
     outunits[ defs.h2o_molar_density_star ] = units[ mrho_h2o_fluc ]
-    outunits[ defs.specific_humidity_star ] = units[ q_fluc ]
+    #outunits[ defs.specific_humidity_star ] = units[ q_fluc ]
     #---------
 
     #---------
@@ -194,7 +195,7 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None,
     out[ defs.stability_parameter ] = stabilityParam(Lm, siteConf)
 
     outunits[ defs.obukhov_length ] = (outunits[ defs.u_star ]**2.)/cunits[ 'gravity' ]
-    outunits[ defs.stability_parameter ] = ureg['meter']/outunits[ defs.obukhov_length ]
+    outunits[ defs.stability_parameter ] = ureg.meter/outunits[ defs.obukhov_length ]
     print('done!')
     #---------
 
@@ -206,7 +207,6 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None,
 
     #---------
     # Finally we construct the output dataframe
-    print()
     if inplace:
         units.update(outunits)
         return out

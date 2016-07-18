@@ -26,13 +26,12 @@ def _to_unitsCsv(self, units, filename, **kwargs):
 
     data = self.copy()
     cols = data.columns
-    unts = [ str(units[c]) if c in units.keys() else ' ' for c in cols ]
+    unts = [ str(units[c]) if c in units.keys() else '' for c in cols ]
     columns = pd.MultiIndex.from_tuples(zip(cols, unts))
     data = data.copy()
     data.columns = columns
     data.to_csv(filename, **kwargs)
     return
-
 _pd.DataFrame.to_unitsCsv = _to_unitsCsv
 #---------------
 

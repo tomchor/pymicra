@@ -64,57 +64,52 @@ def theta_from_theta_v(data, units, notation=None, return_df=True):
 
 
 
-def theta_std_from_theta_v_fluc(data, units, notation=None, return_df=True):
+def theta_std_from_theta_v_fluc(data, units, notation=None):
     """
     Derived from theta_v = theta(1 + 0.61 q)
 
     Parameters:
     -----------
-    theta_v: array
-    q: array
-    theta_v_mean: float
-    q_mean: float
-    theta_mean: float
+    data: pandas.dataframe
+        dataframe with q, q', theta, theta_v'
+    units: dict
+        units dictionary
+    notation: pymicra.Notation
+        Notation object or None
     """
+    import numpy as np
     from . import algs
 
     defs = algs.get_notation(notation)
     data = data.copy()
 
-    denom = (1. + 0.61*data[ defs.mean_specific_humidity ])**2.
-    num1 = data[ defs.virtual_temp ]**2.
+    #-----------
+    # Consider the existence of mean q
+    if defs.mean_specific_humidity in data.columns:
+        q_mean = data[ defs.mean_specific_humidity ]
+    else:
+        q_mean = data[ defs.specific_humidity ].mean()
+    #-----------
 
+    #-----------
+    # Consider existence of mean theta
     if defs.mean_thermodyn_temp in data.columns:
         theta_mean = data[ defs.mean_thermodyn_temp ]
     else:
         theta_mean = data[ defs.thermodyn_temp ].mean()
+    #-----------
 
-    num2 = 2.*0.61*theta_mean*np.nanmean(theta_v * q)
-    num3 = ((0.61*theta_mean)**2.) * np.nanmean(q*q)
-    var = (num1 - num2 + num3)/denom
-    return np.sqrt(var)
-
-
-
-def theta_std_from_theta_v(theta_v, q, theta_v_mean, q_mean, theta_mean):
-    """
-    Derived from theta_v = theta(1 + 0.61 q)
-
-    Parameters:
-    -----------
-    theta_v: array
-    q: array
-    theta_v_mean: float
-    q_mean: float
-    theta_mean: float
-    """
-    import numpy as np
     denom = (1. + 0.61*q_mean)**2.
-    num1 = np.nanmean(theta_v*theta_v) 
-    num2 = 2.*0.61*theta_mean*np.nanmean(theta_v * q)
-    num3 = ((0.61*theta_mean)**2.) * np.nanmean(q*q)
+
+    num1 = (data[ defs.virtual_temp_fluctuations ]**2.).mean()
+    num2 = 2. * 0.61 * theta_mean * (data[ defs.virtual_temp_fluctuations] * data[ defs.specific_humidity_fluctuations ]).mean()
+    num3 = ((0.61*theta_mean)**2.) * ( data[ defs.specific_humidity_fluctuations ]**2.).mean()
+
     var = (num1 - num2 + num3)/denom
-    return np.sqrt(var)
+    theta_fluc = np.sqrt(var)
+
+    return theta_fluc
+
 
 
 def ppxv2density(ser, T, p, units, solute=None):
