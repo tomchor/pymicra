@@ -432,17 +432,17 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         # NEEDS IMPROVEMENT
         for sol_flux, solutef, solute in zip(solutefluxes, solutesf, solutes):
             print('Applying WPL correction for {} ... '.format(sol_flux), end='\n')
-            sol_molar_density_mean    =   data[ defs.molar_density % solute ].mean()
+            sol_molar_density_mean    =   data[ defsdic['%s_molar_density' % solute] ].mean()
 
             #---------
             # Obtaining solute mass mixing ratio
-            if defs.molar_mixing_ratio % solute in data.columns:
-                mr_sol = data[ defs.molar_mixing_ratio % solute ].mean()
-                mr_sol_unit = units[ defs.molar_mixing_ratio % solute ]
+            if defsdic['%s_molar_mixing_ratio' % solute] in data.columns:
+                mr_sol = data[ defsdic['%s_molar_mixing_ratio' % solute] ].mean()
+                mr_sol_unit = units[ defsdic['%s_molar_mixing_ratio' % solute] ]
 
             elif defs.dry_air_molar_density in data.columns:
                 mr_sol = sol_molar_density_mean/data[ defs.dry_air_molar_density ]
-                mr_sol_unit = units[ defs.molar_density % solute ] / units[ defs.dry_air_molar_density ]
+                mr_sol_unit = units[ defsdic['%s_molar_density' % solute] ] / units[ defs.dry_air_molar_density ]
 
             else:
                 raise TypeError('Either water mixing ratio should be provided, or dry air molar density')
@@ -450,11 +450,11 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
 
             #---------
             # Again, we calculate WPL little by little to make it easy to handle the units
-            aux1 = out[ defs.flux_of % solute ]
-            unt1 = fluxunits[ defs.flux_of % solute ]
+            aux1 = out[ sol_flux ]
+            unt1 = fluxunits[ sol_flux ]
 
             aux2 = sol_molar_density_mean * (1. + mr_h2o) * (cov[theta_fluc][w_fluc])/theta_mean
-            unt2 = units[ defs.molar_density % solute ] * units[ w_fluc ]
+            unt2 = units[ defsdic['%s_molar_density' % solute] ] * units[ w_fluc ]
 
             aux3 = mr_sol* E_orig
             unt3 = mr_sol_unit * E_orig_unit
@@ -490,7 +490,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         from ..micro import turbulentScales
         theta_v_mean = data[ defs.virtual_temp ].mean()
         scales, scaleunits = turbulentScales(wplcov, site_config, units, notation=defs, inplace=False, 
-                                solutes=solutes, theta_v_mean=theta_v_mean, output_as_df=False)
+                                solutes=solutes, theta_v_mean=theta_v_mean, theta_v_mean_unit=units[defs.virtual_temperature], output_as_df=False)
 
         #-------
         # Here we calculate q_star and solute_star with WPL

@@ -36,6 +36,7 @@ _pd.DataFrame.to_unitsCsv = _to_unitsCsv
 #---------------
 
 #---------------
+@_decors.pdgeneral(convert_out=False)
 def _with_units(data, units):
     """
     Wrapper around toUnitsCsv to create a method to print the contents of
@@ -57,6 +58,7 @@ def _with_units(data, units):
     data.columns = columns
     return data
 _pd.DataFrame.with_units = _with_units
+_pd.Series.with_units = _with_units
 #---------------
 
 from .io import _get_printable

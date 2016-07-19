@@ -169,6 +169,7 @@ def convert_cols(data, guide, units, inplace=False):
     else: 
         return data, guide 
 
+
 def convert_indexes(data, guide, units, inplace=False):
     ''' 
     Converts data from one unit to the other 

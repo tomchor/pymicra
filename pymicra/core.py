@@ -458,12 +458,26 @@ class dataloggerConfig(object):
     __repr__ = __str__
 
 
-class Dataset(object):
+import pandas as _pd
+class myData(_pd.DataFrame):
     """
-    Attempt to create a Dataset object
+    Attempt to create a myData object
     """
     def __init__(self, df):
-        self = df.copy()
+        df = df.copy()
+        print(type(df))
+        self.df = df
+        self = df
+
+    def as_df(self):
+        import pandas as pd
+        return self.copy()
+
+    def __repr__(self):
+        return _pd.DataFrame.__repr__(self)
+
+    def __str__(self):
+        return _pd.DataFrame.__str__(self)
 
     def __div__(self):
         import pandas as pd
