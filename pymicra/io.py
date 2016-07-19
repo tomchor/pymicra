@@ -253,7 +253,7 @@ def read_site(sitefile):
     #--------
 
 
-def readUnitsCsv(filename, names=0, units=1, **kwargs):
+def readUnitsCsv(filename, **kwargs):
     """
     Reads a csv file in which the first line is the name of the variables
     and the second line contains the units
@@ -262,10 +262,8 @@ def readUnitsCsv(filename, names=0, units=1, **kwargs):
     -----------
     filename: string
         path of the csv file to read
-    names: int
-        line number (starting from zero) that has the variables' names
-    units: int
-        line number (starting from zero) that has the variables' units
+    **kwargs:
+        to be passed to pandas.read_csv
 
     Returns:
     --------
@@ -275,11 +273,19 @@ def readUnitsCsv(filename, names=0, units=1, **kwargs):
         dictionary with the variable names as keys and the units as values
     """
     import pandas as pd
+    from .algs import parseUnits
 
-    df=pd.read_csv(filename, header=[names, units], **kwargs)
-    cols,units=zip(*df.columns)
-    unitsdic={ k:v for k,v in zip(cols,units) }
-    df.columns=cols
+    #------
+    # Reads units and parses them
+    units = pd.read_csv(filename, nrows=1, skiprows=0, squeeze=False, header=0, index_col=None).iloc[0]
+    unitsdict = units.dropna().to_dict()
+    unitsdic = parseUnits(unitsdict)
+    #------
+
+    #------
+    # Reads the rest of the csv ignoring the units
+    df = pd.read_csv(filename, header=0, skiprows=[1,2], **kwargs)
+    #------
     return df, unitsdic
 
 
