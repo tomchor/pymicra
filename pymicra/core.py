@@ -472,8 +472,8 @@ class myData(object):
     #    import pandas as pd
     #    return self.copy()
 
-    #def __repr__(self):
-    #    return _pd.DataFrame.__repr__(self)
+    def __repr__(self):
+        return self.df.__repr__()
 
     #def __str__(self):
     #    return _pd.DataFrame.__str__(self)
