@@ -481,7 +481,7 @@ class myData(object):
         return self.df.__loc__()
 
     def __repr__(self):
-        return self.df.with_units(self.dic).__repr__()+self.watermaek
+        return self.df.with_units(self.dic).__repr__()+self.watermark
 
     def __str__(self):
         return self.df.with_units(self.dic).__str__()+self.watermark
