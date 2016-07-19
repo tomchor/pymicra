@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import print_function
-__version__ = open('pymicra/version', 'rt').read().strip()
+import os
+vfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),'pymicra/version')
+__version__ = open(vfile, 'rt').read().strip()
 
 """
 Python Micrometeorological Analysis tool - Pymicra

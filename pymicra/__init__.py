@@ -12,7 +12,9 @@
  It is recommended that pint is installed for better handling the
  units inside the functions.
 """
-__version__ = open('version', 'rt').read().strip()
+import os
+vfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),'version')
+__version__ = open(vfile, 'rt').read().strip()
 
 #---------
 # Here we create a "global" unitregistry for pymicra

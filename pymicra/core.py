@@ -459,14 +459,13 @@ class dataloggerConfig(object):
 
 
 import pandas as _pd
-class myData(_pd.DataFrame):
+class myData(object):
     """
     Attempt to create a myData object
     """
     def __init__(self, df, dic):
-        df = df.copy()
-#        self.dic = dic
-        super(myData, self).__init__(df)
+        self.df = df.copy()
+        self.dic = dic
 #        self.df = df
 
     #def as_df(self):
