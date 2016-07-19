@@ -1,0 +1,3 @@
+Pandas==0.17.1
+Numpy
+pint==0.7.2

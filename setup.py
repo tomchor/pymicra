@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
-from pymicra.__init__ import __version__
+__version__ = open('pymicra/version', 'rt').read().strip()
+
 """
 Python Micrometeorological Analysis tool - Pymicra
 """
@@ -22,9 +23,10 @@ packages = find_packages()
 #-----------
 
 extra_kwargs={'install_requires' : dependencies}
+
 setup(name='pymicra',
       version = __version__,
-          description='A Python tool for Micrometeorological Analyses',
+      description='A Python tool for Micrometeorological Analyses',
       long_description=open('README.md').read(),
       url='https://github.com/tomchor/pymicra.git',
       author='Tomas Chor',
