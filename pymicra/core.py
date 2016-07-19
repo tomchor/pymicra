@@ -459,24 +459,32 @@ class dataloggerConfig(object):
 
 
 import pandas as _pd
+from . import algs as _algs
 class myData(object):
     """
     Attempt to create a myData object
     """
+    watermark = '\n<pymicra.Dataset>'
     def __init__(self, df, dic):
         self.df = df.copy()
         self.dic = dic
-#        self.df = df
 
-    #def as_df(self):
-    #    import pandas as pd
-    #    return self.copy()
+    def mean(self, notation=None):
+        defs = _algs.get_notation(notation)
+        self = self.df.copy()
+        return self.rename(columns=lambda x: defs.mean%x).mean()
+
+    def __getitem__(self, item):
+        return self.df.with_units(self.dic).__getitem__(item)
+
+    def loc(self):
+        return self.df.__loc__()
 
     def __repr__(self):
-        return self.df.__repr__()
+        return self.df.with_units(self.dic).__repr__()+self.watermaek
 
-    #def __str__(self):
-    #    return _pd.DataFrame.__str__(self)
+    def __str__(self):
+        return self.df.with_units(self.dic).__str__()+self.watermark
 
     #def __div__(self):
     #    import pandas as pd
