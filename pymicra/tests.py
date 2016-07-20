@@ -7,19 +7,19 @@ that fail the test.
 from . import algs
 
 def check_replaced(replaced, max_count=180):
-    '''
+    """
     Sums and checks if the number of replaced points is larger than the
     maximum accepted
-    '''
+    """
     valid = replaced < max_count
 
     return valid
 
 
 def check_nans(data, max_percent=0.1, replace_with='interpolation'):
-    '''
+    """
     Checks data for NaN values
-    ''' 
+    """ 
     from . import data as pmdata
     df = data.copy() 
     max_count = int(len(df)*max_percent/100.)
@@ -43,9 +43,9 @@ def check_nans(data, max_percent=0.1, replace_with='interpolation'):
 
 
 def check_maxdif(data, tables, detrend=True, detrend_kw={'how':'movingmean', 'window':900}):
-    '''
+    """
     Check the maximum and minimum differences between the fluctuations of a run.
-    '''
+    """
     from . import data as pmdata
     from matplotlib import pyplot as plt
 
@@ -61,10 +61,10 @@ def check_maxdif(data, tables, detrend=True, detrend_kw={'how':'movingmean', 'wi
 def check_stationarity(data, tables, detrend=False,
             detrend_kw={'how':'movingmean', 'window':900}, 
             trend=True, trend_kw={'how':'movingmedian', 'window':'1min'}):
-    '''
+    """
     Check difference between the maximum and minimum values of the run trend agaisnt an upper-limit.
     This aims to flag nonstationary runs
-    '''
+    """
     from . import data as pmdata
 
     #------------
@@ -94,7 +94,7 @@ def check_stationarity(data, tables, detrend=False,
 
 def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
             RAT_vars=None, RAT_points=50, RAT_significance=0.05):
-    '''
+    """
     Performs the Reverse Arrangement Test in each column of data
 
     Parameters:
@@ -115,7 +115,7 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
     --------
     valid: pd.Series
         True or False for each column. If True, column passed the test
-    '''
+    """
     import data as pmdata
 
     #-----------
@@ -141,7 +141,7 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
 
 
 def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_size='2min', falseverbose=False):
-    '''
+    """
     Checks dataframe for columns with too small of a standard deviation
 
     Parameters:
@@ -161,7 +161,7 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     --------
     valid: pandas.Series
         contatining True of False for each column. True means passed the test.
-    '''
+    """
     import data as pmdata
     import numpy as np
     import pandas as pd
@@ -197,7 +197,7 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
  
 
 def check_limits(data, tables, max_percent=1., replace_with='interpolation'):
-    '''
+    """
     Checks dataframe for lower and upper limits. If found, they are substituted by 
     the linear trend of the run. The number of faulty points is also checked for each
     column against the maximum percentage of accepted faults max_percent
@@ -218,7 +218,7 @@ def check_limits(data, tables, max_percent=1., replace_with='interpolation'):
         input data but with the faulty points substituted by the linear trend of the run.
     valid: pandas.Series
         True for the columns that passed this test, False for the columns that didn't.
-    '''
+    """
     from . import trend as pmtrend
     import numpy as np
     import algs
@@ -274,7 +274,7 @@ def check_spikes(data, chunk_size='2min',
                  cut_func = lambda x: (abs(x - x.mean()) > 5.*x.std()),
                  replace_with='interpolation',
                  max_percent=1.):
-    '''
+    """
     Applies spikes-check according to Vickers and Mahrt (1997)
 
     Parameters:
@@ -299,7 +299,7 @@ def check_spikes(data, chunk_size='2min',
         method to use when replacing spikes. Options are 'interpolation' or 'trend'.
     max_percent: float
         maximum percentage of spikes to allow.
-    '''
+    """
     import pandas as pd
     import algs
     import data as pmdata

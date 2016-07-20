@@ -1,7 +1,7 @@
 import pandas as pd
 
 #def _integrate_series(self, how='trapz', dateindex=False, **kwargs):
-#    '''
+#    """
 #    Numerically a given series.
 #
 #    Parameters:
@@ -19,7 +19,7 @@ import pandas as pd
 #    See http://docs.scipy.org/doc/scipy/reference/integrate.html for the method details.
 #    or the source code
 #    https://github.com/scipy/scipy/blob/master/scipy/integrate/quadrature.py
-#    '''
+#    """
 #    import numpy as np
 #    from scipy import integrate
 #
@@ -40,10 +40,10 @@ import pandas as pd
 
 #----------
 # Definition of the .integrate method for dataframes
-from .. import decorators
-@decorators.pdgeneral(convert_out=True)
+from .. import decorators as _decor
+@_decor.pdgeneral(convert_out=True)
 def _integrate_df(self, how='trapz', dateindex=False, **kwargs):
-    '''
+    """
     Numerically integrate a given dataframe
 
     Parameters:
@@ -63,7 +63,7 @@ def _integrate_df(self, how='trapz', dateindex=False, **kwargs):
     See http://docs.scipy.org/doc/scipy/reference/integrate.html for the method details.
     or the source code
     https://github.com/scipy/scipy/blob/master/scipy/integrate/quadrature.py
-    '''
+    """
     import numpy as np
     from scipy import integrate
 
@@ -86,14 +86,13 @@ def _integrate_df(self, how='trapz', dateindex=False, **kwargs):
         return df.iloc[0]
     else:
         return df
-#pd.Series.integrate = _integrate_series
 pd.Series.integrate = _integrate_df
 pd.DataFrame.integrate = _integrate_df
 #----------
 
 #----------
 # Definition of the .differentiate method for dataframes
-@decorators.pdgeneral(convert_out=True)
+@_decor.pdgeneral(convert_out=True)
 def _diff_df(self, how='central', axis=0):
     """
     Differentiates data numerically

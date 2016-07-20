@@ -1,12 +1,15 @@
 #!/usr/bin/env python
-from __future__ import print_function
-import os
-vfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),'pymicra/version')
-__version__ = open(vfile, 'rt').read().strip()
-
 """
 Python Micrometeorological Analysis tool - Pymicra
 """
+from __future__ import print_function
+import os
+
+#-----------
+# Import version from one file used by the whole module
+vfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),'pymicra/version')
+__version__ = open(vfile, 'rt').read().strip()
+#-----------
 
 dependencies=['Pandas==0.17.1', 'Numpy', 'pint==0.7.2']
 

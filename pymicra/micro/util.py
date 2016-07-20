@@ -19,9 +19,9 @@ specific evaporation heat?
 
 def preProcess(data, units, notation=None, use_means=False,
         rho_air_from_theta_v=True, inplace=True, theta=None, theta_unit=None, solutes=[]):
-    '''
-    Pre-processes data by calculating moist and dry air densities, specific humidity
-    mass density and other important variables
+    """
+    Calculates moist and dry air densities, specific humidity mass density and other 
+    important variables using the variables provided in the input DataFrame.
 
     Parameters:
     -----------
@@ -46,7 +46,7 @@ def preProcess(data, units, notation=None, use_means=False,
     --------
     data: pandas.DataFrame
         dataframe with original columns and new calculated ones
-    '''
+    """
     from .. import constants
     from .. import algs
     from .. import physics

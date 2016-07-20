@@ -67,9 +67,9 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
 
 
 def resample(df, rule, how=None, **kwargs):
-    '''
+    """
     Extends pandas resample methods to index made of integers
-    '''
+    """
     import pandas as pd
     if how==None:
         import numpy as np
@@ -139,7 +139,7 @@ def fitByDate(data, degree=1, rule=None):
 
 
 def limited_interpolation(data, maxcount=3):
-    '''
+    """
     Interpolates linearly but only if gap is smaller of equal to maxcout
 
     Parameters:
@@ -149,7 +149,7 @@ def limited_interpolation(data, maxcount=3):
         dataset to interpolate
     maxcount: int
         maximum number of consecutive NaNs to interpolate. If the number is smaller than that, nothing is done with the points.
-    '''
+    """
     mask = data.copy()
     grp = ((mask.notnull() != mask.shift().notnull()).cumsum())
     grp['ones'] = 1
@@ -334,7 +334,7 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
 
 
 def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscale=True):
-    '''
+    """
     Separates x and y inputs into bins based on the x array.
     x and y do not have to be ordered.
 
@@ -350,7 +350,7 @@ def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscal
         funtion to be applied to both x and y-bins in order to smooth the data
     logscale: boolean
         whether or not to use a log-spaced scale to set the bins
-    '''
+    """
     import warnings
     import numpy as np
 
@@ -521,10 +521,10 @@ def mad(data, axis=None):
 
 #
 #def parseUnits(unitstr):
-#    '''
+#    """
 #    Gets unit from string, list of strings, or dict's values, using the UnitRegistry
 #    defined in __init__.py
-#    '''
+#    """
 #    try:
 #        from .. import ureg, Q_
 #    except ImportError:
@@ -540,7 +540,7 @@ def mad(data, axis=None):
 #
 #
 #def convert_to(data, inunit, outunit, inplace=False, key=None):
-#    '''
+#    """
 #    Converts data from one unit to the other
 #
 #    Parameters:
@@ -555,7 +555,7 @@ def mad(data, axis=None):
 #        if inunit is a dict, the dict is update in place. "key" keyword must be provided
 #    key: str
 #        if inunit is a dict, it is the name of the variable to be chamged
-#    '''
+#    """
 #    from .. import Q_
 #
 #    if key:
@@ -573,9 +573,9 @@ def mad(data, axis=None):
 #
 
 def get_notation(notation_def):
-    '''
+    """
     Auxiliar function ro retrieve notation
-    '''
+    """
     if notation_def != None:
         return notation_def
     else:
@@ -585,8 +585,8 @@ def get_notation(notation_def):
 
 
 def latexify(variables, math_mode=True):
-    '''
-    '''
+    """
+    """
     from ..constants import greek_alphabet
 
     latex = []

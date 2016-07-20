@@ -454,7 +454,7 @@ def bulkCorr(data):
 
 
 def reverse_arrangement(array, points_number=None, alpha=0.05, verbose=False):
-    '''
+    """
     Performs the reverse arrangement test
     according to Bendat and Piersol - Random Data - 4th edition, page 96
 
@@ -474,7 +474,7 @@ def reverse_arrangement(array, points_number=None, alpha=0.05, verbose=False):
     and 0.1% at N=100.
 
     Still not adapted for dataframes
-    '''
+    """
     import algs
     import numpy as np
 

@@ -96,7 +96,7 @@ def parseUnits(unitstr):
 
 
 def convert_to(data, inunit, outunit, inplace=False, key=None): 
-    ''' 
+    """ 
     Converts data from one unit to the other 
  
     Parameters: 
@@ -111,7 +111,7 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
         if inunit is a dict, the dict is update in place. "key" keyword must be provided 
     key: str 
         if inunit is a dict, it is the name of the variable to be changed 
-    ''' 
+    """ 
     from .. import Q_ 
  
     if key: 
@@ -129,7 +129,7 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
 
 
 def convert_cols(data, guide, units, inplace=False):
-    ''' 
+    """ 
     Converts data from one unit to the other 
  
     Parameters: 
@@ -142,7 +142,7 @@ def convert_cols(data, guide, units, inplace=False):
         units dictionary
     inplace: bool 
         if inunit is a dict, the dict is update in place. "key" keyword must be provided 
-    ''' 
+    """ 
     from .. import algs
     from .. import Q_
 
@@ -171,7 +171,7 @@ def convert_cols(data, guide, units, inplace=False):
 
 
 def convert_indexes(data, guide, units, inplace=False):
-    ''' 
+    """ 
     Converts data from one unit to the other 
  
     Parameters: 
@@ -184,7 +184,7 @@ def convert_indexes(data, guide, units, inplace=False):
         units dictionary
     inplace: bool 
         if inunit is a dict, the dict is update in place. "key" keyword must be provided 
-    ''' 
+    """ 
     from .. import algs
 
     data = data.copy()
