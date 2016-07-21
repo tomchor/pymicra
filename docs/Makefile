@@ -49,7 +49,8 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 clean:
-	rm -rf $(BUILDDIR)/*
+	rm -rf $(BUILDDIR)/html/*
+	rm -rf $(BUILDDIR)/latex/*
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
@@ -116,6 +117,7 @@ latexpdf:
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf
+	cp $(BUILDDIR)/latex/pymicra.pdf ../
 	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
 
 
