@@ -7,6 +7,16 @@ Installation
     should adapt the specific commands to your system in case you are using any other Linux distro.
 
 
+Most of the required packages already come with python. However, packages that
+generally have to be manually installed beforehand are:
+
+-  Pandas
+-  Pint
+-  Numpy
+-  Scipy
+-  setuptools (for installation only)
+
+
 In order to install Pymicra the ``setuptools`` Python package should be
 installed. If you don't have it installed already you can install it with
 ``sudo apt install python-setuptools`` or ``sudo pip install setuptools``.

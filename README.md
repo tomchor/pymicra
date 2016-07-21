@@ -1,37 +1,21 @@
-# Pymicra - A Python tool for Micrometeorological Analyses
+Pymicra - A Python tool for Micrometeorological Analyses
+========================================================
 
-This package was designed to make it easier to work with micrometeorological data. Pymicra is currently fully written in python and it's aimed towards aggregating all of functionality that is commonly needed to work with micrometeorological data into one productivity-enhancing tool.
+Pymicra is a Python package designed to make it easier to work with micrometeorological datasets. It is aimed at improving the productivity and allowing us to focus on the micrometeorological, rather than programming issues.
+
+Please check out the [Github page](https://github.com/tomchor/pymicra) and the [documentation](http://tomchor.github.io/pymicra/).
+
+Here's a quick (incomplete!) list of what Pymicra does:
+
+-   Reading, separating and understanding micrometeorological data in virtually any column-separated ASCII format (thanks to pandas).
+-   Quality control methods (max and min values check, spikes, reverse-arrangement test and etc..
+-   Rotation of coordinates (2D).
+-   Detrending of data in the most common ways (block averages, moving averages and polynomial detrending).
+-   Correction of sensor drift.
+-   Automatic calculation of most auxiliary variables based on measurements (air density, dry air density, etc.).
+-   Calculation of spectra and cross-spectra.
+-   Calculation fluxes and characteristic scales with or without WPL correction.
+-   Provide common constants generally used in atmospheric sciences.
+-   Plus all native features of Pandas (interpolation, resampling, grouping, statistical tests, slicing, handling of missing data and etc.).
 
 The package is extensively (almost entirely) based on Pandas, mostly the `pandas.DataFrame` class. We use Pint for units control and (generally) Numpy or Scipy for some numerical functions not contained in Pandas.
-
-## Required Packages
-Most required packages already come with python. However, packages that generally have to be manually installed beforehand are:
-
-* Pandas
-* Pint
-* Numpy
-* Scipy
-* setuptools (for installation only)
-
-## Main Features
-Currently, this is a sum up of what Pymicra does:
-
-  - Reading, separating and understanding micrometeorological data in virtually any column-separated ASCII format (thanks to pandas).
-  - Quality control methods (max and min values check, spikes, reverse-arrangement test and etc..
-  - Rotation of coordinates (2D).
-  - Detrending of data in the most common ways (block averages, moving averages and polynomial detrending).
-  - Correction of sensor drift.
-  - Automatic calculation of most auxiliary variables based on actual measurements (air density, dry air density, etc.).
-  - Calculation of spectra and cross-spectra.
-  - Calculation fluxes and characteristic scales.
-  - WPL correction.
-  - Provide all the common constants generally used in micrometeorology.
-  - Plus all native features of Pandas (interpolation, resampling, grouping, statistical tests, slicing, handling of missing data and etc.)
-
-## Installation
-To install Pymicra we recommend to install the `setuptools` package, which can be done with `sudo apt-get install python-setuptools, depending on your Linux distribution.
-
-Download the package an unpack in somewhere. Then open a terminal and move to the directory created, whose name should be `pymicra`. Then run `sudo python setup.py install`. This should be enough to install the package.
-
-To remove Pymicra, the easiest way is to use pip (`sudo apt-get install python-pip`) with the command `sudo pip uninstall pymicra`.
-
