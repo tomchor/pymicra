@@ -1,13 +1,13 @@
-pymicra package
+Welcome to Pymicra's list of submodules, classes and functions
 ===============
 
 Subpackages
 -----------
 
 .. toctree::
-
-    pymicra.algs
-    pymicra.micro
+   :maxdepth: 2
+   pymicra.algs
+   pymicra.micro
 
 Submodules
 ----------
