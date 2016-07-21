@@ -1,16 +1,10 @@
 """
- PyMicrA - Python Micrometeorology Analysis tool
- --------------------------------
- Author: Tomas Chor
- Date of start: 2015-08-15
- --------------------------------
+ Pymicra - Python Micrometeorology Analysis tool
+ ----------------------------------------------
 
- This package is a collection of functions aimed at analysing 
- micrometeorology data. It mainly uses Pandas and Numpy for its
- analysis so these are required packages.
+ :Author: Tomas Chor
+ :Date of start: 2015-08-15
 
- It is recommended that pint is installed for better handling the
- units inside the functions.
 """
 import os
 vfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),'version')

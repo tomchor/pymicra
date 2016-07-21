@@ -1,4 +1,4 @@
-Welcome to Pymicra's list of submodules, classes and functions
+Pymicra's auto-generated docs
 ===============
 
 Subpackages
