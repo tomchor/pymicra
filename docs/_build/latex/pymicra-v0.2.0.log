@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.7.11)  22 JUL 2016 08:48
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.7.11)  22 JUL 2016 20:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**pymicra.tex
-(./pymicra.tex
+**pymicra-v0.2.0.tex
+(./pymicra-v0.2.0.tex
 LaTeX2e <2016/02/01>
 Babel <3.9q> and hyphenation patterns for 4 language(s) loaded.
 (./sphinxmanual.cls
@@ -960,12 +960,12 @@ Package: environ 2014/05/04 v0.3 A new way to define environments
 Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 )))
 \@indexfile=\write5
-\openout5 = `pymicra.idx'.
+\openout5 = `pymicra-v0.2.0.idx'.
 
 
-Writing index file pymicra.idx
-(./pymicra.aux)
-\openout1 = `pymicra.aux'.
+Writing index file pymicra-v0.2.0.idx
+(./pymicra-v0.2.0.aux)
+\openout1 = `pymicra-v0.2.0.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 140.
 LaTeX Font Info:    ... okay on input line 140.
@@ -991,7 +991,6 @@ LaTeX Font Info:    ... okay on input line 140.
 LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 140.
 LaTeX Font Info:    ... okay on input line 140.
 LaTeX Font Info:    Try loading font information for T1+ptm on input line 140.
-
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1ptm.fd
 File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 )
@@ -1038,10 +1037,20 @@ LaTeX Info: Redefining \ref on input line 140.
 LaTeX Info: Redefining \pageref on input line 140.
 LaTeX Info: Redefining \nameref on input line 140.
 
-(./pymicra.out) (./pymicra.out)
+(./pymicra-v0.2.0.out) (./pymicra-v0.2.0.out)
 \@outlinefile=\write6
-\openout6 = `pymicra.out'.
+\openout6 = `pymicra-v0.2.0.out'.
 
+
+<starry.jpg, id=101, 2569.6pt x 1606.0pt>
+File: starry.jpg Graphic file (type jpg)
+ <use starry.jpg>
+Package pdftex.def Info: starry.jpg used on input line 143.
+(pdftex.def)             Requested size: 2569.59377pt x 1605.99611pt.
+File: starry.jpg Graphic file (type jpg)
+ <use starry.jpg>
+Package pdftex.def Info: starry.jpg used on input line 143.
+(pdftex.def)             Requested size: 452.96788pt x 283.08818pt.
 LaTeX Font Info:    Try loading font information for T1+phv on input line 143.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1phv.fd
@@ -1076,22 +1085,40 @@ LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <12> not available
 (Font)              Font shape `T1/phv/b/n' tried instead on input line 143.
  [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./starry.jpg>]
 
-] (./pymicra.toc
+Package Fancyhdr Warning: \fancyfoot's `E' option without twoside option is use
+less on input line 143.
+
+(./pymicra-v0.2.0.toc
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <10> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 2.
 )
 \tf@toc=\write7
-\openout7 = `pymicra.toc'.
+\openout7 = `pymicra-v0.2.0.toc'.
 
- [1
 
-] [2
+
+Package Fancyhdr Warning: \fancyfoot's `E' option without twoside option is use
+less on input line 143.
+
+[1
+
 
 ]
-LaTeX Font Info:    Try loading font information for TS1+ptm on input line 157.
 
+Package Fancyhdr Warning: \fancyfoot's `E' option without twoside option is use
+less on input line 143.
+
+
+Package Fancyhdr Warning: \fancyfoot's `E' option without twoside option is use
+less on input line 143.
+
+
+Package Fancyhdr Warning: \fancyhead's `E' option without twoside option is use
+less on input line 143.
+
+LaTeX Font Info:    Try loading font information for TS1+ptm on input line 157.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
@@ -1100,7 +1127,7 @@ LaTeX Font Info:    Try loading font information for T1+pcr on input line 1.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
-) [1] [2
+) [1
 
 ]
 Chapter 1.
@@ -1110,230 +1137,317 @@ LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <14.4> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 200.
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <24.88> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 200.
-[3]
+
+Package Fancyhdr Warning: \fancyfoot's `E' option without twoside option is use
+less on input line 230.
+
+[2
+
+]
+Chapter 2.
+
+Package Fancyhdr Warning: \fancyfoot's `E' option without twoside option is use
+less on input line 288.
+
+[3
+
+]
+Chapter 3.
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <9> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 317.
- [4] [5]
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 302.
+LaTeX Font Info:    Try loading font information for TS1+pcr on input line 324.
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1pcr.fd
+File: ts1pcr.fd 2001/06/04 font definitions for TS1/pcr.
+)
+
+Package Fancyhdr Warning: \fancyfoot's `E' option without twoside option is use
+less on input line 352.
+
+[4
+
+] [5] [6]
+Chapter 4.
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <10> not available
 (Font)              Font shape `T1/pcr/b/n' tried instead on input line 1.
- [6] [7] [8]
-Underfull \hbox (badness 10000) in paragraph at lines 859--859
+
+Package Fancyhdr Warning: \fancyfoot's `E' option without twoside option is use
+less on input line 557.
+
+[7
+
+]
+LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <10> not available
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 596.
+ [8] [9]
+Underfull \hbox (badness 6758) in paragraph at lines 783--784
+[]\T1/pcr/b/n/10 frequency \T1/ptm/m/n/10 (\T1/pcr/m/sl/10 float\T1/ptm/m/n/10 
+) -- fre-quency of mea-sure-ment of sig-nal to pass to
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 830--831
+[]\T1/pcr/b/n/10 degree \T1/ptm/m/n/10 (\T1/pcr/m/sl/10 int\T1/ptm/m/n/10 ) -- 
+de-gree of poly-no-mial fit (only if how=='linear' or
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 844--844
 []\T1/ptm/m/it/10 array\T1/ptm/m/n/10 , \T1/ptm/m/it/10 points_number=None\T1/p
 tm/m/n/10 , \T1/ptm/m/it/10 al-pha=0.05\T1/ptm/m/n/10 , \T1/ptm/m/it/10 ver-
  []
 
-[9] [10]
-LaTeX Font Info:    Try loading font information for TS1+pcr on input line 1057
-.
- (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1pcr.fd
-File: ts1pcr.fd 2001/06/04 font definitions for TS1/pcr.
-) [11]
-Underfull \hbox (badness 10000) in paragraph at lines 1198--1203
+
+Underfull \hbox (badness 10000) in paragraph at lines 860--861
+[]\T1/pcr/b/n/10 This fuction approximates table A.6 from Bendat&Piersol as
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 863--864
+[]\T1/pcr/b/n/10 may no be true, since they do not express which
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 866--867
+[]\T1/pcr/b/n/10 table. However, in the range 9<N<101, this approximation
+ []
+
+[10]
+Underfull \hbox (badness 6758) in paragraph at lines 908--909
+[]\T1/pcr/b/n/10 frequency \T1/ptm/m/n/10 (\T1/pcr/m/sl/10 float\T1/ptm/m/n/10 
+) -- fre-quency of mea-sure-ment of sig-nal to pass to
+ []
+
+
+Underfull \hbox (badness 6758) in paragraph at lines 936--937
+[]\T1/pcr/b/n/10 frequency \T1/ptm/m/n/10 (\T1/pcr/m/sl/10 float\T1/ptm/m/n/10 
+) -- fre-quency of mea-sure-ment of sig-nal to pass to
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 983--984
+[]\T1/pcr/b/n/10 degree \T1/ptm/m/n/10 (\T1/pcr/m/sl/10 int\T1/ptm/m/n/10 ) -- 
+de-gree of poly-no-mial fit (only if how=='linear' or
+ []
+
+[11] [12]
+Underfull \hbox (badness 10000) in paragraph at lines 1199--1204
 []\T1/ptm/m/n/10 measurement_height = 10
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1214--1214
+Underfull \hbox (badness 10000) in paragraph at lines 1215--1215
 \T1/ptm/m/it/10 parse_dates_kw={}\T1/ptm/m/n/10 , \T1/ptm/m/it/10 clean_dates=T
 rue\T1/ptm/m/n/10 , \T1/ptm/m/it/10 re-turn_units=True\T1/ptm/m/n/10 ,
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 1266--1266
+[13]
+Underfull \hbox (badness 10000) in paragraph at lines 1297--1297
 []\T1/ptm/m/it/10 data\T1/ptm/m/n/10 , \T1/ptm/m/it/10 units\T1/ptm/m/n/10 , \T
 1/ptm/m/it/10 no-ta-tion=None\T1/ptm/m/n/10 , \T1/ptm/m/it/10 in-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1266--1266
+Underfull \hbox (badness 10000) in paragraph at lines 1297--1297
 \T1/ptm/m/it/10 place=True\T1/ptm/m/n/10 , \T1/ptm/m/it/10 use_means=False\T1/p
 tm/m/n/10 , \T1/ptm/m/it/10 theta=None\T1/ptm/m/n/10 ,
  []
 
-[12] [13]
-Underfull \hbox (badness 10000) in paragraph at lines 1447--1447
+[14]
+Underfull \hbox (badness 10000) in paragraph at lines 1428--1429
+[]\T1/pcr/b/n/10 is the julian day of the solstice. Default is to get from
+ []
+
+[15] [16]
+Underfull \hbox (badness 10000) in paragraph at lines 1686--1686
 []\T1/ptm/m/it/10 data\T1/ptm/m/n/10 , \T1/ptm/m/it/10 ta-bles\T1/ptm/m/n/10 , 
 \T1/ptm/m/it/10 de-trend=False\T1/ptm/m/n/10 , \T1/ptm/m/it/10 de-trend_kw={`ho
 w':
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1447--1447
+Underfull \hbox (badness 10000) in paragraph at lines 1686--1686
 \T1/ptm/m/it/10 `mov-ing-mean'\T1/ptm/m/n/10 , \T1/ptm/m/it/10 `win-dow': 900}\
 T1/ptm/m/n/10 , \T1/ptm/m/it/10 trend=True\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1456--1456
+Underfull \hbox (badness 10000) in paragraph at lines 1695--1695
 []\T1/ptm/m/it/10 data\T1/ptm/m/n/10 , \T1/ptm/m/it/10 ta-bles\T1/ptm/m/n/10 , 
 \T1/ptm/m/it/10 de-trend=False\T1/ptm/m/n/10 , \T1/ptm/m/it/10 de-trend_kw={`ho
 w': `lin-ear'}\T1/ptm/m/n/10 ,
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 1467--1467
+[17]
+Underfull \hbox (badness 10000) in paragraph at lines 1751--1751
 \T1/ptm/m/it/10 write_fit=True\T1/ptm/m/n/10 , \T1/ptm/m/it/10 fit_file='correc
 tDrift_linfit.params'\T1/ptm/m/n/10 , \T1/ptm/m/it/10 ap-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1467--1467
+Underfull \hbox (badness 10000) in paragraph at lines 1751--1751
 \T1/ptm/m/it/10 ply_fit=True\T1/ptm/m/n/10 , \T1/ptm/m/it/10 show_plot=False\T1
 /ptm/m/n/10 , \T1/ptm/m/it/10 re-turn_plot=False\T1/ptm/m/n/10 , \T1/ptm/m/it/1
 0 units={}\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 []\T1/ptm/m/it/10 files\T1/ptm/m/n/10 , \T1/ptm/m/it/10 dat-a-log-ger_config\T1
 /ptm/m/n/10 , \T1/ptm/m/it/10 read_files_kw={`parse_dates': False\T1/ptm/m/n/10
  ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 \T1/ptm/m/it/10 `only_named_cols': False\T1/ptm/m/n/10 , \T1/ptm/m/it/10 `clean
 _dates': False}\T1/ptm/m/n/10 , \T1/ptm/m/it/10 ac-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 \T1/ptm/m/it/10 cepted_nans_percent=1.0\T1/ptm/m/n/10 , \T1/ptm/m/it/10 ac-cept
 ed_spikes_percent=1.0\T1/ptm/m/n/10 , \T1/ptm/m/it/10 ac-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 \T1/ptm/m/it/10 cepted_bound_percent=1.0\T1/ptm/m/n/10 , \T1/ptm/m/it/10 max_re
 placement_count=180\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 \T1/ptm/m/it/10 maxdif_detrend=True\T1/ptm/m/n/10 , \T1/ptm/m/it/10 maxdif_detr
 end_kw={`how': `mov-ing-mean'\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 \T1/ptm/m/it/10 `mov-ing-mean'\T1/ptm/m/n/10 , \T1/ptm/m/it/10 `win-dow': 900}\
 T1/ptm/m/n/10 , \T1/ptm/m/it/10 RAT_detrend=True\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 \T1/ptm/m/it/10 RAT_detrend_kw={`how': `lin-ear'}\T1/ptm/m/n/10 , \T1/ptm/m/it/
 10 spikes_detrend=True\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 \T1/ptm/m/it/10 spikes_test=True\T1/ptm/m/n/10 , \T1/ptm/m/it/10 vi-su-al-ize_s
 pikes=False\T1/ptm/m/n/10 , \T1/ptm/m/it/10 spikes_vis_col='u'\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 \T1/ptm/m/it/10 spikes_func=<function <lambda>>\T1/ptm/m/n/10 , \T1/ptm/m/it/10
  re-place_with='interpolation'\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 \T1/ptm/m/it/10 true-ver-bose=False\T1/ptm/m/n/10 , \T1/ptm/m/it/10 fal-se-ver-
 bose=True\T1/ptm/m/n/10 , \T1/ptm/m/it/10 false-show=False\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 \T1/ptm/m/it/10 trueshow=False\T1/ptm/m/n/10 , \T1/ptm/m/it/10 trueshow_vars=No
 ne\T1/ptm/m/n/10 , \T1/ptm/m/it/10 out-dir='quality_controlled'\T1/ptm/m/n/10 ,
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1473--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1800--1800
 \T1/ptm/m/it/10 sum-mary_file='qcontrol_summary.csv'\T1/ptm/m/n/10 , \T1/ptm/m/
 it/10 re-placed_report=None\T1/ptm/m/n/10 ,
  []
 
-[14]
-Underfull \hbox (badness 10000) in paragraph at lines 1525--1525
+[18] [19] [20]
+Underfull \hbox (badness 10000) in paragraph at lines 2024--2024
 []\T1/ptm/m/it/10 files\T1/ptm/m/n/10 , \T1/ptm/m/it/10 dl-con-fig\T1/ptm/m/n/1
 0 , \T1/ptm/m/it/10 outformat='out_%Y-%m-%d_%H:%M.csv'\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1525--1525
+Underfull \hbox (badness 10000) in paragraph at lines 2024--2024
 \T1/ptm/m/it/10 out-dir='`\T1/ptm/m/n/10 , \T1/ptm/m/it/10 ver-bose=False\T1/pt
 m/m/n/10 , \T1/ptm/m/it/10 first-flag='.first'\T1/ptm/m/n/10 , \T1/ptm/m/it/10 
 last-flag='.last'\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1525--1525
+Underfull \hbox (badness 10000) in paragraph at lines 2024--2024
 \T1/ptm/m/it/10 save_ram=False\T1/ptm/m/n/10 , \T1/ptm/m/it/10 fre-quency=`30mi
 n'\T1/ptm/m/n/10 , \T1/ptm/m/it/10 quot-ing=0\T1/ptm/m/n/10 ,
  []
 
-[15] [16
+[21] [22]
 
-]
-Chapter 2.
-[17] [18
+Package Fancyhdr Warning: \fancyfoot's `E' option without twoside option is use
+less on input line 2116.
 
-] [19
-
-
-] (./pymicra.ind [20
+[23
 
 
-]
+
+] (./pymicra-v0.2.0.ind
 Underfull \hbox (badness 10000) in paragraph at lines 6--7
 []\T1/ptm/m/n/10 airDensity_from_theta_v() (in mod-ule pym-i-
  []
 
-[21
+
+Package Fancyhdr Warning: \fancyfoot's `E' option without twoside option is use
+less on input line 104.
+
+[24
+
+
 
 ]
 Underfull \hbox (badness 10000) in paragraph at lines 124--125
 []\T1/ptm/m/n/10 theta_std_from_theta_v_fluc() (in mod-ule pym-i-
  []
 
-[22
+[25
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1579.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1579.
- (./pymicra.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1579.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1579.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2120.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2120.
+ (./pymicra-v0.2.0.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2120.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2120.
 
-Package rerunfilecheck Info: File `pymicra.out' has not changed.
-(rerunfilecheck)             Checksum: A0B9A5DC9251146EC6D66A9B4132A91C;1008.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1579.
+Package rerunfilecheck Info: File `pymicra-v0.2.0.out' has not changed.
+(rerunfilecheck)             Checksum: 90BFC0F744DD0EA89B8310B1D036BD49;3532.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2120.
  ) 
 Here is how much of TeX's memory you used:
- 13647 strings out of 494929
- 186887 string characters out of 6180142
- 279134 words of memory out of 5000000
- 16501 multiletter control sequences out of 15000+600000
- 58569 words of font info for 76 fonts, out of 8000000 for 9000
+ 13660 strings out of 494929
+ 187005 string characters out of 6180142
+ 278904 words of memory out of 5000000
+ 16511 multiletter control sequences out of 15000+600000
+ 59306 words of font info for 78 fonts, out of 8000000 for 9000
  17 hyphenation exceptions out of 8191
- 36i,12n,45p,1771b,574s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 36i,12n,45p,1778b,579s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
-e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/urw/courier/ucrb8a.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/hel
-vetic/uhvb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvbo8
-a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/
-share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/t
-exmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts
-/type1/urw/times/utmri8a.pfb>
-Output written on pymicra.pdf (26 pages, 164809 bytes).
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/u
+rw/courier/ucrb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/uc
+rr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrro8a.pfb></u
+sr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/share/tex
+live/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></usr/share/texlive/texmf-
+dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/
+utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on pymicra-v0.2.0.pdf (27 pages, 2712962 bytes).
 PDF statistics:
- 434 PDF objects out of 1000 (max. 8388607)
- 388 compressed objects within 4 object streams
- 132 named destinations out of 1000 (max. 500000)
- 85 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 518 PDF objects out of 1000 (max. 8388607)
+ 465 compressed objects within 5 object streams
+ 129 named destinations out of 1000 (max. 500000)
+ 218 words of extra memory for PDF output out of 10000 (max. 10000000)
 

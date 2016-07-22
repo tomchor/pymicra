@@ -111,6 +111,7 @@ pygments_style = 'sphinx'
 # If true, keep warnings as "system message" paragraphs in the built documents.
 #keep_warnings = False
 
+logo = '_static/starry.jpg'
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -135,7 +136,7 @@ html_theme = 'bizstyle'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = logo
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -206,6 +207,10 @@ latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').
 'papersize': 'a4paper',
 
+# Gets rid of blank pages
+'classoptions': ',oneside',
+'babel': r'\usepackage[english]{babel}'
+
 # The font size ('10pt', '11pt' or '12pt').
 #'pointsize': '10pt',
 
@@ -217,13 +222,13 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'pymicra.tex', u'Pymicra Documentation',
+  ('index', 'pymicra-v{}.tex'.format(version), u'Pymicra Documentation',
    u'Tomás Chor', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-#latex_logo = None
+latex_logo = logo
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.

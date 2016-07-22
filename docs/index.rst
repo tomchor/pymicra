@@ -7,8 +7,6 @@
 .. include:: global.rst
 .. include:: README.rst
 
-Contents:
----------
 
 .. toctree::
    :maxdepth: 2
@@ -20,8 +18,8 @@ Contents:
 
 
 
-Indices and tables
-==================
+.. Indices and tables
+.. ==================
 
 * :ref:`genindex`
 * :ref:`modindex`

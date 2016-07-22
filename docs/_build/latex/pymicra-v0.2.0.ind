@@ -1,0 +1,128 @@
+\begin{theindex}
+\def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
+
+  \bigletter A
+  \item airDensity\_from\_theta() (in module pymicra.physics), \hyperpage{14}
+  \item airDensity\_from\_theta\_v() (in module pymicra.physics), \hyperpage{14}
+  \item autoassign() (in module pymicra.decorators), \hyperpage{12}
+
+  \indexspace
+  \bigletter B
+  \item binwrapper() (in module pymicra.methods), \hyperpage{14}
+  \item build() (pymicra.core.Notation method), \hyperpage{7}
+  \item bulkCorr() (in module pymicra.data), \hyperpage{9}
+
+  \indexspace
+  \bigletter C
+  \item check\_consistency() (pymicra.core.fileConfig method), \hyperpage{9}
+  \item check\_limits() (in module pymicra.tests), \hyperpage{16}
+  \item check\_maxdif() (in module pymicra.tests), \hyperpage{16}
+  \item check\_nans() (in module pymicra.tests), \hyperpage{16}
+  \item check\_numlines() (in module pymicra.tests), \hyperpage{16}
+  \item check\_RA() (in module pymicra.tests), \hyperpage{16}
+  \item check\_replaced() (in module pymicra.tests), \hyperpage{17}
+  \item check\_spikes() (in module pymicra.tests), \hyperpage{17}
+  \item check\_stationarity() (in module pymicra.tests), \hyperpage{17}
+  \item check\_std() (in module pymicra.tests), \hyperpage{17}
+  \item concentration (pymicra.core.Notation attribute), \hyperpage{7}
+  \item correctDrift() (in module pymicra.util), \hyperpage{18}
+  \item cospectrum (pymicra.core.Notation attribute), \hyperpage{7}
+  \item cross\_spectrum (pymicra.core.Notation attribute), \hyperpage{7}
+  \item crossSpectra() (in module pymicra.data), \hyperpage{9}
+  \item CtoK() (in module pymicra.physics), \hyperpage{14}
+
+  \indexspace
+  \bigletter D
+  \item dataloggerConfig (class in pymicra.core), \hyperpage{8}
+  \item dataset() (in module pymicra.io), \hyperpage{12}
+  \item density (pymicra.core.Notation attribute), \hyperpage{7}
+  \item detrend() (in module pymicra.data), \hyperpage{10}
+  \item dewPointTemp() (in module pymicra.physics), \hyperpage{14}
+  \item dryAirDensity\_from\_p() (in module pymicra.physics), \hyperpage{14}
+
+  \indexspace
+  \bigletter F
+  \item fileConfig (class in pymicra.core), \hyperpage{8}
+  \item fluctuations (pymicra.core.Notation attribute), \hyperpage{7}
+  \item flux\_of (pymicra.core.Notation attribute), \hyperpage{7}
+
+  \indexspace
+  \bigletter G
+  \item get\_date\_cols() (pymicra.core.fileConfig method), \hyperpage{9}
+
+  \indexspace
+  \bigletter L
+  \item latent\_heat\_water() (in module pymicra.physics), \hyperpage{14}
+
+  \indexspace
+  \bigletter M
+  \item mass\_concentration (pymicra.core.Notation attribute), \hyperpage{7}
+  \item mass\_density (pymicra.core.Notation attribute), \hyperpage{7}
+  \item mass\_mixing\_ratio (pymicra.core.Notation attribute), \hyperpage{7}
+  \item mean (pymicra.core.Notation attribute), \hyperpage{7}
+  \item mixing\_ratio (pymicra.core.Notation attribute), \hyperpage{7}
+  \item molar\_concentration (pymicra.core.Notation attribute), \hyperpage{7}
+  \item molar\_density (pymicra.core.Notation attribute), \hyperpage{7}
+  \item molar\_mixing\_ratio (pymicra.core.Notation attribute), \hyperpage{7}
+  \item myData (class in pymicra.core), \hyperpage{9}
+
+  \indexspace
+  \bigletter N
+  \item Notation (class in pymicra.core), \hyperpage{7}
+
+  \indexspace
+  \bigletter P
+  \item pdgeneral() (in module pymicra.decorators), \hyperpage{12}
+  \item pdgeneral\_in() (in module pymicra.decorators), \hyperpage{12}
+  \item pdgeneral\_io() (in module pymicra.decorators), \hyperpage{12}
+  \item perfGas() (in module pymicra.physics), \hyperpage{14}
+  \item ppxv2density() (in module pymicra.physics), \hyperpage{14}
+  \item pymicra (module), \hyperpage{22}
+  \item pymicra.constants (module), \hyperpage{7}
+  \item pymicra.core (module), \hyperpage{7}
+  \item pymicra.data (module), \hyperpage{9}
+  \item pymicra.decorators (module), \hyperpage{12}
+  \item pymicra.io (module), \hyperpage{12}
+  \item pymicra.methods (module), \hyperpage{14}
+  \item pymicra.physics (module), \hyperpage{14}
+  \item pymicra.tests (module), \hyperpage{16}
+  \item pymicra.util (module), \hyperpage{18}
+
+  \indexspace
+  \bigletter Q
+  \item qcontrol() (in module pymicra.util), \hyperpage{18}
+  \item quadrature (pymicra.core.Notation attribute), \hyperpage{8}
+
+  \indexspace
+  \bigletter R
+  \item R\_moistAir() (in module pymicra.physics), \hyperpage{14}
+  \item read\_dlc() (in module pymicra.io), \hyperpage{13}
+  \item read\_fileConfig() (in module pymicra.io), \hyperpage{13}
+  \item read\_site() (in module pymicra.io), \hyperpage{13}
+  \item readDataFile() (in module pymicra.io), \hyperpage{12}
+  \item readDataFiles() (in module pymicra.io), \hyperpage{12}
+  \item readUnitsCsv() (in module pymicra.io), \hyperpage{13}
+  \item reverse\_arrangement() (in module pymicra.data), \hyperpage{10}
+  \item rotate2D() (in module pymicra.data), \hyperpage{10}
+
+  \indexspace
+  \bigletter S
+  \item satWaterPressure() (in module pymicra.physics), \hyperpage{15}
+  \item separateFiles() (in module pymicra.util), \hyperpage{21}
+  \item siteConfig (class in pymicra.core), \hyperpage{9}
+  \item solarZenith() (in module pymicra.physics), \hyperpage{15}
+  \item spectra() (in module pymicra.data), \hyperpage{11}
+  \item spectrum (pymicra.core.Notation attribute), \hyperpage{8}
+  \item spectrum() (in module pymicra.data), \hyperpage{11}
+  \item star (pymicra.core.Notation attribute), \hyperpage{8}
+  \item std (pymicra.core.Notation attribute), \hyperpage{8}
+
+  \indexspace
+  \bigletter T
+  \item theta\_from\_theta\_s() (in module pymicra.physics), \hyperpage{15}
+  \item theta\_from\_theta\_v() (in module pymicra.physics), \hyperpage{15}
+  \item theta\_std\_from\_theta\_v\_fluc() (in module pymicra.physics), \hyperpage{15}
+  \item timeSeries() (in module pymicra.io), \hyperpage{13}
+  \item trend() (in module pymicra.data), \hyperpage{11}
+
+\end{theindex}
