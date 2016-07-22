@@ -4,7 +4,7 @@ Installation
 .. warning::
     The commands written here assume you are running a Ubuntu-based distribution of 
     Linux. Although the basic steps should be similar for all Linux distributions, you 
-    should adapt the specific commands to your system in case you are using any other Linux distro.
+    should adapt the specific commands to your system in case you are using any other OS.
 
 
 Most of the required packages already come with python. However, packages that
@@ -21,10 +21,11 @@ In order to install Pymicra the ``setuptools`` Python package should be
 installed. If you don't have it installed already you can install it with
 ``sudo apt install python-setuptools`` or ``sudo pip install setuptools``.
 
-Download the package an unpack in somewhere. Then open a terminal and
-move to the directory created, whose name should be ``pymicra``. Then
-run ``sudo python setup.py install``. This should be enough to install
-the package.
+Download the package from the `github repo
+<https://github.com/tomchor/pymicra>`_ an unpack it somewhere. Then open a
+terminal and move to the directory created, whose name should be ``pymicra``.
+Then run ``sudo python setup.py install``. This should be enough to install the
+package.
 
 
 First download the zipped file at the \href{github.com/tomchor/pymicra}{Pymicra
