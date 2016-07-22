@@ -13,8 +13,10 @@ is extremely important, because it is by these labels that Pymicra knows which
 variable is in each column. You can check the default notation with
 
 .. code-block:: python
+
     import pymicra
     print(pymicra.notation)
+
 
 On the left you see the full name of the variables (which corresponds to a notation namespace) and on the right
 we see the default notation for that variable.
@@ -23,6 +25,7 @@ You can change Pymicra's notation at any time by altering the attributes of
 ``pymicra.notation``.
 
 .. todo::
+
    Extend this section with some examples
 
 

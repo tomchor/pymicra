@@ -35,6 +35,7 @@ sys.path.insert(0, os.path.abspath('/home/tomas/pymicra'))
 extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
+    'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
     'sphinx.ext.autodoc',
     'numpydoc'
