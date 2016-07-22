@@ -14,10 +14,8 @@ Contents:
 
    intro
    install
-   notation
    tutorial
    pymicra
-
 
 
 

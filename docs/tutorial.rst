@@ -1,21 +1,54 @@
 Getting started
 ===============
 
+This "Getting started" tutorial is a brief introduction to Pymicra. This is in
+no way supposed to be a complete representation of everything that can be done
+with Pymicra.
+
+Notation
+--------
+
+Pymicra uses a specific notation to name each one of its columns. This notation
+is extremely important, because it is by these labels that Pymicra knows which
+variable is in each column. You can check the default notation with
+
+.. code-block:: python
+    import pymicra
+    print(pymicra.notation)
+
+On the left you see the full name of the variables (which corresponds to a notation namespace) and on the right
+we see the default notation for that variable.
+
+You can change Pymicra's notation at any time by altering the attributes of
+``pymicra.notation``.
+
+.. todo::
+   Extend this section with some examples
+
 
 Reading datafiles
 -----------------
 
-The easiest way to read data files is using a Pymicra class called
-\texttt{dataloggerConfig} along with the function \texttt{timeSeries}. First,
-let's explain what the \texttt{dataloggerConfig} class does. This class holds
+The easiest way to read data files is using the ``timeSeries`` function with a
+``fileConfig`` object such as 
+
+.. code-block:: python
+   config = pm.fileConfig('example.config')
+   data = pm.timeSeries('1H_20130504.csv', config, parse_dates=False)
+
+First,
+let's explain what the ``fileConfig`` class does. This class holds
 most of the configurations inherent to the datalogger that actually influence
 the file output (such as columns separator), which variable is in each column,
 variables units, frequency, file headers, etc..
 
-You can create a \texttt{dataloggerConfig} object manually by passing each of
-these informations as a keyword to the \texttt{dataloggerConfig} function, but
+Creating file configurations
+............................
+
+You can create a ``fileConfig`` object manually by passing each of
+these informations as a keyword to the ``fileConfig`` function, but
 the easiest method is to create a \texttt{.dlc} file (meaning datalogger
-configuration), store it somewhere and create a \texttt{dataloggerConfig} object
+configuration), store it somewhere and create a ``fileConfig`` object
 by reading it every time you work with files with that same configuration.
 
 Consider the example \texttt{.dlc} file below, which will be explained next.
@@ -59,13 +92,13 @@ Useful mostly when taking the spectrum or cospectrum.
 The \texttt{columns} separator is what separates one column from the other.
 Generaly it is one character, such as a comma or a whitespace. A special case
 happens is if the columns are separated by whitespaces of varying length. In
-that case just put ``whitespace''.
+that case just put "whitespace".
 
 The keyword \texttt{header\_lines} is an int, or list of ints saying which rows
 are headers, starting from zero. So if the first two rows of the file are a
 header, the \texttt{header\_lines} in this case should be \texttt{[0, 1]}.
 
-The \tt{filename\_format}
+The {filename\_format}
 
 The \tt{date\_connector}
 
@@ -76,7 +109,7 @@ below
 
 EXAMPLE
 
-In it we passed the path of a file to read and the \tt{dataloggerConfig} object
+In it we passed the path of a file to read and the \tt{fileConfig} object
 containing the configuration of the file. The function \tt{timeSeries} reads the
 file according to the options provided and returns a DataFrame that is put into
 the \tt{data} variable. Printing \tt{data}, in this case, would print the
@@ -88,15 +121,28 @@ Notice that every variable defined in our datalogger configuration file appears 
 data variable.
 
 
-
-\chapter{Viewing and manipulating data}
+Viewing and manipulating data
+-----------------------------
 
 To view and manipulate data you have to follow Pandas's DataFrame rules. For
 that we suggest that the user visit a Pandas tutorial. However, I'll explain
 some main ideas here for the sake of completeness.
 
 
+Converting between different units
+----------------------------------
 
-\chapter{Extracting fluxes}
+Pymicra has some handy functions that convert between units using Pint.
+
+Extracting fluxes
+-----------------
+
+Although you can extract the fluxes manually either using the DataFrame or extracting
+the Numpy arrays, Pymicra has a couple of functions that come in handy.
 
 
+Obtaining the spectra
+---------------------
+
+Using Numpy's fast Fourier transform implementation, Pymicra is also able to extract
+spectra, cospectra and quadratures.
