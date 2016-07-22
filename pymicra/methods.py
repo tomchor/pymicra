@@ -11,7 +11,7 @@ def _to_unitsCsv(self, units, filename, **kwargs):
     Wrapper around toUnitsCsv to create a method to print the contents of
     a dataframe plus its units into a unitsCsv file.
     
-    Parameters:
+    Parameters
     -----------
     self: dataframe
         dataframe to write
@@ -42,7 +42,7 @@ def _with_units(data, units):
     Wrapper around toUnitsCsv to create a method to print the contents of
     a dataframe plus its units into a unitsCsv file.
     
-    Parameters:
+    Parameters
     -----------
     self: dataframe
         dataframe to write
@@ -150,8 +150,8 @@ def _xplot(self, xcol, reverse_x=False, return_ax=False,
     A smarter way to plot things with the x axis being one of the columns. Very useful for
     comparison of models and results
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     self: pandas.DataFrame
         datframe to be plotted
     xcol: str

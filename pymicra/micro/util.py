@@ -23,7 +23,7 @@ def preProcess(data, units, notation=None, use_means=False,
     Calculates moist and dry air densities, specific humidity mass density and other 
     important variables using the variables provided in the input DataFrame.
 
-    Parameters:
+    Parameters
     -----------
     data: pandas.DataFrame
         dataframe with micrometeorological measurements
@@ -42,7 +42,7 @@ def preProcess(data, units, notation=None, use_means=False,
     solutes: list
         list of string where each string is a solute to be considered
 
-    Returns:
+    Returns
     --------
     data: pandas.DataFrame
         dataframe with original columns and new calculated ones
@@ -254,7 +254,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     """
     Get fluxes from the turbulent fluctuations
     
-    Parameters:
+    Parameters
     -----------
     data: pandas.DataFrame
         dataframe with the characteristic lengths calculated

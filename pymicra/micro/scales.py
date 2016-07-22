@@ -107,7 +107,7 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None, the
     The names of the variables are retrived out the dictionary. You can update the dictionary
     and change the names by using the notation_defs keyworkd, which is a notation object
 
-    Parameters:
+    Parameters
     -----------
     data: pandas.DataFrame
         dataset to be used. It must either be the raw and turbulent data, or the covariances of such data

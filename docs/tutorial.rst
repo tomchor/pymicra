@@ -36,6 +36,7 @@ The easiest way to read data files is using the ``timeSeries`` function with a
 ``fileConfig`` object such as 
 
 .. code-block:: python
+
    config = pm.fileConfig('example.config')
    data = pm.timeSeries('1H_20130504.csv', config, parse_dates=False)
 

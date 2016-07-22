@@ -12,19 +12,26 @@ TO DO LIST:
 
 
 def theta_from_theta_s(data, units, notation=None, return_df=True):
-    """
+    r"""Calculates thermodynamic temperature using sonic temperature measurements
+
     From Schotanus, Nieuwstadt, de Bruin; DOI 10.1007/BF00164332
 
-    theta_s = theta (1 + 0.51 q) (1 - (vn/c)**2)**0.5
-    theta_s ~ theta (1 + 0.51 q)
+    theta_s = theta (1 + 0.51 q) (1 - (vn/c)**2)^0.5
 
-    Parameter:
+    :math:`theta_s \approx theta (1 + 0.51 q)`
+
+    Parameters
     ----------
     data: pandas.dataframe
         dataset
     units: dict
         units dictionary
     notation: pymicra.Notation
+
+    Returns
+    -------
+    pandas.Series
+        thermodynamic temperature
     """
     from . import algs
 
@@ -43,7 +50,7 @@ def theta_from_theta_v(data, units, notation=None, return_df=True):
 
     theta_v ~ theta (1 + 0.61 q)
 
-    Parameter:
+    Parameters
     ----------
     data: pandas.dataframe
         dataset
@@ -68,8 +75,8 @@ def theta_std_from_theta_v_fluc(data, units, notation=None):
     """
     Derived from theta_v = theta(1 + 0.61 q)
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     data: pandas.dataframe
         dataframe with q, q', theta, theta_v'
     units: dict
@@ -209,7 +216,7 @@ def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=Fa
     """
     Calculates moist air density using theta measurements
 
-    Parameters:
+    Parameters
     -----------
     data: pandas.DataFrame
         dataset to add rho_air
@@ -290,7 +297,7 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
 
     needs validation and needs to work without lon0
 
-    Parameters:
+    Parameters
     -----------
     date: datetime object
         the date and time for which the zenith angle has to be calculated
@@ -303,7 +310,7 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
 
     dr is the julian day of the solstice. Default is to get from dictionary
 
-    Returns:
+    Returns
     --------
     zen_ang: float
         the zenith angle in degrees
@@ -373,13 +380,13 @@ def satWaterPressure(T, unit='kelvin'):
 
     e0, b, T1 and T2 are constants specific for water vapor
 
-    Parameters:
+    Parameters
     -----------
 
     T: float
         thermodynamic temperature
 
-    Returns:
+    Returns
     --------
         saturated vapor pressure of water (in kPa)
     """
@@ -429,12 +436,12 @@ def R_moistAir(q):
     """
     Calculates the gas constant for umid air from the specific humidity q
 
-    Parameters:
+    Parameters
     -----------
     q: float
         the specific humidity in g(water)/g(air)
 
-    Returns:
+    Returns
     --------
     R_air: float
         the specific gas constant for humid air in J/(g*K)

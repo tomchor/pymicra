@@ -26,7 +26,7 @@ def hfc_Dias_ea_16(cross_spec, T):
 
     Co_recovered = Co_ab + 2*pi*n*T*Qu_ab
 
-    Parameters:
+    Parameters
     -----------
     cross_spec: series of dataframe
         the cross spectrum whose coespectrum you'd like to correct
@@ -50,7 +50,7 @@ def hfc_zeroQuad(slow_spec, freqs, T):
     Applies a correction factor to the spectrum of a slow-measured variable
     based on the response-time T. Quadrature must be analytically zero!
 
-    Parameters:
+    Parameters
     -----------
     slow_spec: numpy.array or series
         the spectrum to be corrected (not cross-spectrum!)
@@ -59,7 +59,7 @@ def hfc_zeroQuad(slow_spec, freqs, T):
     T: float
         the response-time
 
-    Returns:
+    Returns
     --------
     spec: numpy.array
         the recovered array
@@ -74,7 +74,7 @@ def Ogive(df, no_nan=True):
     """
     Integrates the Ogive from Coespectra
 
-    Parameters:
+    Parameters
     -----------
     df: dataframe
         cospectrum to be integrated
@@ -134,7 +134,7 @@ def _recspe(slow_spec, freqs, T):
     Applied a correction factor to the spectrum of a slow-measured variable
     based on the response-time T
 
-    Parameters:
+    Parameters
     -----------
     freqs: numpy.array
         frequencies

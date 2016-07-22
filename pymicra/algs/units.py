@@ -24,7 +24,7 @@ def operate(elems, units, inplace=False, unitdict=None, key=None, operation='+')
     """
     Operate on elements considering their units
 
-    Parameters:
+    Parameters
     -----------
     elems: list, tuple
         list of pandas.Series
@@ -99,7 +99,7 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
     """ 
     Converts data from one unit to the other 
  
-    Parameters: 
+    Parameters 
     ----------- 
     data: pandas.series 
         to be chanhed from one unit to the other 
@@ -132,7 +132,7 @@ def convert_cols(data, guide, units, inplace=False):
     """ 
     Converts data from one unit to the other 
  
-    Parameters: 
+    Parameters 
     ----------- 
     data: pandas.DataFrame
         to be chanhed from one unit to the other 
@@ -174,7 +174,7 @@ def convert_indexes(data, guide, units, inplace=False):
     """ 
     Converts data from one unit to the other 
  
-    Parameters: 
+    Parameters 
     ----------- 
     data: pandas.Series
         to be chanhed from one unit to the other 

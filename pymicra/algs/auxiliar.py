@@ -44,7 +44,7 @@ def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepa
     """
     Tests a boolean DataFrane obtained from the test and prints standard output
 
-    Parameters:
+    Parameters
     -----------
     df_valid: pandas.Series
         series contaning only True or False values for each of the variables, which should be the indexes
@@ -55,7 +55,7 @@ def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepa
     trueverbose: bool
         whether to print something successful cases
 
-    Returns:
+    Returns
     --------
     result: bool
         True if the run passed the passed
@@ -81,7 +81,7 @@ def applyResult(result, failed, df, control=None, testname=None, filename=None, 
     """
     Auxiliar function to be used with util.qcontrol
 
-    Parameters:
+    Parameters
     -----------
     result: bool
         whether the test failed and succeeded

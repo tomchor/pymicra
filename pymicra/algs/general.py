@@ -1,7 +1,6 @@
+"""
+"""
 from __future__ import print_function
-#!/usr/bin/python
-"""
-"""
 import pandas as pd
 import numpy as np
 
@@ -142,7 +141,7 @@ def limited_interpolation(data, maxcount=3):
     """
     Interpolates linearly but only if gap is smaller of equal to maxcout
 
-    Parameters:
+    Parameters
     -----------
 
     data: pandas.DataFrame
@@ -166,7 +165,7 @@ def limitedSubs(data, max_interp=3, func=lambda x: abs(x) > abs(x.std()*4.) ):
     a maximum of max_interp times in a row.
     If there are more than that number in a row, then they are not substituted.
 
-    Parameters:
+    Parameters
     -----------
     data: pandas.dataframe
         data to be interpolated
@@ -176,7 +175,7 @@ def limitedSubs(data, max_interp=3, func=lambda x: abs(x) > abs(x.std()*4.) ):
         function of x only that determines the which elements become NaNs. Should return
         only True or False.
 
-    Returns:
+    Returns
     --------
     df: pandas.dataframe
         dataframe with the elements substituted
@@ -198,7 +197,7 @@ def file_len(fname):
     """
     Returns length of a file through piping bash's function wc
 
-    Parameters:
+    Parameters
     -----------
 
     fname: string
@@ -236,7 +235,7 @@ def parseDates(data, dataloggerConfig=None,
     date: 2015-08-10
     This routine parses the date from a pandas DataFrame when it is divided into several columns
 
-    Parameters:
+    Parameters
     -----------
     data: pandas DataFrame
         dataFrame whose dates have to be parsed
@@ -338,7 +337,7 @@ def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscal
     Separates x and y inputs into bins based on the x array.
     x and y do not have to be ordered.
 
-    Parameters:
+    Parameters
     -----------
     x: np.array
         independent variable
@@ -389,14 +388,15 @@ def get_index(x, to_look_for):
     """
     Just like the .index method of lists, except it works for multiple values
 
-    Parameter:
+    Parameter
+    ---------
     x: list or array
         the main array
     to_look_for: list of array
         the subset of the main whose indexes are desired
 
-    Returns:
-    --------
+    Returns
+    -------
     indexes: np.array
         array with the indexes of each element in y
     """
@@ -409,19 +409,18 @@ def name2date(filename, dlconfig):
     """
     Gets a date from a the name of the file according to a datalogger config object
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     filename: string
         the (base) name of the file
     dlconfig: pymicra.dataloggerConfig
         configuration of the datalogger
 
-    Returns:
-    --------
+    Returns
+    -------
     cdate: datetime object
 
-    Warning:
-    Needs to be optimized in order to read question markers also after the date
+    :Warning Needs to be optimized in order to read question markers also after the date:
     """
     from itertools import izip_longest
     import datetime as dt
@@ -438,15 +437,15 @@ def line2date(line, dlconfig):
     """
     Gets a date from a line of file according to dataloggerConfig object.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     line: string
         line of file with date inside
     dlconfig: pymicra.dataloggerConfig
         configuration of the datalogger
 
-    Returns:
-    --------
+    Returns
+    -------
     timestamp: datetime object
     """
     import datetime as dt
@@ -476,15 +475,15 @@ def diff_central(x, y):
     """
     Applies the central finite difference scheme
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     x: array
         independent variable
     y: array
         dependent variable
 
-    Returns:
-    --------
+    Returns
+    -------
     dydx: array
         the dependent variable differentiated
     """
@@ -502,7 +501,7 @@ def find_nearest(array, value):
     """
     Smart and small function to find the index of the nearest value, in an array, of some other value
 
-    Parameters:
+    Parameters
     -----------
     array: array
         list or array
@@ -519,58 +518,7 @@ def mad(data, axis=None):
     import numpy as np
     return np.median(np.absolute(data - np.median(data, axis)), axis)
 
-#
-#def parseUnits(unitstr):
-#    """
-#    Gets unit from string, list of strings, or dict's values, using the UnitRegistry
-#    defined in __init__.py
-#    """
-#    try:
-#        from .. import ureg, Q_
-#    except ImportError:
-#        print('You should have pint installed to use units!')
-#        return unitstr
-#
-#    if isinstance(unitstr, str):
-#        return ureg[unitstr]
-#    elif isinstance(unitstr, list):
-#        return [ ureg[el] for el in unitstr ]
-#    elif isinstance(unitstr, dict):
-#        return { key: ureg[el] for key, el in unitstr.items() }
-#
-#
-#def convert_to(data, inunit, outunit, inplace=False, key=None):
-#    """
-#    Converts data from one unit to the other
-#
-#    Parameters:
-#    -----------
-#    data: pandas.series
-#        to be chanhed from one unit to the other
-#    inunit: pint.quantity or dict
-#        unit(s) that the data is in
-#    outunit: str
-#        convert to this unit
-#    inplace: bool
-#        if inunit is a dict, the dict is update in place. "key" keyword must be provided
-#    key: str
-#        if inunit is a dict, it is the name of the variable to be chamged
-#    """
-#    from .. import Q_
-#
-#    if key:
-#        Q = inunit[key].to(outunit)
-#    else:
-#        Q = inunit.to(outunit)
-#
-#    coef = Q.magnitude
-#    outunit = Q_(1, Q.units)
-#    if inplace:
-#        inunit.update({key : outunit})
-#        return data*coef
-#    else:
-#        return data*coef, outunit
-#
+
 
 def get_notation(notation_def):
     """

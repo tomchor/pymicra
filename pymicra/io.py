@@ -12,20 +12,24 @@ from __future__ import print_function
 #-------------------------------------------
 def readDataFile(fname, variables=None, only_named_cols=True, **kwargs):
     """
-    Author: Tomas Chor
+    Reads one datafile using pandas.read_csv()
 
     Parameters
     ----------
+    variables: dict
+        keys are columns and values are names of variable
+    only_named_columns: bool
+        if True, don't read columns that don't appear on variables' keys
     kwargs: dict
         dictionary with kwargs of pandas' read_csv function
         see http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html for more detail
-
     variables: list or dict
         list or dictionary containing the names of each variable in the file (if dict, the keys must be ints)
         
     Returns
     ---------
-    dataFrame: pandas.DataFrame object
+    dataFrame:
+        pandas.DataFrame object
     """
     import pandas as pd
 
@@ -64,10 +68,9 @@ def readDataFile(fname, variables=None, only_named_cols=True, **kwargs):
 
 def readDataFiles(flist, verbose=0, **kwargs):
     """
-    Author: Tomas Chor
-    Reads data from a list of files
+    Reads data from a list of files by calling readDataFile individually for each entry
 
-    Parameters:
+    Parameters
     -----------
     flist: sequence of strings
         files to be parsed
@@ -76,9 +79,10 @@ def readDataFiles(flist, verbose=0, **kwargs):
     **kwargs:
         readDataFile kwargs
 
-    Returns:
+    Returns
     --------
-    data: pandas.DataFrame
+    pandas.DataFrame
+        data
     """
     import pandas as pd
 
@@ -107,7 +111,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     """
     Creates a micrometeorological time series from a file or list of files.
 
-    Parameters:
+    Parameters
     -----------
 
     flist: list or string
@@ -258,14 +262,14 @@ def readUnitsCsv(filename, **kwargs):
     Reads a csv file in which the first line is the name of the variables
     and the second line contains the units
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     filename: string
         path of the csv file to read
     **kwargs:
         to be passed to pandas.read_csv
 
-    Returns:
+    Returns
     --------
     df: pandas.DataFrame
         dataframe with the data

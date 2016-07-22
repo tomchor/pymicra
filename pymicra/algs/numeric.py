@@ -1,43 +1,5 @@
 import pandas as pd
 
-#def _integrate_series(self, how='trapz', dateindex=False, **kwargs):
-#    """
-#    Numerically a given series.
-#
-#    Parameters:
-#    -----------
-#    how: string
-#        the method to use (trapz by default)
-#        Available methods:
-#         * trapz - trapezoidal
-#         * cumtrapz - cumulative trapezoidal
-#         * simps - Simpson's rule
-#         * romb - Romberger's rule
-#    dateindex: bool
-#        whether or not to assume index is sequence of dates
-#
-#    See http://docs.scipy.org/doc/scipy/reference/integrate.html for the method details.
-#    or the source code
-#    https://github.com/scipy/scipy/blob/master/scipy/integrate/quadrature.py
-#    """
-#    import numpy as np
-#    from scipy import integrate
-#
-#    available_rules = set(['trapz', 'cumtrapz', 'simps', 'romb'])
-#    if how in available_rules:
-#        rule = integrate.__getattribute__(how)
-#    else:
-#        print('Unsupported integration rule: %s' % (how))
-#        print('Expecting one of these sample-based integration rules: %s' % (str(list(available_rules))))
-#        raise AttributeError
-#    if dateindex:
-#        result = rule(self.values, self.index.astype(np.int64), **kwargs)
-#    else:
-#        result = rule(self.values, np.array(self.index), **kwargs)
-#        #result = rule(self.values, self.index.astype(np.float64), **kwargs)
-#    return result
-#
-
 #----------
 # Definition of the .integrate method for dataframes
 from .. import decorators as _decor
@@ -46,7 +8,7 @@ def _integrate_df(self, how='trapz', dateindex=False, **kwargs):
     """
     Numerically integrate a given dataframe
 
-    Parameters:
+    Parameters
     -----------
     how: string
         the method to use (trapz by default)
@@ -97,7 +59,7 @@ def _diff_df(self, how='central', axis=0):
     """
     Differentiates data numerically
 
-    Parameters:
+    Parameters
     -----------
     self: pd.DataFrame
         self

@@ -6,7 +6,7 @@ class fileConfig(object):
     """
     This class defines a specific configuration of a data file
 
-    Parameters:
+    Parameters
     ----------
     from_file: str
         path of .cfg file (configuration file) to read from. This will ignore all other
@@ -128,7 +128,7 @@ class siteConfig(object):
              displacement_height=None, roughness_length=None,
              latitude=None, longitude=None, altitude=None, description=None, **kwargs):
         """
-        Parameters:
+        Parameters
         -----------
             from_file: str
                 path to .site file with the configurations of the experiment. All atributes are taken from there.
@@ -332,7 +332,7 @@ class dataloggerConfig(object):
     """
     This class defines a specific configuration of a datalogger output file
 
-    Parameters:
+    Parameters
     ----------
     from_file: str
         path of .dlc file (datalogger configuration file) to read from. This will ignore all other

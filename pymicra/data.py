@@ -81,7 +81,7 @@ def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=
     degree: int
         degree of polynomial fit (only if how=='linear' or how=='polynomial')
 
-    Returns:
+    Returns
         out: pandas.DataFrame or pandas.Series
     """
     import pandas as pd
@@ -167,7 +167,7 @@ def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=Non
     degree: int
         degree of polynomial fit (only if how=='linear' or how=='polynomial')
 
-    Returns:
+    Returns
         out: pandas.DataFrame or pandas.Series
     """
     from scipy import signal
@@ -248,7 +248,7 @@ def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):
     notation: notation object
         notation to be used
 
-    Returns:
+    Returns
     --------
     spectrum: dataframe
         whose column is the spectrum or coespectrum of the input dataframe
@@ -309,7 +309,7 @@ def spectra(data, frequency=10, notation=None, anti_aliasing=True):
     anti_aliasing: bool
         whether or not to apply anti-aliasing according to Gobbi, Chamecki & Dias, 2006 (doi:10.1029/2005WR004374)
 
-    Returns:
+    Returns
     --------
     spectra: dataframe
         whose column is the spectrum or coespectrum of the input dataframe
@@ -370,7 +370,7 @@ def spectrum(data, frequency=10, anti_aliasing=False, outname=None):
     outname: str
         name of the output column
 
-    Returns:
+    Returns
     --------
     spectrum: dataframe
         whose column is the spectrum or coespectrum of the input dataframe
@@ -437,7 +437,7 @@ def bulkCorr(data):
     Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
     doi:10.1029/2012WR012127
 
-    Parameters:
+    Parameters
     -----------
     data: pandas.dataframe
         a two-columns dataframe

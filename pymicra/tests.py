@@ -97,7 +97,7 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
     """
     Performs the Reverse Arrangement Test in each column of data
 
-    Parameters:
+    Parameters
     -----------
     data: pandas.DataFrame
         to apply RAT to each column
@@ -111,7 +111,7 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
     RAT_significance: float
         significance with which to apply the RAT
 
-    Returns:
+    Returns
     --------
     valid: pd.Series
         True or False for each column. If True, column passed the test
@@ -144,7 +144,7 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     """
     Checks dataframe for columns with too small of a standard deviation
 
-    Parameters:
+    Parameters
     -----------
     data: pandas.DataFrame
         dataset whose standard deviation to check 
@@ -157,7 +157,7 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     chunk_size: str
         pandas datetime offset string
 
-    Returns:
+    Returns
     --------
     valid: pandas.Series
         contatining True of False for each column. True means passed the test.
@@ -202,7 +202,7 @@ def check_limits(data, tables, max_percent=1., replace_with='interpolation'):
     the linear trend of the run. The number of faulty points is also checked for each
     column against the maximum percentage of accepted faults max_percent
 
-    Parameters:
+    Parameters
     -----------
     data: pandas dataframe
         dataframe to be checked
@@ -277,7 +277,7 @@ def check_spikes(data, chunk_size='2min',
     """
     Applies spikes-check according to Vickers and Mahrt (1997)
 
-    Parameters:
+    Parameters
     -----------
     data: pandas.dataframe
         data to de-spike
@@ -382,7 +382,7 @@ def check_numlines(fname, numlines=18000, falseverbose=False):
     Checks length of file against a correct value.
     Returns False is length is wrong and True if length is right
 
-    Parameters:
+    Parameters
     ----------
     fname: string
         path of the file to check
