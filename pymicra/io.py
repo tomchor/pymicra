@@ -1,9 +1,8 @@
 """
-Author: Tomas Chor
-Date: 2015-08-07
--------------------------
+Defines some useful functions to aid on the input/output
 """
 from __future__ import print_function
+
 
 #-------------------------------------------
 #-------------------------------------------
@@ -28,7 +27,7 @@ def readDataFile(fname, variables=None, only_named_cols=True, **kwargs):
         
     Returns
     ---------
-    dataFrame:
+    pandas.DataFrame:
         pandas.DataFrame object
     """
     import pandas as pd
@@ -112,8 +111,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     Creates a micrometeorological time series from a file or list of files.
 
     Parameters
-    -----------
-
+    ----------
     flist: list or string
         either list or names of files (dataFrame will be one concatenated dataframe) or the name of one file
     datalogger: pymicra.dataloggerConfig object
@@ -124,6 +122,13 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
         (i.d. there are repeated timestamps)
     verbose: int, bool
         verbose level
+
+    Returns
+    -------
+    pandas.DataFrame
+        data contained in the files in flist
+    dict (optional)
+        units of the data
     """
     from . import algs
 

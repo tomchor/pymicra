@@ -1,20 +1,12 @@
-#!/usr/bin/python
+"""
+Defines functions useful to generic signal data
+"""
+
 from __future__ import print_function
 from . import decorators as _decors
-"""
-Author: Tomas Chor
-Date: 2015-08-07
--------------------------
-
-This module works with micrometeorological data using pandas,
-numpy, datetime and several other packages.
-
-"""
 
 def rotate2D(data, notation=None):
-    """
-    Rotates the coordinates of wind data
-    ----------------------
+    """Rotates the coordinates of wind data
 
     Parameters
     ----------
@@ -22,6 +14,11 @@ def rotate2D(data, notation=None):
         the dataFrame to be rotated
     notation: notation object
         a notation object to know which are the wind variables
+
+    Returns
+    -------
+    pandas.DataFrame
+        the complete data input with the wind components rotated
     """
     from math import atan2, sqrt
     import numpy as np
@@ -82,7 +79,9 @@ def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=
         degree of polynomial fit (only if how=='linear' or how=='polynomial')
 
     Returns
-        out: pandas.DataFrame or pandas.Series
+    -------
+    pandas.DataFrame or pandas.Series
+        trends of data input
     """
     import pandas as pd
     import algs
@@ -168,7 +167,9 @@ def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=Non
         degree of polynomial fit (only if how=='linear' or how=='polynomial')
 
     Returns
-        out: pandas.DataFrame or pandas.Series
+    -------
+    pandas.DataFrame or pandas.Series
+        fluctuations of the input data
     """
     from scipy import signal
     from . import algs
@@ -250,7 +251,7 @@ def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):
 
     Returns
     --------
-    spectrum: dataframe
+    spectrum: pandas.DataFrame
         whose column is the spectrum or coespectrum of the input dataframe
     """
     from . import notation
@@ -310,8 +311,8 @@ def spectra(data, frequency=10, notation=None, anti_aliasing=True):
         whether or not to apply anti-aliasing according to Gobbi, Chamecki & Dias, 2006 (doi:10.1029/2005WR004374)
 
     Returns
-    --------
-    spectra: dataframe
+    -------
+    spectra: pandas.DataFrame
         whose column is the spectrum or coespectrum of the input dataframe
     """
     from . import notation
@@ -354,91 +355,15 @@ def spectra(data, frequency=10, notation=None, anti_aliasing=True):
     return specs
 
 
-
-def spectrum(data, frequency=10, anti_aliasing=False, outname=None):
-    """
-    Calculates the spectrum for a set of data
-
-    Parameters
-    ----------
-    data: pandas.DataFrame
-        dataframe with one (will return the spectrum) or two (will return to cross-spectrum) columns
-    frequency: float
-        frequency of measurement of signal to pass to numpy.fft.rfftfreq
-    anti_aliasing: bool
-        whether or not to apply anti-aliasing according to Gobbi, Chamecki & Dias, 2006 (doi:10.1029/2005WR004374)
-    outname: str
-        name of the output column
-
-    Returns
-    --------
-    spectrum: dataframe
-        whose column is the spectrum or coespectrum of the input dataframe
-    """
-    import numpy as np
-    import pandas as pd
-
-    N = len(data)
-    Co = False
-    if type(data)==pd.DataFrame:
-        if len(data.columns)==1:
-            pass
-        elif len(data.columns)==2:
-            Co=True
-        else:
-            raise Exception('Too many columns of data. Chose one (spectrum) or two (cross-spectrum)')
-    else:
-        raise Exception('Input has to be pandas.DataFrame')
-
-    #---------
-    # Either calculate the spectrum or the cross-spectrum
-    spec = np.fft.rfft(data.iloc[:,0])
-    if Co:
-        spec = np.conj(spec) * np.fft.rfft(data.iloc[:,-1])
-    else:
-        spec = np.conj(spec) * spec
-    #---------
-
-    #---------
-    # Anti-aliasing is done here
-    if anti_aliasing:
-        RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
-        spec *= RA**2.
-    #---------
-
-    #---------
-    # Now we normalize the spectrum and calculate their frequency
-    spec*= 2./(frequency*N)
-    freq = np.fft.rfftfreq(len(data), d=1./frequency)
-    #---------
-
-    #---------
-    # Return a dataframe if outname is something, otherwise just return a Series
-    if outname:
-        aux=pd.DataFrame( data={ outname : spec }, index=freq )
-    else:
-        aux = pd.Series(spec, index=freq)
-    aux.index.name='frequencies'
-    #---------
-
-    #---------
-    # This is just to avoid x + 0j as output, which is an array of complex numbers
-    # with imaginary part always equal to zero.
-    if Co:
-        return aux
-    else:
-        return aux.apply(np.real)
-    #---------
-
-
 def bulkCorr(data):
-    """
-    Bulk correlation coefficient according to
+    """Bulk correlation coefficient according
+
+    Bulk correlation coefficient according to 
     Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
     doi:10.1029/2012WR012127
 
     Parameters
-    -----------
+    ----------
     data: pandas.dataframe
         a two-columns dataframe
     """
@@ -449,7 +374,6 @@ def bulkCorr(data):
     r = cov.loc[a,b]
     r = r / (np.sqrt(cov.loc[a,a])*np.sqrt(cov.loc[b,b]))
     return r
-
 
 
 

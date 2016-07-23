@@ -1,9 +1,11 @@
+"""
+Defines useful decorators for Pymicra
+"""
 from functools import wraps
 
 
 def pdgeneral_in(func):
-    """
-    """
+    """Defines a decorator that transforms Series into DataFrame"""
     import pandas as pd
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -62,6 +64,13 @@ def pdgeneral_io(func):
     return wrapper
 
 def pdgeneral(convert_out=True):
+    """Defines a decorator to make functions work on both pandas.Series and DataFrames
+
+    Parameters
+    ----------
+    convert_out: bool
+        if True, also converts output back to Series if input is Series
+    """
     if convert_out:
         return pdgeneral_io
     else:
@@ -71,31 +80,20 @@ def pdgeneral(convert_out=True):
 
 
 def autoassign(*names, **kwargs):
-    """
-    autoassign(function) -> method
-    autoassign(*argnames) -> decorator
-    autoassign(exclude=argnames) -> decorator
-    
+    """Decorator that automatically assigns keywords as atributes
+ 
     allow a method to assign (some of) its arguments as attributes of
     'self' automatically.  E.g.
     
-    >>> class Foo(object):
-    ...     @autoassign
-    ...     def __init__(self, foo, bar): pass
-    ... 
-    >>> breakfast = Foo('spam', 'eggs')
-    >>> breakfast.foo, breakfast.bar
-    ('spam', 'eggs')
-    
     To restrict autoassignment to 'bar' and 'baz', write:
     
-        @autoassign('bar', 'baz')
-        def method(self, foo, bar, baz): ...
+    @autoassign('bar', 'baz')
+    def method(self, foo, bar, baz): ...
 
     To prevent 'foo' and 'baz' from being autoassigned, use:
 
-        @autoassign(exclude=('foo', 'baz'))
-        def method(self, foo, bar, baz): ...
+    @autoassign(exclude=('foo', 'baz'))
+    def method(self, foo, bar, baz): ...
     """
     from functools import wraps
     from inspect import getargspec, isfunction

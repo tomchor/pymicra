@@ -1,6 +1,6 @@
 """
- Pymicra - Python Micrometeorology Analysis tool
- ----------------------------------------------
+Pymicra - Python tool for Micrometeorological Analyses
+------------------------------------------------------
 
  :Author: Tomas Chor
  :Date of start: 2015-08-15

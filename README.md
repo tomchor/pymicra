@@ -3,6 +3,8 @@ Pymicra - A Python tool for Micrometeorological Analyses
 
 Pymicra is a Python package designed to make it easier to work with micrometeorological datasets. It is aimed at improving the productivity and allowing us to focus on the micrometeorological, rather than programming issues.
 
+Please check out the |gitrepo|\_ and the |docs|\_.
+
 Please check out the [Github page](https://github.com/tomchor/pymicra) and the [documentation](http://tomchor.github.io/pymicra/).
 
 Here's a quick (incomplete!) list of what Pymicra does:

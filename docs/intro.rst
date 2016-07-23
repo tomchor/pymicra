@@ -12,11 +12,8 @@ and running ``help(pymicra.timeSeries)``, for example.
 
 Since Pymicra is meant to be a community package, improvements, suggestions of
 improvement, and any kind of feedback are highly appreciated. The code is
-available at `its github page`_ and any contact can be made through there
+available at its |gitrepo|_ and any contact can be made through there
 (possibly creating an issue) or via e-mail.
-
-.. _its github page: https://github.com/tomchor/pymicra
-
 
 In order for the user to program fast and effectively (and to reduce the time it
 takes me to write its code), Pymicra was written on top of the

@@ -486,6 +486,8 @@ def _printUnit(string, mode='L', trim=True, greek=True):
     """
     Returns string formatted for LaTeX or other uses.
 
+    Parameters
+    ----------
     string: string
         string (unambiguous) that represents the unit
     mode: string
@@ -538,7 +540,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
         of the next file in case they don't finish on a nice round time with respect to the frequency
 
     Returns
-    --------
+    -------
     None
     """
     from os import path
@@ -695,7 +697,7 @@ def correctDrift(drifted, correct_drifted_vars=None, correct=None,
         whether to return the indexes of the used points for the calculation. Serves to check the regression
 
     Returns
-    --------
+    -------
     outdf: pandas.DataFrame
         drifted dataset corrected with right dataset
     """

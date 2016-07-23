@@ -9,9 +9,6 @@ Subpackages
    pymicra.algs
    pymicra.micro
 
-Submodules
-----------
-
 pymicra.constants module
 ------------------------
 

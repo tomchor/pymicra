@@ -1,9 +1,11 @@
-from __future__ import print_function
 """
-This module contains functions that test certain conditions on pandas.dataframes.
+This module contains functions that test certain conditions on pandas.dataframes to
+be used with the qcontrol().
+
 They all return True for the columns that pass the test and False for the columns
 that fail the test.
 """
+from __future__ import print_function
 from . import algs
 
 def check_replaced(replaced, max_count=180):
@@ -98,7 +100,7 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
     Performs the Reverse Arrangement Test in each column of data
 
     Parameters
-    -----------
+    ----------
     data: pandas.DataFrame
         to apply RAT to each column
     detrend_kw: dict
@@ -112,7 +114,7 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
         significance with which to apply the RAT
 
     Returns
-    --------
+    -------
     valid: pd.Series
         True or False for each column. If True, column passed the test
     """
@@ -145,7 +147,7 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     Checks dataframe for columns with too small of a standard deviation
 
     Parameters
-    -----------
+    ----------
     data: pandas.DataFrame
         dataset whose standard deviation to check 
     tables: pandas.DataFrame
@@ -158,7 +160,7 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
         pandas datetime offset string
 
     Returns
-    --------
+    -------
     valid: pandas.Series
         contatining True of False for each column. True means passed the test.
     """
@@ -203,7 +205,7 @@ def check_limits(data, tables, max_percent=1., replace_with='interpolation'):
     column against the maximum percentage of accepted faults max_percent
 
     Parameters
-    -----------
+    ----------
     data: pandas dataframe
         dataframe to be checked
     tables: pandas.dataframe
@@ -212,7 +214,7 @@ def check_limits(data, tables, max_percent=1., replace_with='interpolation'):
         number from 0 to 100 that represents the maximum percentage of faulty
         runs accepted by this test.
 
-    Return:
+    Returns
     -------
     df: pandas.DataFrame
         input data but with the faulty points substituted by the linear trend of the run.
@@ -278,7 +280,7 @@ def check_spikes(data, chunk_size='2min',
     Applies spikes-check according to Vickers and Mahrt (1997)
 
     Parameters
-    -----------
+    ----------
     data: pandas.dataframe
         data to de-spike
     chunk_size: str, int
@@ -388,6 +390,11 @@ def check_numlines(fname, numlines=18000, falseverbose=False):
         path of the file to check
     numlines: int
         correct number of lines that the file has to have
+
+    Returns
+    -------
+    pandas.Series
+        Either with True or False
     """
     from . import algs
     import pandas as pd

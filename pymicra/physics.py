@@ -1,13 +1,9 @@
-#!/usr/bin/python
 """
-Author: Tomas Chor
-
 Module that contains physical functions for general use
 
 TO DO LIST:
-
-* ADD GENERAL SOLAR ZENITH CALCULATION
-* ADD FOOTPRINT CALCULATION?
+ * ADD GENERAL SOLAR ZENITH CALCULATION
+ * ADD FOOTPRINT CALCULATION?
 """
 
 
@@ -46,7 +42,7 @@ def theta_from_theta_s(data, units, notation=None, return_df=True):
 
 
 def theta_from_theta_v(data, units, notation=None, return_df=True):
-    """
+    """Calculates thermodynamic temperature from virtual temperature measurements
 
     theta_v ~ theta (1 + 0.61 q)
 
@@ -57,6 +53,11 @@ def theta_from_theta_v(data, units, notation=None, return_df=True):
     units: dict
         units dictionary
     notation: pymicra.Notation
+
+    Returns
+    -------
+    pandas.DataFrame or Series
+        virtual temperature
     """
     from . import algs
 

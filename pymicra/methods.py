@@ -1,5 +1,6 @@
-#!/usr/bin/python
 """
+Defines some methods. Some have functions defined here but most use
+functions defined elsewhere. This is done by monkey-patching Pandas.
 """
 from . import decorators as _decors
 import pandas as _pd
