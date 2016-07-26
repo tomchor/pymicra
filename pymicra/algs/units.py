@@ -1,26 +1,26 @@
 from .. import decorators
 
-def multiply(elems, units, inplace=False, unitdict=None, key=None):
+def multiply(elems, units, inplace_units=False, unitdict=None, key=None):
     """
     Multiply elements considering their units
     """
-    return operate(elems, units, inplace=inplace, unitdict=unitdict, key=key, operation='*')
+    return operate(elems, units, inplace_units=inplace_units, unitdict=unitdict, key=key, operation='*')
 
-def add(elems, units, inplace=False, unitdict=None, key=None):
+def add(elems, units, inplace_units=False, unitdict=None, key=None):
     """
     Add elements considering their units
     """
-    return operate(elems, units, inplace=inplace, unitdict=unitdict, key=key, operation='+')
+    return operate(elems, units, inplace_units=inplace_units, unitdict=unitdict, key=key, operation='+')
 
-def divide(elems, units, inplace=False, unitdict=None, key=None):
+def divide(elems, units, inplace_units=False, unitdict=None, key=None):
     """
     Divide elements considering their units
     """
-    return operate(elems, units, inplace=inplace, unitdict=unitdict, key=key, operation='/')
+    return operate(elems, units, inplace_units=inplace_units, unitdict=unitdict, key=key, operation='/')
 
 
 
-def operate(elems, units, inplace=False, unitdict=None, key=None, operation='+'):
+def operate(elems, units, inplace_units=False, unitdict=None, key=None, operation='+'):
     """
     Operate on elements considering their units
 
@@ -30,8 +30,8 @@ def operate(elems, units, inplace=False, unitdict=None, key=None, operation='+')
         list of pandas.Series
     units: list, tuple
         list of pint.units ordered as the elems list
-    inplace: bool
-        sets dictionary inplace
+    inplace_units: bool
+        sets dictionary inplace_units
     unitdict: dict
         dict to be set inplace
     key: str
@@ -72,7 +72,7 @@ def operate(elems, units, inplace=False, unitdict=None, key=None, operation='+')
     out = pd.Series(result.magnitude, index=idx)
     funit = result.units
 
-    if inplace==True:
+    if inplace_units==True:
         unitdict.update({key : funit})
         return out
     else:
@@ -95,7 +95,7 @@ def parseUnits(unitstr):
         return { key: ureg[el].u for key, el in unitstr.items() }
 
 
-def convert_to(data, inunit, outunit, inplace=False, key=None): 
+def convert_to(data, inunit, outunit, inplace_units=False, key=None): 
     """ 
     Converts data from one unit to the other 
  
@@ -107,7 +107,7 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
         unit(s) that the data is in 
     outunit: str 
         convert to this unit 
-    inplace: bool 
+    inplace_units: bool 
         if inunit is a dict, the dict is update in place. "key" keyword must be provided 
     key: str 
         if inunit is a dict, it is the name of the variable to be changed 
@@ -121,14 +121,14 @@ def convert_to(data, inunit, outunit, inplace=False, key=None):
  
     coef = Q.magnitude 
     outunit = Q.units
-    if inplace: 
+    if inplace_units: 
         inunit.update({key : outunit}) 
         return data*coef 
     else: 
         return data*coef, outunit 
 
 
-def convert_cols(data, guide, units, inplace=False):
+def convert_cols(data, guide, units, inplace_units=False):
     """ 
     Converts data from one unit to the other 
  
@@ -140,7 +140,7 @@ def convert_cols(data, guide, units, inplace=False):
         {names of columns : units to converted to}
     units: dict
         units dictionary
-    inplace: bool 
+    inplace_units: bool 
         if inunit is a dict, the dict is update in place. "key" keyword must be provided 
     """ 
     from .. import algs
@@ -163,14 +163,14 @@ def convert_cols(data, guide, units, inplace=False):
         data.loc[:, col] = aux
     #-------
         
-    if inplace: 
+    if inplace_units: 
         units.update(guide) 
         return data 
     else: 
         return data, guide 
 
 
-def convert_indexes(data, guide, units, inplace=False):
+def convert_indexes(data, guide, units, inplace_units=False):
     """ 
     Converts data from one unit to the other 
  
@@ -182,7 +182,7 @@ def convert_indexes(data, guide, units, inplace=False):
         {names of columns : units to converted to}
     units: dict
         units dictionary
-    inplace: bool 
+    inplace_units: bool 
         if inunit is a dict, the dict is update in place. "key" keyword must be provided 
     """ 
     from .. import algs
@@ -198,7 +198,7 @@ def convert_indexes(data, guide, units, inplace=False):
         data.loc[ idx ] = aux.magnitude
     #-------
         
-    if inplace: 
+    if inplace_units: 
         units.update(guide) 
         return data 
     else: 

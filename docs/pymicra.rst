@@ -1,15 +1,24 @@
 Pymicra's auto-generated docs
-===============
+=============================
 
 Subpackages
 -----------
 
 .. toctree::
    :maxdepth: 2
+
    pymicra.algs
    pymicra.micro
 
-pymicra.constants module
+Pymicra contents
+----------------
+
+.. automodule:: pymicra
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pymicra.constants
 ------------------------
 
 .. automodule:: pymicra.constants
@@ -17,7 +26,7 @@ pymicra.constants module
     :undoc-members:
     :show-inheritance:
 
-pymicra.core module
+pymicra.core
 -------------------
 
 .. automodule:: pymicra.core
@@ -25,7 +34,7 @@ pymicra.core module
     :undoc-members:
     :show-inheritance:
 
-pymicra.data module
+pymicra.data
 -------------------
 
 .. automodule:: pymicra.data
@@ -33,7 +42,7 @@ pymicra.data module
     :undoc-members:
     :show-inheritance:
 
-pymicra.decorators module
+pymicra.decorators
 -------------------------
 
 .. automodule:: pymicra.decorators
@@ -41,7 +50,7 @@ pymicra.decorators module
     :undoc-members:
     :show-inheritance:
 
-pymicra.io module
+pymicra.io
 -----------------
 
 .. automodule:: pymicra.io
@@ -49,7 +58,7 @@ pymicra.io module
     :undoc-members:
     :show-inheritance:
 
-pymicra.methods module
+pymicra.methods
 ----------------------
 
 .. automodule:: pymicra.methods
@@ -57,7 +66,7 @@ pymicra.methods module
     :undoc-members:
     :show-inheritance:
 
-pymicra.physics module
+pymicra.physics
 ----------------------
 
 .. automodule:: pymicra.physics
@@ -65,7 +74,7 @@ pymicra.physics module
     :undoc-members:
     :show-inheritance:
 
-pymicra.tests module
+pymicra.tests
 --------------------
 
 .. automodule:: pymicra.tests
@@ -73,7 +82,7 @@ pymicra.tests module
     :undoc-members:
     :show-inheritance:
 
-pymicra.util module
+pymicra.util
 -------------------
 
 .. automodule:: pymicra.util
@@ -82,10 +91,4 @@ pymicra.util module
     :show-inheritance:
 
 
-Module contents
----------------
 
-.. automodule:: pymicra
-    :members:
-    :undoc-members:
-    :show-inheritance:

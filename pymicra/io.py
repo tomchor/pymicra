@@ -1,5 +1,5 @@
 """
-Defines some useful functions to aid on the input/output
+Defines some useful functions to aid on the input/output of data
 """
 from __future__ import print_function
 
@@ -101,9 +101,6 @@ def readDataFiles(flist, verbose=0, **kwargs):
     return data
 
 
-def dataset(*args, **kwargs):
-    return timeSeries(*args, **kwargs)
-
 
 def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
         read_data_kw={}, parse_dates_kw={}, clean_dates=True, return_units=True, only_named_cols=True):
@@ -183,7 +180,7 @@ def read_fileConfig(dlcfile):
 
     "2013-04-05 00:00:00", .345, .344, ...
 
-    Then the .dlc should have: variables = {0:'%Y-%m-%d %H:%M:%S'}. This is the default csv format of
+    Then the .config should have: variables={0:'%Y-%m-%d %H:%M:%S',1:'u',2:'v'}. This is the default csv format of
     CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
     """
     from .core import fileConfig
@@ -201,16 +198,16 @@ def read_fileConfig(dlcfile):
 
 
 
-def read_dlc(dlcfile):
+def _read_dlc(dlcfile):
     """
     Reads datalogger configuration file
 
-    WARNING! When defining the .dlc note that by default columns that are enclosed between doublequotes
+    When defining the .dlc note that by default columns that are enclosed between doublequotes
     will appear without the doublequotes. So if your file is of the form :
 
     "2013-04-05 00:00:00", .345, .344, ...
 
-    Then the .dlc should have: varNames=['%Y-%m-%d %H:%M:%S','u','v']. This is the default csv format of
+    Then the .dlc should have: variables={0:'%Y-%m-%d %H:%M:%S',1:'u',2:'v'}. This is the default csv format of
     CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
     """
     from core import dataloggerConfig
@@ -240,6 +237,16 @@ def read_site(sitefile):
 
     sitedile: str
         path to .site file
+
+    Parameters
+    ----------
+    sitefile: str
+        path to the site configuration file
+
+    Returns
+    -------
+    pymicra.siteConfig
+        pymicra site configuration object
     """
     from core import siteConfig, siteConfig
 

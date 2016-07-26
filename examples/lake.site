@@ -1,0 +1,6 @@
+description         = "Site configurations for the lake"
+
+measurement_height  = 2.75  # m
+canopy_height       = 0.0   # m
+displacement_height = 0.0   # m
+roughness_length    = .01   # m

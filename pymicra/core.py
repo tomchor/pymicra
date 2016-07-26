@@ -192,33 +192,39 @@ class Notation(object):
     You should be careful with the order. The last argument should not have any '%' symbols
     or you'll get a "TypeError: not all arguments converted during string formatting" message.
     """
-    mean='%s_mean'
-    fluctuations="%s'"
-    star='%s_star'
-    std='%s_std'
-    mass_concentration='conc_%s'
-    molar_concentration='mconc_%s'
-    mass_density='rho_%s'
-    molar_density='mrho_%s'
-    mass_mixing_ratio='r_%s'
-    molar_mixing_ratio='mr_%s'
-
-    density=mass_density
-    concentration=mass_concentration
-    mixing_ratio=mass_mixing_ratio
-
-    flux_of = 'F_%s'
-
-    cross_spectrum = 'X_%s_%s'
-    spectrum = 'Sp_%s'
-    cospectrum = 'Co_%s_%s'
-    quadrature = 'Qu_%s_%s'
-
     @_decors.autoassign
     def __init__(self, solutes=['h2o', 'co2', 'ch4', 'o3', 'n2o'], **kwargs):
         """
         When initialized, calls the build method to build the full notation
+
+        Parameters
+        ----------
+        solutes: list
+            list of solutes for which to build the notation (still to be implemented)
+
+        Returns
+        -------
+        pymicra.Notation
+            default Notation object
         """
+
+        self.mean='%s_mean'
+        self.fluctuations="%s'"
+        self.star='%s_star'
+        self.std='%s_std'
+        self.mass_concentration='conc_%s'
+        self.molar_concentration='mconc_%s'
+        self.mass_density='rho_%s'
+        self.molar_density='mrho_%s'
+        self.mass_mixing_ratio='r_%s'
+        self.molar_mixing_ratio='mr_%s'
+
+        self.flux_of = 'F_%s'
+
+        self.cross_spectrum = 'X_%s_%s'
+        self.spectrum = 'Sp_%s'
+        self.cospectrum = 'Co_%s_%s'
+        self.quadrature = 'Qu_%s_%s'
 
         self.u='u'
         self.v='v'
@@ -256,7 +262,16 @@ class Notation(object):
 
     def build(self):
         """
-        This useful method builds the full notation based on the base notation
+        This useful method builds the full notation based on the base notation.
+
+        Given notation for means, fluctuations, and etc, along with names of variables, this 
+        method builds the notation for mean h2o concentration, virtual temperature fluctuations
+        and so on.
+
+        Returns
+        -------
+        pymicra.Notation
+            Notation object with built notation
         """
 
         #-------------

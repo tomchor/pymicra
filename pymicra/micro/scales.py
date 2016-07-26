@@ -1,9 +1,7 @@
 from __future__ import print_function
 
 def MonObuVar(L_m, siteConf):
-    """
-    Redirects to stabilityParam
-    """
+    """Redirects to stabilityParam()"""
     return stabilityParam(L_m, siteConf)
 
 def stabilityParam(L_m, siteConf):
@@ -22,36 +20,11 @@ def stabilityParam(L_m, siteConf):
     return zeta
 
 def MonObuLen(theta_v_star, theta_v_mean, u_star, g=None):
-    """
-    """
+    """Redirects to obukhovLen()"""
     return obukhovLen(theta_v_star, theta_v_mean, u_star)
 
-def obukhovLen2(theta_v_star, theta_v_mean, u_star, units=None):
-    """
-    Calculates the Monin-Obukhov Length
-    according to:
 
-    GARRAT, The atmospheric boundary layer, 1992 (eq. 1.11, p. 10)
-    L = ( u_star^2 * theta_v ) / ( kappa * g * theta_v_star )
-
-    KUNDU, Fluid mechanics, 1990 (eq 71, chap. 12, p. 462)
-    L_M = - u_star^3 / ( kappa * alpha * g * cov(w,T') )
-
-    ARYA, Introduction to micrometeorology (eq. 11.1, p. 214)
-    L = - u_star^3 / (kappa * (g/T_0) * (H_0/(rho*c_p)) )
-
-    STULL, An introduction to Boundary layer meteorology, 1988 (eq. 5.7b, p. 181)
-    L = - ( theta_v * u_star^3 ) / ( kappa *g* cov(w',theta_v') )
-    """
-    from .. import constants
-
-    g = constants.gravity
-    kappa = constants.kappa
-    Lm = - ( (u_star**2) * theta_v_mean) / (kappa *g* theta_v_star)
-    return Lm
-
-
-def obukhovLen(data, units, theta_v_mean=None, theta_v_mean_unit=None, notation=None, inplace=True):
+def obukhovLen(data, units, theta_v_mean=None, theta_v_mean_unit=None, notation=None, inplace_units=True):
     """
     Calculates the Monin-Obukhov Length
     according to:
@@ -91,7 +64,7 @@ def obukhovLen(data, units, theta_v_mean=None, theta_v_mean_unit=None, notation=
     Lo = - num/denom
     Lo_unit = num_unit/denom_unit
 
-    if inplace:
+    if inplace_units:
         units.update({defs.obukhov_length:Lo_unit})
         return Lo
     else:
@@ -100,7 +73,7 @@ def obukhovLen(data, units, theta_v_mean=None, theta_v_mean_unit=None, notation=
 
 
 def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None, theta_v_mean_unit=None,
-        theta_fluct_from_theta_v=True, solutes=[], output_as_df=True, inplace=True):
+        theta_fluct_from_theta_v=True, solutes=[], output_as_df=True, inplace_units=True):
     """
     Calculates characteristic lengths for data
 
@@ -108,7 +81,7 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None, the
     and change the names by using the notation_defs keyworkd, which is a notation object
 
     Parameters
-    -----------
+    ----------
     data: pandas.DataFrame
         dataset to be used. It must either be the raw and turbulent data, or the covariances of such data
     siteConf: pymicra.siteConfig object
@@ -118,7 +91,13 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None, the
     output_as_df: boolean
         True if you want the output to be a one-line pandas.DataFrame. A pd.Series
         will be output if False.
+    inplace_units: bool
+        whether or not to update the units dict in place
 
+    Returns
+    -------
+    pandas.Series or pandas.Dataframe
+        depending on return_as_df
     """
     from .. import constants
     from .. import algs
@@ -236,7 +215,7 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None, the
     #---------
     # Now we calculate the obukhov length and the similarity variable
     print('Calculating Obukhov length and stability parameter ... ', end='')
-    Lo = obukhovLen(out, outunits, theta_v_mean=theta_v_mean, theta_v_mean_unit=theta_v_mean_unit, inplace=True)
+    Lo = obukhovLen(out, outunits, theta_v_mean=theta_v_mean, theta_v_mean_unit=theta_v_mean_unit, inplace_units=True)
     out[ defs.obukhov_length ]      = Lo
     out[ defs.stability_parameter ] = stabilityParam(Lo, siteConf)
 
@@ -253,7 +232,7 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None, the
 
     #---------
     # Finally we construct the output dataframe
-    if inplace:
+    if inplace_units:
         units.update(outunits)
         return out
     else:

@@ -1,5 +1,6 @@
 """
-Module that contains physical functions for general use
+Module that contains physical functions. They are all general use, but
+most are specially frequent in micrometeorology.
 
 TO DO LIST:
  * ADD GENERAL SOLAR ZENITH CALCULATION
@@ -7,7 +8,7 @@ TO DO LIST:
 """
 
 
-def theta_from_theta_s(data, units, notation=None, return_df=True):
+def theta_from_theta_s(data, units, notation=None, return_full_df=True, inplace_units=True):
     r"""Calculates thermodynamic temperature using sonic temperature measurements
 
     From Schotanus, Nieuwstadt, de Bruin; DOI 10.1007/BF00164332
@@ -34,17 +35,26 @@ def theta_from_theta_s(data, units, notation=None, return_df=True):
     defs = algs.get_notation(notation)
     data = data.copy()
     theta = data[ defs.sonic_temp ]/(1. + 0.51*data[ defs.specific_humidity ])
-    if return_df:
+    theta_unit = units[ defs.sonic_temp ]
+
+    if return_full_df:
         data.loc[:, defs.thermodyn_temp ] = theta
-        return data
+        out = data
     else:
-        return theta
+        out = theta
+
+    if inplace_units:
+        units.update({ defs.thermodyn_temp : theta_unit })
+    else:
+        out = (out, theta_unit)
+
+    return out
 
 
-def theta_from_theta_v(data, units, notation=None, return_df=True):
-    """Calculates thermodynamic temperature from virtual temperature measurements
+def theta_from_theta_v(data, units, notation=None, return_full_df=True, inplace_units=True):
+    r"""Calculates thermodynamic temperature from virtual temperature measurements
 
-    theta_v ~ theta (1 + 0.61 q)
+    :math:`theta_v \approx theta (1 + 0.61 q)`
 
     Parameters
     ----------
@@ -63,12 +73,21 @@ def theta_from_theta_v(data, units, notation=None, return_df=True):
 
     defs = algs.get_notation(notation)
     data = data.copy()
-    theta = data[ defs.sonic_temp ]/(1. + 0.61*data[ defs.specific_humidity ])
-    if return_df:
+    theta = data[ defs.virtual_temp ]/(1. + 0.61*data[ defs.specific_humidity ])
+    theta_unit = units[ defs.virtual_temp ]
+
+    if return_full_df:
         data.loc[:, defs.thermodyn_temp ] = theta
-        return data
+        out = data
     else:
-        return theta
+        out = theta
+
+    if inplace_units:
+        units.update({ defs.thermodyn_temp : theta_unit })
+    else:
+        out = (out, theta_unit)
+
+    return out
 
 
 
@@ -84,12 +103,18 @@ def theta_std_from_theta_v_fluc(data, units, notation=None):
         units dictionary
     notation: pymicra.Notation
         Notation object or None
+
+    Returns
+    -------
+    float
+        standard deviation of the thermodynamic temperature
     """
     import numpy as np
     from . import algs
 
     defs = algs.get_notation(notation)
     data = data.copy()
+    units = units.copy()
 
     #-----------
     # Consider the existence of mean q
@@ -120,37 +145,92 @@ def theta_std_from_theta_v_fluc(data, units, notation=None):
 
 
 
-def ppxv2density(ser, T, p, units, solute=None):
-    """
-    ser should be a series!
-    concentration in ser should be ppmv, which will be transformed to g/m3
-    p should be in kPa!
+def ppxv2density(data, units, notation=None, inplace_units=True, solutes=[]):
+    r"""
+    Calculates density of solutes based on their molar concentration (ppmv, ppbv and etc), not
+    to be confused with mass concentration (ppm, ppb and etc).
+
+    Uses the relation
+    :math:`\rho_x = \frac{C p}{\theta R_x}`
+
+    Parameters
+    ----------
+    data: pandas.DataFrame
+        dataset of micromet variables
+    units: dict
+        dict of pint units
+    notation: pymicra.Notation
+        notation to be used here
+    inplace_units: bool
+        whether or not to treat the dict units in place
+    solutes: list or tuple
+        solutes to consider when doing this conversion
+
+    Returns
+    -------
+    pandas.DataFrame
+        input data plus calculated density columns
     """
     from . import constants
     from . import algs
-    from . import ureg
 
-    units = units.copy()
-    ser = ser.copy()
+    if not solutes:
+        raise ValueError('Should specify for which solutes')
 
-    out = p/(T*constants.R_spec[solute])
-    out = ser.multiply(out, axis=0)
-    unit = units[solute]*units['p']/(units['T']*constants.units['R_spec'])
-    out, unit = algs.convert_to(out, unit, 'kg/m**3')
-    units.update({solute:unit})
-    return out, units
+    defs = algs.get_notation(notation)
+    defsdic = vars(defs)
+    data = data.copy()
+    cunits = constants.units
+    sol_units = {}
+    convert_to={}
+
+    p = data[ defs.pressure ]
+    theta = data[ defs.thermodyn_temp ]
+
+    for solute in solutes:
+        sol_mconc = defsdic[ '%s_molar_concentration' % solute ]
+        rho_sol = defsdic[ '%s_mass_density' % solute ]
+        data[ rho_sol ] = data[ sol_mconc ]*p/(theta*constants.R_spec[solute])
+        unit = units[ sol_mconc ]*units[ defs.pressure ]/(units[ defs.thermodyn_temp ]*cunits['R_spec'])
+
+        sol_units.update({ rho_sol : unit })
+        convert_to.update({ rho_sol : 'kg/m**3' })
+    data = data.convert_cols(convert_to, sol_units, inplace_units=True)
+
+    if inplace_units:
+        units.update(sol_units)
+        return data
+    else:
+        return data, unit
 
 
-def airDensity_from_theta_v(data, units, notation=None, inplace=True, use_means=False):
+def airDensity_from_theta_v(data, units, notation=None, inplace_units=True, use_means=False, return_full_df=True):
     """
     Calculates moist air density using p = rho R_dry T_virtual
+
+    Parameters
+    ----------
+    data: pandas.DataFrame
+        data to use to calculate air density
+    units: dict
+        dictionary of units
+    notation: pymicra.Notation
+        notation to be used
+    inplace_units: bool
+        whether or not to update the units inplace. If False, units are returns too
+    use_means: bool
+        whether or not to use averages of pressure and virtual temperature, instead of the means plus fluctuations
+
+    Returns
+    -------
+    
     """
     from . import algs
     from . import constants
 
     defs = algs.get_notation(notation)
     data = data.copy()
-    if not inplace:
+    if not inplace_units:
         units = units.copy()
     R_dry = constants.R_spec['dry']
 
@@ -165,16 +245,16 @@ def airDensity_from_theta_v(data, units, notation=None, inplace=True, use_means=
 
     #---------
     # We pass it to the standard mass density unit: kg/m**3
-    data = data.convert_cols({defs.moist_air_mass_density:'kg/m**3'}, units, inplace=True)
+    data = data.convert_cols({defs.moist_air_mass_density:'kg/m**3'}, units, inplace_units=True)
     #---------
 
-    if inplace:
+    if inplace_units:
         return data
     else:
         return data, units
 
 
-def dryAirDensity_from_p(data, units, notation=None, inplace=True):
+def dryAirDensity_from_p(data, units, notation=None, inplace_units=True):
     """
     Calculates dry air density
     NEEDS IMPROVEMENT REGARDING HANDLING OF UNITS
@@ -184,7 +264,7 @@ def dryAirDensity_from_p(data, units, notation=None, inplace=True):
 
     defs = algs.get_notation(notation)
     data = data.copy()
-    if not inplace:
+    if not inplace_units:
         units = units.copy()
 
     Rdry = constants.R_spec['dry']
@@ -207,13 +287,13 @@ def dryAirDensity_from_p(data, units, notation=None, inplace=True):
     units.update({ defs.dry_air_mass_density : p_air_unit/(Runit * units[ defs.thermodyn_temp ])})
     #-----------
 
-    if inplace:
+    if inplace_units:
         return data
     else:
         return data, units
 
 
-def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=False, theta=None, theta_unit=None):
+def airDensity_from_theta(data, units, notation=None, inplace_units=True, use_means=False, theta=None, theta_unit=None):
     """
     Calculates moist air density using theta measurements
 
@@ -225,7 +305,7 @@ def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=Fa
         units dictionary
     notation: pymicra.notation
         notation to be used
-    inplace: bool
+    inplace_units: bool
         whether or not to treat units inplace
     use_means: bool
         use the mean of theta or not when calculating
@@ -257,42 +337,137 @@ def airDensity_from_theta(data, units, notation=None, inplace=True, use_means=Fa
     p_h2o = data[ defs.h2o_mass_density ] * R_h2o * theta
     p_h2o_unit = units[ defs.h2o_mass_density ]*R_spec_unit*theta_unit
     #pv, pvu = algs.multiply([ data[defs.h2o_mass_density], R_h2o, theta ], [ units[defs.h2o_mass_density], R_spec_unit, theta_unit ])
-    #print(p_h2o, p_h2o_unit)
     #-----------
 
     #-----------
     # We subtract p_h2o from p_dry using pymicra.algs.add because addition with different units is tricky
-    p_dry, p_dry_unit = algs.add([ data[defs.pressure], -p_h2o ], [ units[defs.pressure], p_h2o_unit ], inplace=False)
+    p_dry, p_dry_unit = algs.add([ data[defs.pressure], -p_h2o ], [ units[defs.pressure], p_h2o_unit ], inplace_units=False)
     #-----------
 
     #-----------
     # We calculate dry air mass density
     data[ defs.dry_air_mass_density ] = p_dry/(R_dry*theta)
     outunits[ defs.dry_air_mass_density ] = p_dry_unit/(R_spec_unit*theta_unit)
-    data = data.convert_cols({defs.dry_air_mass_density : 'kg/m**3'}, outunits, inplace=True)
+    data = data.convert_cols({defs.dry_air_mass_density : 'kg/m**3'}, outunits, inplace_units=True)
     #-----------
 
     #-----------
     # We add rho_dry to rho_h2o using pymicra.algs.add because addition with different units is tricky
     data.loc[:, defs.moist_air_mass_density ] = algs.add([data[defs.dry_air_mass_density], data[defs.h2o_mass_density]],
-                        [outunits[defs.dry_air_mass_density], units[defs.h2o_mass_density]], inplace=True, unitdict=outunits, key=defs.moist_air_mass_density)
+                        [outunits[defs.dry_air_mass_density], units[defs.h2o_mass_density]], inplace_units=True, unitdict=outunits, key=defs.moist_air_mass_density)
     #-----------
 
     #-----------
     # Adjust the units
     conversions = { defs.moist_air_mass_density : 'kg/m**3',
                     defs.dry_air_mass_density : 'kg/m**3'}
-    data = data.convert_cols(conversions, outunits, inplace=True)
+    data = data.convert_cols(conversions, outunits, inplace_units=True)
     #-----------
 
-    if inplace:
+    if inplace_units:
         units.update(outunits)
         return data
     else:
         return data, outunits
 
 
-def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, dr=None):
+def latent_heat_water(T):
+    """
+    Calculates the latent heat of evaporation for water
+
+    Receives T in Kelvin and returns the latent heat in J/g
+    """
+    return 2500.827 -2.360*(T-273.15)
+
+
+def satWaterPressure(T, unit='kelvin'):
+    """
+    Returns the saturated water vapor pressure according eq (3.97) of Wallace and Hobbes, page 99.
+
+    e0, b, T1 and T2 are constants specific for water vapor
+
+    Parameters
+    ----------
+    T: float
+        thermodynamic temperature
+
+    Returns
+    -------
+        saturated vapor pressure of water (in kPa)
+    """
+    from math import exp
+    e0=0.61094
+    b=17.2694
+    if unit=='kelvin':
+        T1=273.16
+        T2=35.86
+    elif units=='celsius':
+        T1=0.
+        T2=243.04
+    else:
+        raise TypeError('Check your units')
+    brackets=b*(T-T1)/(T-T2)
+    return e0*exp(brackets)
+
+
+def perfGas(p=None, rho=None, R=None, T=None, gas=None):
+    """
+    Returns the only value that is not provided in the ideal gas law
+
+    P.S.: I'm using type to identify None objects because this way it works
+    againt pandas objects
+    """
+    from constants import R_spec
+    
+    if R==None:
+        if gas != None:
+            R=R_spec[gas]
+        elif gas==None:
+            R=R_spec['dry']
+
+    if type(p) == type(None):
+        return rho*R*T
+    elif type(rho) == type(None):
+        return p / (R*T)
+    elif type(T) == type(None):
+        return p / (R*rho)
+    elif type(R) == type(None):
+        return p / (rho*T)
+    return
+
+
+
+def R_moistAir(q):
+    """
+    Calculates the gas constant for umid air from the specific humidity q
+
+    Parameters
+    ----------
+    q: float
+        the specific humidity in g(water)/g(air)
+
+    Returns
+    -------
+    R_air: float
+        the specific gas constant for humid air in J/(g*K)
+    """
+    from constants import R_spec
+
+    return q* R_spec['h2o'] + (1.0 - q)*R_spec['dry_air']
+
+
+def dewPointTemp(theta, e):
+    """
+    Calculates the dew point temperature.
+    theta has to be in Kelvin and e in kPa
+    """
+    import numpy as np
+    ln = np.log(e / 0.611)
+    coef = ln / (17.502 - ln)
+    return 240.97*coef + 273.16
+
+
+def _solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, dr=None):
     """
     Calculates the solar zenith angle at any given day
 
@@ -358,107 +533,4 @@ def solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False, 
         return zen_ang
     #----------
 
-
-def latent_heat_water(T):
-    """
-    Calculates the latent heat of evaporation for water
-
-    Receives T in Kelvin and returns the latent heat in J/g
-    """
-    return 2500.827 -2.360*(T-273.15)
-
-
-def CtoK(T):
-    """
-    Return temp in Kelvin given temp T in Celsius
-    """
-    return T + 273.15
-
-
-def satWaterPressure(T, unit='kelvin'):
-    """
-    Returns the saturated water vapor pressure according eq (3.97) of Wallace and Hobbes, page 99.
-
-    e0, b, T1 and T2 are constants specific for water vapor
-
-    Parameters
-    -----------
-
-    T: float
-        thermodynamic temperature
-
-    Returns
-    --------
-        saturated vapor pressure of water (in kPa)
-    """
-    from math import exp
-    e0=0.61094
-    b=17.2694
-    if unit=='kelvin':
-        T1=273.16
-        T2=35.86
-    elif units=='celsius':
-        T1=0.
-        T2=243.04
-    else:
-        raise TypeError('Check your units')
-    brackets=b*(T-T1)/(T-T2)
-    return e0*exp(brackets)
-
-
-def perfGas(p=None, rho=None, R=None, T=None, gas=None):
-    """
-    Returns the only value that is not provided in the ideal gas law
-
-    P.S.: I'm using type to identify None objects because this way it works
-    againt pandas objects
-    """
-    from constants import R_spec
-    
-    if R==None:
-        if gas != None:
-            R=R_spec[gas]
-        elif gas==None:
-            R=R_spec['dry']
-
-    if type(p) == type(None):
-        return rho*R*T
-    elif type(rho) == type(None):
-        return p / (R*T)
-    elif type(T) == type(None):
-        return p / (R*rho)
-    elif type(R) == type(None):
-        return p / (rho*T)
-    return
-
-
-
-def R_moistAir(q):
-    """
-    Calculates the gas constant for umid air from the specific humidity q
-
-    Parameters
-    -----------
-    q: float
-        the specific humidity in g(water)/g(air)
-
-    Returns
-    --------
-    R_air: float
-        the specific gas constant for humid air in J/(g*K)
-    """
-    from constants import R_spec
-
-    return q* R_spec['h2o'] + (1.0 - q)*R_spec['dry_air']
-
-
-def dewPointTemp(theta, e):
-    """
-    Calculates the dew point temperature.
-    theta has to be in Kelvin and e in kPa
-    """
-    import numpy as np
-    ln = np.log(e / 0.611)
-    coef = ln / (17.502 - ln)
-    return 240.97*coef + 273.16
 

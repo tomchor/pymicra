@@ -46,16 +46,17 @@ def qcontrol(files, datalogger_config,
     All others depend on their respective keywords.
 
 
-    :Consistency tests:
-    -------------------
+    Consistency tests
+    -----------------
+
     - :date check:
         files outside a date_range are left out (end_date and begin_date keywords)
     - :lines test:
         checks each file to see if they have a certain number of lines. Files with a different number of lines
         fail this test. Active this test by passing the file_lines keyword.
 
-    :Quality tests (in this order):
-    ------------------
+    Quality tests (in this order)
+    -----------------------------
     - :NaN's test:
         checks for any NaN values. NaNs are replaced with interpolation or linear trend. If the percentage
         of NaNs is greater than accepted_nans_percent, run is discarded. Activate it by passing nans_test=True.
