@@ -11,7 +11,7 @@ from __future__ import print_function
 import tests
 
 def qcontrol(files, datalogger_config,
-             read_files_kw={'parse_dates':False, 'clean_dates':False, 'only_named_cols':False},
+             read_files_kw={'parse_dates':False, 'clean_dates':False, 'only_named_cols':False, 'return_units':False},
              accepted_nans_percent=1.,
              accepted_spikes_percent=1.,
              accepted_bound_percent=1.,

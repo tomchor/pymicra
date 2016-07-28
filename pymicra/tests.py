@@ -29,7 +29,7 @@ def check_nans(data, max_percent=0.1, replace_with='interpolation'):
     #-----------
     # This counts the number of NaNs
     nan_count = df.isnull().sum()
-    valid = nan_count < max_count
+    valid = nan_count <= max_count
     #-----------
 
     #------------
