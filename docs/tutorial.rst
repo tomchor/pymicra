@@ -2,8 +2,8 @@ Hands-on tutorial
 =================
 
 
-Converting between different units
-----------------------------------
+Calculating auxiliary variables and units
+-----------------------------------------
 
 Pymicra has some handy functions that convert between units using Pint.
 

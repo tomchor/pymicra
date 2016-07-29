@@ -15,6 +15,7 @@ variable is in each column. You can check the default notation with
 
 .. ipython:: python
 
+    %%capture
     import pymicra as pm
     print(pm.notation)
 
@@ -47,7 +48,8 @@ whole notation with the ``build`` method:
    pm.notation.build()
    pm.notation.mean_h2o_mass_concentration
 
-If you just want to change the notation of one variable, but not the full notation, just don't re-build. For example:
+If you just want to change the notation of one variable, but not the full
+notation, just don't re-build. For example:
 
 .. ipython:: python
 
@@ -55,44 +57,64 @@ If you just want to change the notation of one variable, but not the full notati
    pm.notation.mean_co2_mass_concentration
    pm.notation.mean_h2o_mass_concentration
 
+It is important to note that this changes the notation used throughout every
+Pymicra function.  If, however, you want to use a different notation in a
+specific part of the program (in one specific function for example) you can
+create a Notation object and pass it to the function, such as 
+
+.. ipython:: python
+   :verbatim:
+
+   mynotation = pm.Notation()
+   mynotation.co2='c'
+   mynotation.build()
+   fluxes = pm.eddyCovariance(data, units, notation=mynotation) # For example
+
+In the example above the default Pymicra notation is left untouched, and a
+separate notation is defined which is then used in a Pymicra function
+separately.
 
 
 Creating file configurations file
 ---------------------------------
 
-The easiest way to read data files is using the ``timeSeries`` function with a
-``fileConfig`` object such as 
+The easiest way to read data files is using a ``fileConfig`` object. This object holds
+the configuration of the data files so you can just call this object when reading these files.
+To make it easier, Pymicra prefers to read this configurations from a file. That way
+you can write the configurations for some data files once, store it into a cofiguration file
+and then use it from then on everytime you want to read those data files. That is what
+Pymicra calls a "file configuration file", or "config file" for short. From that
+file, Pymicra can create a ``pymicra.fileConfig`` object. Consider, for example, the config
+file below
 
-.. code-block:: python
+.. literalinclude:: ../examples/lake.config
 
-   config = pm.fileConfig('example.config')
-   data = pm.timeSeries('1H_20130504.csv', config, parse_dates=False)
+First of all, note that the ``.config`` file is written in Python syntax, so it
+has to be able to actually be run on python. This has to be true for all
+``.config`` files.
 
-First, let's explain what the ``fileConfig`` class does. This class holds most
-of the configurations inherent to the datalogger that actually influence the
-file output (such as columns separator), which variable is in each column,
-variables units, frequency, file headers, etc..
+description
+...........
+
+The description is optional. It's a string that serves only to better identify
+the config file you're dealing with. It might useful for storage purposes.
+
+variables
+.........
+
+The most important keyword is ``variables``. This is a python dictionary where
+each key is a column and its corresponding value is the variable in that
+column. Note that we are using here the default notation to indicate which
+variable is in which column. If a different notation is to be used here, then
+you will have to define a new notation in your program (refer back to
+:ref:`Notation` for that).
+
+.. note::
+
+   From this point on, for simplicity,  we will assume that the default notation is used.
 
 
-You can create a ``fileConfig`` object manually by passing each of
-these informations as a keyword to the ``fileConfig`` function, but
-the easiest method is to create a ``.dlc`` file (meaning datalogger
-configuration), store it somewhere and create a ``fileConfig`` object
-by reading it every time you work with files with that same configuration.
-
-Consider the example ``.dlc`` file below, which will be explained next.
-
-.. code-block:: python
-
-   ex_itaipu.dlc
-
-First of all, every .dlc file is written in Python syntax, so it has to be able
-to actually be run on python. The description is optional and the
-``first_time_skip`` and ``date_connector`` keywords are generally not
-necessary, so you'll rarely have to use them. They can be omitted from the
-file.
-
-The most important keyword is ``variables``. Since Pymicra works with labels for its
+Since Pymicra works with labels for its
 data, its best if all the names of the variables are properly written, preferably
 following the default Pymicra notation. Let look at how to write parts of the
 timestamp first.
@@ -107,6 +129,10 @@ huge advantage in some cases (check out what Pandas can do with
 wish to work with timestamps and want to work only by line number in each file,
 you can ignore there columns.
 
+.. todo::
+
+   improve this subsection
+
 As for the physical quantities, it is strongly advised to follow Pymicra's
 notation, which is described explained in the `Notation`_ Section. In the above
 example, which follows the Pymicra notation, u, v and w are the three wind
@@ -114,25 +140,65 @@ components, ``theta_v`` stands for the virtual temperature, and ``mrho_h2o``
 stands for the molar density of H2O. If it were the mass density the name would
 have been ``rho_h2o``, according to the notation.
 
-The ``date_cols``
+units
+.....
 
-The ``frequency``, in Hertz, is the frequency of the data collection.
-Useful mostly when taking the spectrum or co-spectrum.
+The ``units`` keywork is also very important. It tells Pymicra in which units
+every variable is being measured. Units are handled by |pint|_, so for more
+details on how to define the units please refer to their documentation. Suffices 
+to say here that the format of the units are pretty intuitive. Some quick remarks
+are
 
-The ``columns`` separator is what separates one column from the other.
-Generally it is one character, such as a comma or a whitespace. A special case
-happens is if the columns are separated by whitespaces of varying length. In
-that case just put "whitespace".
+ - prefer to define units unambiguously (``'g/(m*(s**2))'`` is generaly preffered to ``'g/m/s**2'``, although both will work).
+ - to define that a unit is dimensionless, ``'1'`` will not work. Define it as ``'dimensionless'`` or ``'g/g'`` and so on.
+ - if one variable does not have a unit (such as a sensor flag), you don't have to include that variable.
+ - the keys of ``units`` **should exactly match** the values of ``variables``.
 
-The keyword ``header_lines`` is an int, or list of ints saying which rows are
-headers, starting from zero. So if the first two rows of the file are a header,
-the ``header_lines`` in this case should be ``[0, 1]``.
 
-The ``filename_format``
+columns_separator
+.................
 
-The ``date_connector``
+The ``columns_separator`` keyword is what it sounds: what separates one column
+from the other.  Generally it is one character, such as a comma. A special case
+happens is if the columns are separated by whitespaces of varying length, or
+tabs. In that case it should be ``"whitespace"``.
 
-The ``first_time_skip``
+
+frequency
+.........
+
+The ``frequency`` keyword is the frequency of the data collection in Hertz.
+
+header_lines
+............
+
+The keyword ``header_lines`` tells us which of the first lines are part of a
+the file header.  If there is no header then is should be ``None``. If there
+are header lines than it should be a list or int. For example, if the first two
+lines of the file are part of a header, it should be ``[0, 1]``. If it were the
+4 first lines, ``[0, 1, 2, 3]`` (``range(4)`` would also be acceptable).
+
+Header lines are not used by Pymicra and are therefore skipped.
+
+
+filename_format
+...............
+The ``filename_format`` keyword tells Pymicra how the data files are named.
+
+
+date_cols
+.........
+
+The ``date_cols`` keyword is optional. It merely indicates which on the columns
+are a part of the timestamp. If it's not provided, then Pymicra will assume
+that columns whose names have the character "%" in them are part of the date
+and will try to parse them. If the default notation is used, this should always
+be true, but can be false if a variable is named with a string that has a
+percentage sign in it.
+
+
+Reading data
+------------
 
 With this file ready, it is easy to read any datafile. Consider the example
 below
