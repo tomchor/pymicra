@@ -101,6 +101,9 @@ def fitWrap(x, y, degree=1):
     #----------
     # Getting rid of NaNs and passing only "good" points to polyfit
     idx = np.isfinite(x) & np.isfinite(y)
+    print(y.mean())
+    print(y.std())
+    #raw_input()
     coefs = np.polyfit(x[idx], y[idx], degree)
     #----------
 

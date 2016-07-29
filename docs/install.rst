@@ -8,8 +8,8 @@ Installation
 
 .. include:: global.rst
 
-Most of the required packages already come with python. However, packages that
-generally have to be manually installed beforehand are:
+Most of the required packages already come with python, such as ``datetime`` or
+``os``. The packages that may not come as default are:
 
 -  Pandas (recommended 0.17.1)
 -  Pint (0.7.2)
@@ -17,34 +17,40 @@ generally have to be manually installed beforehand are:
 -  Scipy
 -  setuptools (for installation only)
 
+.. note::
+   Version 0.17.1 of Pandas is suggested, but it should work fine with any
+   distribution from 0.13 up to 0.17.1. However, version 0.18 upwards is not
+   currently supported because of a change in the rolling functions API.
+
 
 In order to install Pymicra the ``setuptools`` Python package should be
-installed. If you don't have it installed already you can install it with
-``sudo apt install python-setuptools`` or ``sudo pip install setuptools``.
+installed beforehand. If you don't have it installed already you can install it
+with ``sudo apt install python-setuptools`` or ``sudo pip install setuptools``.
 
-Download the package from the |gitrepo|_ and unpack it somewhere. Then open a
-terminal and move to the directory created, whose name should be ``pymicra``.
-Then run ``sudo python setup.py install``. This should be enough to install the
-package.
+Once ``setuptools`` is installed, download the package from the |gitrepo|_,
+unpack it somewhere, then run ``setup.py`` on a terminal with the ``install``
+directive. Assuming the file is downloaded into the Downloads directory:
+
+.. code-block:: bash
+
+    cd ~/Downloads
+    unzip pymicra-master.zip
+    cp pymicra-master
+    sudo python setup.py install
 
 
-This should successfully install Pymicra. The only
-requirements are Pandas and Pint. Version 0.17 of Pandas is suggested, but it
-should work fine will any distribution from 0.13 up to 0.17.1 (0.18 is not
-supported because of changed in the rolling functions API).
+This should successfully install Pymicra. Note that the ``pymicra-master`` may
+be different depending on whether you download directly from the master branch,
+the dev branch or a specific release on github.
 
 Although fairly general, I have tested the setup program on a limited number of
 computers so far, so it is possible that an error occurs depending on the
-version of some auxiliary packages you have installed. If that happens and the
-installation fails for some reason, please contact me through email or creating
-a github issue detailing your problem and I will improve the setup file.
+version of some auxiliary packages you have installed. If that happens, please
+contact me through email or creating a |gitissue|_ detailing your problem and I
+will try to improve the setup file accordingly. Alternatively, you may also try
+to manually install versions 1.11.0 of Numpy and 0.17.0 of Scipy and then
+running ``sudo python setup.py install`` again.
 
-In case errors arise, please try to manually install versions 1.11.0 of Numpy
-and 0.17.0 of Scipy and then running ``sudo python setup.py install`` again. If
-still installation fails, please create a |gitissue|_ stating your OS, Python
-version and any relevant information.
-
-To remove Pymicra, the easiest way is to use pip
-(``sudo apt-get install python-pip``) with the command
-``sudo pip uninstall pymicra``.
+To remove Pymicra, the easiest way is to use pip (``sudo apt install
+python-pip``) with the command ``sudo pip uninstall pymicra``.
 

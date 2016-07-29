@@ -258,8 +258,6 @@ def _polyfit(self, degree=1, rule=None):
     from . import algs
 
     data = self.copy()
-    #if isinstance(self, pd.Series):
-    #    data = pd.DataFrame(data)
 
     #-----------
     # If rule == None it should return a list of 1
@@ -269,9 +267,6 @@ def _polyfit(self, degree=1, rule=None):
     out=pd.DataFrame()
     if isinstance(data.index, pd.DatetimeIndex):
         xx=data.index.to_julian_date()
-        #for data in dflist:
-        #    aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
-        #    out=out.append(aux)
     else:
         xx=data.index.values
 
@@ -279,10 +274,6 @@ def _polyfit(self, degree=1, rule=None):
         aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
         out=out.append(aux)
  
-    #if isinstance(self, pd.Series):
-    #    return out.iloc[:, 0]
-    #else:
-    #    return out
     return out
 _pd.DataFrame.polyfit = _polyfit
 _pd.Series.polyfit = _polyfit

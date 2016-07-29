@@ -13,6 +13,7 @@
 
    intro
    install
+   basics
    tutorial
    pymicra
 

@@ -54,6 +54,9 @@ def readDataFile(fname, variables=None, only_named_cols=True, **kwargs):
         data=pd.read_csv(fname, usecols=usedcols, dtype=dtypes, **kwargs)
     except ValueError:
         print('WARNING: Ignoring dtypes for date columns. This may cause problems parsing dates')
+        print(usedcols)
+        print(kwargs)
+        print(fname)
         data=pd.read_csv(fname, usecols=usedcols, **kwargs)
     #------------
 

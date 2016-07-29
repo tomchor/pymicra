@@ -15,7 +15,6 @@
 import sys
 import os
 import pypandoc as pdoc
-import pkg_resources
 
 readme = pdoc.convert_file('README.rst', 'markdown_github', format='rst')
 open('../README.md', 'wt').write(readme)
@@ -24,6 +23,7 @@ open('../README.md', 'wt').write(readme)
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('/home/tomas/pymicra'))
+import pymicra as pm
 
 # -- General configuration ------------------------------------------------
 
@@ -37,9 +37,21 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
+    'IPython.sphinxext.ipython_directive',
+    'IPython.sphinxext.ipython_console_highlighting',
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon'
 #    'numpydoc'
+]
+
+ipython_exec_lines = [
+    'import numpy as np',
+    'import pandas as pd',
+    # This ensures correct rendering on system with console encoding != utf8
+    # (windows). It forces pandas to encode its output reprs using utf8
+    # whereever the docs are built. The docs' target is the browser, not
+    # the console, so this is fine.
+    'pd.options.display.encoding="utf8"'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -66,7 +78,7 @@ copyright = u'2016, Tomás Chor'
 
 # The short X.Y version.
 try:
-    version = pkg_resources.get_distribution(project).version
+    version = pm.__version__
 except:
     # we seem to have a local copy not installed without setuptools
     version = "unknown"
