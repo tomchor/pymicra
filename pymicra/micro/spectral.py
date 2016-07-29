@@ -1,5 +1,7 @@
 from __future__ import print_function
+from .. import decorators as _decor
 
+@_decor.pdgeneral(convert_out=True)
 def correctLag(data, notation=None, lag_bounds=[0, 100]):
     """
     Identifies and correct lags between data, assuming the 
@@ -16,8 +18,10 @@ def correctLag(data, notation=None, lag_bounds=[0, 100]):
 
     return data
 
+
 def phaseCorrection(cross_spec, T):
     return hfc_Dias_ea_16(cross_spec, T)
+
 
 def hfc_Dias_ea_16(cross_spec, T):
     """
@@ -39,6 +43,7 @@ def hfc_Dias_ea_16(cross_spec, T):
     Qu = -cross_spec.apply(np.imag)
     n = np.array(cross_spec.index)
     return Co + 2.*np.pi*T*Qu.multiply(n, axis=0)
+
 
 def hfc_Massman_Ibrom_08(df):
     pass
@@ -102,6 +107,29 @@ def Ogive(df, no_nan=True):
             dfs[0]=dfs[0].join(d, how='outer')
         out=dfs[0]
     return out
+
+
+@_decor.pdgeneral(convert_out=True)
+def zeroQuadCorrection(df, T):
+    """Applies the correction assuming that the quadrature is zero to
+    a dataframe with spectra
+
+    Wrapper to make hfc_zeroQuad work in a pandas.DataFrame
+
+    Parameters
+    ----------
+    df: pandas.DataFrame
+        dataframe with cospectra to correct
+    T: float
+        response time to be used
+    """
+    import numpy as np
+
+    freqs=np.array(df.index)
+    for c in df.columns:
+        spec =np.array(df[c])
+        df[c]=hfc_zeroQuad(spec, freqs, T)
+    return df
 
 
 

@@ -101,9 +101,6 @@ def fitWrap(x, y, degree=1):
     #----------
     # Getting rid of NaNs and passing only "good" points to polyfit
     idx = np.isfinite(x) & np.isfinite(y)
-    print(y.mean())
-    print(y.std())
-    #raw_input()
     coefs = np.polyfit(x[idx], y[idx], degree)
     #----------
 
@@ -231,8 +228,7 @@ def inverse_normal_cdf(mu, sigma):
     return f
 
 
-def parseDates(data, dataloggerConfig=None,
-        date_col_names=None, clean=True, correct_fracs=None, complete_zeroes=False, verbose=False):
+def parseDates(data, dataloggerConfig=None, date_col_names=None, clean=True, verbose=False, connector=''):
     """
     Author: Tomas Chor
     date: 2015-08-10
@@ -253,34 +249,26 @@ def parseDates(data, dataloggerConfig=None,
         the offset (mostly because of the bad converting done by LBA
     clean: bool
         remove date columns from data after it is introduced as index
-    correct_fracs: bool
 
-    complete_zeroes: list
-        list of columns that need to be padded with zeroes
+    Returns
+    -------
+    pandas.DataFrame
+        data indexed by timestamp
     """
-    from datetime import timedelta,datetime
     import pandas as pd
 
     #------------------------------------
     # If dataloggerConfig object is provided, we take the keywords from it
     if dataloggerConfig:
         date_col_names = dataloggerConfig.date_col_names
-        connector = dataloggerConfig.date_connector
-        first_time_skip = 0#dataloggerConfig.first_time_skip
     elif date_col_names==None:
-        raise NameError('Must provide either dataloggerConfig or date_col_names')
+        raise NameError('Must provide either fileConfig or date_col_names')
     #------------------------------------
 
     #------------------------------------
     # Joins the names of the columns, which must match the datetime directive (see __doc__)
     if verbose: print('Using these columns: ', date_col_names)
     date_format=connector.join(date_col_names)
-    auxformat='%Y-%m-%d %H:%M:%S.%f'
-    if complete_zeroes:
-        if type(complete_zeroes) == str:
-            complete_zeroes=[complete_zeroes]
-        for col in complete_zeroes:
-            data[col]=data[col].apply(completeHM)
     #------------------------------------
 
     #-------------------------------------
@@ -289,35 +277,10 @@ def parseDates(data, dataloggerConfig=None,
         aux=data[date_col_names[0]].astype(str)
     except ValueError:
         aux=data[date_col_names[0]].astype(int).astype(str)
+
     for col in date_col_names[1:]:
         aux+=connector + data[col].astype(str)
     dates=pd.to_datetime(aux, format=date_format)
-    #-------------------------------------
-
-    #-------------------------------------
-    # The next steps are there to check if there are fractions that are not expressed in the datetime convention
-    # and it assumes that the lowest time period expressed is the minute
-    first_date=dates.unique()[1]
-    n_fracs=len(dates[dates.values==first_date])
-    if n_fracs>1:
-        if correct_fracs == None:
-            print('Warning! I identified that there are', n_fracs, ' values (on average) for every timestamp.\n\
-This generally means that the data is sampled at a frequency greater than the frequency of the timestamp. \
-I will then proceed to guess the fractions based of the keyword "first_time_skip" and correct the index.')
-        if (correct_fracs==None) or (correct_fracs==True):
-            dates=[ date.strftime(auxformat) for date in dates ]
-            aux=dates[0]
-            cont=first_time_skip
-            for i,date in enumerate(dates):
-                if date==aux:
-                    pass
-                else:
-                    cont=0
-                    aux=date
-                dates[i]=datetime.strptime(date, auxformat) + timedelta(minutes=cont/float(n_fracs))
-                cont+=1
-        else:
-            print('\nWarning: fractions werent corrected. Check your timestamp data and the correct_fracs flag\n')
     #-------------------------------------
 
     #-------------------------------------
@@ -352,6 +315,13 @@ def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscal
         funtion to be applied to both x and y-bins in order to smooth the data
     logscale: boolean
         whether or not to use a log-spaced scale to set the bins
+
+    Returns
+    -------
+    np.array:
+        x binned
+    np.array:
+        y binned
     """
     import warnings
     import numpy as np
@@ -372,6 +342,7 @@ def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscal
         bins=np.linspace(xmin, xmax, bins_number+1)
     xsm = np.zeros(bins_number)
     ysm = np.zeros(bins_number)
+
     #-----------
     # The following process is what actually bins the data using numpy
     with warnings.catch_warnings():
@@ -391,11 +362,11 @@ def get_index(x, to_look_for):
     """
     Just like the .index method of lists, except it works for multiple values
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     x: list or array
         the main array
-    to_look_for: list of array
+    to_look_for: list or array
         the subset of the main whose indexes are desired
 
     Returns
@@ -423,7 +394,7 @@ def name2date(filename, dlconfig):
     -------
     cdate: datetime object
 
-    :Warning Needs to be optimized in order to read question markers also after the date:
+    :Warning: Needs to be optimized in order to read question markers also after the date
     """
     from itertools import izip_longest
     import datetime as dt
@@ -455,7 +426,6 @@ def line2date(line, dlconfig):
     import numpy as np
     import re
 
-    #varnames = dlconfig.variables
     connector = dlconfig.date_connector
     date_col_names = dlconfig.date_col_names
     date_cols = dlconfig.date_cols

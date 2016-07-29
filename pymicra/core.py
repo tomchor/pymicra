@@ -184,13 +184,7 @@ class siteConfig(object):
 
 class Notation(object):
     """
-    This holds the notation used in every function of pymicra except when told otherwise.
-    Example of usage:
-
-    fluctuations_of_co2_conc = notation.concentration % notation.fluctuations % notation.co2
-
-    You should be careful with the order. The last argument should not have any '%' symbols
-    or you'll get a "TypeError: not all arguments converted during string formatting" message.
+    Holds the notation used in every function of pymicra except when told otherwise.
     """
     @_decors.autoassign
     def __init__(self, solutes=['h2o', 'co2', 'ch4', 'o3', 'n2o'], **kwargs):
@@ -222,9 +216,9 @@ class Notation(object):
         self.flux_of = 'F_%s'
 
         self.cross_spectrum = 'X_%s_%s'
-        self.spectrum = 'Sp_%s'
-        self.cospectrum = 'Co_%s_%s'
-        self.quadrature = 'Qu_%s_%s'
+        self.spectrum = 'sp_%s'
+        self.cospectrum = 'co_%s_%s'
+        self.quadrature = 'qu_%s_%s'
 
         self.u='u'
         self.v='v'
@@ -260,13 +254,21 @@ class Notation(object):
     
         self.build()
 
-    def build(self):
+    def build(self, from_level=0):
         """
         This useful method builds the full notation based on the base notation.
 
         Given notation for means, fluctuations, and etc, along with names of variables, this 
         method builds the notation for mean h2o concentration, virtual temperature fluctuations
         and so on.
+
+        Parameters
+        ----------
+        self: pymicra.Notation
+            notation to be built
+        from_level: int
+            level from which to build. If 0, build everything from scratch and higher notations
+            will be overwritten. If 1, skip one step in building process. Still to be implemented!
 
         Returns
         -------
