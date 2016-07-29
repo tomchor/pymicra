@@ -98,9 +98,24 @@ has to be able to actually be run on python. This has to be true for all
 Furthermore, the extension of the file does not matter. We adopt the
 ``.config`` extension for clarity, but it could be anything else.
 
-Each variable defined in this file works as a keyword, since it can also be input
-manually when calling ``pymicra.fileConfig``. Thus, for more information, you can also
-use ``help(pymicra.fileConfig``. Now we explain the keywords one by one.
+The previous config file describes the data in the files in the directory
+``../examples/ex_data/``. Here's an example of one such file for comparison
+
+.. literalinclude:: ../examples/ex_data/20131108-1300.csv
+   :lines: 1-10
+
+We obtain the config object with
+
+.. ipython:: python
+
+   fconfig = pm.fileConfig('../examples/lake.config')
+   print(fconfig)
+
+Each variable defined in this file works as a keyword, since it can also be
+input manually when calling ``pymicra.fileConfig()``. Thus, for more
+information, you can also use ``help(pymicra.fileConfig``. Now we explain the
+keywords one by one. In the next section we wil explain how to use this object
+for reading a data file.
 
 description
 ...........
@@ -197,39 +212,68 @@ The ``filename_format`` keyword tells Pymicra how the data files are named.
 date_cols
 .........
 
-The ``date_cols`` keyword is optional. It merely indicates which on the columns
-are a part of the timestamp. If it's not provided, then Pymicra will assume
-that columns whose names have the character "%" in them are part of the date
-and will try to parse them. If the default notation is used, this should always
-be true, but can be false if a variable is named with a string that has a
-percentage sign in it.
+The ``date_cols`` keyword is optional. It is a list of integers that indicates
+which of the columns are a part of the timestamp. If it's not provided, then
+Pymicra will assume that columns whose names have the character "%" in them are
+part of the date and will try to parse them. If the default notation is used,
+this should always be true.
 
 
 Reading data
 ------------
 
-With this file ready, it is easy to read any datafile. Consider the example
-below
+To read a data file or a list of data files we use the function ``timeSeries`` along with
+a config file. Let us use the config file defined in the previous subsection with one of the data
+file it describes:
 
-EXAMPLE
+.. ipython:: python
+   :suppress:
 
-In it we passed the path of a file to read and the ``fileConfig`` object
-containing the configuration of the file. The function ``timeSeries`` reads the
-file according to the options provided and returns a DataFrame that is put into
-the ``data`` variable. Printing ``data``, in this case, would print the
-following on screen.
+   import pandas as pd
+   pd.options.display.max_rows=20
+   pd.options.display.width=100
 
-DATA PRINT
 
-Notice that every variable defined in our datalogger configuration file appears in the
-data variable.
+
+.. ipython:: python
+
+   fname = '../examples/ex_data/20131108-1300.csv'
+   fconfig = pm.fileConfig('../examples/lake.config')
+   data, units = pm.timeSeries(fname, fconfig, parse_dates=True)
+   print(data)
+
+Note that ``data`` is a ``pandas.DataFrame`` object which contains the whole data available in the
+datafile with each columns being a variable. Since we indicated that we wanted to parse the dates
+with the option ``parse_dates=True``, each row has its respective timestamp.
+If, otherwise, we were to ignore the dates, the result would be a integer-indexed dataset:
+
+.. ipython:: python
+
+   data2, units = pm.timeSeries(fname, fconfig, parse_dates=False)
+   print(data2)
+
+And, as mentioned, this way is a lot faster:
+
+.. ipython:: python
+
+   %timeit pm.timeSeries(fname, fconfig, parse_dates=False)
+   %timeit pm.timeSeries(fname, fconfig, parse_dates=True)
 
 
 Viewing and manipulating data
 -----------------------------
 
-To view and manipulate data you have to follow Pandas's DataFrame rules. For
+To view and manipulate data, mostly you have to follow Pandas's DataFrame rules. For
 that we suggest that the user visit a Pandas tutorial. However, I'll explain
-some main ideas here for the sake of completeness.
+some main ideas here for the sake of completeness and introduce some few ideas specific
+for Pymicra that don't exist for general Pandas DataFrames.
 
+First, for viewing raw data on screen, printing should be enough. Slicing and indexing
+are supported:
 
+.. ipython:: python
+
+   print(data['u'])
+   print(data['theta_v'])
+   print(data[['u', 'v', 'w']])
+   print(data['2013-11-08 13:15:00'])

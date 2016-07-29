@@ -147,10 +147,10 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     columns_separator=datalogger.columns_separator
 
     if columns_separator=='whitespace':
-        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, delim_whitespace=True, 
+        timeseries=readDataFiles(flist, header=None, skiprows=skiprows, delim_whitespace=True, 
             variables = datalogger.variables, only_named_cols=only_named_cols, **read_data_kw)
     else:
-        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, sep=columns_separator, 
+        timeseries=readDataFiles(flist, header=None, skiprows=skiprows, sep=columns_separator, 
             variables = datalogger.variables, only_named_cols=only_named_cols, **read_data_kw)
     #------------
 
