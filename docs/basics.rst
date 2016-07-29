@@ -1,3 +1,5 @@
+.. include:: global.rst
+
 Getting started
 ===============
 
@@ -93,6 +95,13 @@ First of all, note that the ``.config`` file is written in Python syntax, so it
 has to be able to actually be run on python. This has to be true for all
 ``.config`` files.
 
+Furthermore, the extension of the file does not matter. We adopt the
+``.config`` extension for clarity, but it could be anything else.
+
+Each variable defined in this file works as a keyword, since it can also be input
+manually when calling ``pymicra.fileConfig``. Thus, for more information, you can also
+use ``help(pymicra.fileConfig``. Now we explain the keywords one by one.
+
 description
 ...........
 
@@ -107,49 +116,48 @@ each key is a column and its corresponding value is the variable in that
 column. Note that we are using here the default notation to indicate which
 variable is in which column. If a different notation is to be used here, then
 you will have to define a new notation in your program (refer back to
-:ref:`Notation` for that).
+`Notation`_ for that).
 
 .. note::
 
    From this point on, for simplicity,  we will assume that the default notation is used.
 
 
-Since Pymicra works with labels for its
-data, its best if all the names of the variables are properly written, preferably
-following the default Pymicra notation. Let look at how to write parts of the
-timestamp first.
+It is imperative that the columns be named accordingly. For example, measuring
+|H2O| contents in mmol/m^3 is different from measuring it in g/m^3 or mg/g. The
+first is a molar density (moles per volume), the second is a mass density (mass
+per volume) and the third is a mass concentration (mass per mass). In the
+default notation these are indicated by the names ``'mrho_h2o'``, ``'rho_h2o'``
+and ``'conc_h2o'``, respectively, and Pymicra needs to know which one is which.
 
-The columns that contain parts of the date have to have their name matching
+
+Columns that contain parts of the timestamp have to have their name matching
 Python's `date format string directive
-<https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior>`_.
-This is useful in case you want to index your data by timestamp, which is a
-huge advantage in some cases (check out what Pandas can do with
+<https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior>`_,
+which themselves are the 1989 version default C standard format dates, which is
+common in many platforms.
+
+This is useful only in case you want to index your data by timestamp, which is
+a huge advantage in some cases (check out what Pandas can do with
 `timestamp-indexed data
-<http://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_. If you don't
-wish to work with timestamps and want to work only by line number in each file,
-you can ignore there columns.
+<http://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_) but Pymicra
+can also work well without this. If you don't wish to work with timestamps and
+want to work only by line number in each file, you can ignore these columns and
+indicate that you don't want to parse dates. In fact, parsing of dates makes
+Pymicra a lot slower. Reading a file parsing its dates is about 5.5 times
+slower than reading the same file without parsing any dates!
 
-.. todo::
-
-   improve this subsection
-
-As for the physical quantities, it is strongly advised to follow Pymicra's
-notation, which is described explained in the `Notation`_ Section. In the above
-example, which follows the Pymicra notation, u, v and w are the three wind
-components, ``theta_v`` stands for the virtual temperature, and ``mrho_h2o``
-stands for the molar density of H2O. If it were the mass density the name would
-have been ``rho_h2o``, according to the notation.
 
 units
 .....
 
-The ``units`` keywork is also very important. It tells Pymicra in which units
-every variable is being measured. Units are handled by |pint|_, so for more
+The ``units`` keyword is also very important. It tells Pymicra in which units
+each variable is being measured. Units are handled by |pint|_, so for more
 details on how to define the units please refer to their documentation. Suffices 
 to say here that the format of the units are pretty intuitive. Some quick remarks
 are
 
- - prefer to define units unambiguously (``'g/(m*(s**2))'`` is generaly preffered to ``'g/m/s**2'``, although both will work).
+ - prefer to define units unambiguously (``'g/(m*(s**2))'`` is generally preferred to ``'g/m/s**2'``, although both will work).
  - to define that a unit is dimensionless, ``'1'`` will not work. Define it as ``'dimensionless'`` or ``'g/g'`` and so on.
  - if one variable does not have a unit (such as a sensor flag), you don't have to include that variable.
  - the keys of ``units`` **should exactly match** the values of ``variables``.
@@ -172,7 +180,7 @@ The ``frequency`` keyword is the frequency of the data collection in Hertz.
 header_lines
 ............
 
-The keyword ``header_lines`` tells us which of the first lines are part of a
+The keyword ``header_lines`` tells us which of the first lines are part of
 the file header.  If there is no header then is should be ``None``. If there
 are header lines than it should be a list or int. For example, if the first two
 lines of the file are part of a header, it should be ``[0, 1]``. If it were the

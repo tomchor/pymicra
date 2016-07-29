@@ -56,10 +56,10 @@ class fileConfig(object):
             columns_separator=None,
             header_lines=None,
             units=None,
-            skiprows=None,
             filename_format=None,
+            skiprows=None,
             varNames=None,
-            description='Type help(fileConfig) to read intructions'):
+            description='Type help(fileConfig) to read intructions', **read_csv_kwargs):
         """
         Reads the arguments, transforms them into attributes of the object and calcultes some
         other attributes.
@@ -90,7 +90,8 @@ class fileConfig(object):
         #------------------
 
         self.get_date_cols()
-        self.check_consistency()
+        self._check_consistency()
+        self._unite_header()
 
 
     def get_date_cols(self):
@@ -106,7 +107,7 @@ class fileConfig(object):
             self.date_cols = date_cols.keys()
 
 
-    def check_consistency(self):
+    def _check_consistency(self):
         """
         Checks consistency of fileConfig
         Currently only checks every key of self.units dictionary agaisnt values of variables dict.
@@ -116,6 +117,24 @@ class fileConfig(object):
                 print('fileConfig WARNING!:\n    {} is defined in "units" but not defined in "variables"!'.format(key))
 
 
+    def _unite_header(self):
+        """
+        Checks if both skiprows and header_lines were given. Since header lines
+        have to be skipped, we unite header_lines and skiprows into skiprows
+        """
+        if self.skiprows==None:
+            self.skiprows = []
+        elif isinstance(self.skiprows, int):
+            self.skiprows = range(self.skiprows)
+
+        if self.header_lines==None:
+            self.header_lines = []
+        elif isinstance(self.header_lines, int):
+            self.header_lines = range(self.header_lines)
+
+        self.skiprows = list(set(self.skiprows) | set(self.header_lines))
+
+
     def __str__(self):
         return '<pymicra.fileConfig>\n{}'.format(self.description)
     __repr__ = __str__
@@ -123,7 +142,7 @@ class fileConfig(object):
 
 class siteConfig(object):
     """
-    Keeper of the configurations and constants of an experiment. (such as height of instruments,
+    Keeps the configurations and constants of an experiment. (such as height of instruments,
     location, canopy height and etc)
     """
     @_decors.autoassign
