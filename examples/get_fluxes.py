@@ -20,6 +20,7 @@ filelist = sorted(glob('ex_data/*'))
 allresults=[]
 for fname in filelist:
     data, units = pm.timeSeries(fname, fileconf, parse_dates=True)
+    data = data.rotateCoor(how='2d')
     data = pm.preProcess(data, units, expand_temperature=True, use_means=False, rho_air_from_theta_v=True, solutes=['co2'], inplace_units=True)
     ddata = data.detrend(how='linear', units=units, ignore=['theta', 'p'])
     data = data.join(ddata)

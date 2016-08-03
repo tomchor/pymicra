@@ -298,3 +298,5 @@ _pd.DataFrame.convert_cols = _algs.convert_cols
 _pd.Series.convert_indexes = _algs.convert_indexes
 #---------
 
+from . import micro as _micro
+_pd.DataFrame.rotateCoor = _micro.rotateCoor
