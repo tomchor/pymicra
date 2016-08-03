@@ -28,7 +28,7 @@ variable.
 
 We recommend to use the default notation for the sake of simplicity, however,
 you can change Pymicra's notation at any time by altering the attributes of
-``pm.notation``. For example, by the default the notation for the mean is
+``pm.notation``. For example, by default the notation for the mean is
 ``'%s_mean'``, and every variable follows this base notation:
 
 .. ipython:: python
@@ -243,7 +243,7 @@ file it describes:
    print(data)
 
 Note that ``data`` is a ``pandas.DataFrame`` object which contains the whole data available in the
-datafile with each columns being a variable. Since we indicated that we wanted to parse the dates
+datafile with each column being a variable. Since we indicated that we wanted to parse the dates
 with the option ``parse_dates=True``, each row has its respective timestamp.
 If, otherwise, we were to ignore the dates, the result would be a integer-indexed dataset:
 
