@@ -331,7 +331,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     # Now we try to calculate or identify the fluctuations of theta
     theta_mean = data[ defs.thermodyn_temp ].mean()
     if (theta_fluc not in data.columns) or theta_fluct_from_theta_v:
-        print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
+        print("Fluctuations of theta not found. Will try to calculate it with theta' = (theta_v' - 0.61 theta_mean q')/(1 + 0.61 q_mean ... ", end='')
         #---------
         # We check the units of theta_v and theta
         if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
@@ -361,7 +361,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
 
     #---------
     # Calculate the fluxes
-    print('Calculating fluxes ... ', end='')
+    print('Calculating fluxes from covariances ... ', end='')
     idx0 = data.index[0]
     out = pd.Series(name=idx0)
     out[ defs.momentum_flux ]               = -rho_air_mean * cov[ u_fluc ][ w_fluc ]
@@ -392,7 +392,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     #------------------------
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
-        print('Applying WPL correction for water vapor flux ... ', end='\n')
+        print('Applying WPL correction for water vapor flux ... ', end='')
         mrho_h2o_mean = data[ defs.h2o_molar_density ].mean()
 
         #---------
@@ -429,13 +429,15 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
 
         out.loc[ defs.water_vapor_flux ] = (1. + mr_h2o)* aux3
         fluxunits[ defs.water_vapor_flux ] = unt3
+        print('done!')
         #---------
 
         #---------
         # Now we re-calculate LE based on the corrected E
-        print('Applying WPL correction for latent heat flux ... ', end='\n')
+        print('Applying WPL correction for latent heat flux using result for water vapor flux ... ', end='')
         out[ defs.latent_heat_flux ] = lamb(theta_mean) * out[ defs.water_vapor_flux ] * constants.molar_mass['h2o']
         fluxunits[ defs.latent_heat_flux ] = cunits[ 'latent_heat_water' ] * fluxunits[ defs.water_vapor_flux ] * cunits['molar_mass']
+        print('done!')
         #---------
 
         #---------
@@ -451,7 +453,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         #---------
         # We calculate WPL for each solute
         for sol_flux, solutef, solute in zip(solutefluxes, solutesf, solutes):
-            print('Applying WPL correction for {} ... '.format(sol_flux), end='\n')
+            print('Applying WPL correction for {} ... '.format(sol_flux), end='')
             sol_molar_density_mean    =   data[ defsdic['%s_molar_density' % solute] ].mean()
 
             #---------
@@ -485,6 +487,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
 
             out[ sol_flux ] = aux4
             fluxunits[ sol_flux ] = unt4
+            print('done!')
 
             print("Re-calculating cov(%s, w') according to WPL correction ... " % solutef, end='')
             w_sol_units = units[ w_fluc ] * units[ solutef ]

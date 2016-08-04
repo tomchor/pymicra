@@ -7,6 +7,12 @@ This "Getting started" tutorial is a brief introduction to Pymicra. This is in
 no way supposed to be a complete representation of everything that can be done
 with Pymicra.
 
+In this tutorial we use some example data and refer to some example python
+scripts that can be download `here
+<https://github.com/tomchor/pymicra/tree/master/examples>`_.  Please feel free
+to explore both the example data and the example programs, as well as modify
+the programs for your own learning process!
+
 
 Notation
 --------
@@ -83,8 +89,8 @@ Creating file configurations file
 The easiest way to read data files is using a ``fileConfig`` object. This object holds
 the configuration of the data files so you can just call this object when reading these files.
 To make it easier, Pymicra prefers to read this configurations from a file. That way
-you can write the configurations for some data files once, store it into a cofiguration file
-and then use it from then on everytime you want to read those data files. That is what
+you can write the configurations for some data files once, store it into a configuration file
+and then use it from then on every time you want to read those data files. That is what
 Pymicra calls a "file configuration file", or "config file" for short. From that
 file, Pymicra can create a ``pymicra.fileConfig`` object. Consider, for example, the config
 file below
@@ -99,10 +105,14 @@ Furthermore, the extension of the file does not matter. We adopt the
 ``.config`` extension for clarity, but it could be anything else.
 
 The previous config file describes the data in the files in the directory
-``../examples/ex_data/``. Here's an example of one such file for comparison
+``../examples/ex_data/``. Here's an example of one such file for comparison:
 
-.. literalinclude:: ../examples/ex_data/20131108-1300.csv
+.. literalinclude:: ../examples/ex_data/20131108-1000.csv
    :lines: 1-10
+
+Note that not all columns of this file are described. Columns that are not
+described are also read but are discarded by default. You can change that using
+``only_named_columns=False`` in the ``timeSeries`` function.
 
 We obtain the config object with
 
@@ -237,7 +247,7 @@ file it describes:
 
 .. ipython:: python
 
-   fname = '../examples/ex_data/20131108-1300.csv'
+   fname = '../examples/ex_data/20131108-1000.csv'
    fconfig = pm.fileConfig('../examples/lake.config')
    data, units = pm.timeSeries(fname, fconfig, parse_dates=True)
    print(data)
@@ -276,4 +286,4 @@ are supported:
    print(data['u'])
    print(data['theta_v'])
    print(data[['u', 'v', 'w']])
-   print(data['2013-11-08 13:15:00'])
+   print(data['2013-11-08 10:15:00'])
