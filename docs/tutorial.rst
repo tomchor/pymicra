@@ -14,6 +14,11 @@ contribute with another one yourself!).  To rotate, use the ``pm.rotateCoor``
 function:
 
 .. ipython:: python
+   :suppress:
+
+   pm.notation = pm.Notation()
+
+.. ipython:: python
 
    import pymicra as pm
    fname = '../examples/ex_data/20131108-1000.csv'
@@ -96,6 +101,21 @@ Now we must expand our dataset with the fluctuations by `joining DataFrames
    print(data.with_units(units).mean())
 
 
+
+Creating a site configuration file
+----------------------------------
+
+In order o use some micrometeorological function, we need a site configuration
+object, or site object. This object tells Pymicra how the instruments are organized
+and how is experimental site (vegetation, roughness length etc.). This object is created
+with the ``siteConfig()`` call and the easiest way is to use it with a site config file.
+
+.. literalinclude:: ../examples/lake.site
+
+
+Extracting fluxes
+-----------------
+
 Finally, we are able to calculate the fluxes and turbulent scales. For that we
 use the ``eddyCovariance`` function along with the ``get_turbulent_scales``
 keyword (which is true by default). Again, it is recommended that you carefully
@@ -120,14 +140,7 @@ Check out the example to get fluxes of many files `here
 download the example data `here
 <https://github.com/tomchor/pymicra/tree/master/examples/ex_data>`_.
 
-If you wish to change some units, Pymicra has some handy functions that convert between units using Pint.
 
-
-Extracting fluxes
------------------
-
-Although you can extract the fluxes manually either using the DataFrame or extracting
-the Numpy arrays, Pymicra has a couple of functions that come in handy.
 
 
 Obtaining the spectra
@@ -135,3 +148,4 @@ Obtaining the spectra
 
 Using Numpy's fast Fourier transform implementation, Pymicra is also able to extract
 spectra, co-spectra and quadratures.
+

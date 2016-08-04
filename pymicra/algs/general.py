@@ -286,7 +286,7 @@ def parseDates(data, dataloggerConfig=None, date_col_names=None, clean=True, ver
     #-------------------------------------
     # setting new dates list as the index
     data=data.set_index([dates])
-    data.index.name = date_format
+    data.index.name = 'Timestamp'
     #-------------------------------------
 
     #-------------------------------------

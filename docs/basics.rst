@@ -28,8 +28,9 @@ variable is in each column. You can check the default notation with
     print(pm.notation)
 
 
-On the left you see the full name of the variables (which corresponds to a
-notation namespace) and on the right we see the default notation for that
+The output is too long to be reprodued here, but on the left you'll see the
+full name of the variables (which corresponds to a notation
+namespace/attribute) and on the right you'll see the default notation for that
 variable.
 
 We recommend to use the default notation for the sake of simplicity, however,
@@ -104,7 +105,7 @@ has to be able to actually be run on python. This has to be true for all
 Furthermore, the extension of the file does not matter. We adopt the
 ``.config`` extension for clarity, but it could be anything else.
 
-The previous config file describes the data in the files in the directory
+The previous config file describes the data files in the directory
 ``../examples/ex_data/``. Here's an example of one such file for comparison:
 
 .. literalinclude:: ../examples/ex_data/20131108-1000.csv
@@ -123,8 +124,8 @@ We obtain the config object with
 
 Each variable defined in this file works as a keyword, since it can also be
 input manually when calling ``pymicra.fileConfig()``. Thus, for more
-information, you can also use ``help(pymicra.fileConfig``. Now we explain the
-keywords one by one. In the next section we wil explain how to use this object
+information, you can also use ``help(pymicra.fileConfig)``. Now we explain the
+keywords one by one. In the next section we will explain how to use this object
 for reading a data file.
 
 description
@@ -278,12 +279,119 @@ that we suggest that the user visit a Pandas tutorial. However, I'll explain
 some main ideas here for the sake of completeness and introduce some few ideas specific
 for Pymicra that don't exist for general Pandas DataFrames.
 
-First, for viewing raw data on screen, printing should be enough. Slicing and indexing
-are supported:
+Printing and plotting
+.....................
+
+First, for viewing raw data on screen there's printing. Slicing and indexing
+are supported by Pandas, but without support for units:
+
+.. ipython:: python
+   :suppress:
+
+   import pandas as pd
+   pd.options.display.max_rows = 12
 
 .. ipython:: python
 
-   print(data['u'])
    print(data['theta_v'])
    print(data[['u', 'v', 'w']])
-   print(data['2013-11-08 10:15:00'])
+   print(data['20131108 10:15:00.000':'20131108 10:17:00.000'])
+
+Note that Pandas "guesses" if the argument you pass (``'theta_v'`` or
+``'2013-11-08 10:15:00'`` etc.) is a column indexer or a row indexer. To use
+these unambiguously, use the ``.loc`` method as 
+
+.. ipython:: python
+
+    print(data.loc['2013-11-08 10:15:00.000':'2013-11-08 10:17:00.000', ['u','v','w']])
+
+This method is actually preferred  and you can find more information on this topic `here
+<http://pandas.pydata.org/pandas-docs/stable/indexing.html>`_.
+
+To view these data with units, you can use the ``.with_units()`` method. Note that, although this method returns
+a Pandas DataFrame, it is not meant for calculations. Currently the DataFrame it returns is meant for
+visualization purposes only! The previous output would like this using units:
+
+.. ipython:: python
+
+   print(data.with_units(units)['theta_v'])
+   print(data.with_units(units)[['u', 'v', 'w']])
+   print(data.with_units(units)['2013-11-08 10:15:00'])
+
+
+We can also plot the data on screen so we can view it interactively. This can be done directly
+from the DataFrame with
+
+.. ipython:: python
+
+   from matplotlib import pyplot as plt
+   @savefig uvw_plot_basics.png
+   data[['u', 'v', 'w']].plot()
+   plt.show()
+ 
+Using the ``plt.show()`` command, the plot above would plot interactively. If
+we had used ``plt.savefig('figure.png')`` instead, it would have saved the
+figure as png. For more on plotting, you can checkout Pandas's `visualization
+guide <http://pandas.pydata.org/pandas-docs/stable/visualization.html>`_ and
+find out ways to make this plot look nicer, how to render it with LaTeX and
+some more tricks.
+
+Pymicra also has an ``.xplot`` method, which brings a little more options to
+Pandas's ``.plot()`` method.
+
+.. todo::
+
+   give xplot examples
+
+
+Converting units
+................
+
+You can manually convert between units using the contents from `Manipulating`
+and the Pint package. But Pymicra has a very useful method to do this called ``.convert_cols`` (more exist,
+but let's focus on this one).
+
+Let's, for example, convert some units:
+
+.. ipython:: python
+
+   conversions = {'p':'pascal', 'mrho_h2o':'mole/m^3', 'theta_v':'kelvin'}
+   print(data.convert_cols(conversions, units, inplace_units=False))
+
+Note that the units dictionary is updated automatically if the
+``inplace_units`` keyword is true. The default is false for safety reasons, but
+passing this keyword as true is much simpler and compact:
+
+.. ipython:: python
+
+   conversions = {'theta':'kelvin', 'theta_v':'kelvin'}
+   data = data.convert_cols(conversions, units, inplace_units=True)
+   print(data.with_units(units))
+
+
+Manipulating
+............
+
+Manipulating data is pretty intuitive with Pandas. For example
+
+.. ipython:: python
+
+   data['rho_air'] = data['p']/(287.058*data['theta_v'])
+   print(data['rho_air'])
+
+If, however, you're not familiar with Pandas and prefer to just stick with what
+you know, you can get Numpy arrays from columns using the ``.values``
+attribute:
+
+.. ipython:: python
+
+   P = data['p'].values
+   Tv = data['theta_v'].values
+   print(type(Tv))
+   rho_air = P/(287.058*Tv)
+   print(rho_air)
+   print(type(rho_air))
+
+Doing that you can step out of Pandas and do your own calculations using your
+own Python or Numpy code. This is pretty advantageous if you have a lot of routines
+that are already written in your own way.
