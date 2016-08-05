@@ -16,6 +16,7 @@ function:
 .. ipython:: python
    :suppress:
 
+   import pymicra as pm
    pm.notation = pm.Notation()
 
 .. ipython:: python
@@ -65,7 +66,7 @@ density, you can calculate it yourself by extracting Numpy arrays using the
    data['rho_air'] = my_rho_air_calculation(T, P, water_density)
 
 
-Next we calculate the fluctuations. The way to do that is with the ``detrend``
+Next we calculate the fluctuations. The way to do that is with the ``detrend()``
 function/method.
 
 .. ipython:: python
@@ -105,13 +106,36 @@ Now we must expand our dataset with the fluctuations by `joining DataFrames
 Creating a site configuration file
 ----------------------------------
 
-In order o use some micrometeorological function, we need a site configuration
+In order to use some micrometeorological function, we need a site configuration
 object, or site object. This object tells Pymicra how the instruments are organized
 and how is experimental site (vegetation, roughness length etc.). This object is created
-with the ``siteConfig()`` call and the easiest way is to use it with a site config file.
+with the ``siteConfig()`` call and the easiest way is to use it with a site config file. This
+is like a ``fileConfig`` file, but simpler and for the micrometeorological aspects of the site.
+Consider this example of a site config file, saved at ``../examples/lake.site``:
 
 .. literalinclude:: ../examples/lake.site
 
+
+As in the case of ``fileConfig``, the description is optional, but is handy for
+organization purposes and printing on screen.
+
+The ``measurement_height`` keyword is the general measurement height to be used
+in the calculation, generally taken as the sonic anemometer height (in meters).
+
+The ``canopy_height`` keyword is what it sounds like. Should be the mean canopy
+height in meters. The ``displacement_height`` is the zero-plane displacement
+height. If it is not given, it'll be calculated as 2/3 of the mean canopy
+height.
+
+The ``roughness_length`` is the roughness length in meters.
+
+The creation of the site config object is done as
+
+.. ipython:: python
+
+   siteconf = pm.siteConfig('../examples/lake.site')
+   print(siteconf)
+ 
 
 Extracting fluxes
 -----------------
@@ -123,7 +147,6 @@ check the output of this function before moving on:
 
 .. ipython:: python
 
-   siteconf = pm.siteConfig('../examples/lake.site')
    results = pm.eddyCovariance(data, units, site_config=siteconf, 
        get_turbulent_scales=True, wpl=True, solutes=['co2'])
    print(results.with_units(units).mean())
@@ -140,12 +163,41 @@ Check out the example to get fluxes of many files `here
 download the example data `here
 <https://github.com/tomchor/pymicra/tree/master/examples/ex_data>`_.
 
+The output of this file is 
 
+.. code-block:: python
 
+                                                    tau                   H                  Hv                                 E                  LE  \
+                       <kilogram / meter / second ** 2> <watt / meter ** 2> <watt / meter ** 2> <millimole / meter ** 2 / second> <watt / meter ** 2>   
+   2013-11-08 10:00:00                         0.195731           50.837195           74.537609                          7.007486          306.392623   
+   2013-11-08 12:00:00                         0.070182           -7.116972           14.737946                          6.647450          290.331014   
+   2013-11-08 13:00:00                         0.059115           -3.325774           12.743194                          4.875838          212.906974   
+   2013-11-08 16:00:00                         0.017075          -13.847040           -4.131275                          2.961474          128.982980   
+   2013-11-08 17:00:00                         0.003284           -5.557620           -2.525949                          0.931213           40.576805   
+   2013-11-08 18:00:00                         0.026564           -6.632330           -2.782190                          1.184226           51.654208   
+   2013-11-08 19:00:00                         0.044550          -14.860873          -11.991508                          0.925637           40.476446   
+   
+                                 u_star theta_v_star theta_star            mrho_h2o_star          Lo            zeta          q_star  
+                       <meter / second>     <kelvin>   <kelvin> <millimole / meter ** 3>     <meter> <dimensionless> <dimensionless>  
+   2013-11-08 10:00:00         0.412886     0.156686   0.106865                16.971952  -83.429641       -0.032363        0.000266  
+   2013-11-08 12:00:00         0.247697     0.051834  -0.025031                26.837060  -90.992476       -0.029673        0.000423  
+   2013-11-08 13:00:00         0.227652     0.048903  -0.012763                21.417958  -81.621514       -0.033080        0.000338  
+   2013-11-08 16:00:00         0.122980    -0.029651  -0.099383                24.080946   39.583979        0.068209        0.000384  
+   2013-11-08 17:00:00         0.053951    -0.041353  -0.090986                17.260443    5.463569        0.494182        0.000276  
+   2013-11-08 18:00:00         0.153328    -0.016003  -0.038149                 7.723494  113.854892        0.023714        0.000123  
+   2013-11-08 19:00:00         0.198083    -0.053132  -0.065846                 4.672974   56.961515        0.047400        0.000074  
+   
+
+Note that the date parsing when reading the file comes is handy now, although
+there are computationally faster ways to do it other than setting
+``parse_dates=True`` in the ``timeSeries()`` call.
 
 Obtaining the spectra
 ---------------------
 
-Using Numpy's fast Fourier transform implementation, Pymicra is also able to extract
-spectra, co-spectra and quadratures.
+Using Numpy's fast Fourier transform implementation, Pymicra is also able to
+extract spectra, co-spectra and quadratures.
+
+We begin normally with out data:
+
 
