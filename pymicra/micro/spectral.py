@@ -2,6 +2,49 @@ from __future__ import print_function
 from .. import decorators as _decor
 
 @_decor.pdgeneral(convert_out=True)
+def cospectra(data, notation=None):
+    """
+    Gets cospectra from cross-spectrum
+    """
+    from .. import algs
+    import numpy as np
+
+    data = data.copy()
+    defs = algs.get_notation(notation)
+
+    cospectra = data.apply(np.real)
+
+    cr_def = defs.cross_spectrum.replace('_','').replace('%s','')
+    co_def = defs.cospectrum.replace('_','').replace('%s','')
+    
+    cospectra = cospectra.rename(columns=lambda x: x.replace(cr_def, co_def))
+
+    return cospectra
+
+@_decor.pdgeneral(convert_out=True)
+def quadrature(data, notation=None):
+    """
+    Gets quadrature from cross-spectrum
+    """
+    from .. import algs
+    import numpy as np
+
+    data = data.copy()
+    defs = algs.get_notation(notation)
+
+    quadrature = data.apply(np.imag)
+
+    cr_def = defs.cross_spectrum.replace('_','').replace('%s','')
+    qu_def = defs.quadrature.replace('_','').replace('%s','')
+    
+    quadrature = quadrature.rename(columns=lambda x: x.replace(cr_def, qu_def))
+
+    return quadrature
+
+
+
+
+@_decor.pdgeneral(convert_out=True)
 def correctLag(data, notation=None, lag_bounds=[0, 100]):
     """
     Identifies and correct lags between data, assuming the 
@@ -106,6 +149,8 @@ def Ogive(df, no_nan=True):
         for d in dfs[1:]:
             dfs[0]=dfs[0].join(d, how='outer')
         out=dfs[0]
+
+    out.index.name = df.index.name
     return out
 
 

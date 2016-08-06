@@ -128,6 +128,7 @@ def binwrapper(self, clean_index=True, **kwargs):
         xsm, ysm = algs.classbin(x, self[c].astype(np.float64), **kwargs)
         out[c] = ysm
     out.index=xsm
+    out.index.name = self.index.name
 
     #----------
     # Remove rows where the index is NaN
@@ -300,3 +301,6 @@ _pd.Series.convert_indexes = _algs.convert_indexes
 
 from . import micro as _micro
 _pd.DataFrame.rotateCoor = _micro.rotateCoor
+
+_pd.DataFrame.cospectra = _micro.spectral.cospectra
+_pd.DataFrame.quadrature = _micro.spectral.quadrature

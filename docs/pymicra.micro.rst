@@ -4,7 +4,7 @@ pymicra.micro package
 Submodules
 ----------
 
-pymicra.micro.functions module
+pymicra.micro.functions
 ------------------------------
 
 .. automodule:: pymicra.micro.functions
@@ -12,7 +12,7 @@ pymicra.micro.functions module
     :undoc-members:
     :show-inheritance:
 
-pymicra.micro.scales module
+pymicra.micro.scales
 ---------------------------
 
 .. automodule:: pymicra.micro.scales
@@ -20,7 +20,7 @@ pymicra.micro.scales module
     :undoc-members:
     :show-inheritance:
 
-pymicra.micro.spectral module
+pymicra.micro.spectral
 -----------------------------
 
 .. automodule:: pymicra.micro.spectral
@@ -28,7 +28,7 @@ pymicra.micro.spectral module
     :undoc-members:
     :show-inheritance:
 
-pymicra.micro.util module
+pymicra.micro.util
 -------------------------
 
 .. automodule:: pymicra.micro.util

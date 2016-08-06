@@ -288,7 +288,7 @@ def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):
     specs *= 2./(frequency*N)
     freq = np.fft.rfftfreq(len(data), d=1./frequency)
     specs.index = freq
-    specs.index.name='frequencies'
+    specs.index.name='Frequency'
     #---------
 
     return specs
@@ -338,6 +338,11 @@ def spectra(data, frequency=10, notation=None, anti_aliasing=True):
     #---------
 
     #---------
+    # Since it's the spectra, we can ignore the imaginary part
+    specs = specs.apply(np.real)
+    #---------
+
+    #---------
     # Anti-aliasing is done here
     if anti_aliasing:
         RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
@@ -349,7 +354,7 @@ def spectra(data, frequency=10, notation=None, anti_aliasing=True):
     specs *= 2./(frequency*N)
     freq = np.fft.rfftfreq(len(data), d=1./frequency)
     specs.index = freq
-    specs.index.name='frequencies'
+    specs.index.name='Frequency'
     #---------
 
     return specs

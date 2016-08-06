@@ -11,5 +11,7 @@
 .. _numpy: http://www.numpy.org/
 .. _scipy: https://www.scipy.org/
 
+.. |myemail| replace:: email (tomaschor [at] gmail.com)
+
 .. |H2O| replace:: H\ :sub:`2`\ O
 .. |CO2| replace:: CO\ :sub:`2`

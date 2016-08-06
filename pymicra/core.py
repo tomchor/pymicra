@@ -144,6 +144,13 @@ class siteConfig(object):
     """
     Keeps the configurations and constants of an experiment. (such as height of instruments,
     location, canopy height and etc)
+
+    Check help(pm.siteConfig.__init__) for other parameters
+
+    Parameters
+    ----------
+    from_file: str
+        path to .site file which contais other keywords
     """
     @_decors.autoassign
     def __init__(self, from_file=None,
@@ -236,8 +243,8 @@ class Notation(object):
 
         self.cross_spectrum = 'X_%s_%s'
         self.spectrum = 'sp_%s'
-        self.cospectrum = 'co_%s_%s'
-        self.quadrature = 'qu_%s_%s'
+        self.cospectrum = self.cross_spectrum.replace('X', 'co')
+        self.quadrature = self.cross_spectrum.replace('X', 'qu')
 
         self.u='u'
         self.v='v'

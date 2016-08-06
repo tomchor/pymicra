@@ -1,6 +1,14 @@
 Pymicra's auto-generated docs
 =============================
 
+..
+ Pymicra contents
+ ----------------
+ .. automodule:: pymicra
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
@@ -10,16 +18,9 @@ Subpackages
    pymicra.algs
    pymicra.micro
 
-Pymicra contents
-----------------
-
-.. automodule:: pymicra
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 pymicra.constants
-------------------------
+-----------------
 
 .. automodule:: pymicra.constants
     :members:
@@ -27,7 +28,7 @@ pymicra.constants
     :show-inheritance:
 
 pymicra.core
--------------------
+------------
 
 .. automodule:: pymicra.core
     :members:
@@ -35,7 +36,7 @@ pymicra.core
     :show-inheritance:
 
 pymicra.data
--------------------
+------------
 
 .. automodule:: pymicra.data
     :members:
@@ -43,7 +44,7 @@ pymicra.data
     :show-inheritance:
 
 pymicra.decorators
--------------------------
+------------------
 
 .. automodule:: pymicra.decorators
     :members:
@@ -51,7 +52,7 @@ pymicra.decorators
     :show-inheritance:
 
 pymicra.io
------------------
+----------
 
 .. automodule:: pymicra.io
     :members:
@@ -59,7 +60,7 @@ pymicra.io
     :show-inheritance:
 
 pymicra.methods
-----------------------
+---------------
 
 .. automodule:: pymicra.methods
     :members:
@@ -67,7 +68,7 @@ pymicra.methods
     :show-inheritance:
 
 pymicra.physics
-----------------------
+---------------
 
 .. automodule:: pymicra.physics
     :members:
@@ -75,7 +76,7 @@ pymicra.physics
     :show-inheritance:
 
 pymicra.tests
---------------------
+-------------
 
 .. automodule:: pymicra.tests
     :members:
@@ -83,12 +84,11 @@ pymicra.tests
     :show-inheritance:
 
 pymicra.util
--------------------
+------------
 
 .. automodule:: pymicra.util
     :members:
     :undoc-members:
     :show-inheritance:
-
 
 

@@ -11,7 +11,7 @@ In this tutorial we use some example data and refer to some example python
 scripts that can be download `here
 <https://github.com/tomchor/pymicra/tree/master/examples>`_. These data and
 scripts are from a measurement campaign in a very small island (about 20 meters
-accross) in a large artificial lake. At the time of these measurements the
+across) in a large artificial lake. At the time of these measurements the
 island was almost completely immersed into about 5 cm of water. Please feel
 free to explore both the example data and the example programs, as well as
 modify the programs for your own learning process!
@@ -31,7 +31,7 @@ variable is in each column. You can check the default notation with
     print(pm.notation)
 
 
-The output is too long to be reprodued here, but on the left you'll see the
+The output is too long to be reproduced here, but on the left you'll see the
 full name of the variables (which corresponds to a notation
 namespace/attribute) and on the right you'll see the default notation for that
 variable.
@@ -135,7 +135,8 @@ description
 ...........
 
 The description is optional. It's a string that serves only to better identify
-the config file you're dealing with. It might useful for storage purposes.
+the config file you're dealing with. It might useful for storage purposes and useful
+when printing the config object.
 
 variables
 .........
@@ -256,17 +257,18 @@ file it describes:
    data, units = pm.timeSeries(fname, fconfig, parse_dates=True)
    print(data)
 
-Note that ``data`` is a ``pandas.DataFrame`` object which contains the whole data available in the
-datafile with each column being a variable. Since we indicated that we wanted to parse the dates
-with the option ``parse_dates=True``, each row has its respective timestamp.
-If, otherwise, we were to ignore the dates, the result would be a integer-indexed dataset:
+Note that ``data`` is a ``pandas.DataFrame`` object which contains the whole
+data available in the datafile with each column being a variable. Since we
+indicated that we wanted to parse the dates with the option
+``parse_dates=True``, each row has its respective timestamp.  If, otherwise, we
+were to ignore the dates, the result would be a integer-indexed dataset:
 
 .. ipython:: python
 
    data2, units = pm.timeSeries(fname, fconfig, parse_dates=False)
    print(data2)
 
-And, as mentioned, this way is a lot faster:
+And, as mentioned, the latter way is a lot faster:
 
 .. ipython:: python
 
@@ -306,20 +308,25 @@ these unambiguously, use the ``.loc`` method as
 
 .. ipython:: python
 
-    print(data.loc['2013-11-08 10:15:00.000':'2013-11-08 10:17:00.000000000', ['u','v','w']])
+    print(data.loc['2013-11-08 10:15:00':'2013-11-08 10:17:00', ['u','v','w']])
 
 This method is actually preferred  and you can find more information on this topic `here
 <http://pandas.pydata.org/pandas-docs/stable/indexing.html>`_.
 
-To view these data with units, you can use the ``.with_units()`` method. Note that, although this method returns
-a Pandas DataFrame, it is not meant for calculations. Currently the DataFrame it returns is meant for
-visualization purposes only! The previous output would like this using units:
+To view these data with units, you can use the ``.with_units()`` method. 
+The previous output would look like this using units:
+
 
 .. ipython:: python
 
    print(data.with_units(units)['theta_v'])
    print(data.with_units(units)[['u', 'v', 'w']])
    print(data.with_units(units)['2013-11-08 10:15:00'])
+
+.. warning::
+ Note that, although this method returns
+ a Pandas DataFrame, it is not meant for calculations. Currently the DataFrame it returns is meant for
+ visualization purposes only! 
 
 
 We can also plot the data on screen so we can view it interactively. This can be done directly

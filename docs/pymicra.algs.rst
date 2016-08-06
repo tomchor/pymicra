@@ -4,7 +4,7 @@ pymicra.algs package
 Submodules
 ----------
 
-pymicra.algs.auxiliar module
+pymicra.algs.auxiliar
 ----------------------------
 
 .. automodule:: pymicra.algs.auxiliar
@@ -12,7 +12,7 @@ pymicra.algs.auxiliar module
     :undoc-members:
     :show-inheritance:
 
-pymicra.algs.general module
+pymicra.algs.general
 ---------------------------
 
 .. automodule:: pymicra.algs.general
@@ -20,7 +20,7 @@ pymicra.algs.general module
     :undoc-members:
     :show-inheritance:
 
-pymicra.algs.numeric module
+pymicra.algs.numeric
 ---------------------------
 
 .. automodule:: pymicra.algs.numeric
@@ -28,7 +28,7 @@ pymicra.algs.numeric module
     :undoc-members:
     :show-inheritance:
 
-pymicra.algs.units module
+pymicra.algs.units
 -------------------------
 
 .. automodule:: pymicra.algs.units

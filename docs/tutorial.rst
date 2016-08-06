@@ -18,6 +18,10 @@ function:
 
    import pymicra as pm
    pm.notation = pm.Notation()
+   import pandas as pd
+   pd.options.display.max_rows = 30
+
+
 
 .. ipython:: python
 
@@ -200,4 +204,75 @@ extract spectra, co-spectra and quadratures.
 
 We begin normally with out data:
 
+.. ipython:: python
 
+   import pymicra as pm
+   fname = '../examples/ex_data/20131108-1000.csv'
+   fconfig = pm.fileConfig('../examples/lake.config')
+   data, units = pm.timeSeries(fname, fconfig, parse_dates=True)
+   data = data.rotateCoor(how='2d')
+   data = pm.preProcess(data, units, expand_temperature=True,
+       use_means=False, rho_air_from_theta_v=True, solutes=['co2'])
+   ddata = data.detrend(how='linear', units=units, ignore=['p', 'theta'])
+
+   spectra = pm.spectra(ddata[["q'", "theta_v'"]], frequency=20, anti_aliasing=True)
+   print(spectra)
+
+
+We can plot it with the raw points, but it's hard to see anything
+
+.. ipython:: python
+
+   @savefig spectra.png
+   spectra.plot(loglog=True, style='o')
+   plt.show()
+
+The best option it to apply a binning procedure before plotting it:
+
+.. ipython:: python
+
+   @savefig spectra_binned.png
+   spectra.binned(bins_number=100).plot(loglog=True, style='o')
+   plt.show()
+
+
+
+We can also calculate the cross-spectra
+
+.. ipython:: python
+
+   crspectra = pm.crossSpectra(ddata[["q'", "theta_v'", "w'"]], frequency=20, anti_aliasing=True)
+   print(crspectra)
+   
+We can then get the cospectra and plot it's binned version (the same can be
+done with the ``.quadrature()`` method). It's important to note that, although
+to pass from cross-spectra to cospectra one can merely do
+``data.apply(np.real)``, it's recommended to use the ``.cospectra()`` method or
+the ``pm.spectral.cospectra()`` function, since this way the notation on the
+resulting DataFrame will be correctly passed on, as you can see by the legend
+in the resulting plot.
+
+.. ipython:: python
+
+   cospectra = crspectra[[r"X_q'_w'", r"X_theta_v'_w'"]].cospectra()
+   @savefig cospectra_binned.png
+   cospectra.binned(bins_number=100).plot(loglog=True, style='o')
+   plt.show()
+ 
+
+Now we can finally obtain an Ogive with the ``pm.spectral.Ogive()`` function.
+Note that we plot ``Og/Og.sum()`` (i.e. we normalize the ogive) instead of
+``Og`` merely for visualization purposes, as the scale of both ogives are too
+different.
+
+.. ipython:: python
+
+   Og = pm.spectral.Ogive(cospectra)
+   @savefig ogive.png
+   (Og/Og.sum()).plot(logx=True)
+   plt.show()
+
+
+.. note::
+
+ Include some examples for spectral corrections.
