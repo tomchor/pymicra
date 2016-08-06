@@ -1,0 +1,121 @@
+\indexentry{pymicra.algs.auxiliar (module)|hyperpage}{30}
+\indexentry{applyResult() (in module pymicra.algs.auxiliar)|hyperpage}{30}
+\indexentry{completeHM() (in module pymicra.algs.auxiliar)|hyperpage}{30}
+\indexentry{first\_last() (in module pymicra.algs.auxiliar)|hyperpage}{30}
+\indexentry{lenYear() (in module pymicra.algs.auxiliar)|hyperpage}{30}
+\indexentry{stripDown() (in module pymicra.algs.auxiliar)|hyperpage}{30}
+\indexentry{testValid() (in module pymicra.algs.auxiliar)|hyperpage}{30}
+\indexentry{pymicra.algs.general (module)|hyperpage}{31}
+\indexentry{classbin() (in module pymicra.algs.general)|hyperpage}{31}
+\indexentry{diff\_central() (in module pymicra.algs.general)|hyperpage}{31}
+\indexentry{file\_len() (in module pymicra.algs.general)|hyperpage}{31}
+\indexentry{find\_nearest() (in module pymicra.algs.general)|hyperpage}{31}
+\indexentry{fitByDate() (in module pymicra.algs.general)|hyperpage}{31}
+\indexentry{fitWrap() (in module pymicra.algs.general)|hyperpage}{31}
+\indexentry{get\_index() (in module pymicra.algs.general)|hyperpage}{32}
+\indexentry{get\_notation() (in module pymicra.algs.general)|hyperpage}{32}
+\indexentry{inverse\_normal\_cdf() (in module pymicra.algs.general)|hyperpage}{32}
+\indexentry{latexify() (in module pymicra.algs.general)|hyperpage}{32}
+\indexentry{limitedSubs() (in module pymicra.algs.general)|hyperpage}{32}
+\indexentry{limited\_interpolation() (in module pymicra.algs.general)|hyperpage}{32}
+\indexentry{line2date() (in module pymicra.algs.general)|hyperpage}{32}
+\indexentry{mad() (in module pymicra.algs.general)|hyperpage}{33}
+\indexentry{name2date() (in module pymicra.algs.general)|hyperpage}{33}
+\indexentry{parseDates() (in module pymicra.algs.general)|hyperpage}{33}
+\indexentry{resample() (in module pymicra.algs.general)|hyperpage}{33}
+\indexentry{splitData() (in module pymicra.algs.general)|hyperpage}{33}
+\indexentry{pymicra.algs.numeric (module)|hyperpage}{34}
+\indexentry{pymicra.algs.units (module)|hyperpage}{34}
+\indexentry{add() (in module pymicra.algs.units)|hyperpage}{34}
+\indexentry{convert\_cols() (in module pymicra.algs.units)|hyperpage}{34}
+\indexentry{convert\_indexes() (in module pymicra.algs.units)|hyperpage}{34}
+\indexentry{convert\_to() (in module pymicra.algs.units)|hyperpage}{34}
+\indexentry{divide() (in module pymicra.algs.units)|hyperpage}{34}
+\indexentry{multiply() (in module pymicra.algs.units)|hyperpage}{34}
+\indexentry{operate() (in module pymicra.algs.units)|hyperpage}{34}
+\indexentry{parseUnits() (in module pymicra.algs.units)|hyperpage}{34}
+\indexentry{pymicra.algs (module)|hyperpage}{35}
+\indexentry{pymicra.micro.functions (module)|hyperpage}{35}
+\indexentry{Psi() (in module pymicra.micro.functions)|hyperpage}{35}
+\indexentry{nondimensionalGrad() (in module pymicra.micro.functions)|hyperpage}{35}
+\indexentry{nondimensionalSTD() (in module pymicra.micro.functions)|hyperpage}{35}
+\indexentry{rte() (in module pymicra.micro.functions)|hyperpage}{35}
+\indexentry{ste() (in module pymicra.micro.functions)|hyperpage}{35}
+\indexentry{pymicra.micro.scales (module)|hyperpage}{36}
+\indexentry{MonObuLen() (in module pymicra.micro.scales)|hyperpage}{36}
+\indexentry{MonObuVar() (in module pymicra.micro.scales)|hyperpage}{36}
+\indexentry{obukhovLen() (in module pymicra.micro.scales)|hyperpage}{36}
+\indexentry{stabilityParam() (in module pymicra.micro.scales)|hyperpage}{36}
+\indexentry{turbulentScales() (in module pymicra.micro.scales)|hyperpage}{36}
+\indexentry{pymicra.micro.spectral (module)|hyperpage}{36}
+\indexentry{Ogive() (in module pymicra.micro.spectral)|hyperpage}{36}
+\indexentry{correctLag() (in module pymicra.micro.spectral)|hyperpage}{36}
+\indexentry{cospectra() (in module pymicra.micro.spectral)|hyperpage}{37}
+\indexentry{hfc\_Dias\_ea\_16() (in module pymicra.micro.spectral)|hyperpage}{37}
+\indexentry{hfc\_Massman\_Ibrom\_08() (in module pymicra.micro.spectral)|hyperpage}{37}
+\indexentry{hfc\_zeroQuad() (in module pymicra.micro.spectral)|hyperpage}{37}
+\indexentry{phaseCorrection() (in module pymicra.micro.spectral)|hyperpage}{37}
+\indexentry{quadrature() (in module pymicra.micro.spectral)|hyperpage}{37}
+\indexentry{recspeAux() (in module pymicra.micro.spectral)|hyperpage}{37}
+\indexentry{zeroQuadCorrection() (in module pymicra.micro.spectral)|hyperpage}{37}
+\indexentry{pymicra.micro.util (module)|hyperpage}{37}
+\indexentry{eddyCovariance() (in module pymicra.micro.util)|hyperpage}{37}
+\indexentry{preProcess() (in module pymicra.micro.util)|hyperpage}{38}
+\indexentry{rotateCoor() (in module pymicra.micro.util)|hyperpage}{38}
+\indexentry{pymicra.micro (module)|hyperpage}{38}
+\indexentry{pymicra.constants (module)|hyperpage}{38}
+\indexentry{pymicra.core (module)|hyperpage}{38}
+\indexentry{Notation (class in pymicra.core)|hyperpage}{38}
+\indexentry{build() (pymicra.core.Notation method)|hyperpage}{38}
+\indexentry{fileConfig (class in pymicra.core)|hyperpage}{39}
+\indexentry{get\_date\_cols() (pymicra.core.fileConfig method)|hyperpage}{39}
+\indexentry{siteConfig (class in pymicra.core)|hyperpage}{39}
+\indexentry{pymicra.data (module)|hyperpage}{40}
+\indexentry{bulkCorr() (in module pymicra.data)|hyperpage}{40}
+\indexentry{crossSpectra() (in module pymicra.data)|hyperpage}{40}
+\indexentry{detrend() (in module pymicra.data)|hyperpage}{40}
+\indexentry{reverse\_arrangement() (in module pymicra.data)|hyperpage}{40}
+\indexentry{rotate2D() (in module pymicra.data)|hyperpage}{41}
+\indexentry{spectra() (in module pymicra.data)|hyperpage}{41}
+\indexentry{trend() (in module pymicra.data)|hyperpage}{41}
+\indexentry{pymicra.decorators (module)|hyperpage}{42}
+\indexentry{autoassign() (in module pymicra.decorators)|hyperpage}{42}
+\indexentry{pdgeneral() (in module pymicra.decorators)|hyperpage}{42}
+\indexentry{pdgeneral\_in() (in module pymicra.decorators)|hyperpage}{42}
+\indexentry{pdgeneral\_io() (in module pymicra.decorators)|hyperpage}{42}
+\indexentry{pymicra.io (module)|hyperpage}{42}
+\indexentry{readDataFile() (in module pymicra.io)|hyperpage}{42}
+\indexentry{readDataFiles() (in module pymicra.io)|hyperpage}{43}
+\indexentry{readUnitsCsv() (in module pymicra.io)|hyperpage}{43}
+\indexentry{read\_fileConfig() (in module pymicra.io)|hyperpage}{43}
+\indexentry{read\_site() (in module pymicra.io)|hyperpage}{43}
+\indexentry{timeSeries() (in module pymicra.io)|hyperpage}{43}
+\indexentry{pymicra.methods (module)|hyperpage}{44}
+\indexentry{binwrapper() (in module pymicra.methods)|hyperpage}{44}
+\indexentry{pymicra.physics (module)|hyperpage}{44}
+\indexentry{R\_moistAir() (in module pymicra.physics)|hyperpage}{44}
+\indexentry{airDensity\_from\_theta() (in module pymicra.physics)|hyperpage}{44}
+\indexentry{airDensity\_from\_theta\_v() (in module pymicra.physics)|hyperpage}{44}
+\indexentry{dewPointTemp() (in module pymicra.physics)|hyperpage}{45}
+\indexentry{dryAirDensity\_from\_p() (in module pymicra.physics)|hyperpage}{45}
+\indexentry{latent\_heat\_water() (in module pymicra.physics)|hyperpage}{45}
+\indexentry{perfGas() (in module pymicra.physics)|hyperpage}{45}
+\indexentry{ppxv2density() (in module pymicra.physics)|hyperpage}{45}
+\indexentry{satWaterPressure() (in module pymicra.physics)|hyperpage}{45}
+\indexentry{theta\_from\_theta\_s() (in module pymicra.physics)|hyperpage}{45}
+\indexentry{theta\_from\_theta\_v() (in module pymicra.physics)|hyperpage}{46}
+\indexentry{theta\_std\_from\_theta\_v\_fluc() (in module pymicra.physics)|hyperpage}{46}
+\indexentry{pymicra.tests (module)|hyperpage}{46}
+\indexentry{check\_RA() (in module pymicra.tests)|hyperpage}{46}
+\indexentry{check\_limits() (in module pymicra.tests)|hyperpage}{47}
+\indexentry{check\_maxdif() (in module pymicra.tests)|hyperpage}{47}
+\indexentry{check\_nans() (in module pymicra.tests)|hyperpage}{47}
+\indexentry{check\_numlines() (in module pymicra.tests)|hyperpage}{47}
+\indexentry{check\_replaced() (in module pymicra.tests)|hyperpage}{47}
+\indexentry{check\_spikes() (in module pymicra.tests)|hyperpage}{47}
+\indexentry{check\_stationarity() (in module pymicra.tests)|hyperpage}{48}
+\indexentry{check\_std() (in module pymicra.tests)|hyperpage}{48}
+\indexentry{pymicra.util (module)|hyperpage}{48}
+\indexentry{correctDrift() (in module pymicra.util)|hyperpage}{48}
+\indexentry{qcontrol() (in module pymicra.util)|hyperpage}{49}
+\indexentry{separateFiles() (in module pymicra.util)|hyperpage}{51}

@@ -1,8 +1,5 @@
-.. |gitrepo| replace:: Github page
-.. _gitrepo: https://github.com/tomchor/pymicra
-.. |docs| replace:: documentation
-.. _docs: https://tomchor.github.io/pymicra
-
+.. _Github page: https://github.com/tomchor/pymicra
+.. _documentation: https://tomchor.github.io/pymicra
 
 
 Pymicra - A Python tool for Micrometeorological Analyses
@@ -13,7 +10,7 @@ micrometeorological datasets. It is aimed at improving the productivity and
 allowing us to focus on the micrometeorological issues, rather than programming
 ones.
 
-Please check out the |gitrepo|_ and the |docs|_.
+Please check out the `Github page`_ and the documentation_.
 
 Here's a quick (incomplete!) list of what Pymicra does:
 

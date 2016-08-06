@@ -14,10 +14,10 @@
 
 import sys
 import os
-import pypandoc as pdoc
+from shutil import copyfile
 
-readme = pdoc.convert_file('README.rst', 'markdown_github', format='rst')
-open('../README.md', 'wt').write(readme)
+copyfile('README.rst', '../README.rst')
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

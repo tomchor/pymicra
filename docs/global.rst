@@ -1,15 +1,12 @@
-.. |gitrepo| replace:: Github page
-.. _gitrepo: https://github.com/tomchor/pymicra
-.. |gitissue| replace:: Github issue
-.. _gitissue: https://github.com/tomchor/pymicra/issues
-.. |docs| replace:: documentation
-.. _docs: https://tomchor.github.io/pymicra
-.. |pint| replace:: Pint
-.. _pint: https://pint.readthedocs.io/en/0.7.2/
-.. |pandas| replace:: Pandas
-.. _pandas: http://pandas.pydata.org/
-.. _numpy: http://www.numpy.org/
-.. _scipy: https://www.scipy.org/
+.. _Github page: https://github.com/tomchor/pymicra
+.. _documentation: https://tomchor.github.io/pymicra
+.. _Github issue: https://github.com/tomchor/pymicra/issues
+
+
+.. _Pint: https://pint.readthedocs.io/en/0.7.2/
+.. _Pandas: http://pandas.pydata.org/
+.. _Numpy: http://www.numpy.org/
+.. _Scipy: https://www.scipy.org/
 
 .. |myemail| replace:: email (tomaschor [at] gmail.com)
 

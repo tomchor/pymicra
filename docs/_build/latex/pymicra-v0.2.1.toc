@@ -1,0 +1,53 @@
+\select@language {english}
+\contentsline {chapter}{\numberline {1}Introduction}{2}{chapter.1}
+\contentsline {section}{\numberline {1.1}Quick notes}{2}{section.1.1}
+\contentsline {section}{\numberline {1.2}Contributing}{2}{section.1.2}
+\contentsline {chapter}{\numberline {2}Installation}{3}{chapter.2}
+\contentsline {chapter}{\numberline {3}Getting started}{4}{chapter.3}
+\contentsline {section}{\numberline {3.1}Notation}{4}{section.3.1}
+\contentsline {section}{\numberline {3.2}Creating file configurations file}{5}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}description}{7}{subsection.3.2.1}
+\contentsline {subsection}{\numberline {3.2.2}variables}{7}{subsection.3.2.2}
+\contentsline {subsection}{\numberline {3.2.3}units}{7}{subsection.3.2.3}
+\contentsline {subsection}{\numberline {3.2.4}columns\_separator}{7}{subsection.3.2.4}
+\contentsline {subsection}{\numberline {3.2.5}frequency}{7}{subsection.3.2.5}
+\contentsline {subsection}{\numberline {3.2.6}header\_lines}{8}{subsection.3.2.6}
+\contentsline {subsection}{\numberline {3.2.7}filename\_format}{8}{subsection.3.2.7}
+\contentsline {subsection}{\numberline {3.2.8}date\_cols}{8}{subsection.3.2.8}
+\contentsline {section}{\numberline {3.3}Reading data}{8}{section.3.3}
+\contentsline {section}{\numberline {3.4}Viewing and manipulating data}{10}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}Printing and plotting}{10}{subsection.3.4.1}
+\contentsline {subsection}{\numberline {3.4.2}Converting units}{14}{subsection.3.4.2}
+\contentsline {subsection}{\numberline {3.4.3}Manipulating}{16}{subsection.3.4.3}
+\contentsline {chapter}{\numberline {4}Hands-on tutorial}{18}{chapter.4}
+\contentsline {section}{\numberline {4.1}Calculating auxiliary variables and units}{18}{section.4.1}
+\contentsline {section}{\numberline {4.2}Creating a site configuration file}{21}{section.4.2}
+\contentsline {section}{\numberline {4.3}Extracting fluxes}{21}{section.4.3}
+\contentsline {section}{\numberline {4.4}Obtaining the spectra}{23}{section.4.4}
+\contentsline {chapter}{\numberline {5}Pymicra's auto-generated docs}{30}{chapter.5}
+\contentsline {section}{\numberline {5.1}Subpackages}{30}{section.5.1}
+\contentsline {subsection}{\numberline {5.1.1}pymicra.algs package}{30}{subsection.5.1.1}
+\contentsline {subsubsection}{Submodules}{30}{subsubsection*.3}
+\contentsline {subsubsection}{pymicra.algs.auxiliar}{30}{subsubsection*.4}
+\contentsline {subsubsection}{pymicra.algs.general}{31}{subsubsection*.11}
+\contentsline {subsubsection}{pymicra.algs.numeric}{34}{subsubsection*.30}
+\contentsline {subsubsection}{pymicra.algs.units}{34}{subsubsection*.31}
+\contentsline {subsubsection}{Module contents}{35}{subsubsection*.40}
+\contentsline {subsection}{\numberline {5.1.2}pymicra.micro package}{35}{subsection.5.1.2}
+\contentsline {subsubsection}{Submodules}{35}{subsubsection*.41}
+\contentsline {subsubsection}{pymicra.micro.functions}{35}{subsubsection*.42}
+\contentsline {subsubsection}{pymicra.micro.scales}{36}{subsubsection*.48}
+\contentsline {subsubsection}{pymicra.micro.spectral}{36}{subsubsection*.54}
+\contentsline {subsubsection}{pymicra.micro.util}{37}{subsubsection*.65}
+\contentsline {subsubsection}{Module contents}{38}{subsubsection*.69}
+\contentsline {section}{\numberline {5.2}pymicra.constants}{38}{section.5.2}
+\contentsline {section}{\numberline {5.3}pymicra.core}{38}{section.5.3}
+\contentsline {section}{\numberline {5.4}pymicra.data}{40}{section.5.4}
+\contentsline {section}{\numberline {5.5}pymicra.decorators}{42}{section.5.5}
+\contentsline {section}{\numberline {5.6}pymicra.io}{42}{section.5.6}
+\contentsline {section}{\numberline {5.7}pymicra.methods}{44}{section.5.7}
+\contentsline {section}{\numberline {5.8}pymicra.physics}{44}{section.5.8}
+\contentsline {section}{\numberline {5.9}pymicra.tests}{46}{section.5.9}
+\contentsline {section}{\numberline {5.10}pymicra.util}{48}{section.5.10}
+\contentsline {chapter}{Python Module Index}{53}{section*.117}
+\contentsline {chapter}{Index}{54}{section*.118}

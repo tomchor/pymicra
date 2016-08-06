@@ -14,8 +14,8 @@ and running ``help(pymicra.timeSeries)``, for example.
 
 Since Pymicra is meant to be a community package, improvements, suggestions of
 improvement, and any kind of feedback are highly appreciated. The code is
-available at its |gitrepo|_ and any contact can be made through there
-(possibly creating an issue) or via |myemail|.
+available at its `Github page`_ and any contact can be made through there
+(possibly creating an `Github issue`_) or via |myemail|.
 
 Quick notes
 ...........
@@ -48,13 +48,12 @@ the docstring, but also detail them with comments throughout the code. This was
 done specially to make it easier for other people to contribute.
 
 If you want to contribute with code you can either create a Github account and
-contact me via the |gitrepo|_ by creating an issue/pull request, or you can
+contact me via the `Github page`_ by creating an issue/pull request, or you can
 contact me directly by |myemail|. Furthermore, if you have some useful routines
 laying around (or even some routines with a procedure you recently created and
 published) but aren't sure how to make them Pymicra-compatible, let me know by
 email and we'll work together to adapt it.
 
 Cheers
-
 
 Tomás Chor.

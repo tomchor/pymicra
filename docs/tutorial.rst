@@ -59,7 +59,7 @@ see if it's doing what you think it's doing and to analyse its calculation
 logic. By doing that you can have a better idea of what it does without having
 to check the code, and how to prevent it from doing some calculations you don't
 want. For example, if you're not happy with the way it calculates moist air
-density, you can calculate it yourself by extracting Numpy arrays using the
+density, you can calculate it yourself by extracting Numpy_ arrays using the
 ``.values`` method:
 
 .. code-block:: ipython

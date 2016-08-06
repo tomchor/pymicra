@@ -8,7 +8,7 @@ no way supposed to be a complete representation of everything that can be done
 with Pymicra.
 
 In this tutorial we use some example data and refer to some example python
-scripts that can be download `here
+scripts that can be downloaded `here
 <https://github.com/tomchor/pymicra/tree/master/examples>`_. These data and
 scripts are from a measurement campaign in a very small island (about 20 meters
 across) in a large artificial lake. At the time of these measurements the
@@ -168,7 +168,7 @@ which themselves are the 1989 version default C standard format dates, which is
 common in many platforms.
 
 This is useful only in case you want to index your data by timestamp, which is
-a huge advantage in some cases (check out what Pandas can do with
+a huge advantage in some cases (check out what Pandas_ can do with
 `timestamp-indexed data
 <http://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_) but Pymicra
 can also work well without this. If you don't wish to work with timestamps and
@@ -182,7 +182,7 @@ units
 .....
 
 The ``units`` keyword is also very important. It tells Pymicra in which units
-each variable is being measured. Units are handled by |pint|_, so for more
+each variable is being measured. Units are handled by Pint_, so for more
 details on how to define the units please refer to their documentation. Suffices 
 to say here that the format of the units are pretty intuitive. Some quick remarks
 are
@@ -358,7 +358,7 @@ Converting units
 ................
 
 You can manually convert between units using the contents from `Manipulating`
-and the Pint package. But Pymicra has a very useful method to do this called ``.convert_cols`` (more exist,
+and the Pint_ package. But Pymicra has a very useful method to do this called ``.convert_cols`` (more exist,
 but let's focus on this one).
 
 Let's, for example, convert some units:
@@ -390,7 +390,7 @@ Manipulating data is pretty intuitive with Pandas. For example
    print(data['rho_air'])
 
 If, however, you're not familiar with Pandas and prefer to just stick with what
-you know, you can get Numpy arrays from columns using the ``.values``
+you know, you can get Numpy_ arrays from columns using the ``.values``
 attribute:
 
 .. ipython:: python
