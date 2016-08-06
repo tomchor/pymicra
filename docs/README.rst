@@ -1,4 +1,8 @@
-.. include:: global.rst
+.. |gitrepo| replace:: Github page
+.. _gitrepo: https://github.com/tomchor/pymicra
+.. |docs| replace:: documentation
+.. _docs: https://tomchor.github.io/pymicra
+
 
 
 Pymicra - A Python tool for Micrometeorological Analyses
