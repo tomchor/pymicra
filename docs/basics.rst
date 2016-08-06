@@ -9,9 +9,12 @@ with Pymicra.
 
 In this tutorial we use some example data and refer to some example python
 scripts that can be download `here
-<https://github.com/tomchor/pymicra/tree/master/examples>`_.  Please feel free
-to explore both the example data and the example programs, as well as modify
-the programs for your own learning process!
+<https://github.com/tomchor/pymicra/tree/master/examples>`_. These data and
+scripts are from a measurement campaign in a very small island (about 20 meters
+accross) in a large artificial lake. At the time of these measurements the
+island was almost completely immersed into about 5 cm of water. Please feel
+free to explore both the example data and the example programs, as well as
+modify the programs for your own learning process!
 
 
 Notation
@@ -303,7 +306,7 @@ these unambiguously, use the ``.loc`` method as
 
 .. ipython:: python
 
-    print(data.loc['2013-11-08 10:15:00.000':'2013-11-08 10:17:00.000', ['u','v','w']])
+    print(data.loc['2013-11-08 10:15:00.000':'2013-11-08 10:17:00.000000000', ['u','v','w']])
 
 This method is actually preferred  and you can find more information on this topic `here
 <http://pandas.pydata.org/pandas-docs/stable/indexing.html>`_.
