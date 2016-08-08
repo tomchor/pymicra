@@ -67,7 +67,7 @@ def Psi(zeta, x='tau', zeta0=0.):
 
     Taken from Simpson.ea1998--the.validity.of.similarity.theory;.in.the.roughness.sublayer
 
-    Parameters:
+    Parameters
     -----------
     zeta: float
         the stability variable
@@ -102,7 +102,7 @@ def ste(data, w_fluctuations="w'"):
     according to Cancelli, Dias, Chamecki. Dimensionless criteria for the production-dissipation equilibrium
     of scalar fluctuations and their implications for scalar similarity, Water Resources Research, 2012
 
-    Parameters:
+    Parameters
     -----------
     data: pandas dataframe
         a three-columns dataframe, where one of them should be the vertical velocity fluctuations
@@ -136,7 +136,7 @@ def rte(data, w_fluctuations="w'", order=None):
     according to Cancelli, Dias, Chamecki. Dimensionless criteria for the production-dissipation equilibrium
     of scalar fluctuations and their implications for scalar similarity, Water Resources Research, 2012
 
-    Parameters:
+    Parameters
     -----------
     order: 2-elements list
         order of variables: if its rte_ab should be [a,b], if its rte_ba should [b,a]
@@ -165,7 +165,7 @@ def _Cx(x, za, zb, d, z0, Lm, Psif=None):
     In this code, zb means tau and za means anything else and the bottom level
     is the ground (height zero)
 
-    Parameters:
+    Parameters
     -----------
 
     x: string

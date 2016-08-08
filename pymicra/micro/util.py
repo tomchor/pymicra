@@ -17,13 +17,13 @@ moist air heat capacity at constant pressure?
 specific evaporation heat?
 """
 
-def preProcess(data, units, notation=None, use_means=False,
-        rho_air_from_theta_v=True, inplace=True, theta=None, theta_unit=None, solutes=[]):
-    '''
-    Pre-processes data by calculating moist and dry air densities, specific humidity
-    mass density and other important variables
+def preProcess(data, units, notation=None, use_means=False, expand_temperature=True,
+        rho_air_from_theta_v=True, inplace_units=True, theta=None, theta_unit=None, solutes=[]):
+    """
+    Calculates moist and dry air densities, specific humidity mass density and other 
+    important variables using the variables provided in the input DataFrame.
 
-    Parameters:
+    Parameters
     -----------
     data: pandas.DataFrame
         dataframe with micrometeorological measurements
@@ -33,7 +33,7 @@ def preProcess(data, units, notation=None, use_means=False,
         defining notation used in data
     rho_air_from_theta_v: bool
         whether to use theta_v to calculate air density or theta
-    inplace: bool
+    inplace_units: bool
         treat units inplace or not
     theta: pandas.Series
         auxiliar theta measurement to be used if rho_air_from_theta_v==False
@@ -42,17 +42,17 @@ def preProcess(data, units, notation=None, use_means=False,
     solutes: list
         list of string where each string is a solute to be considered
 
-    Returns:
+    Returns
     --------
     data: pandas.DataFrame
         dataframe with original columns and new calculated ones
-    '''
+    """
     from .. import constants
     from .. import algs
     from .. import physics
 
     data = data.copy()
-    if not inplace:
+    if not inplace_units:
         units = units.copy()
 
     Rh2o = constants.R_spec['h2o']
@@ -70,7 +70,7 @@ def preProcess(data, units, notation=None, use_means=False,
     # First convert any temperature if it is still in Celsius
     temps = { col:'kelvin' for col in data.columns if col in [defs.thermodyn_temp, defs.virtual_temp, defs.sonic_temp, defs.potential_temp] }
     print('Converting {} to kelvin ... '.format(' and '.join(temps.keys())), end='')
-    data = data.convert_cols(temps, units, inplace=True)
+    data = data.convert_cols(temps, units, inplace_units=True)
     print("Done!")
     #---------
 
@@ -81,7 +81,7 @@ def preProcess(data, units, notation=None, use_means=False,
         data.loc[:, defs.h2o_mass_density ] = data.loc[:, defs.h2o_molar_density ]*Mh2o
         units.update({ defs.h2o_mass_density : units[ defs.h2o_molar_density ]*molar_mass_unit })
         print("Done!")
-    data = data.convert_cols({defs.h2o_mass_density:'kg/m**3'}, units, inplace=True)
+    data = data.convert_cols({defs.h2o_mass_density:'kg/m**3'}, units, inplace_units=True)
     #---------
 
     #---------
@@ -99,14 +99,14 @@ def preProcess(data, units, notation=None, use_means=False,
         print('Moist air density not present in dataset')
         if rho_air_from_theta_v:
             print('Calculating rho_air = p/(Rdry * theta_v) ... ', end='')
-            data = physics.airDensity_from_theta_v(data, units, notation=defs, inplace=True, use_means=use_means)
+            data = physics.airDensity_from_theta_v(data, units, notation=defs, inplace_units=True, use_means=use_means)
         else:
             if theta:
                 print('Trying to calculate rho_air using auxiliar theta measurement ... ', end='')
-                data = physics.airDensity_from_theta(data, units, notation=defs, inplace=True, use_means=use_means, theta=theta, theta_unit=theta_unit)
+                data = physics.airDensity_from_theta(data, units, notation=defs, inplace_units=True, use_means=use_means, theta=theta, theta_unit=theta_unit)
             else:
                 print('Trying to calculate rho_air using theta from this dataset ... ', end='')
-                data = physics.airDensity_from_theta(data, units, notation=defs, inplace=True, use_means=use_means, theta=None)
+                data = physics.airDensity_from_theta(data, units, notation=defs, inplace_units=True, use_means=use_means, theta=None)
         print('Done!')
     #---------
 
@@ -115,7 +115,7 @@ def preProcess(data, units, notation=None, use_means=False,
     if (defs.dry_air_mass_density not in data.columns):
         print('Calculating dry_air mass_density = rho_air - rho_h2o ... ', end='')
         data.loc[:, defs.dry_air_mass_density ] = algs.add([ data[defs.moist_air_mass_density], -data[defs.h2o_mass_density] ], 
-                        [ units[defs.moist_air_mass_density], units[defs.h2o_mass_density] ], inplace=True, unitdict=units, key=defs.dry_air_mass_density)
+                        [ units[defs.moist_air_mass_density], units[defs.h2o_mass_density] ], inplace_units=True, unitdict=units, key=defs.dry_air_mass_density)
         print('Done!')
     #---------
 
@@ -128,7 +128,7 @@ def preProcess(data, units, notation=None, use_means=False,
         print('Calculating dry_air molar_density = rho_dry / dry_air_molar_mass ... ', end='')
         data.loc[:, defs.dry_air_molar_density ] = data[ defs.dry_air_mass_density ]/constants.molar_mass['dry']
         units.update({ defs.dry_air_molar_density : units[ defs.dry_air_mass_density ]/molar_mass_unit })
-        data = data.convert_cols({defs.dry_air_molar_density:'mole/m**3'}, units, inplace=True)
+        data = data.convert_cols({defs.dry_air_molar_density:'mole/m**3'}, units, inplace_units=True)
         print('Done!')
     #---------
  
@@ -153,7 +153,7 @@ def preProcess(data, units, notation=None, use_means=False,
     #---------
     # Calculation of h2o mass mixing ratio is done here
     if (defs.h2o_molar_mixing_ratio not in data.columns):
-        print('Calculating h2o mass mixing ratio = rho_h2o / rho_dry ... ', end='')
+        print('Calculating h2o molar mixing ratio = rho_h2o / rho_dry ... ', end='')
         data.loc[:, defs.h2o_molar_mixing_ratio] = data[ defs.h2o_molar_density ] / data[ defs.dry_air_molar_density ]
         units.update({ defs.h2o_molar_mixing_ratio : units[ defs.h2o_molar_density ] / units[ defs.dry_air_molar_density ] })
         print('Done!')
@@ -163,7 +163,27 @@ def preProcess(data, units, notation=None, use_means=False,
     # Converting dry_air_molar_density and dry_air_molar_mixing_ratio to mol/meter**3 and mole/mole, respectively
     convert_to={defs.h2o_molar_mixing_ratio : 'mole/mole',
                 defs.dry_air_molar_density : 'mole/meter**3'}
-    data = data.convert_cols(convert_to, units, inplace=True)
+    data = data.convert_cols(convert_to, units, inplace_units=True)
+    #---------
+
+    #---------
+    # Tries to calculate theta_v or theta if they are not found
+    if defs.thermodyn_temp not in data.columns:
+        print('Thermodynamic temperature not found ... ', end='')
+        if expand_temperature:
+            print('trying to calculate it ', end='')
+            if defs.virtual_temperature in data.columns:
+                print('with theta_v ~ theta (1 + 0.61 q) relation ... ', end='')
+                data.loc[:, defs.thermodyn_temp ] = physics.theta_from_theta_v(data, units, notation=defs, return_full_df=False, inplace_units=True)
+                print('done!')
+            elif defs.sonic_temperature in data.columns:
+                print('with theta_s ~ theta (1 + 0.51 q) relation ... ', end='')
+                data.loc[:, defs.thermodyn_temp ] = physics.theta_from_theta_s(data, units, notation=defs, return_full_df=False, inplace_units=True)
+                print('done!')
+            else:
+                print('... not possible with current variables!')
+        else:
+            print('to try to calculate it from virtual temperature or sonic temperature measurements do expand_temperarure=True')
     #---------
 
     #---------
@@ -192,7 +212,7 @@ def preProcess(data, units, notation=None, use_means=False,
             data.loc[:, sol_mass_density ] = data.loc[:, sol_molar_density ]*M_sol
             units.update({ sol_mass_density : units[ sol_molar_density ]*molar_mass_unit })
             print("Done!")
-        data = data.convert_cols({sol_mass_density:'kg/m**3'}, units, inplace=True)
+        data = data.convert_cols({sol_mass_density:'kg/m**3'}, units, inplace_units=True)
         #---------
     
         #---------
@@ -237,24 +257,24 @@ def preProcess(data, units, notation=None, use_means=False,
         convert_to={sol_molar_mixing_ratio : 'mole/mole',
                     sol_mass_mixing_ratio : 'g/g',
                     sol_mass_concentration : 'g/g'}
-        data = data.convert_cols(convert_to, units, inplace=True)
+        data = data.convert_cols(convert_to, units, inplace_units=True)
         #---------
  
     #---------
         
     print('Pre-processing complete.\n')
-    if inplace:
+    if inplace_units:
         return data
     else:
         return data, units
 
 
 def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config=None, output_as_df=True,
-        notation=None, theta_fluct_from_theta_v=True, inplace=True, solutes=[]):
+        notation=None, theta_fluct_from_theta_v=True, inplace_units=True, solutes=[]):
     """
     Get fluxes from the turbulent fluctuations
     
-    Parameters:
+    Parameters
     -----------
     data: pandas.DataFrame
         dataframe with the characteristic lengths calculated
@@ -268,7 +288,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         siteConfig object to pass to getScales if get_turbulent_scales==True
     notation: pymicra.Notation
         object that holds the notation used in the dataframe
-    inplace: bool
+    inplace_units: bool
         whether or not to treat the units inplace
     solutes: list
         list that holds every solute considered for flux
@@ -286,7 +306,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     defsdic = defs.__dict__
 
     data = data.copy()
-    if (not inplace) and units:
+    if (not inplace_units) and units:
         units = units.copy()
     cunits = constants.units
 
@@ -311,7 +331,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     # Now we try to calculate or identify the fluctuations of theta
     theta_mean = data[ defs.thermodyn_temp ].mean()
     if (theta_fluc not in data.columns) or theta_fluct_from_theta_v:
-        print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
+        print("Fluctuations of theta not found. Will try to calculate it with theta' = (theta_v' - 0.61 theta_mean q')/(1 + 0.61 q_mean ... ", end='')
         #---------
         # We check the units of theta_v and theta
         if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
@@ -341,7 +361,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
 
     #---------
     # Calculate the fluxes
-    print('Calculating fluxes ... ', end='')
+    print('Calculating fluxes from covariances ... ', end='')
     idx0 = data.index[0]
     out = pd.Series(name=idx0)
     out[ defs.momentum_flux ]               = -rho_air_mean * cov[ u_fluc ][ w_fluc ]
@@ -372,7 +392,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     #------------------------
     # APPLY WPL CORRECTION. PAGES 34-35 OF MICRABORDA
     if wpl:
-        print('Applying WPL correction for water vapor flux ... ', end='\n')
+        print('Applying WPL correction for water vapor flux ... ', end='')
         mrho_h2o_mean = data[ defs.h2o_molar_density ].mean()
 
         #---------
@@ -409,13 +429,15 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
 
         out.loc[ defs.water_vapor_flux ] = (1. + mr_h2o)* aux3
         fluxunits[ defs.water_vapor_flux ] = unt3
+        print('done!')
         #---------
 
         #---------
         # Now we re-calculate LE based on the corrected E
-        print('Applying WPL correction for latent heat flux ... ', end='\n')
+        print('Applying WPL correction for latent heat flux using result for water vapor flux ... ', end='')
         out[ defs.latent_heat_flux ] = lamb(theta_mean) * out[ defs.water_vapor_flux ] * constants.molar_mass['h2o']
         fluxunits[ defs.latent_heat_flux ] = cunits[ 'latent_heat_water' ] * fluxunits[ defs.water_vapor_flux ] * cunits['molar_mass']
+        print('done!')
         #---------
 
         #---------
@@ -429,9 +451,9 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         #---------
 
         #---------
-        # NEEDS IMPROVEMENT
+        # We calculate WPL for each solute
         for sol_flux, solutef, solute in zip(solutefluxes, solutesf, solutes):
-            print('Applying WPL correction for {} ... '.format(sol_flux), end='\n')
+            print('Applying WPL correction for {} ... '.format(sol_flux), end='')
             sol_molar_density_mean    =   data[ defsdic['%s_molar_density' % solute] ].mean()
 
             #---------
@@ -465,6 +487,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
 
             out[ sol_flux ] = aux4
             fluxunits[ sol_flux ] = unt4
+            print('done!')
 
             print("Re-calculating cov(%s, w') according to WPL correction ... " % solutef, end='')
             w_sol_units = units[ w_fluc ] * units[ solutef ]
@@ -480,7 +503,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     convert_to ={defs.latent_heat_flux : 'watts/meter**2',
                 defs.virtual_sensible_heat_flux : 'watts/meter**2',
                 defs.sensible_heat_flux : 'watts/meter**2'}
-    out = out.convert_indexes(convert_to, fluxunits, inplace=True)
+    out = out.convert_indexes(convert_to, fluxunits, inplace_units=True)
     #------------
 
     #------------
@@ -489,7 +512,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         assert site_config is not None, 'Must provide site_config keyword if get_turbulent_scales==True'
         from ..micro import turbulentScales
         theta_v_mean = data[ defs.virtual_temp ].mean()
-        scales, scaleunits = turbulentScales(wplcov, site_config, units, notation=defs, inplace=False, 
+        scales, scaleunits = turbulentScales(wplcov, site_config, units, notation=defs, inplace_units=False, 
                                 solutes=solutes, theta_v_mean=theta_v_mean, theta_v_mean_unit=units[defs.virtual_temperature], output_as_df=False)
 
         #-------
@@ -501,11 +524,10 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
             Msol = constants.molar_mass[solute]
             scales[ concsol_star ] = scales[ sol_star ] * Msol / rho_air_mean
             scaleunits[ concsol_star ] = scaleunits[ sol_star ] * cunits['molar_mass'] / units[defs.moist_air_mass_density]
-
         #-------
 
         toconvert = { star:'dimensionless' for star in ([ defs.specific_humidity_star]+concsolutestars) }
-        scales = scales.convert_indexes(toconvert, scaleunits, inplace=True)
+        scales = scales.convert_indexes(toconvert, scaleunits, inplace_units=True)
 
         out = pd.concat([out, scales])
         fluxunits.update(scaleunits)
@@ -520,7 +542,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
     #------------
 
     print('Done with Eddy Covariance.\n')
-    if inplace:
+    if inplace_units:
         units.update(fluxunits)
         return out
     else:

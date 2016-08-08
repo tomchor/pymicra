@@ -1,5 +1,6 @@
-#!/usr/bin/python
 """
+Defines some methods. Some have functions defined here but most use
+functions defined elsewhere. This is done by monkey-patching Pandas.
 """
 from . import decorators as _decors
 import pandas as _pd
@@ -11,7 +12,7 @@ def _to_unitsCsv(self, units, filename, **kwargs):
     Wrapper around toUnitsCsv to create a method to print the contents of
     a dataframe plus its units into a unitsCsv file.
     
-    Parameters:
+    Parameters
     -----------
     self: dataframe
         dataframe to write
@@ -42,7 +43,7 @@ def _with_units(data, units):
     Wrapper around toUnitsCsv to create a method to print the contents of
     a dataframe plus its units into a unitsCsv file.
     
-    Parameters:
+    Parameters
     -----------
     self: dataframe
         dataframe to write
@@ -127,6 +128,7 @@ def binwrapper(self, clean_index=True, **kwargs):
         xsm, ysm = algs.classbin(x, self[c].astype(np.float64), **kwargs)
         out[c] = ysm
     out.index=xsm
+    out.index.name = self.index.name
 
     #----------
     # Remove rows where the index is NaN
@@ -150,8 +152,8 @@ def _xplot(self, xcol, reverse_x=False, return_ax=False,
     A smarter way to plot things with the x axis being one of the columns. Very useful for
     comparison of models and results
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     self: pandas.DataFrame
         datframe to be plotted
     xcol: str
@@ -257,8 +259,6 @@ def _polyfit(self, degree=1, rule=None):
     from . import algs
 
     data = self.copy()
-    #if isinstance(self, pd.Series):
-    #    data = pd.DataFrame(data)
 
     #-----------
     # If rule == None it should return a list of 1
@@ -268,9 +268,6 @@ def _polyfit(self, degree=1, rule=None):
     out=pd.DataFrame()
     if isinstance(data.index, pd.DatetimeIndex):
         xx=data.index.to_julian_date()
-        #for data in dflist:
-        #    aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
-        #    out=out.append(aux)
     else:
         xx=data.index.values
 
@@ -278,10 +275,6 @@ def _polyfit(self, degree=1, rule=None):
         aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
         out=out.append(aux)
  
-    #if isinstance(self, pd.Series):
-    #    return out.iloc[:, 0]
-    #else:
-    #    return out
     return out
 _pd.DataFrame.polyfit = _polyfit
 _pd.Series.polyfit = _polyfit
@@ -306,3 +299,8 @@ _pd.DataFrame.convert_cols = _algs.convert_cols
 _pd.Series.convert_indexes = _algs.convert_indexes
 #---------
 
+from . import micro as _micro
+_pd.DataFrame.rotateCoor = _micro.rotateCoor
+
+_pd.DataFrame.cospectra = _micro.spectral.cospectra
+_pd.DataFrame.quadrature = _micro.spectral.quadrature

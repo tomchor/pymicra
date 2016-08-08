@@ -1,16 +1,10 @@
 """
- PyMicrA - Python Micrometeorology Analysis tool
- --------------------------------
- Author: Tomas Chor
- Date of start: 2015-08-15
- --------------------------------
+Pymicra - Python tool for Micrometeorological Analyses
+------------------------------------------------------
 
- This package is a collection of functions aimed at analysing 
- micrometeorology data. It mainly uses Pandas and Numpy for its
- analysis so these are required packages.
+ :Author: Tomas Chor
+ :Date of start: 2015-08-15
 
- It is recommended that pint is installed for better handling the
- units inside the functions.
 """
 import os
 vfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),'version')
@@ -30,8 +24,8 @@ except ImportError:
 #---------
 import decorators
 
-from io import timeSeries, read_dlc, read_site, readUnitsCsv
-from util import qcontrol, separateFiles, correctDrift
+from io import *
+from util import *
 from micro import *
 from data import *
 from core import *
@@ -50,5 +44,5 @@ notation = Notation()
 #---------
 # Some quick pandas display configurations
 import pandas as _pd
-_pd.options.display.max_rows=30
+_pd.options.display.max_rows=26
 _pd.options.display.width=160

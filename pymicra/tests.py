@@ -1,25 +1,27 @@
-from __future__ import print_function
 """
-This module contains functions that test certain conditions on pandas.dataframes.
+This module contains functions that test certain conditions on pandas.dataframes to
+be used with the qcontrol().
+
 They all return True for the columns that pass the test and False for the columns
 that fail the test.
 """
+from __future__ import print_function
 from . import algs
 
 def check_replaced(replaced, max_count=180):
-    '''
+    """
     Sums and checks if the number of replaced points is larger than the
     maximum accepted
-    '''
+    """
     valid = replaced < max_count
 
     return valid
 
 
 def check_nans(data, max_percent=0.1, replace_with='interpolation'):
-    '''
+    """
     Checks data for NaN values
-    ''' 
+    """ 
     from . import data as pmdata
     df = data.copy() 
     max_count = int(len(df)*max_percent/100.)
@@ -27,7 +29,7 @@ def check_nans(data, max_percent=0.1, replace_with='interpolation'):
     #-----------
     # This counts the number of NaNs
     nan_count = df.isnull().sum()
-    valid = nan_count < max_count
+    valid = nan_count <= max_count
     #-----------
 
     #------------
@@ -43,9 +45,9 @@ def check_nans(data, max_percent=0.1, replace_with='interpolation'):
 
 
 def check_maxdif(data, tables, detrend=True, detrend_kw={'how':'movingmean', 'window':900}):
-    '''
+    """
     Check the maximum and minimum differences between the fluctuations of a run.
-    '''
+    """
     from . import data as pmdata
     from matplotlib import pyplot as plt
 
@@ -61,10 +63,10 @@ def check_maxdif(data, tables, detrend=True, detrend_kw={'how':'movingmean', 'wi
 def check_stationarity(data, tables, detrend=False,
             detrend_kw={'how':'movingmean', 'window':900}, 
             trend=True, trend_kw={'how':'movingmedian', 'window':'1min'}):
-    '''
+    """
     Check difference between the maximum and minimum values of the run trend agaisnt an upper-limit.
     This aims to flag nonstationary runs
-    '''
+    """
     from . import data as pmdata
 
     #------------
@@ -94,11 +96,11 @@ def check_stationarity(data, tables, detrend=False,
 
 def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
             RAT_vars=None, RAT_points=50, RAT_significance=0.05):
-    '''
+    """
     Performs the Reverse Arrangement Test in each column of data
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     data: pandas.DataFrame
         to apply RAT to each column
     detrend_kw: dict
@@ -111,11 +113,11 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
     RAT_significance: float
         significance with which to apply the RAT
 
-    Returns:
-    --------
+    Returns
+    -------
     valid: pd.Series
         True or False for each column. If True, column passed the test
-    '''
+    """
     import data as pmdata
 
     #-----------
@@ -141,11 +143,11 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
 
 
 def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_size='2min', falseverbose=False):
-    '''
+    """
     Checks dataframe for columns with too small of a standard deviation
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     data: pandas.DataFrame
         dataset whose standard deviation to check 
     tables: pandas.DataFrame
@@ -157,11 +159,11 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     chunk_size: str
         pandas datetime offset string
 
-    Returns:
-    --------
+    Returns
+    -------
     valid: pandas.Series
         contatining True of False for each column. True means passed the test.
-    '''
+    """
     import data as pmdata
     import numpy as np
     import pandas as pd
@@ -197,13 +199,13 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
  
 
 def check_limits(data, tables, max_percent=1., replace_with='interpolation'):
-    '''
+    """
     Checks dataframe for lower and upper limits. If found, they are substituted by 
     the linear trend of the run. The number of faulty points is also checked for each
     column against the maximum percentage of accepted faults max_percent
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     data: pandas dataframe
         dataframe to be checked
     tables: pandas.dataframe
@@ -212,13 +214,13 @@ def check_limits(data, tables, max_percent=1., replace_with='interpolation'):
         number from 0 to 100 that represents the maximum percentage of faulty
         runs accepted by this test.
 
-    Return:
+    Returns
     -------
     df: pandas.DataFrame
         input data but with the faulty points substituted by the linear trend of the run.
     valid: pandas.Series
         True for the columns that passed this test, False for the columns that didn't.
-    '''
+    """
     from . import trend as pmtrend
     import numpy as np
     import algs
@@ -274,11 +276,11 @@ def check_spikes(data, chunk_size='2min',
                  cut_func = lambda x: (abs(x - x.mean()) > 5.*x.std()),
                  replace_with='interpolation',
                  max_percent=1.):
-    '''
+    """
     Applies spikes-check according to Vickers and Mahrt (1997)
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     data: pandas.dataframe
         data to de-spike
     chunk_size: str, int
@@ -299,7 +301,7 @@ def check_spikes(data, chunk_size='2min',
         method to use when replacing spikes. Options are 'interpolation' or 'trend'.
     max_percent: float
         maximum percentage of spikes to allow.
-    '''
+    """
     import pandas as pd
     import algs
     import data as pmdata
@@ -382,12 +384,17 @@ def check_numlines(fname, numlines=18000, falseverbose=False):
     Checks length of file against a correct value.
     Returns False is length is wrong and True if length is right
 
-    Parameters:
+    Parameters
     ----------
     fname: string
         path of the file to check
     numlines: int
         correct number of lines that the file has to have
+
+    Returns
+    -------
+    pandas.Series
+        Either with True or False
     """
     from . import algs
     import pandas as pd

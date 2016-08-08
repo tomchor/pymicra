@@ -1,0 +1,181 @@
+\begin{theindex}
+\def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
+
+  \bigletter A
+  \item add() (in module pymicra.algs.units), \hyperpage{34}
+  \item airDensity\_from\_theta() (in module pymicra.physics), \hyperpage{44}
+  \item airDensity\_from\_theta\_v() (in module pymicra.physics), \hyperpage{44}
+  \item applyResult() (in module pymicra.algs.auxiliar), \hyperpage{30}
+  \item autoassign() (in module pymicra.decorators), \hyperpage{42}
+
+  \indexspace
+  \bigletter B
+  \item binwrapper() (in module pymicra.methods), \hyperpage{44}
+  \item build() (pymicra.core.Notation method), \hyperpage{38}
+  \item bulkCorr() (in module pymicra.data), \hyperpage{40}
+
+  \indexspace
+  \bigletter C
+  \item check\_limits() (in module pymicra.tests), \hyperpage{47}
+  \item check\_maxdif() (in module pymicra.tests), \hyperpage{47}
+  \item check\_nans() (in module pymicra.tests), \hyperpage{47}
+  \item check\_numlines() (in module pymicra.tests), \hyperpage{47}
+  \item check\_RA() (in module pymicra.tests), \hyperpage{46}
+  \item check\_replaced() (in module pymicra.tests), \hyperpage{47}
+  \item check\_spikes() (in module pymicra.tests), \hyperpage{47}
+  \item check\_stationarity() (in module pymicra.tests), \hyperpage{48}
+  \item check\_std() (in module pymicra.tests), \hyperpage{48}
+  \item classbin() (in module pymicra.algs.general), \hyperpage{31}
+  \item completeHM() (in module pymicra.algs.auxiliar), \hyperpage{30}
+  \item convert\_cols() (in module pymicra.algs.units), \hyperpage{34}
+  \item convert\_indexes() (in module pymicra.algs.units), \hyperpage{34}
+  \item convert\_to() (in module pymicra.algs.units), \hyperpage{34}
+  \item correctDrift() (in module pymicra.util), \hyperpage{48}
+  \item correctLag() (in module pymicra.micro.spectral), \hyperpage{36}
+  \item cospectra() (in module pymicra.micro.spectral), \hyperpage{37}
+  \item crossSpectra() (in module pymicra.data), \hyperpage{40}
+
+  \indexspace
+  \bigletter D
+  \item detrend() (in module pymicra.data), \hyperpage{40}
+  \item dewPointTemp() (in module pymicra.physics), \hyperpage{45}
+  \item diff\_central() (in module pymicra.algs.general), \hyperpage{31}
+  \item divide() (in module pymicra.algs.units), \hyperpage{34}
+  \item dryAirDensity\_from\_p() (in module pymicra.physics), \hyperpage{45}
+
+  \indexspace
+  \bigletter E
+  \item eddyCovariance() (in module pymicra.micro.util), \hyperpage{37}
+
+  \indexspace
+  \bigletter F
+  \item file\_len() (in module pymicra.algs.general), \hyperpage{31}
+  \item fileConfig (class in pymicra.core), \hyperpage{39}
+  \item find\_nearest() (in module pymicra.algs.general), \hyperpage{31}
+  \item first\_last() (in module pymicra.algs.auxiliar), \hyperpage{30}
+  \item fitByDate() (in module pymicra.algs.general), \hyperpage{31}
+  \item fitWrap() (in module pymicra.algs.general), \hyperpage{31}
+
+  \indexspace
+  \bigletter G
+  \item get\_date\_cols() (pymicra.core.fileConfig method), \hyperpage{39}
+  \item get\_index() (in module pymicra.algs.general), \hyperpage{32}
+  \item get\_notation() (in module pymicra.algs.general), \hyperpage{32}
+
+  \indexspace
+  \bigletter H
+  \item hfc\_Dias\_ea\_16() (in module pymicra.micro.spectral), \hyperpage{37}
+  \item hfc\_Massman\_Ibrom\_08() (in module pymicra.micro.spectral), \hyperpage{37}
+  \item hfc\_zeroQuad() (in module pymicra.micro.spectral), \hyperpage{37}
+
+  \indexspace
+  \bigletter I
+  \item inverse\_normal\_cdf() (in module pymicra.algs.general), \hyperpage{32}
+
+  \indexspace
+  \bigletter L
+  \item latent\_heat\_water() (in module pymicra.physics), \hyperpage{45}
+  \item latexify() (in module pymicra.algs.general), \hyperpage{32}
+  \item lenYear() (in module pymicra.algs.auxiliar), \hyperpage{30}
+  \item limited\_interpolation() (in module pymicra.algs.general), \hyperpage{32}
+  \item limitedSubs() (in module pymicra.algs.general), \hyperpage{32}
+  \item line2date() (in module pymicra.algs.general), \hyperpage{32}
+
+  \indexspace
+  \bigletter M
+  \item mad() (in module pymicra.algs.general), \hyperpage{33}
+  \item MonObuLen() (in module pymicra.micro.scales), \hyperpage{36}
+  \item MonObuVar() (in module pymicra.micro.scales), \hyperpage{36}
+  \item multiply() (in module pymicra.algs.units), \hyperpage{34}
+
+  \indexspace
+  \bigletter N
+  \item name2date() (in module pymicra.algs.general), \hyperpage{33}
+  \item nondimensionalGrad() (in module pymicra.micro.functions), \hyperpage{35}
+  \item nondimensionalSTD() (in module pymicra.micro.functions), \hyperpage{35}
+  \item Notation (class in pymicra.core), \hyperpage{38}
+
+  \indexspace
+  \bigletter O
+  \item obukhovLen() (in module pymicra.micro.scales), \hyperpage{36}
+  \item Ogive() (in module pymicra.micro.spectral), \hyperpage{36}
+  \item operate() (in module pymicra.algs.units), \hyperpage{34}
+
+  \indexspace
+  \bigletter P
+  \item parseDates() (in module pymicra.algs.general), \hyperpage{33}
+  \item parseUnits() (in module pymicra.algs.units), \hyperpage{34}
+  \item pdgeneral() (in module pymicra.decorators), \hyperpage{42}
+  \item pdgeneral\_in() (in module pymicra.decorators), \hyperpage{42}
+  \item pdgeneral\_io() (in module pymicra.decorators), \hyperpage{42}
+  \item perfGas() (in module pymicra.physics), \hyperpage{45}
+  \item phaseCorrection() (in module pymicra.micro.spectral), \hyperpage{37}
+  \item ppxv2density() (in module pymicra.physics), \hyperpage{45}
+  \item preProcess() (in module pymicra.micro.util), \hyperpage{38}
+  \item Psi() (in module pymicra.micro.functions), \hyperpage{35}
+  \item pymicra.algs (module), \hyperpage{35}
+  \item pymicra.algs.auxiliar (module), \hyperpage{30}
+  \item pymicra.algs.general (module), \hyperpage{31}
+  \item pymicra.algs.numeric (module), \hyperpage{34}
+  \item pymicra.algs.units (module), \hyperpage{34}
+  \item pymicra.constants (module), \hyperpage{38}
+  \item pymicra.core (module), \hyperpage{38}
+  \item pymicra.data (module), \hyperpage{40}
+  \item pymicra.decorators (module), \hyperpage{42}
+  \item pymicra.io (module), \hyperpage{42}
+  \item pymicra.methods (module), \hyperpage{44}
+  \item pymicra.micro (module), \hyperpage{38}
+  \item pymicra.micro.functions (module), \hyperpage{35}
+  \item pymicra.micro.scales (module), \hyperpage{36}
+  \item pymicra.micro.spectral (module), \hyperpage{36}
+  \item pymicra.micro.util (module), \hyperpage{37}
+  \item pymicra.physics (module), \hyperpage{44}
+  \item pymicra.tests (module), \hyperpage{46}
+  \item pymicra.util (module), \hyperpage{48}
+
+  \indexspace
+  \bigletter Q
+  \item qcontrol() (in module pymicra.util), \hyperpage{49}
+  \item quadrature() (in module pymicra.micro.spectral), \hyperpage{37}
+
+  \indexspace
+  \bigletter R
+  \item R\_moistAir() (in module pymicra.physics), \hyperpage{44}
+  \item read\_fileConfig() (in module pymicra.io), \hyperpage{43}
+  \item read\_site() (in module pymicra.io), \hyperpage{43}
+  \item readDataFile() (in module pymicra.io), \hyperpage{42}
+  \item readDataFiles() (in module pymicra.io), \hyperpage{43}
+  \item readUnitsCsv() (in module pymicra.io), \hyperpage{43}
+  \item recspeAux() (in module pymicra.micro.spectral), \hyperpage{37}
+  \item resample() (in module pymicra.algs.general), \hyperpage{33}
+  \item reverse\_arrangement() (in module pymicra.data), \hyperpage{40}
+  \item rotate2D() (in module pymicra.data), \hyperpage{41}
+  \item rotateCoor() (in module pymicra.micro.util), \hyperpage{38}
+  \item rte() (in module pymicra.micro.functions), \hyperpage{35}
+
+  \indexspace
+  \bigletter S
+  \item satWaterPressure() (in module pymicra.physics), \hyperpage{45}
+  \item separateFiles() (in module pymicra.util), \hyperpage{51}
+  \item siteConfig (class in pymicra.core), \hyperpage{39}
+  \item spectra() (in module pymicra.data), \hyperpage{41}
+  \item splitData() (in module pymicra.algs.general), \hyperpage{33}
+  \item stabilityParam() (in module pymicra.micro.scales), \hyperpage{36}
+  \item ste() (in module pymicra.micro.functions), \hyperpage{35}
+  \item stripDown() (in module pymicra.algs.auxiliar), \hyperpage{30}
+
+  \indexspace
+  \bigletter T
+  \item testValid() (in module pymicra.algs.auxiliar), \hyperpage{30}
+  \item theta\_from\_theta\_s() (in module pymicra.physics), \hyperpage{45}
+  \item theta\_from\_theta\_v() (in module pymicra.physics), \hyperpage{46}
+  \item theta\_std\_from\_theta\_v\_fluc() (in module pymicra.physics), \hyperpage{46}
+  \item timeSeries() (in module pymicra.io), \hyperpage{43}
+  \item trend() (in module pymicra.data), \hyperpage{41}
+  \item turbulentScales() (in module pymicra.micro.scales), \hyperpage{36}
+
+  \indexspace
+  \bigletter Z
+  \item zeroQuadCorrection() (in module pymicra.micro.spectral), \hyperpage{37}
+
+\end{theindex}

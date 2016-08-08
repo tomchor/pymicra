@@ -1,5 +1,50 @@
 from __future__ import print_function
+from .. import decorators as _decor
 
+@_decor.pdgeneral(convert_out=True)
+def cospectra(data, notation=None):
+    """
+    Gets cospectra from cross-spectrum
+    """
+    from .. import algs
+    import numpy as np
+
+    data = data.copy()
+    defs = algs.get_notation(notation)
+
+    cospectra = data.apply(np.real)
+
+    cr_def = defs.cross_spectrum.replace('_','').replace('%s','')
+    co_def = defs.cospectrum.replace('_','').replace('%s','')
+    
+    cospectra = cospectra.rename(columns=lambda x: x.replace(cr_def, co_def))
+
+    return cospectra
+
+@_decor.pdgeneral(convert_out=True)
+def quadrature(data, notation=None):
+    """
+    Gets quadrature from cross-spectrum
+    """
+    from .. import algs
+    import numpy as np
+
+    data = data.copy()
+    defs = algs.get_notation(notation)
+
+    quadrature = data.apply(np.imag)
+
+    cr_def = defs.cross_spectrum.replace('_','').replace('%s','')
+    qu_def = defs.quadrature.replace('_','').replace('%s','')
+    
+    quadrature = quadrature.rename(columns=lambda x: x.replace(cr_def, qu_def))
+
+    return quadrature
+
+
+
+
+@_decor.pdgeneral(convert_out=True)
 def correctLag(data, notation=None, lag_bounds=[0, 100]):
     """
     Identifies and correct lags between data, assuming the 
@@ -16,8 +61,10 @@ def correctLag(data, notation=None, lag_bounds=[0, 100]):
 
     return data
 
+
 def phaseCorrection(cross_spec, T):
     return hfc_Dias_ea_16(cross_spec, T)
+
 
 def hfc_Dias_ea_16(cross_spec, T):
     """
@@ -26,7 +73,7 @@ def hfc_Dias_ea_16(cross_spec, T):
 
     Co_recovered = Co_ab + 2*pi*n*T*Qu_ab
 
-    Parameters:
+    Parameters
     -----------
     cross_spec: series of dataframe
         the cross spectrum whose coespectrum you'd like to correct
@@ -40,6 +87,7 @@ def hfc_Dias_ea_16(cross_spec, T):
     n = np.array(cross_spec.index)
     return Co + 2.*np.pi*T*Qu.multiply(n, axis=0)
 
+
 def hfc_Massman_Ibrom_08(df):
     pass
     return
@@ -50,7 +98,7 @@ def hfc_zeroQuad(slow_spec, freqs, T):
     Applies a correction factor to the spectrum of a slow-measured variable
     based on the response-time T. Quadrature must be analytically zero!
 
-    Parameters:
+    Parameters
     -----------
     slow_spec: numpy.array or series
         the spectrum to be corrected (not cross-spectrum!)
@@ -59,7 +107,7 @@ def hfc_zeroQuad(slow_spec, freqs, T):
     T: float
         the response-time
 
-    Returns:
+    Returns
     --------
     spec: numpy.array
         the recovered array
@@ -74,7 +122,7 @@ def Ogive(df, no_nan=True):
     """
     Integrates the Ogive from Coespectra
 
-    Parameters:
+    Parameters
     -----------
     df: dataframe
         cospectrum to be integrated
@@ -101,7 +149,32 @@ def Ogive(df, no_nan=True):
         for d in dfs[1:]:
             dfs[0]=dfs[0].join(d, how='outer')
         out=dfs[0]
+
+    out.index.name = df.index.name
     return out
+
+
+@_decor.pdgeneral(convert_out=True)
+def zeroQuadCorrection(df, T):
+    """Applies the correction assuming that the quadrature is zero to
+    a dataframe with spectra
+
+    Wrapper to make hfc_zeroQuad work in a pandas.DataFrame
+
+    Parameters
+    ----------
+    df: pandas.DataFrame
+        dataframe with cospectra to correct
+    T: float
+        response time to be used
+    """
+    import numpy as np
+
+    freqs=np.array(df.index)
+    for c in df.columns:
+        spec =np.array(df[c])
+        df[c]=hfc_zeroQuad(spec, freqs, T)
+    return df
 
 
 
@@ -119,12 +192,12 @@ def recspeAux(df, T):
 
 
 def _anti_aliasing(spec):
-    '''
+    """
     Minimizes aliasing effects on spectra and cross-spectra
 
     df: pandas.DataFrame
         containing spectrum or cross-spectrum
-    '''
+    """
     RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
     return spec * RA**2.
 
@@ -134,7 +207,7 @@ def _recspe(slow_spec, freqs, T):
     Applied a correction factor to the spectrum of a slow-measured variable
     based on the response-time T
 
-    Parameters:
+    Parameters
     -----------
     freqs: numpy.array
         frequencies

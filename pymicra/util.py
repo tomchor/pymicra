@@ -1,20 +1,17 @@
-from __future__ import print_function
 """
-Author: Tomas Chor
-Date: 2015-08-07
--------------------------
+Module for general utilities
 
-TODO LIST
--INCLUDE DECODIFICAION OF DATA?
--INCLUDE UPPER LIMIT TO STD TEST?
--INCLUDE DROPOUT TEST
--INCLUDE THIRD MOMENT TEST
--CHANGE NOTATION IN QCONTROL'S SUMMARY
+ - INCLUDE DECODIFICAION OF DATA?
+ - INCLUDE UPPER LIMIT TO STD TEST?
+ - INCLUDE DROPOUT TEST
+ - INCLUDE THIRD MOMENT TEST
+ - CHANGE NOTATION IN QCONTROL'S SUMMARY
 """
+from __future__ import print_function
 import tests
 
 def qcontrol(files, datalogger_config,
-             read_files_kw={'parse_dates':False, 'clean_dates':False, 'only_named_cols':False},
+             read_files_kw={'parse_dates':False, 'clean_dates':False, 'only_named_cols':False, 'return_units':False},
              accepted_nans_percent=1.,
              accepted_spikes_percent=1.,
              accepted_bound_percent=1.,
@@ -49,42 +46,43 @@ def qcontrol(files, datalogger_config,
     All others depend on their respective keywords.
 
 
-    Consistency tests:
-    --------------
-    date check:
+    Consistency tests
+    -----------------
+
+    - :date check:
         files outside a date_range are left out (end_date and begin_date keywords)
-    lines test:
+    - :lines test:
         checks each file to see if they have a certain number of lines. Files with a different number of lines
         fail this test. Active this test by passing the file_lines keyword.
 
-    Quality tests (in this order):
-    ------------------
-    NaNs test:
+    Quality tests (in this order)
+    -----------------------------
+    - :NaN's test:
         checks for any NaN values. NaNs are replaced with interpolation or linear trend. If the percentage
         of NaNs is greater than accepted_nans_percent, run is discarded. Activate it by passing nans_test=True.
-    boundaries test:
+    - :boundaries test:
         runs with values in any column lower than a pre-determined lower limit or higher
         than a upper limits are left out. Activate it by passing a lower_limits or upper_limits keyword.
-    spikes test:
+    - :spikes test:
         runs with more than a certain percetage of spikes are left out. 
         Activate it by passing a spikes_test keyword. Adjust the test with the spikes_func
         visualize_spikes, spikes_vis_col, max_consec_spikes, accepted_spikes_percent and chunk_size keywords.
-    replacement count test:
+    - :replacement count test:
         checks the total amount of points that were replaced (including NaN, boundaries and spikes test)
         against the max_replacement_count keyword. Fails if any columns has more replacements than that.
-    standard deviation (STD) check:
+    - :standard deviation (STD) check:
         runs with a standard deviation lower than a pre-determined value (generally close to the
         sensor precision) are left out.
         Activate it by passing a std_limits keyword.
-    maximum difference test:
+    - :maximum difference test:
         runs whose trend have a maximum difference greater than a certain value are left out.
         This excludes non-stationary runs. Activate it by passing a dif_limits keyword.
-    reverse arrangement test (RAT):
+    - :reverse arrangement test (RAT):
         runs that fail the reverse arrangement test for any variable are left out.
         Activate it by passing a RAT keyword.
  
-    Parameters:
-    -----------
+    Parameters
+    ----------
     files: list
         list of filepaths
     datalogger_config: pymicra.datalogerConf object or str
@@ -176,8 +174,8 @@ def qcontrol(files, datalogger_config,
     summary_file: str
         path of file to be created with the summary of the runs. Will be overwriten if already exists.
 
-    Returns:
-    --------
+    Returns
+    -------
     ext_summary: pandas.DataFrame
         dict with the extended summary, which has the path of the files that got "stuck" in each test along with the successful ones
     """
@@ -489,6 +487,8 @@ def _printUnit(string, mode='L', trim=True, greek=True):
     """
     Returns string formatted for LaTeX or other uses.
 
+    Parameters
+    ----------
     string: string
         string (unambiguous) that represents the unit
     mode: string
@@ -514,7 +514,7 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
     Separates files into (default) 30-minute smaller files. Useful for output files such
     as the ones by Campbell Sci, that can have days of data in one single file.
 
-    Parameters:
+    Parameters
     -----------
     files: list
         list of file paths to be separated
@@ -540,8 +540,8 @@ def separateFiles(files, dlconfig, outformat='out_%Y-%m-%d_%H:%M.csv', outdir=''
         use this carefully. This concatenates the last few lines of a file to the first few lines
         of the next file in case they don't finish on a nice round time with respect to the frequency
 
-    Returns:
-    --------
+    Returns
+    -------
     None
     """
     from os import path
@@ -672,7 +672,7 @@ def correctDrift(drifted, correct_drifted_vars=None, correct=None,
                 get_fit=True, write_fit=True, fit_file='correctDrift_linfit.params',
                 apply_fit=True, show_plot=False, return_plot=False, units={}, return_index=False):
     """
-    Parameters:
+    Parameters
     -----------
     correct: pandas.DataFrame
         dataset with the correct averages
@@ -697,8 +697,8 @@ def correctDrift(drifted, correct_drifted_vars=None, correct=None,
     return_index: bool
         whether to return the indexes of the used points for the calculation. Serves to check the regression
 
-    Returns:
-    --------
+    Returns
+    -------
     outdf: pandas.DataFrame
         drifted dataset corrected with right dataset
     """

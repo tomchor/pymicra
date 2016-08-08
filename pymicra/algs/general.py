@@ -1,7 +1,6 @@
+"""
+"""
 from __future__ import print_function
-#!/usr/bin/python
-"""
-"""
 import pandas as pd
 import numpy as np
 
@@ -67,9 +66,9 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
 
 
 def resample(df, rule, how=None, **kwargs):
-    '''
+    """
     Extends pandas resample methods to index made of integers
-    '''
+    """
     import pandas as pd
     if how==None:
         import numpy as np
@@ -139,17 +138,17 @@ def fitByDate(data, degree=1, rule=None):
 
 
 def limited_interpolation(data, maxcount=3):
-    '''
+    """
     Interpolates linearly but only if gap is smaller of equal to maxcout
 
-    Parameters:
+    Parameters
     -----------
 
     data: pandas.DataFrame
         dataset to interpolate
     maxcount: int
         maximum number of consecutive NaNs to interpolate. If the number is smaller than that, nothing is done with the points.
-    '''
+    """
     mask = data.copy()
     grp = ((mask.notnull() != mask.shift().notnull()).cumsum())
     grp['ones'] = 1
@@ -166,7 +165,7 @@ def limitedSubs(data, max_interp=3, func=lambda x: abs(x) > abs(x.std()*4.) ):
     a maximum of max_interp times in a row.
     If there are more than that number in a row, then they are not substituted.
 
-    Parameters:
+    Parameters
     -----------
     data: pandas.dataframe
         data to be interpolated
@@ -176,7 +175,7 @@ def limitedSubs(data, max_interp=3, func=lambda x: abs(x) > abs(x.std()*4.) ):
         function of x only that determines the which elements become NaNs. Should return
         only True or False.
 
-    Returns:
+    Returns
     --------
     df: pandas.dataframe
         dataframe with the elements substituted
@@ -198,7 +197,7 @@ def file_len(fname):
     """
     Returns length of a file through piping bash's function wc
 
-    Parameters:
+    Parameters
     -----------
 
     fname: string
@@ -229,14 +228,13 @@ def inverse_normal_cdf(mu, sigma):
     return f
 
 
-def parseDates(data, dataloggerConfig=None,
-        date_col_names=None, clean=True, correct_fracs=None, complete_zeroes=False, verbose=False):
+def parseDates(data, dataloggerConfig=None, date_col_names=None, clean=True, verbose=False, connector=''):
     """
     Author: Tomas Chor
     date: 2015-08-10
     This routine parses the date from a pandas DataFrame when it is divided into several columns
 
-    Parameters:
+    Parameters
     -----------
     data: pandas DataFrame
         dataFrame whose dates have to be parsed
@@ -251,34 +249,26 @@ def parseDates(data, dataloggerConfig=None,
         the offset (mostly because of the bad converting done by LBA
     clean: bool
         remove date columns from data after it is introduced as index
-    correct_fracs: bool
 
-    complete_zeroes: list
-        list of columns that need to be padded with zeroes
+    Returns
+    -------
+    pandas.DataFrame
+        data indexed by timestamp
     """
-    from datetime import timedelta,datetime
     import pandas as pd
 
     #------------------------------------
     # If dataloggerConfig object is provided, we take the keywords from it
     if dataloggerConfig:
         date_col_names = dataloggerConfig.date_col_names
-        connector = dataloggerConfig.date_connector
-        first_time_skip = 0#dataloggerConfig.first_time_skip
     elif date_col_names==None:
-        raise NameError('Must provide either dataloggerConfig or date_col_names')
+        raise NameError('Must provide either fileConfig or date_col_names')
     #------------------------------------
 
     #------------------------------------
     # Joins the names of the columns, which must match the datetime directive (see __doc__)
     if verbose: print('Using these columns: ', date_col_names)
     date_format=connector.join(date_col_names)
-    auxformat='%Y-%m-%d %H:%M:%S.%f'
-    if complete_zeroes:
-        if type(complete_zeroes) == str:
-            complete_zeroes=[complete_zeroes]
-        for col in complete_zeroes:
-            data[col]=data[col].apply(completeHM)
     #------------------------------------
 
     #-------------------------------------
@@ -287,41 +277,16 @@ def parseDates(data, dataloggerConfig=None,
         aux=data[date_col_names[0]].astype(str)
     except ValueError:
         aux=data[date_col_names[0]].astype(int).astype(str)
+
     for col in date_col_names[1:]:
         aux+=connector + data[col].astype(str)
     dates=pd.to_datetime(aux, format=date_format)
     #-------------------------------------
 
     #-------------------------------------
-    # The next steps are there to check if there are fractions that are not expressed in the datetime convention
-    # and it assumes that the lowest time period expressed is the minute
-    first_date=dates.unique()[1]
-    n_fracs=len(dates[dates.values==first_date])
-    if n_fracs>1:
-        if correct_fracs == None:
-            print('Warning! I identified that there are', n_fracs, ' values (on average) for every timestamp.\n\
-This generally means that the data is sampled at a frequency greater than the frequency of the timestamp. \
-I will then proceed to guess the fractions based of the keyword "first_time_skip" and correct the index.')
-        if (correct_fracs==None) or (correct_fracs==True):
-            dates=[ date.strftime(auxformat) for date in dates ]
-            aux=dates[0]
-            cont=first_time_skip
-            for i,date in enumerate(dates):
-                if date==aux:
-                    pass
-                else:
-                    cont=0
-                    aux=date
-                dates[i]=datetime.strptime(date, auxformat) + timedelta(minutes=cont/float(n_fracs))
-                cont+=1
-        else:
-            print('\nWarning: fractions werent corrected. Check your timestamp data and the correct_fracs flag\n')
-    #-------------------------------------
-
-    #-------------------------------------
     # setting new dates list as the index
     data=data.set_index([dates])
-    data.index.name = date_format
+    data.index.name = 'Timestamp'
     #-------------------------------------
 
     #-------------------------------------
@@ -334,11 +299,11 @@ I will then proceed to guess the fractions based of the keyword "first_time_skip
 
 
 def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscale=True):
-    '''
+    """
     Separates x and y inputs into bins based on the x array.
     x and y do not have to be ordered.
 
-    Parameters:
+    Parameters
     -----------
     x: np.array
         independent variable
@@ -350,7 +315,14 @@ def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscal
         funtion to be applied to both x and y-bins in order to smooth the data
     logscale: boolean
         whether or not to use a log-spaced scale to set the bins
-    '''
+
+    Returns
+    -------
+    np.array:
+        x binned
+    np.array:
+        y binned
+    """
     import warnings
     import numpy as np
 
@@ -370,6 +342,7 @@ def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscal
         bins=np.linspace(xmin, xmax, bins_number+1)
     xsm = np.zeros(bins_number)
     ysm = np.zeros(bins_number)
+
     #-----------
     # The following process is what actually bins the data using numpy
     with warnings.catch_warnings():
@@ -389,14 +362,15 @@ def get_index(x, to_look_for):
     """
     Just like the .index method of lists, except it works for multiple values
 
-    Parameter:
+    Parameters
+    ----------
     x: list or array
         the main array
-    to_look_for: list of array
+    to_look_for: list or array
         the subset of the main whose indexes are desired
 
-    Returns:
-    --------
+    Returns
+    -------
     indexes: np.array
         array with the indexes of each element in y
     """
@@ -409,19 +383,18 @@ def name2date(filename, dlconfig):
     """
     Gets a date from a the name of the file according to a datalogger config object
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     filename: string
         the (base) name of the file
     dlconfig: pymicra.dataloggerConfig
         configuration of the datalogger
 
-    Returns:
-    --------
+    Returns
+    -------
     cdate: datetime object
 
-    Warning:
-    Needs to be optimized in order to read question markers also after the date
+    :Warning: Needs to be optimized in order to read question markers also after the date
     """
     from itertools import izip_longest
     import datetime as dt
@@ -438,22 +411,21 @@ def line2date(line, dlconfig):
     """
     Gets a date from a line of file according to dataloggerConfig object.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     line: string
         line of file with date inside
     dlconfig: pymicra.dataloggerConfig
         configuration of the datalogger
 
-    Returns:
-    --------
+    Returns
+    -------
     timestamp: datetime object
     """
     import datetime as dt
     import numpy as np
     import re
 
-    #varnames = dlconfig.variables
     connector = dlconfig.date_connector
     date_col_names = dlconfig.date_col_names
     date_cols = dlconfig.date_cols
@@ -476,15 +448,15 @@ def diff_central(x, y):
     """
     Applies the central finite difference scheme
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     x: array
         independent variable
     y: array
         dependent variable
 
-    Returns:
-    --------
+    Returns
+    -------
     dydx: array
         the dependent variable differentiated
     """
@@ -502,7 +474,7 @@ def find_nearest(array, value):
     """
     Smart and small function to find the index of the nearest value, in an array, of some other value
 
-    Parameters:
+    Parameters
     -----------
     array: array
         list or array
@@ -519,63 +491,12 @@ def mad(data, axis=None):
     import numpy as np
     return np.median(np.absolute(data - np.median(data, axis)), axis)
 
-#
-#def parseUnits(unitstr):
-#    '''
-#    Gets unit from string, list of strings, or dict's values, using the UnitRegistry
-#    defined in __init__.py
-#    '''
-#    try:
-#        from .. import ureg, Q_
-#    except ImportError:
-#        print('You should have pint installed to use units!')
-#        return unitstr
-#
-#    if isinstance(unitstr, str):
-#        return ureg[unitstr]
-#    elif isinstance(unitstr, list):
-#        return [ ureg[el] for el in unitstr ]
-#    elif isinstance(unitstr, dict):
-#        return { key: ureg[el] for key, el in unitstr.items() }
-#
-#
-#def convert_to(data, inunit, outunit, inplace=False, key=None):
-#    '''
-#    Converts data from one unit to the other
-#
-#    Parameters:
-#    -----------
-#    data: pandas.series
-#        to be chanhed from one unit to the other
-#    inunit: pint.quantity or dict
-#        unit(s) that the data is in
-#    outunit: str
-#        convert to this unit
-#    inplace: bool
-#        if inunit is a dict, the dict is update in place. "key" keyword must be provided
-#    key: str
-#        if inunit is a dict, it is the name of the variable to be chamged
-#    '''
-#    from .. import Q_
-#
-#    if key:
-#        Q = inunit[key].to(outunit)
-#    else:
-#        Q = inunit.to(outunit)
-#
-#    coef = Q.magnitude
-#    outunit = Q_(1, Q.units)
-#    if inplace:
-#        inunit.update({key : outunit})
-#        return data*coef
-#    else:
-#        return data*coef, outunit
-#
+
 
 def get_notation(notation_def):
-    '''
+    """
     Auxiliar function ro retrieve notation
-    '''
+    """
     if notation_def != None:
         return notation_def
     else:
@@ -585,8 +506,8 @@ def get_notation(notation_def):
 
 
 def latexify(variables, math_mode=True):
-    '''
-    '''
+    """
+    """
     from ..constants import greek_alphabet
 
     latex = []

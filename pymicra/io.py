@@ -1,9 +1,8 @@
 """
-Author: Tomas Chor
-Date: 2015-08-07
--------------------------
+Defines some useful functions to aid on the input/output of data
 """
 from __future__ import print_function
+
 
 #-------------------------------------------
 #-------------------------------------------
@@ -12,20 +11,24 @@ from __future__ import print_function
 #-------------------------------------------
 def readDataFile(fname, variables=None, only_named_cols=True, **kwargs):
     """
-    Author: Tomas Chor
+    Reads one datafile using pandas.read_csv()
 
     Parameters
     ----------
+    variables: dict
+        keys are columns and values are names of variable
+    only_named_columns: bool
+        if True, don't read columns that don't appear on variables' keys
     kwargs: dict
         dictionary with kwargs of pandas' read_csv function
         see http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html for more detail
-
     variables: list or dict
         list or dictionary containing the names of each variable in the file (if dict, the keys must be ints)
         
     Returns
     ---------
-    dataFrame: pandas.DataFrame object
+    pandas.DataFrame:
+        pandas.DataFrame object
     """
     import pandas as pd
 
@@ -51,6 +54,9 @@ def readDataFile(fname, variables=None, only_named_cols=True, **kwargs):
         data=pd.read_csv(fname, usecols=usedcols, dtype=dtypes, **kwargs)
     except ValueError:
         print('WARNING: Ignoring dtypes for date columns. This may cause problems parsing dates')
+        print(usedcols)
+        print(kwargs)
+        print(fname)
         data=pd.read_csv(fname, usecols=usedcols, **kwargs)
     #------------
 
@@ -64,10 +70,9 @@ def readDataFile(fname, variables=None, only_named_cols=True, **kwargs):
 
 def readDataFiles(flist, verbose=0, **kwargs):
     """
-    Author: Tomas Chor
-    Reads data from a list of files
+    Reads data from a list of files by calling readDataFile individually for each entry
 
-    Parameters:
+    Parameters
     -----------
     flist: sequence of strings
         files to be parsed
@@ -76,9 +81,10 @@ def readDataFiles(flist, verbose=0, **kwargs):
     **kwargs:
         readDataFile kwargs
 
-    Returns:
+    Returns
     --------
-    data: pandas.DataFrame
+    pandas.DataFrame
+        data
     """
     import pandas as pd
 
@@ -98,18 +104,14 @@ def readDataFiles(flist, verbose=0, **kwargs):
     return data
 
 
-def dataset(*args, **kwargs):
-    return timeSeries(*args, **kwargs)
-
 
 def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
         read_data_kw={}, parse_dates_kw={}, clean_dates=True, return_units=True, only_named_cols=True):
     """
     Creates a micrometeorological time series from a file or list of files.
 
-    Parameters:
-    -----------
-
+    Parameters
+    ----------
     flist: list or string
         either list or names of files (dataFrame will be one concatenated dataframe) or the name of one file
     datalogger: pymicra.dataloggerConfig object
@@ -120,6 +122,13 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
         (i.d. there are repeated timestamps)
     verbose: int, bool
         verbose level
+
+    Returns
+    -------
+    pandas.DataFrame
+        data contained in the files in flist
+    dict (optional)
+        units of the data
     """
     from . import algs
 
@@ -138,10 +147,10 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     columns_separator=datalogger.columns_separator
 
     if columns_separator=='whitespace':
-        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, delim_whitespace=True, 
+        timeseries=readDataFiles(flist, header=None, skiprows=skiprows, delim_whitespace=True, 
             variables = datalogger.variables, only_named_cols=only_named_cols, **read_data_kw)
     else:
-        timeseries=readDataFiles(flist, header=header_lines, skiprows=skiprows, sep=columns_separator, 
+        timeseries=readDataFiles(flist, header=None, skiprows=skiprows, sep=columns_separator, 
             variables = datalogger.variables, only_named_cols=only_named_cols, **read_data_kw)
     #------------
 
@@ -174,7 +183,7 @@ def read_fileConfig(dlcfile):
 
     "2013-04-05 00:00:00", .345, .344, ...
 
-    Then the .dlc should have: variables = {0:'%Y-%m-%d %H:%M:%S'}. This is the default csv format of
+    Then the .config should have: variables={0:'%Y-%m-%d %H:%M:%S',1:'u',2:'v'}. This is the default csv format of
     CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
     """
     from .core import fileConfig
@@ -192,16 +201,16 @@ def read_fileConfig(dlcfile):
 
 
 
-def read_dlc(dlcfile):
+def _read_dlc(dlcfile):
     """
     Reads datalogger configuration file
 
-    WARNING! When defining the .dlc note that by default columns that are enclosed between doublequotes
+    When defining the .dlc note that by default columns that are enclosed between doublequotes
     will appear without the doublequotes. So if your file is of the form :
 
     "2013-04-05 00:00:00", .345, .344, ...
 
-    Then the .dlc should have: varNames=['%Y-%m-%d %H:%M:%S','u','v']. This is the default csv format of
+    Then the .dlc should have: variables={0:'%Y-%m-%d %H:%M:%S',1:'u',2:'v'}. This is the default csv format of
     CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
     """
     from core import dataloggerConfig
@@ -231,6 +240,16 @@ def read_site(sitefile):
 
     sitedile: str
         path to .site file
+
+    Parameters
+    ----------
+    sitefile: str
+        path to the site configuration file
+
+    Returns
+    -------
+    pymicra.siteConfig
+        pymicra site configuration object
     """
     from core import siteConfig, siteConfig
 
@@ -258,14 +277,14 @@ def readUnitsCsv(filename, **kwargs):
     Reads a csv file in which the first line is the name of the variables
     and the second line contains the units
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     filename: string
         path of the csv file to read
     **kwargs:
         to be passed to pandas.read_csv
 
-    Returns:
+    Returns
     --------
     df: pandas.DataFrame
         dataframe with the data
