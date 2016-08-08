@@ -374,8 +374,12 @@ class Notation(object):
 
 
 import pandas as _pd
+<<<<<<< HEAD
 from . import algs as _algs
+class myData(object):
+=======
 class _myData(object):
+>>>>>>> master
     """
     Attempt to create a myData object
     """
@@ -386,12 +390,8 @@ class _myData(object):
 
     def mean(self, notation=None):
         defs = _algs.get_notation(notation)
-        newdic = self.dic.copy()
-        tomean = lambda x: defs.mean % x
-        newdic = { tomean(key) : val for key, val in self.dic.items() }
         self = self.df.copy()
-        print(newdic)
-        return _myData(self.rename(columns=tomean).mean(), newdic)
+        return self.rename(columns=lambda x: defs.mean%x).mean()
 
     def __getitem__(self, item):
         return self.df.with_units(self.dic).__getitem__(item)

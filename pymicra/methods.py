@@ -37,7 +37,7 @@ _pd.DataFrame.to_unitsCsv = _to_unitsCsv
 #---------------
 
 #---------------
-@_decors.pdgeneral(convert_out=False)
+#@_decors.pdgeneral(convert_out=False)
 def _with_units(data, units):
     """
     Wrapper around toUnitsCsv to create a method to print the contents of
@@ -53,10 +53,16 @@ def _with_units(data, units):
     import pandas as pd
 
     data = data.copy()
-    cols = data.columns
+    if isinstance(data, pd.DataFrame):
+        cols = data.columns
+    elif isinstance(data, pd.Series):
+        cols = data.index
     unts = [ '<{}>'.format(units[c]) if c in units.keys() else '<?>' for c in cols ]
     columns = pd.MultiIndex.from_tuples(zip(cols, unts))
-    data.columns = columns
+    if isinstance(data, pd.DataFrame):
+        data.columns = columns
+    elif isinstance(data, pd.Series):
+        data.index = columns
     return data
 _pd.DataFrame.with_units = _with_units
 _pd.Series.with_units = _with_units
