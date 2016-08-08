@@ -45,8 +45,8 @@ def _with_units(data, units):
     
     Parameters
     -----------
-    self: dataframe
-        dataframe to write
+    self: pandas.DataFrame, pandas.Series
+        dataframe or series to which units belong
     units: dict
         dictionary with the names of each column and their unit
     """
