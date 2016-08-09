@@ -390,14 +390,13 @@ class _myData(object):
         tomean = lambda x: defs.mean % x
         newdic = { tomean(key) : val for key, val in self.dic.items() }
         self = self.df.copy()
-        print(newdic)
         return _myData(self.rename(columns=tomean).mean(), newdic)
 
     def __getitem__(self, item):
-        return self.df.with_units(self.dic).__getitem__(item)
+        return self.df.__getitem__(item)
 
-    def loc(self):
-        return self.df.__loc__()
+    def loc(self, *args):
+        return self.df.loc(*args)
 
     def __repr__(self):
         return self.df.with_units(self.dic).__repr__()+self.watermark
@@ -405,6 +404,7 @@ class _myData(object):
     def __str__(self):
         return self.df.with_units(self.dic).__str__()+self.watermark
 
-    #def __div__(self):
-    #    import pandas as pd
-       # return pd.DataFrame(self)
+    def __mul__(self, other):
+        for c in self.df.columns:
+            unitarray = self.df.loc[:, c].values * self.dic[c]
+        return pd.DataFrame(self)
