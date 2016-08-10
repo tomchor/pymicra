@@ -90,6 +90,63 @@ def theta_from_theta_v(data, units, notation=None, return_full_df=True, inplace_
     return out
 
 
+def theta_fluc_from_theta_v_fluc(data, units, notation=None, return_full_df=True, inplace_units=True):
+    """
+    Derived from theta_v = theta(1 + 0.61 q)
+
+    Parameters
+    ----------
+    data: pandas.dataframe
+        dataframe with q, q', theta, theta_v'
+    units: dict
+        units dictionary
+    notation: pymicra.Notation
+        Notation object or None
+
+    Returns
+    -------
+    float
+        standard deviation of the thermodynamic temperature
+    """
+    import numpy as np
+    from . import algs
+
+    defs = algs.get_notation(notation)
+    data = data.copy()
+    units = units.copy()
+
+    #-----------
+    # Consider the existence of mean q
+    if defs.mean_specific_humidity in data.columns:
+        q_mean = data[ defs.mean_specific_humidity ]
+    else:
+        q_mean = data[ defs.specific_humidity ].mean()
+    #-----------
+
+    #-----------
+    # Consider existence of mean theta
+    if defs.mean_thermodyn_temp in data.columns:
+        theta_mean = data[ defs.mean_thermodyn_temp ]
+    else:
+        theta_mean = data[ defs.thermodyn_temp ].mean()
+    #-----------
+
+    theta_fluc = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1.+0.61*q_mean)
+        theta_fluc_unit = units[ theta_v_fluc ]
+
+    if return_full_df:
+        data.loc[:, defs.thermodyn_temp_fluctuations ] = theta_fluc
+        out = data
+    else:
+        out = theta
+
+    if inplace_units:
+        units.update({ defs.thermodyn_temp : theta_unit })
+    else:
+        out = (out, theta_unit)
+
+    return out
+
 
 def theta_std_from_theta_v_fluc(data, units, notation=None):
     """
