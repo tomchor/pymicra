@@ -132,7 +132,7 @@ def theta_fluc_from_theta_v_fluc(data, units, notation=None, return_full_df=True
     #-----------
 
     theta_fluc = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1.+0.61*q_mean)
-        theta_fluc_unit = units[ theta_v_fluc ]
+    theta_fluc_unit = units[ theta_v_fluc ]
 
     if return_full_df:
         data.loc[:, defs.thermodyn_temp_fluctuations ] = theta_fluc
