@@ -204,3 +204,46 @@ def convert_indexes(data, guide, units, inplace_units=False):
     else: 
         return data, guide 
 
+
+def with_units(data, units):
+    """
+    Wrapper around toUnitsCsv to create a method to print the contents of
+    a dataframe plus its units into a unitsCsv file.
+    
+    Parameters
+    -----------
+    self: pandas.DataFrame, pandas.Series
+        dataframe or series to which units belong
+    units: dict
+        dictionary with the names of each column and their unit
+    """
+    import pandas as pd
+
+    data = data.copy()
+    if isinstance(data, pd.DataFrame):
+        cols = data.columns
+
+    #-------------
+    # A series can be a column of a main DataFrame, or separate elements
+    elif isinstance(data, pd.Series):
+        #---------
+        # We check if it's a column by the name of the Series
+        if data.name in units.keys() or isinstance(data.index, pd.DatetimeIndex):
+            data = pd.DataFrame(data, columns=[ data.name ])
+            cols = data.columns
+        #---------
+
+        #---------
+        # If the name is None or it's not in the list of units, then it's different variables
+        else:
+            cols = data.index
+        #---------
+    #-------------
+    unts = [ '<{}>'.format(units[c]) if c in units.keys() else '<?>' for c in cols ]
+    columns = pd.MultiIndex.from_tuples(zip(cols, unts))
+    if isinstance(data, pd.DataFrame):
+        data.columns = columns
+    elif isinstance(data, pd.Series):
+        data.index = columns
+    return data
+

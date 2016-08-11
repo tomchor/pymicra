@@ -5,6 +5,64 @@ Defines functions useful to generic signal data
 from __future__ import print_function
 from . import decorators as _decors
 
+
+def mean(data, units, notation=None, inplace_units=True):
+    """
+    Calculates the mean of the DataFrame using Pymicra's notation
+
+    Parameters
+    ----------
+    data: pandas.DataFrame
+        dataset
+    units: dict
+        units dict
+    notation: pymicra.Notation
+        notation to be used
+    inplace_units: bool
+        whether to update units inplace or return a separate units dictionary
+    """
+    from . import algs
+
+    defs = algs.get_notation(notation)
+    tomean = lambda x: defs.mean % x
+
+    outunits = { tomean(key) : val for key, val in units.items() }
+    if inplace_units:
+        units.update(outunits)
+        return data.rename(columns=tomean).mean()
+    else:
+        return data.rename(columns=tomean).mean(), outunits
+
+
+def std(data, units, notation=None, inplace_units=True):
+    """
+    Calculates the std of the DataFrame using Pymicra's notation
+
+    Parameters
+    ----------
+    data: pandas.DataFrame
+        dataset
+    units: dict
+        units dict
+    notation: pymicra.Notation
+        notation to be used
+    inplace_units: bool
+        whether to update units inplace or return a separate units dictionary
+    """
+    from . import algs
+
+    defs = algs.get_notation(notation)
+    tostd = lambda x: defs.std % x
+
+    outunits = { tostd(key) : val for key, val in units.items() }
+    if inplace_units:
+        units.update(outunits)
+        return data.rename(columns=tostd).std()
+    else:
+        return data.rename(columns=tostd).std(), outunits
+
+
+
 def rotate2D(data, notation=None):
     """Rotates the coordinates of wind data
 

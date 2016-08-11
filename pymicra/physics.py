@@ -113,7 +113,6 @@ def theta_fluc_from_theta_v_fluc(data, units, notation=None, return_full_df=True
 
     defs = algs.get_notation(notation)
     data = data.copy()
-    units = units.copy()
 
     #-----------
     # Consider the existence of mean q
@@ -131,19 +130,20 @@ def theta_fluc_from_theta_v_fluc(data, units, notation=None, return_full_df=True
         theta_mean = data[ defs.thermodyn_temp ].mean()
     #-----------
 
-    theta_fluc = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1.+0.61*q_mean)
-    theta_fluc_unit = units[ theta_v_fluc ]
+    theta_fluc = (data[ defs.virtual_temperature_fluctuations ] - 0.61*theta_mean*data[ defs.specific_humidity_fluctuations ])/(1.+0.61*q_mean)
+    theta_fluc_unit = units[ defs.virtual_temperature_fluctuations ]
 
     if return_full_df:
         data.loc[:, defs.thermodyn_temp_fluctuations ] = theta_fluc
         out = data
     else:
-        out = theta
+        theta_fluc.name = defs.thermodyn_temp_fluctuations
+        out = theta_fluc
 
     if inplace_units:
-        units.update({ defs.thermodyn_temp : theta_unit })
+        units.update({ defs.thermodyn_temp_fluctuations : theta_fluc_unit })
     else:
-        out = (out, theta_unit)
+        out = (out, theta_fluc_unit)
 
     return out
 

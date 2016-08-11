@@ -36,38 +36,6 @@ def _to_unitsCsv(self, units, filename, **kwargs):
 _pd.DataFrame.to_unitsCsv = _to_unitsCsv
 #---------------
 
-#---------------
-#@_decors.pdgeneral(convert_out=False)
-def _with_units(data, units):
-    """
-    Wrapper around toUnitsCsv to create a method to print the contents of
-    a dataframe plus its units into a unitsCsv file.
-    
-    Parameters
-    -----------
-    self: pandas.DataFrame, pandas.Series
-        dataframe or series to which units belong
-    units: dict
-        dictionary with the names of each column and their unit
-    """
-    import pandas as pd
-
-    data = data.copy()
-    if isinstance(data, pd.DataFrame):
-        cols = data.columns
-    elif isinstance(data, pd.Series):
-        cols = data.index
-    unts = [ '<{}>'.format(units[c]) if c in units.keys() else '<?>' for c in cols ]
-    columns = pd.MultiIndex.from_tuples(zip(cols, unts))
-    if isinstance(data, pd.DataFrame):
-        data.columns = columns
-    elif isinstance(data, pd.Series):
-        data.index = columns
-    return data
-_pd.DataFrame.with_units = _with_units
-_pd.Series.with_units = _with_units
-#---------------
-
 from .io import _get_printable
 _pd.DataFrame.printable = _get_printable
 
@@ -303,6 +271,9 @@ _pd.Series.trend  = trend
 from . import algs as _algs
 _pd.DataFrame.convert_cols = _algs.convert_cols
 _pd.Series.convert_indexes = _algs.convert_indexes
+
+_pd.DataFrame.with_units = _algs.with_units
+_pd.Series.with_units = _algs.with_units
 #---------
 
 from . import micro as _micro
