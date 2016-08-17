@@ -256,11 +256,11 @@ _pd.Series.polyfit = _polyfit
 
 #---------
 # Detrend and trend methods for Series and DataFrames
-from .data import detrend
+from .signal import detrend
 _pd.DataFrame.detrend = detrend
 _pd.Series.detrend  = detrend
 
-from .data import trend
+from .signal import trend
 _pd.DataFrame.trend = trend
 _pd.Series.trend  = trend
 #---------

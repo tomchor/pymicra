@@ -45,7 +45,7 @@ def quadrature(data, notation=None):
 
 
 @_decor.pdgeneral(convert_out=True)
-def correctLag(data, notation=None, lag_bounds=[0, 100]):
+def _correctLag(data, notation=None, lag_bounds=[0, 100]):
     """
     Identifies and correct lags between data, assuming the 
     vertical wind velocity has lag 0.

@@ -22,7 +22,7 @@ def check_nans(data, max_percent=0.1, replace_with='interpolation'):
     """
     Checks data for NaN values
     """ 
-    from . import data as pmdata
+    from . import signal as pmdata
     df = data.copy() 
     max_count = int(len(df)*max_percent/100.)
 
@@ -48,7 +48,7 @@ def check_maxdif(data, tables, detrend=True, detrend_kw={'how':'movingmean', 'wi
     """
     Check the maximum and minimum differences between the fluctuations of a run.
     """
-    from . import data as pmdata
+    from . import signal as pmdata
     from matplotlib import pyplot as plt
 
     detrended = pmdata.detrend(data, suffix='', **detrend_kw)
@@ -67,7 +67,7 @@ def check_stationarity(data, tables, detrend=False,
     Check difference between the maximum and minimum values of the run trend agaisnt an upper-limit.
     This aims to flag nonstationary runs
     """
-    from . import data as pmdata
+    from . import signal as pmdata
 
     #------------
     # If detrend==True, work with the fluctuations
@@ -118,7 +118,7 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
     valid: pd.Series
         True or False for each column. If True, column passed the test
     """
-    import data as pmdata
+    import signal as pmdata
 
     #-----------
     # Detrend the data
@@ -164,7 +164,7 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     valid: pandas.Series
         contatining True of False for each column. True means passed the test.
     """
-    import data as pmdata
+    import signal as pmdata
     import numpy as np
     import pandas as pd
     from . import algs
@@ -304,7 +304,7 @@ def check_spikes(data, chunk_size='2min',
     """
     import pandas as pd
     import algs
-    import data as pmdata
+    import signal as pmdata
 
     #------------
     if replace_with=='trend':
