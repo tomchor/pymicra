@@ -10,7 +10,7 @@ Module for general utilities
 from __future__ import print_function
 import tests
 
-def qcontrol(files, datalogger_config,
+def qcontrol(files, fileconfig,
              read_files_kw={'parse_dates':False, 'clean_dates':False, 'only_named_cols':False, 'return_units':False},
              accepted_nans_percent=1.,
              accepted_spikes_percent=1.,
@@ -85,7 +85,7 @@ def qcontrol(files, datalogger_config,
     ----------
     files: list
         list of filepaths
-    datalogger_config: pymicra.datalogerConf object or str
+    fileconfig: pymicra.fileConfig object or str
         datalogger configuration object used for all files in the list of files or path to a dlc file.
     read_files_kw: dict
         keywords to pass to pymicra.timeSeries. Default is {'parse_dates':False} because parsing dates
@@ -211,14 +211,14 @@ def qcontrol(files, datalogger_config,
 
     #--------------
     # If the path to the dlc is provided, we read it as a dataloggerConfig object
-    if isinstance(datalogger_config, str):
+    if isinstance(fileconfig, str):
         from . import fileConfig
-        datalogger_config = fileConfig(datalogger_config)
+        fileconfig = fileConfig(fileconfig)
     #--------------
 
     #-------------------------------------
     # Identifying columns that are not part of the datetime
-    variables_list=datalogger_config.variables
+    variables_list=fileconfig.variables
     if type(variables_list) == dict:
         usedvars=[ v for v in variables_list.values() if r'%' not in v ]
     else:
@@ -283,7 +283,7 @@ def qcontrol(files, datalogger_config,
         #---------------
         # DATE CHECK
         if begin_date or end_date:
-            cdate = algs.name2date(filename, datalogger_config)
+            cdate = algs.name2date(filename, fileconfig)
             if begin_date:
                 if cdate<begin_date:
                     print('Skipped because of begin_date.\n')
@@ -315,7 +315,7 @@ def qcontrol(files, datalogger_config,
         # OPENNING OF THE FILE HAPPENS HERE
         # TRY-EXCEPT IS A SAFETY NET BECAUSE OF THE POOR DECODING (2015-06-21 00:00 appears as 2015-06-20 24:00)
         try:
-            fin=timeSeries(filepath, datalogger_config, **read_files_kw)
+            fin=timeSeries(filepath, fileconfig, **read_files_kw)
         except ValueError, e:
             if str(e)=='unconverted data remains: 0' and cdate.hour==23:
                 continue
@@ -448,7 +448,7 @@ def qcontrol(files, datalogger_config,
             print('Re-writing',filepath)
             fullfin[usedvars] = fin[usedvars]       # This is because some spikes were removed during the process
             fullfin.to_csv(join(outdir, basename(filepath)),
-                       header=datalogger_config.header_lines, index=False, quoting=3, na_rep='NaN')
+                       header=fileconfig.header, index=False, quoting=3, na_rep='NaN')
         #-----------------
         print()
     

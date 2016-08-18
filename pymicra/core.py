@@ -59,6 +59,7 @@ class fileConfig(object):
             filename_format=None,
             skiprows=None,
             varNames=None,
+            header=None,
             description='Type help(fileConfig) to read intructions', **read_csv_kwargs):
         """
         Reads the arguments, transforms them into attributes of the object and calcultes some
