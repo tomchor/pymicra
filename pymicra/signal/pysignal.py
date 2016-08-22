@@ -21,7 +21,7 @@ def mean(data, units, notation=None, inplace_units=True):
     inplace_units: bool
         whether to update units inplace or return a separate units dictionary
     """
-    from . import algs
+    from .. import algs
 
     defs = algs.get_notation(notation)
     tomean = lambda x: defs.mean % x
@@ -49,7 +49,7 @@ def std(data, units, notation=None, inplace_units=True):
     inplace_units: bool
         whether to update units inplace or return a separate units dictionary
     """
-    from . import algs
+    from .. import algs
 
     defs = algs.get_notation(notation)
     tostd = lambda x: defs.std % x
@@ -80,7 +80,7 @@ def rotate2D(data, notation=None):
     """
     from math import atan2, sqrt
     import numpy as np
-    import algs
+    from .. import algs
 
     #-------
     # Getting the names for u, v, w
@@ -142,7 +142,7 @@ def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=
         trends of data input
     """
     import pandas as pd
-    import algs
+    from .. import algs
     import numpy as np
 
     how=algs.stripDown(how.lower(), args='-_')
@@ -230,7 +230,7 @@ def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=Non
         fluctuations of the input data
     """
     from scipy import signal
-    from . import algs
+    from .. import algs
     import pandas as pd
 
     how=algs.stripDown(how.lower(), args='-_')
@@ -312,8 +312,8 @@ def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):
     spectrum: pandas.DataFrame
         whose column is the spectrum or coespectrum of the input dataframe
     """
-    from . import notation
-    from . import algs
+    from .. import notation
+    from .. import algs
     import numpy as np
     import pandas as pd
     from itertools import combinations
@@ -373,8 +373,8 @@ def spectra(data, frequency=10, notation=None, anti_aliasing=True):
     spectra: pandas.DataFrame
         whose column is the spectrum or coespectrum of the input dataframe
     """
-    from . import notation
-    from . import algs
+    from .. import notation
+    from .. import algs
     import numpy as np
     import pandas as pd
 

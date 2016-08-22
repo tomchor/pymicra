@@ -32,7 +32,7 @@ def quadrature(data, notation=None):
     data = data.copy()
     defs = algs.get_notation(notation)
 
-    quadrature = data.apply(np.imag)
+    quadrature = -data.apply(np.imag)
 
     cr_def = defs.cross_spectrum.replace('_','').replace('%s','')
     qu_def = defs.quadrature.replace('_','').replace('%s','')

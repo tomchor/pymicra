@@ -281,3 +281,5 @@ _pd.DataFrame.rotateCoor = _micro.rotateCoor
 
 _pd.DataFrame.cospectrum = _micro.spectral.cospectrum
 _pd.DataFrame.quadrature = _micro.spectral.quadrature
+_pd.Series.cospectrum = _micro.spectral.cospectrum
+_pd.Series.quadrature = _micro.spectral.quadrature
