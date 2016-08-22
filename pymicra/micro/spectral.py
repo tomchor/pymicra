@@ -2,7 +2,7 @@ from __future__ import print_function
 from .. import decorators as _decor
 
 @_decor.pdgeneral(convert_out=True)
-def cospectra(data, notation=None):
+def cospectrum(data, notation=None):
     """
     Gets cospectra from cross-spectrum
     """

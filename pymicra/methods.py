@@ -279,5 +279,5 @@ _pd.Series.with_units = _algs.with_units
 from . import micro as _micro
 _pd.DataFrame.rotateCoor = _micro.rotateCoor
 
-_pd.DataFrame.cospectra = _micro.spectral.cospectra
+_pd.DataFrame.cospectrum = _micro.spectral.cospectrum
 _pd.DataFrame.quadrature = _micro.spectral.quadrature
