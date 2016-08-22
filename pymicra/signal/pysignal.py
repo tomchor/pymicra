@@ -3,7 +3,7 @@ Defines functions useful to generic signal data
 """
 
 from __future__ import print_function
-from . import decorators as _decors
+from .. import decorators as _decors
 
 
 def mean(data, units, notation=None, inplace_units=True):
@@ -439,8 +439,7 @@ def bulkCorr(data):
     return r
 
 
-
-def reverse_arrangement(array, points_number=None, alpha=0.05, verbose=False):
+def test_reverse_arrangement(array, points_number=None, alpha=0.05, verbose=False):
     """
     Performs the reverse arrangement test
     according to Bendat and Piersol - Random Data - 4th edition, page 96
@@ -462,8 +461,6 @@ def reverse_arrangement(array, points_number=None, alpha=0.05, verbose=False):
 
     Still not adapted for dataframes
     """
-    import algs
-    import numpy as np
 
     #-----------
     # Definition of function that determines the mean and variance
@@ -477,39 +474,33 @@ def reverse_arrangement(array, points_number=None, alpha=0.05, verbose=False):
     #-----------
 
     #-----------
-    # If number of points N is provided, we turn the run into a N-length array
+    # Get reverse arrangements
+    from csignal import reverse_arrangements
+    Atot = reverse_arrangements(array, points_number=points_number)
+    #-----------
+
+    #-----------
+    # Define N
     if points_number==None:
-        points_number=len(array)
-        xarray=array
-    elif points_number==len(array):
-        xarray=array
+        N = len(array)
     else:
-        pts = len(array)//points_number
-        xarray = []
-        for j in range(0,points_number):
-            xarray.append( np.mean(array[(j*pts):((j+1)*pts)]) )
+        N = points_number
     #-----------
 
-    #-----------
-    # We calculate the reverse arrangements
-    A = []
-    for i in range(len(xarray)-1):
-        h = []
-        for j in range(i,len(xarray)):
-            if(xarray[i] > xarray[j]):
-                h.append(1)
-        A.append(sum(h))
-    Atot = sum(A)
-    #-----------
+    mu, variance = mu_var(N)
+    try:
+        from scipy.stats import norm
+        invnorm = norm(scale=np.sqrt(variance), loc=mu).isf
+    except:
+        invnorm = algs.inverse_normal_cdf(mu, np.sqrt(variance))
 
-    N=len(xarray)
-    mu,variance=mu_var(N)
-    f=algs.inverse_normal_cdf(mu, np.sqrt(variance))
     phi1=1.-alpha/2.
     phi2=alpha/2.
-    A1=f(phi1)
-    A2=f(phi2)
-    if verbose: print(A1, Atot, A2)
+    A1=invnorm(phi1)
+    A2=invnorm(phi2)
+
+    if verbose: print(A1,'<', Atot,'<', A2)
+
     if A1 < Atot < A2:
         return True
     else:
