@@ -7,6 +7,38 @@ TO DO LIST:
  * ADD FOOTPRINT CALCULATION?
 """
 
+def specific_humidity_from_ppxv(data, units, notation=None, return_full_df=True, inplace_units=True):
+    """Calculates the specific humidity q from values of molar concentration of
+    water (ppmv, ppthv and etc).
+
+    The equation is
+                                      mv x
+                             q = ----------------
+                                 (mv - md) x + md
+    where x is the molar concentration in ppxv.
+
+    Parameters
+    ----------
+    data: pandas.dataframe
+        dataset
+    units: dict
+        units dictionary
+    notation: pymicra.Notation
+        notation to be used
+    return_full_df: bool
+        whether to return only the calculated series or the full df
+    inplace_units: bool
+        whether to return only a dict with the units of the new variables or include them in "units"
+
+    Returns
+    -------
+    outdata: pandas.Series, pandas.DataFrame
+        specific humidity
+    """
+
+    q = (mv*x)/(md+(mv-md)*x)
+    return
+
 
 def theta_from_theta_s(data, units, notation=None, return_full_df=True, inplace_units=True):
     r"""Calculates thermodynamic temperature using sonic temperature measurements
