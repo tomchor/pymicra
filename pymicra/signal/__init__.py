@@ -1,2 +1,5 @@
 from pysignal import *
-from csignal import *
+try:
+    from csignal import *
+except ImportError:
+    print('Numba not found')

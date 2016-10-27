@@ -8,8 +8,6 @@ from numba import jit
 import numpy as np
 cc = CC('csignal')
 
-
-#@cc.export('bulk_corr', 'f8(f8[:], f8[:])')
 def bulk_corr(x0, x1):
     """Bulk correlation coefficient according
 
