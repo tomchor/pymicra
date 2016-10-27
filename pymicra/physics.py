@@ -484,7 +484,7 @@ def satWaterPressure(T, unit='kelvin'):
     -------
         saturated vapor pressure of water (in kPa)
     """
-    from math import exp
+    from np import exp
     e0=0.61094
     b=17.2694
     if unit=='kelvin':
