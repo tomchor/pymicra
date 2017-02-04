@@ -114,7 +114,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     ----------
     flist: list or string
         either list or names of files (dataFrame will be one concatenated dataframe) or the name of one file
-    datalogger: pymicra.dataloggerConfig object
+    datalogger: pymicra.fileConfig object
         configuration of the datalogger which is from where all the configurations of the file will be taken
     parse_date: bool
         whether or not to index the data by date. Note that if this is False many of the functionalities
@@ -135,7 +135,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     #--------------
     # If datalogger is a string it should be the path to a .dlc file
     if isinstance(datalogger, str):
-        datalogger = read_dlc(datalogger)
+        datalogger = _read_dlc(datalogger)
     #--------------
     
     #------------
@@ -158,7 +158,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     # We parse de dates
     if parse_dates:
         if verbose: print('Starting to parse the dates')
-        timeseries=algs.parseDates(timeseries, dataloggerConfig=datalogger, **parse_dates_kw)
+        timeseries=algs.parseDates(timeseries, fileConfig=datalogger, **parse_dates_kw)
     #------------
 
     #------------
@@ -213,7 +213,7 @@ def _read_dlc(dlcfile):
     Then the .dlc should have: variables={0:'%Y-%m-%d %H:%M:%S',1:'u',2:'v'}. This is the default csv format of
     CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
     """
-    from core import dataloggerConfig
+    from .core import fileConfig
 
     globs={}
     dlcvars={}
@@ -224,7 +224,7 @@ def _read_dlc(dlcfile):
         with open(dlcfile) as f:
             code=compile(f.read(), dlcfile, 'exec')
             exec(code, globs, dlcvars)
-    return dataloggerConfig(**dlcvars)
+    return fileConfig(**dlcvars)
 
 
 
@@ -251,7 +251,7 @@ def read_site(sitefile):
     pymicra.siteConfig
         pymicra site configuration object
     """
-    from core import siteConfig, siteConfig
+    from core import siteConfig
 
     globs={}
     sitevars={}
