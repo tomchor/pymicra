@@ -113,7 +113,8 @@ def rotate2D(data, notation=None):
 
 
 @_decors.pdgeneral(convert_out=True)
-def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=True, **kwargs):
+def trend(data, how='linear', rule=None, window=1200, block_func='mean', 
+            center=True, units=None, ignore=None, **kwargs):
     """
     Wrapper to return the trend given data. Can be achieved using a moving avg, block avg or polynomial fitting
 
@@ -135,6 +136,10 @@ def trend(data, how='linear', rule=None, window=1200, block_func='mean', center=
         that returns a float. E.g, median.
     degree: int
         degree of polynomial fit (only if how=='linear' or how=='polynomial')
+    ignore: list
+        not yet implemented
+    units: units_dict
+        not yet implemented
 
     Returns
     -------

@@ -240,12 +240,15 @@ def _polyfit(self, degree=1, rule=None):
     #-----------
 
     out=pd.DataFrame()
-    if isinstance(data.index, pd.DatetimeIndex):
-        xx=data.index.to_julian_date()
-    else:
-        xx=data.index.values
-
     for data in dflist:
+        #--------
+        # This if inside a for loop is slow and should be improved
+        if isinstance(data.index, pd.DatetimeIndex):
+            xx=data.index.to_julian_date()
+        else:
+            xx=data.index.values
+        #--------
+
         aux=data.apply(lambda x: fitWrap(xx, x, degree=degree), axis=0)
         out=out.append(aux)
  
