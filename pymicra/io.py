@@ -158,7 +158,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     # We parse de dates
     if parse_dates:
         if verbose: print('Starting to parse the dates')
-        timeseries=algs.parseDates(timeseries, fileConfig=datalogger, **parse_dates_kw)
+        timeseries=algs.parseDates(timeseries, dataloggerConfig=datalogger, **parse_dates_kw)
     #------------
 
     #------------
