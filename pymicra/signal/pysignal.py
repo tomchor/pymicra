@@ -299,7 +299,7 @@ def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=Non
 
 def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):
     """
-    Calculates the spectrum for a set of data
+    Calculates the cross-spectra for a set of data
 
     Parameters
     ----------
@@ -322,8 +322,10 @@ def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):
     import numpy as np
     import pandas as pd
     from itertools import combinations
-
     notation=algs.get_notation(notation)
+
+    if len(data.columns) < 2:
+        raise TypeError('DataFrame has to have more than 1 column.')
 
     N = len(data)
     combs = list(combinations(data.columns, 2))
@@ -362,12 +364,12 @@ def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):
 @_decors.pdgeneral(convert_out=True)
 def spectra(data, frequency=10, notation=None, anti_aliasing=True):
     """
-    Calculates the cross-spectra for a set of data
+    Calculates the power spectra for a set of data
 
     Parameters
     ----------
     data: pandas.DataFrame or pandas.Series
-        dataframe with more than one columns
+        dataframe whose columns you want the power spectra of
     frequency: float
         frequency of measurement of signal to pass to numpy.fft.rfftfreq
     anti_aliasing: bool
@@ -382,10 +384,6 @@ def spectra(data, frequency=10, notation=None, anti_aliasing=True):
     from .. import algs
     import numpy as np
     import pandas as pd
-
-    if len(data.columns) < 2:
-        raise TypeError('DataFrame has to has more than 1 column.')
-
     notation = algs.get_notation(notation)
 
     N = len(data)
