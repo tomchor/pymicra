@@ -7,7 +7,7 @@ Module for general utilities
  - INCLUDE THIRD MOMENT TEST
  - CHANGE NOTATION IN QCONTROL'S SUMMARY
 """
-from __future__ import print_function
+from __future__ import absolute_import, print_function, division
 import tests
 
 def qcontrol(files, fileconfig,
@@ -316,11 +316,11 @@ def qcontrol(files, fileconfig,
         # TRY-EXCEPT IS A SAFETY NET BECAUSE OF THE POOR DECODING (2015-06-21 00:00 appears as 2015-06-20 24:00)
         try:
             fin=timeSeries(filepath, fileconfig, **read_files_kw)
-        except ValueError, e:
+        except ValueError as e:
             if str(e)=='unconverted data remains: 0' and cdate.hour==23:
                 continue
             else:
-                raise ValueError, e
+                raise ValueError(e)
         #-------------------------------
 
         #-------------------------------
@@ -718,7 +718,7 @@ def correctDrift(drifted, correct_drifted_vars=None, correct=None,
     #----------------
     # This option is activated if we provide a correct dataset from which to withdraw the correction parameters
     if get_fit:
-        for slw, fst in rwvars.iteritems():
+        for slw, fst in rwvars.items():
             slow=correct[slw]
             fast=drifted[fst]
             #----------------
@@ -763,7 +763,7 @@ def correctDrift(drifted, correct_drifted_vars=None, correct=None,
             cors.to_csv(fit_file, index=True)
             if units:
                 with open(fit_file+'.units', 'wt') as fou:
-                    for key, item in units.iteritems():
+                    for key, item in units.items():
                         fou.write('{"%s":"%s"}\n' % (key,item))
         #----------------
 
@@ -777,7 +777,7 @@ def correctDrift(drifted, correct_drifted_vars=None, correct=None,
     # Applies the fit column by column
     if apply_fit:
         corrected=drifted.copy()
-        for slw, fst in rwvars.iteritems():
+        for slw, fst in rwvars.items():
             coefs = np.array(cors.loc['{}_{}'.format(slw,fst), ['angular','linear']])
             corrected[ fst ] = np.poly1d(coefs)(drifted[ fst ])
     else:

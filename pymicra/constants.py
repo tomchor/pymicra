@@ -2,7 +2,8 @@
 """
 Defines some useful constants
 """
-import algs
+from __future__ import absolute_import, print_function, division
+from . import algs
 units={}    # creates units dictionary so it can be updated everytime a constant is added
 
 #---------------------------------------
@@ -23,7 +24,7 @@ R=8.3144621    # universal gas constant J/(mol.K)
 units.update({'R' : 'J/(mol * K)'})
 
 R_spec={}
-for key, val in molar_mass.iteritems():
+for key, val in molar_mass.items():
     R_spec.update( {key : R/val} )
 del key, val
 units.update({'R_spec' : 'J/(g * K)'})
@@ -36,10 +37,10 @@ units.update({'cp_dry' : 'J/(g * K)'})
 cp_h2o=4.1813  # specific heat of water vapor at constant pressure
 units.update({'cp_water' : 'J/(g * K)'})
 
-from physics import latent_heat_water
+from .physics import latent_heat_water
 units.update({'latent_heat_water' : 'J/g'})
 
-from physics import satWaterPressure
+from .physics import satWaterPressure
 units['satWaterPressure'] = 'kPa'
 
 
@@ -137,7 +138,7 @@ sumsolstice={
 2016:'20 22:34',
 2017:'21 04:24'
 }
-sumsolstice={ key : datetime.strptime('{0}-06-{1}'.format(key, val), '%Y-%m-%d %H:%M') for key, val in sumsolstice.iteritems() }
+sumsolstice={ key : datetime.strptime('{0}-06-{1}'.format(key, val), '%Y-%m-%d %H:%M') for key, val in sumsolstice.items() }
 
  
 #--------------------------------------
@@ -150,5 +151,5 @@ except:
 
 #---------------
 # Parse units to pint!
-units = algs.parseUnits(units)
+#units = algs.parseUnits(units)
 #---------------

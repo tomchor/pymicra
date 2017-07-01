@@ -1,7 +1,7 @@
 """
 Defines classes that are the basis of Pymicra
 """
-from __future__ import print_function
+from __future__ import absolute_import, print_function, division
 from . import decorators as _decors
 
 
@@ -103,7 +103,7 @@ class fileConfig(object):
         if self.date_cols:
             self.date_col_names = [ self.variables[ idx ] for idx in self.date_cols ]
         else:
-            date_cols = { k : it for (k, it) in self.variables.iteritems() if '%' in it }
+            date_cols = { k : it for (k, it) in self.variables.items() if '%' in it }
             self.date_col_names = date_cols.values()
             self.date_cols = date_cols.keys()
 

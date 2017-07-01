@@ -85,7 +85,7 @@ def parseUnits(unitstr):
     Gets unit from string, list of strings, or dict's values, using the UnitRegistry
     defined in __init__.py
     """
-    from .. import ureg
+    from ..__init__ import ureg
 
     if isinstance(unitstr, str):
         return ureg[unitstr].u
@@ -112,7 +112,7 @@ def convert_to(data, inunit, outunit, inplace_units=False, key=None):
     key: str 
         if inunit is a dict, it is the name of the variable to be changed 
     """ 
-    from .. import Q_ 
+    from ..__init__ import Q_ 
  
     if key: 
         Q = inunit[key].to(outunit) 
@@ -144,7 +144,7 @@ def convert_cols(data, guide, units, inplace_units=False):
         if inunit is a dict, the dict is update in place. "key" keyword must be provided 
     """ 
     from .. import algs
-    from .. import Q_
+    from ..__init__ import Q_
 
     data = data.copy()
 

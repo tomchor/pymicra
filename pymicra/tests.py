@@ -5,7 +5,7 @@ be used with the qcontrol().
 They all return True for the columns that pass the test and False for the columns
 that fail the test.
 """
-from __future__ import print_function
+from __future__ import absolute_import, print_function, division
 from . import algs
 
 def check_replaced(replaced, max_count=180):

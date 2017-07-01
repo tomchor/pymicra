@@ -6,6 +6,7 @@ TO DO LIST:
  * ADD GENERAL SOLAR ZENITH CALCULATION
  * ADD FOOTPRINT CALCULATION?
 """
+from __future__ import absolute_import, print_function, division
 
 def specific_humidity_from_ppxv(data, units, notation=None, return_full_df=True, inplace_units=True):
     """Calculates the specific humidity q from values of molar concentration of

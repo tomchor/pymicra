@@ -2,6 +2,7 @@
 Defines some methods. Some have functions defined here but most use
 functions defined elsewhere. This is done by monkey-patching Pandas.
 """
+from __future__ import absolute_import, print_function, division
 from . import decorators as _decors
 import pandas as _pd
 
@@ -154,7 +155,7 @@ def _xplot(self, xcol, reverse_x=False, return_ax=False,
     #-----------
     # Try to display letters in the latex mathematical environment
     if latexify:
-	df.columns = algs.latexify(df.columns)
+        df.columns = algs.latexify(df.columns)
         xcol = algs.latexify([xcol])[0]
     #-----------
 
