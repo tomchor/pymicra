@@ -352,13 +352,13 @@ class Notation(object):
                     'temperature':'temp',
                     'parameter':'variable' }
 
-        dic = self.__dict__
+        dic = self.__dict__.copy()
         for key, val in dic.items():
             short=key
             for lon in aliases.keys():
                 short = short.replace(lon, aliases[lon])
             if key!=short:
-                dic.update({short:val})
+                self.__dict__.update({short:val})
 
 
     def __str__(self):
