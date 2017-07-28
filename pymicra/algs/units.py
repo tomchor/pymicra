@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function, division
 from .. import decorators
 
 def multiply(elems, units, inplace_units=False, unitdict=None, key=None):
@@ -85,7 +86,8 @@ def parseUnits(unitstr):
     Gets unit from string, list of strings, or dict's values, using the UnitRegistry
     defined in __init__.py
     """
-    from ..__init__ import ureg
+    #from ..__init__ import ureg
+    from .. import ureg
 
     if isinstance(unitstr, str):
         return ureg[unitstr].u

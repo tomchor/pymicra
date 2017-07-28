@@ -2,7 +2,7 @@
 """
 Defines functions useful to generic signal data
 """
-from __future__ import print_function
+from __future__ import absolute_import, print_function, division
 from numba.pycc import CC
 from numba import jit
 import numpy as np

@@ -1,4 +1,5 @@
-import pandas as pd
+from __future__ import absolute_import, print_function, division
+import pandas as _pd
 
 #----------
 # Definition of the .integrate method for dataframes
@@ -48,8 +49,8 @@ def _integrate_df(self, how='trapz', dateindex=False, **kwargs):
         return df.iloc[0]
     else:
         return df
-pd.Series.integrate = _integrate_df
-pd.DataFrame.integrate = _integrate_df
+_pd.Series.integrate = _integrate_df
+_pd.DataFrame.integrate = _integrate_df
 #----------
 
 #----------
@@ -112,8 +113,8 @@ def _diff_df(self, how='central', axis=0):
         raise ValueError('Axis must be 0 or 1')
     #---------
     return out
-pd.DataFrame.differentiate = _diff_df
-pd.Series.differentiate = _diff_df
+_pd.DataFrame.differentiate = _diff_df
+_pd.Series.differentiate = _diff_df
 #----------
 
-del pd
+#del pd

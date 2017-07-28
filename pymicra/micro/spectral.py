@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import absolute_import, print_function, division
 from .. import decorators as _decor
 
 @_decor.pdgeneral(convert_out=True)

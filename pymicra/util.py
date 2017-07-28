@@ -8,7 +8,7 @@ Module for general utilities
  - CHANGE NOTATION IN QCONTROL'S SUMMARY
 """
 from __future__ import absolute_import, print_function, division
-import tests
+from . import tests
 
 def qcontrol(files, fileconfig,
              read_files_kw={'parse_dates':False, 'clean_dates':False, 'only_named_cols':False, 'return_units':False},
