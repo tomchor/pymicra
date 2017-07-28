@@ -240,7 +240,7 @@ def with_units(data, units):
         #---------
     #-------------
     unts = [ '<{}>'.format(units[c]) if c in units.keys() else '<?>' for c in cols ]
-    columns = pd.MultiIndex.from_tuples(zip(cols, unts))
+    columns = pd.MultiIndex.from_tuples(tuple(zip(cols, unts)))
     if isinstance(data, pd.DataFrame):
         data.columns = columns
     elif isinstance(data, pd.Series):
