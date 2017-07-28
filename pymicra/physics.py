@@ -507,7 +507,7 @@ def perfGas(p=None, rho=None, R=None, T=None, gas=None):
     P.S.: I'm using type to identify None objects because this way it works
     againt pandas objects
     """
-    from constants import R_spec
+    from .constants import R_spec
     
     if R==None:
         if gas != None:
@@ -541,7 +541,7 @@ def R_moistAir(q):
     R_air: float
         the specific gas constant for humid air in J/(g*K)
     """
-    from constants import R_spec
+    from .constants import R_spec
 
     return q* R_spec['h2o'] + (1.0 - q)*R_spec['dry_air']
 
@@ -588,7 +588,7 @@ def _solarZenith(date, lat=-3.1300, lon=-60.016667, lon0 = -63., negative=False,
     #----------
     # Finds out which is the day of the solstice for that year and puts it into dr variable
     if dr==None:
-        from constants import sumsolstice
+        from .constants import sumsolstice
         dr=sumsolstice[date.year].timetuple().tm_yday
     #----------
 

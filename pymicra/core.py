@@ -179,7 +179,7 @@ class siteConfig(object):
         #---------
         # If from file keyword exists then we get it from there
         if from_file:
-            from io import read_site
+            from .io import read_site
             siteconf = read_site(from_file)
             self.__dict__.update(siteconf.__dict__)
             return

@@ -135,7 +135,9 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     #--------------
     # If datalogger is a string it should be the path to a .dlc file
     if isinstance(datalogger, str):
-        datalogger = _read_dlc(datalogger)
+        print('TESTGIN')
+        datalogger = fileConfig(datalogger)
+        #datalogger = _read_dlc(datalogger)
     #--------------
     
     #------------
@@ -176,7 +178,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
 
 def read_fileConfig(dlcfile):
     """
-    Reads metadata configuration file
+    Reads file (metadata) configuration file
 
     WARNING! When defining the .config file note that by default columns that are enclosed between doublequotes
     will appear without the doublequotes. So if your file is of the form :
@@ -193,38 +195,10 @@ def read_fileConfig(dlcfile):
     try:
         execfile(dlcfile, globs, dlcvars)
     except NameError:
-        print('This version of python does not have an execfile function. This workaround should work but is yet to be fully tested')
-        with open(dlcfile) as f:
-            code=compile(f.read(), dlcfile, 'exec')
-            exec(code, globs, dlcvars)
+        exec(open(dlcfile).read(), globs, dlcvars)
+
     return fileConfig(**dlcvars)
 
-
-
-def _read_dlc(dlcfile):
-    """
-    Reads datalogger configuration file
-
-    When defining the .dlc note that by default columns that are enclosed between doublequotes
-    will appear without the doublequotes. So if your file is of the form :
-
-    "2013-04-05 00:00:00", .345, .344, ...
-
-    Then the .dlc should have: variables={0:'%Y-%m-%d %H:%M:%S',1:'u',2:'v'}. This is the default csv format of
-    CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
-    """
-    from .core import fileConfig
-
-    globs={}
-    dlcvars={}
-    try:
-        execfile(dlcfile, globs, dlcvars)
-    except NameError:
-        print('This version of python does not have an execfile function. This workaround should work but is yet to be fully tested')
-        with open(dlcfile) as f:
-            code=compile(f.read(), dlcfile, 'exec')
-            exec(code, globs, dlcvars)
-    return fileConfig(**dlcvars)
 
 
 
@@ -251,24 +225,21 @@ def read_site(sitefile):
     pymicra.siteConfig
         pymicra site configuration object
     """
-    from core import siteConfig
+    from .core import siteConfig
 
     globs={}
     sitevars={}
     try:
         execfile(sitefile, globs, sitevars)
     except NameError:
-        print('This version of python does not have an execfile function. This workaround should work but is yet to be fully tested')
-        with open(sitefile) as f:
-            code=compile(f.read(), sitefile, 'exec')
-            exec(code, globs, sitevars)
+        exec(open(sitefile).read(), globs, sitevars)
 
     #--------
     # First try new class, if not possible, try old one
     try:
         return siteConfig(**sitevars)
     except:
-        return siteConfig(**sitevars)
+        return fileConfig(**sitevars)
     #--------
 
 
@@ -306,6 +277,33 @@ def readUnitsCsv(filename, **kwargs):
     df = pd.read_csv(filename, header=0, skiprows=[1,2], **kwargs)
     #------
     return df, unitsdic
+
+
+def _read_dlc(dlcfile):
+    """
+    Obsolete. Should use fileConfig() or read_fileConfig().
+
+    Reads datalogger configuration file.
+
+    When defining the .dlc note that by default columns that are enclosed between doublequotes
+    will appear without the doublequotes. So if your file is of the form :
+
+    "2013-04-05 00:00:00", .345, .344, ...
+
+    Then the .dlc should have: variables={0:'%Y-%m-%d %H:%M:%S',1:'u',2:'v'}. This is the default csv format of
+    CampbellSci dataloggers. To disable this feature, you should parse the file with read_csv using the kw: quoting=3.
+    """
+    from .core import fileConfig
+
+    globs={}
+    dlcvars={}
+    try:
+        execfile(sitefile, globs, sitevars)
+    except NameError:
+        exec(open(sitefile).read(), globs, sitevars)
+
+    return fileConfig(**dlcvars)
+
 
 
 #-------------------------------------------
