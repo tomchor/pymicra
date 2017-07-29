@@ -1,8 +1,8 @@
 """
 """
 from __future__ import absolute_import, print_function, division
-import pandas as pd
-import numpy as np
+#import pandas as _pd
+import numpy as _np
 
 
 def splitData(data, rule='30min', return_index=False, **kwargs):
@@ -48,7 +48,10 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
     elif type(rule) == int:
         out = [ data.iloc[ rule*i : rule*(i+1) ] for i in range(0, len(data)/rule) ]
     else:
-        from itertools import izip_longest as izip
+        try:
+            from itertools import izip_longest as izip
+        except ImportError:
+            from itertools import zip_longest as izip
         #---------
         # We first create the index in which we base our separation
         # THIS STEP CAN PROBABLY BE IMPROVED
@@ -298,7 +301,7 @@ def parseDates(data, dataloggerConfig=None, date_col_names=None, clean=True, ver
     return data
 
 
-def classbin(x, y, bins_number=100, function=np.mean, xfunction=np.mean, logscale=True):
+def classbin(x, y, bins_number=100, function=_np.mean, xfunction=_np.mean, logscale=True):
     """
     Separates x and y inputs into bins based on the x array.
     x and y do not have to be ordered.
@@ -396,11 +399,14 @@ def name2date(filename, dlconfig):
 
     :Warning: Needs to be optimized in order to read question markers also after the date
     """
-    from itertools import izip_longest
+    try:
+        from itertools import izip_longest as izip
+    except ImportError:
+        from itertools import zip_longest as izip
     import datetime as dt
     
     filename_format=dlconfig.filename_format
-    f=''.join([ s for s,v in izip_longest(filename, filename_format) if v!='?' ])
+    f=''.join([ s for s,v in izip(filename, filename_format) if v!='?' ])
     fmt=filename_format.replace('?','')
     cdate=dt.datetime.strptime(f, fmt)
     return cdate

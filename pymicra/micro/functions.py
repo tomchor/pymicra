@@ -109,7 +109,7 @@ def ste(data, w_fluctuations="w'"):
     w_fluctuations: str
         the name of the vertical velocity fluctuations
     """
-    from ..data import bulkCorr
+    from ..signal import bulkCorr
     import numpy as np
 
     w=w_fluctuations
@@ -143,7 +143,7 @@ def rte(data, w_fluctuations="w'", order=None):
 
     NEEDS TO BE VALIDATED!
     """
-    from ..data import bulkCorr
+    from ..signal import bulkCorr
     wcol=w_fluctuations
     df=data.copy()
     if order:

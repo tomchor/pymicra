@@ -86,7 +86,6 @@ def parseUnits(unitstr):
     Gets unit from string, list of strings, or dict's values, using the UnitRegistry
     defined in __init__.py
     """
-    #from ..__init__ import ureg
     from .. import ureg
 
     if isinstance(unitstr, str):
@@ -114,7 +113,7 @@ def convert_to(data, inunit, outunit, inplace_units=False, key=None):
     key: str 
         if inunit is a dict, it is the name of the variable to be changed 
     """ 
-    from ..__init__ import Q_ 
+    from .. import Q_ 
  
     if key: 
         Q = inunit[key].to(outunit) 
@@ -146,7 +145,7 @@ def convert_cols(data, guide, units, inplace_units=False):
         if inunit is a dict, the dict is update in place. "key" keyword must be provided 
     """ 
     from .. import algs
-    from ..__init__ import Q_
+    from .. import Q_ 
 
     data = data.copy()
 
@@ -159,7 +158,7 @@ def convert_cols(data, guide, units, inplace_units=False):
 
     #-------
     # We first turn it into a numpy array to make the conversion using pint natively
-    for col, outunit in guide.iteritems():
+    for col, outunit in guide.items():
         aux = Q_(data[ col ].values, units[ col ])
         aux = aux.to(outunit)
         data.loc[:, col] = aux
@@ -194,7 +193,7 @@ def convert_indexes(data, guide, units, inplace_units=False):
 
     #-------
     # We first turn it into a numpy array to make the conversion using pint natively
-    for idx, outunit in guide.iteritems():
+    for idx, outunit in guide.items():
         aux = data[ idx ] * units[ idx ]
         aux = aux.to(outunit)
         data.loc[ idx ] = aux.magnitude

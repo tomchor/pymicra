@@ -8,7 +8,7 @@ import pandas as _pd
 
 #---------------
 # Creates a method to write to a unitsCsv
-def _to_unitsCsv(self, units, filename, **kwargs):
+def to_unitsCsv(self, units, filename, **kwargs):
     """
     Wrapper around toUnitsCsv to create a method to print the contents of
     a dataframe plus its units into a unitsCsv file.
@@ -29,43 +29,23 @@ def _to_unitsCsv(self, units, filename, **kwargs):
     data = self.copy()
     cols = data.columns
     unts = [ str(units[c]) if c in units.keys() else '' for c in cols ]
-    columns = pd.MultiIndex.from_tuples(zip(cols, unts))
+    columns = pd.MultiIndex.from_tuples(tuple(zip(cols, unts)))
     data = data.copy()
     data.columns = columns
     data.to_csv(filename, **kwargs)
     return
-_pd.DataFrame.to_unitsCsv = _to_unitsCsv
+_pd.DataFrame.to_unitsCsv = to_unitsCsv
 #---------------
 
 from .io import _get_printable
 _pd.DataFrame.printable = _get_printable
 
 
-#---------------
-def _as_dlc(self, outfile, dlc):
-    """
-    Should write a DataFrame in the exact format described by a dataloggerConfig object
-    """
-    df = self.copy()
-
-    #---------------
-    # Re-create date columns if they existed
-    for datecol in dlc.date_col_names:
-        df[ datecol ] = df.index.strftime(datecol)
-    #---------------
-
-    df = df[ dlc.variables.values ]
-
-    df.to_csv(outfile, header=dlc.header_lines, 
-            sep=dlc.columns_separator, index=False, quoting=3, na_rep='nan')
-#---------------
-
-
 #----------
 # Definition of bulk_correlation according to
 # Cancelli, Dias, Chamecki. Dimensionless criteria for the production of...
 # doi:10.1029/2012WR012127
-def _bulk_corr(self):
+def bulk_corr(self):
     import numpy as np
     df = self.copy()
     cov = df.cov()
@@ -75,7 +55,7 @@ def _bulk_corr(self):
     for idx in out.index:
         out.loc[idx, :] = out.loc[idx, :]/np.sqrt(cov.loc[idx, idx])
     return out
-_pd.DataFrame.bulk_corr = _bulk_corr
+_pd.DataFrame.bulk_corr = bulk_corr
 #----------
 
 
@@ -121,7 +101,7 @@ _pd.Series.binned=binwrapper
 
 #--------
 # Define xplot method for pandas dataframes
-def _xplot(self, xcol, reverse_x=False, return_ax=False, 
+def xplot(self, xcol, reverse_x=False, return_ax=False, 
             fixed_cols=[], fcols_styles=[], latexify=False, **kwargs):
     """
     A smarter way to plot things with the x axis being one of the columns. Very useful for
@@ -207,7 +187,7 @@ def _xplot(self, xcol, reverse_x=False, return_ax=False,
         return axes
     else:
         return
-_pd.DataFrame.xplot = _xplot
+_pd.DataFrame.xplot = xplot
 #--------
 
 
@@ -215,7 +195,7 @@ _pd.DataFrame.xplot = _xplot
 #---------
 # Definition of dataframe method to fit
 @_decors.pdgeneral(convert_out=True)
-def _polyfit(self, degree=1, rule=None):
+def polyfit(self, degree=1, rule=None):
     """
     This method fits an n-degree polynomial to the dataset. The index can
     be a DateTimeIndex or not
@@ -254,8 +234,8 @@ def _polyfit(self, degree=1, rule=None):
         out=out.append(aux)
  
     return out
-_pd.DataFrame.polyfit = _polyfit
-_pd.Series.polyfit = _polyfit
+_pd.DataFrame.polyfit = polyfit
+_pd.Series.polyfit = polyfit
 #---------
 
 #---------
@@ -287,3 +267,26 @@ _pd.DataFrame.cospectrum = _micro.spectral.cospectrum
 _pd.DataFrame.quadrature = _micro.spectral.quadrature
 _pd.Series.cospectrum = _micro.spectral.cospectrum
 _pd.Series.quadrature = _micro.spectral.quadrature
+
+
+#---------------
+def _as_dlc(self, outfile, dlc):
+    """
+    Still under development.
+
+    Should write a DataFrame in the exact format described by a dataloggerConfig object
+    """
+    df = self.copy()
+
+    #---------------
+    # Re-create date columns if they existed
+    for datecol in dlc.date_col_names:
+        df[ datecol ] = df.index.strftime(datecol)
+    #---------------
+
+    df = df[ dlc.variables.values ]
+
+    df.to_csv(outfile, header=dlc.header_lines, 
+            sep=dlc.columns_separator, index=False, quoting=3, na_rep='nan')
+#---------------
+

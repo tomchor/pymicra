@@ -2,8 +2,6 @@ from __future__ import absolute_import, print_function, division
 """
 """
 
-
-
 def stripDown(str, final='', args=['_', '-']):
     """
     Auxiliar function to strip down keywords from symbols
@@ -22,21 +20,6 @@ def lenYear(year):
     feblen=calendar.monthrange(year,2)[1]
     otherlens=365-28
     return feblen + otherlens
-
-
-def completeHM(string):
-    """
-    Completes %H%M strings for cases when 2hours 0 minutes appear
-    as 020. Should be dropped eventually because this is pretty much a hack that
-    corrects for file configuration
-    """
-    if string.isdigit():
-        pass
-    else:
-        raise TypeError('String passed must contain only digits. Check the argument')
-    if len(string)==3:
-        string='0'+string
-    return string
 
 
 
@@ -118,4 +101,22 @@ def first_last(fname):
             pass
         last=line
     return first, last
+
+
+def _completeHM(string):
+    """
+    Deprecated.
+
+    Completes %H%M strings for cases when 2hours 0 minutes appear
+    as 020. Should be dropped eventually because this is pretty much a hack that
+    corrects for file configuration
+    """
+    if string.isdigit():
+        pass
+    else:
+        raise TypeError('String passed must contain only digits. Check the argument')
+    if len(string)==3:
+        string='0'+string
+    return string
+
 

@@ -51,7 +51,7 @@ def _correctLag(data, notation=None, lag_bounds=[0, 100]):
     vertical wind velocity has lag 0.
     """
     from .. import algs
-    from .. import data
+    from .. import signal
     data = data.copy()
     defs = algs.get_notation(notation)
 

@@ -551,7 +551,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
 def rotateCoor(data, notation=None, how='2d'):
     """
     """
-    from .. import data as pmdata
+    from .. import signal as pmdata
 
     if how=='2d':
         return pmdata.rotate2D(data, notation=notation)
