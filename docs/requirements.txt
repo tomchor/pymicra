@@ -1,2 +1,2 @@
-IPython
+IPython>=5.0
 
