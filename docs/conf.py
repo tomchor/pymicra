@@ -78,7 +78,7 @@ copyright = u'2016, Tomás Chor'
 
 # The short X.Y version.
 try:
-    version = pm.__version__
+    version = open('../pymicra/version').read().strip()
 except:
     # we seem to have a local copy not installed without setuptools
     version = ''
