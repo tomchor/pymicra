@@ -11,7 +11,7 @@ vfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),'pymicra/versio
 __version__ = open(vfile, 'rt').read().strip()
 #-----------
 
-dependencies=['Pandas==0.17.1', 'Numpy', 'pint==0.7.2']
+dependencies=['Pandas', 'Numpy', 'pint']
 
 #-----------
 # Be ready to work with or without setuptools

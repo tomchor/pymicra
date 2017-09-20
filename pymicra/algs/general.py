@@ -46,7 +46,7 @@ def splitData(data, rule='30min', return_index=False, **kwargs):
     if rule == None:
         out = [ data ]
     elif type(rule) == int:
-        out = [ data.iloc[ rule*i : rule*(i+1) ] for i in range(0, len(data)/rule) ]
+        out = [ data.iloc[ rule*i : rule*(i+1) ] for i in range(0, len(data)//rule) ]
     else:
         try:
             from itertools import izip_longest as izip
