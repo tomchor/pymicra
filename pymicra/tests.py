@@ -133,7 +133,7 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
     if RAT_vars:
         valid = df[RAT_vars].apply(pmdata.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
     elif RAT_vars==None:
-        valid = df.apply(pmdata.reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
+        valid = df.apply(pmdata.test_reverse_arrangement, axis=0, points_number=RAT_points, alpha=RAT_significance)
     else:
         raise TypeError('Check RAT_vars keyword')
     #-----------

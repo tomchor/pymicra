@@ -343,7 +343,7 @@ def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):
     #---------
     # Anti-aliasing is done here
     if anti_aliasing:
-        RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
+        RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N//2+1) ])/2.
         specs = specs.multiply(RA**2., axis='rows')
     #---------
 
@@ -405,7 +405,7 @@ def spectra(data, frequency=10, notation=None, anti_aliasing=True):
     #---------
     # Anti-aliasing is done here
     if anti_aliasing:
-        RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N/2+1) ])/2.
+        RA = np.array([ 1. + np.cos(np.pi*k/N) for k in range(N//2+1) ])/2.
         specs = specs.multiply(RA**2., axis='rows')
     #---------
 
@@ -477,7 +477,7 @@ def test_reverse_arrangement(array, points_number=None, alpha=0.05, verbose=Fals
 
     #-----------
     # Get reverse arrangements
-    from csignal import reverse_arrangements
+    from .csignal import reverse_arrangements
     Atot = reverse_arrangements(array, points_number=points_number)
     #-----------
 
