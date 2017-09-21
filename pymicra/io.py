@@ -135,7 +135,7 @@ def timeSeries(flist, datalogger, parse_dates=True, verbose=False,
     #--------------
     # If datalogger is a string it should be the path to a .dlc file
     if isinstance(datalogger, str):
-        print('TESTGIN')
+        print('TESTING')
         datalogger = fileConfig(datalogger)
         #datalogger = _read_dlc(datalogger)
     #--------------

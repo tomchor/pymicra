@@ -162,13 +162,17 @@ def trend(data, how='linear', rule=None, window=1200, block_func='mean',
         #-------
         # Performs moving average on the data with window
         if ('mean' in how) or ('average' in how):
-            return pd.rolling_mean(data, window=window, center=center, **kwargs)
+            print(kwargs)
+            print(window)
+            #return pd.rolling_mean(data, window=window, center=center, **kwargs) # deprecated by pandas 0.18
+            return data.rolling(window=window, center=center, **kwargs).mean()
         #-------
 
         #-------
         # Performs moving median on the data with window
         elif 'median' in how:
-            return pd.rolling_median(data, window=window, center=center, **kwargs)
+            #return pd.rolling_median(data, window=window, center=center, **kwargs) # deprecated by pandas 0.18
+            return data.rolling(window=window, center=center, **kwargs).median()
         #-------
 
         #-------
@@ -441,6 +445,57 @@ def bulkCorr(data):
     return r
 
 
+
+def reverse_arrangements(array, points_number=0):
+    """
+    Performs the reverse arrangement test
+    according to Bendat and Piersol - Random Data - 4th edition, page 96
+
+    Parameters
+    ----------
+    array: np.array, list, tuple, generator
+        array which to test for the reverse arrangement test
+    points_number: integer
+        number of chunks to consider to the test. Maximum is the length of the array.
+        If it is less, then the number of points will be reduced by application of a mean
+
+    WARNING! This fuction approximates table A.6 from Bendat&Piersol as a normal distribution.
+    This may no be true, since they do not express which distribution they use to construct
+    their table. However, in the range 9<N<101, this approximation is as good as 5% at N=10
+    and 0.1% at N=100.
+
+    Still not adapted for dataframes
+    """
+    import numpy as np
+
+    #-----------
+    # If number of points N is provided, we turn the run into a N-length array
+    if points_number==0:
+        points_number=len(array)
+
+    if points_number==len(array):
+        xarray=array
+    else:
+        chunklen = len(array)//points_number
+        xarray = np.zeros(points_number, dtype=np.float64)
+        for j in range(0, points_number):
+            xarray[j] = np.mean(array[ (j*chunklen) : ((j+1)*chunklen) ])
+    #-----------
+
+    #-----------
+    # We calculate the reverse arrangements
+    A = 0
+    for i in range(points_number - 1):
+        hh = 0
+        for j in range(i,len(xarray)):
+            if (xarray[i] > xarray[j]):
+                hh += 1
+        A += hh
+    #-----------
+
+    return A
+
+
 def test_reverse_arrangement(array, points_number=None, alpha=0.05, verbose=False):
     """
     Performs the reverse arrangement test
@@ -463,6 +518,8 @@ def test_reverse_arrangement(array, points_number=None, alpha=0.05, verbose=Fals
 
     Still not adapted for dataframes
     """
+    from .. import algs
+    import numpy as np
 
     #-----------
     # Definition of function that determines the mean and variance
@@ -477,7 +534,11 @@ def test_reverse_arrangement(array, points_number=None, alpha=0.05, verbose=Fals
 
     #-----------
     # Get reverse arrangements
-    from .csignal import reverse_arrangements
+    from . import _numba
+    if _numba:
+        from .csignal import reverse_arrangements
+    else:
+        from . import reverse_arrangements
     Atot = reverse_arrangements(array, points_number=points_number)
     #-----------
 
