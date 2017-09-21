@@ -254,7 +254,7 @@ in the resulting plot.
 
 .. ipython:: python
 
-   cospectra = crspectra[[r"X_q'_w'", r"X_theta_v'_w'"]].cospectra()
+   cospectra = crspectra[[r"X_q'_w'", r"X_theta_v'_w'"]].cospectrum()
    @savefig cospectra_binned.png
    cospectra.binned(bins_number=100).plot(loglog=True, style='o')
    plt.show()
