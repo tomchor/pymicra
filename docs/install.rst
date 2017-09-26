@@ -8,8 +8,9 @@ Installation
 
 .. include:: global.rst
 
-Most of the required packages already come with python, such as ``datetime`` or
-``os``. The packages that may not come as default are:
+Pymicra should work with both Python 2.7 and Python 3. Most of the required
+packages already come with python, such as ``datetime`` or ``os``. The packages
+that may not come as default are:
 
 -  Pandas_ (recommended 0.17.1)
 -  Pint_ (0.7.2)
