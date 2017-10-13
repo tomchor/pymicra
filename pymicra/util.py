@@ -12,28 +12,35 @@ from . import tests
 
 def qcontrol(files, fileconfig,
              read_files_kw={'parse_dates':False, 'clean_dates':False, 'only_named_cols':False, 'return_units':False},
-             begin_date=None, end_date=None,
-             file_lines=None,
-             nans_test=True,
-             lower_limits={}, upper_limits={},
+             begin_date=None, end_date=None, # date check
+             file_lines=None, # lines test
+             nans_test=True, # nans test
              accepted_nans_percent=1.,
-             accepted_spikes_percent=1.,
+             lower_limits={}, upper_limits={}, # boundaries test
              accepted_bound_percent=1.,
-             max_replacement_count=180,
-             std_limits={},
-             std_detrend=True, std_detrend_kw={'how':'movingmean', 'window':900},
-             std_stat_kw={}, std_stat_limits={},
-             spikes_detrend=True, spikes_detrend_kw = {'how':'linear'},
-             spikes_test=True, visualize_spikes=False, spikes_vis_col='u',
+             spikes_test=True, # spikes test
+             visualize_spikes=False,
+             spikes_vis_col='u',
+             spikes_detrend=True,
+             spikes_detrend_kw = {'how':'linear'},
              spikes_func = lambda x: (abs(x - x.mean()) > 4.*x.std()), 
-             replace_with='interpolation',
-             max_consec_spikes=3, chunk_size=1200,
-             maxdif_detrend=True, maxdif_detrend_kw={'how':'movingmean', 'window':900},
+             max_consec_spikes=3,
+             accepted_spikes_percent=1.,
+             max_replacement_count=180, # replacement count test
+             std_limits={}, # min std test
+             std_detrend=True, std_detrend_kw={'how':'movingmean', 'window':900},
+             std_stat_limits={}, # std stationarity test
+             std_stat_mov_std_kw=dict(window=4800),
+             dif_limits={}, # max. dif test
+             maxdif_detrend=True,
+             maxdif_detrend_kw={'how':'movingmean', 'window':900},
              maxdif_trend=True, maxdif_trend_kw={'how':'movingmedian', 'window':600},
-             dif_limits={},
-             RAT = False, RAT_vars = None,
+             RAT = False, # reverse arrangement test
+             RAT_vars = None,
              RAT_detrend=True, RAT_detrend_kw={'how':'linear'},
              RAT_points = 50, RAT_significance = 0.05,
+             chunk_size=1200,
+             replace_with='interpolation',
              trueverbose=False, falseverbose=True,
              falseshow=False, trueshow=False,
              trueshow_vars=None,
@@ -90,7 +97,7 @@ def qcontrol(files, fileconfig,
     - :standard deviation stationarity test:
         Checks if a run has big changes in the "moving" std, which indicates going from very turbulent
         to very calm ones or vice versa.
-        - keywords: std_stat_kw, std_stat_limits
+        - keywords: std_stat_mov_std_kw, std_stat_limits
 
     - :maximum difference test:
         runs whose trend have a maximum difference greater than a certain value are left out.
@@ -221,9 +228,9 @@ def qcontrol(files, fileconfig,
     nan_name='failed NaNs test'
     bound_name='failed boundaries test'
     spikes_name='failed spikes test'
-    replacement_name = 'failed replacement test'
+    replacement_name = 'failed max. replacement test'
     STD_name='failed STD test'
-    STD_stat_name='failed STD station. test'
+    STD_stat_name='failed STD stationarity test'
     maxdif_name='failed maxdif test'
     RAT_name = 'failed RAT test'
     successful_name = 'passed all tests'
@@ -287,7 +294,7 @@ def qcontrol(files, fileconfig,
         tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
         control[ STD_name ] = []
 
-    if std_stat_kw:
+    if std_stat_limits:
         tables = tables.append( pd.DataFrame(std_stat_limits, index=['std_stat_limits']) )
         control[ STD_stat_name ] = []
 
@@ -436,12 +443,13 @@ def qcontrol(files, fileconfig,
     
         #-------------------------------
         # STANDARD DEVIATION STATIONARITY TEST
-        if std_stat_kw:
+        if std_stat_limits:
+            print('DOING STD STAT')
             valid = tests.check_std_stationarity(fin, tables, detrend=maxdif_detrend, detrend_kw=maxdif_detrend_kw, 
-                moving_std_kw=std_stat_kw)
+                moving_std_kw=std_stat_mov_std_kw)
 
-            result, failed = algs.testValid(valid, testname=maxdif_name, trueverbose=trueverbose, filepath=filepath)
-            control=algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=maxdif_name, filename=filename, falseshow=falseshow)
+            result, failed = algs.testValid(valid, testname=STD_stat_name, trueverbose=trueverbose, filepath=filepath)
+            control=algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=STD_stat_name, filename=filename, falseshow=falseshow)
 
             if result==False: continue
         #-------------------------------
