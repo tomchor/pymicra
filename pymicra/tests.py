@@ -59,10 +59,41 @@ def check_maxdif(data, tables, detrend=True, detrend_kw={'how':'movingmean', 'wi
     return valid
 
 
+def check_std_stationarity(data, tables, detrend=False,
+            detrend_kw=dict(how='movingmean', window=900),
+            moving_std_kw={}):
+    """
+    Check difference between the maximum and minimum values of the run trend agaisnt an upper-limit.
+    This aims to flag nonstationary runs
+
+    First detrends. Then takes the std.
+    """
+    from . import signal as pmdata
+
+    #------------
+    # If detrend==True, work with the fluctuations
+    if detrend:
+        df = pmdata.detrend(data, suffix='', **detrend_kw)
+    else:
+        df = data.copy()
+    #------------
+
+    #-----------
+    # Catch non-stationarity
+    if moving_std_kw:
+        df=df.rolling(**kw).std()
+    #-----------
+
+    maxdif = (df.max() - df.min()).abs()
+    valid = tables.loc['dif_limits'] - maxdif
+    valid = ~(valid < 0)
+
+    return valid
+
+
 
 def check_stationarity(data, tables, detrend=False,
             detrend_kw=dict(how='movingmean', window=900),
-            moving_std_kw={},
             trend=True, trend_kw={'how':'movingmedian', 'window':'1min'}):
     """
     Check difference between the maximum and minimum values of the run trend agaisnt an upper-limit.
@@ -79,12 +110,6 @@ def check_stationarity(data, tables, detrend=False,
     else:
         df = data.copy()
     #------------
-
-    #-----------
-    # Catch stationarity
-    if moving_std_kw:
-        df=df.rolling(**kw).std()
-    #-----------
 
     #------------
     # If trend==True, work with the trend of df (df being either absolute values or the fluctuation)

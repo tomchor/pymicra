@@ -21,7 +21,7 @@ def qcontrol(files, fileconfig,
              maxdif_detrend=True, maxdif_detrend_kw={'how':'movingmean', 'window':900},
              maxdif_trend=True, maxdif_trend_kw={'how':'movingmedian', 'window':600},
              std_detrend=True, std_detrend_kw={'how':'movingmean', 'window':900},
-             RAT_detrend=True, RAT_detrend_kw={'how':'linear'},
+             stat_std_kw={},
              spikes_detrend=True, spikes_detrend_kw = {'how':'linear'},
              lower_limits={}, upper_limits={},
              spikes_test=True, visualize_spikes=False, spikes_vis_col='u',
@@ -30,6 +30,7 @@ def qcontrol(files, fileconfig,
              max_consec_spikes=3, chunk_size=1200,
              std_limits={}, dif_limits={},
              RAT = False, RAT_vars = None,
+             RAT_detrend=True, RAT_detrend_kw={'how':'linear'},
              RAT_points = 50, RAT_significance = 0.05,
              trueverbose=False, falseverbose=True,
              falseshow=False, trueshow=False,
@@ -50,19 +51,23 @@ def qcontrol(files, fileconfig,
     -----------------
 
     - :date check:
-        files outside a date_range are left out (end_date and begin_date keywords)
+        files outside a date_range are left out.
+        keywords: end_date, begin_date
     - :lines test:
-        checks each file to see if they have a certain number of lines. Files with a different number of lines
-        fail this test. Active this test by passing the file_lines keyword.
+        checks each file to see if they have a certain number of lines.
+        Files with a different number of lines fail this test. 
+        keyworkds: file_lines
 
     Quality tests (in this order)
     -----------------------------
     - :NaN's test:
         checks for any NaN values. NaNs are replaced with interpolation or linear trend. If the percentage
         of NaNs is greater than accepted_nans_percent, run is discarded. Activate it by passing nans_test=True.
+        keywords: accepted_nans_percent, nans_test
     - :boundaries test:
         runs with values in any column lower than a pre-determined lower limit or higher
-        than a upper limits are left out. Activate it by passing a lower_limits or upper_limits keyword.
+        than a upper limits are left out.
+        keywords: lower_limits, upper_limits
     - :spikes test:
         runs with more than a certain percetage of spikes are left out. 
         Activate it by passing a spikes_test keyword. Adjust the test with the spikes_func
@@ -99,6 +104,10 @@ def qcontrol(files, fileconfig,
         dates before this automatically fail.
     end_date: str
         dates after this automatically fail.
+    nans_test: bool
+        whether or not to apply the nans test
+    accepted_nans_percent: float
+        percentage of runs that is acceptable
     std_limits: dict
         keys must be names of variables and values must be upper limits for the standard deviation.
     std_detrend: bool
@@ -199,6 +208,7 @@ def qcontrol(files, fileconfig,
     spikes_name='failed spikes test'
     replacement_name = 'failed replacement test'
     STD_name='failed STD test'
+    STD_stat_name='failed STD station. test'
     maxdif_name='failed maxdif test'
     RAT_name = 'failed RAT test'
     successful_name = 'passed all tests'
@@ -206,7 +216,7 @@ def qcontrol(files, fileconfig,
     replaced_bound_name = 'Runs with replaced bound'
     replaced_spikes_name = 'Runs with replaced spikes'
 
-    order = [total_name, lines_name, nan_name, bound_name, spikes_name, replacement_name, STD_name, 
+    order = [total_name, lines_name, nan_name, bound_name, spikes_name, replacement_name, STD_name, STD_stat_name,
                 maxdif_name, RAT_name, successful_name, replaced_nans_name, replaced_bound_name, replaced_spikes_name]
 
     #--------------
@@ -261,6 +271,9 @@ def qcontrol(files, fileconfig,
     if std_limits:
         tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
         control[ STD_name ] = []
+
+    if stat_std_kw:
+        control[ STD_stat_name ] = []
 
     if RAT:
         control[ RAT_name ] = []
@@ -404,6 +417,18 @@ def qcontrol(files, fileconfig,
 
             if result==False: continue
         #----------------------------------
+    
+        #-------------------------------
+        # STANDARD DEVIATION STATIONARITY TEST
+        if dif_limits:
+            valid = tests.check_std_stationarity(fin, tables, detrend=maxdif_detrend, detrend_kw=maxdif_detrend_kw, 
+                moving_std_kw=std_stat_kw)
+
+            result, failed = algs.testValid(valid, testname=maxdif_name, trueverbose=trueverbose, filepath=filepath)
+            control=algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=maxdif_name, filename=filename, falseshow=falseshow)
+
+            if result==False: continue
+        #-------------------------------
    
         #-------------------------------
         # STATIONARITY TEST
