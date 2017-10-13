@@ -44,19 +44,19 @@ def check_nans(data, max_percent=0.1, replace_with='interpolation'):
     return valid, nan_count
 
 
-def check_maxdif(data, tables, detrend=True, detrend_kw={'how':'movingmean', 'window':900}):
-    """
-    Check the maximum and minimum differences between the fluctuations of a run.
-    """
-    from . import signal as pmdata
-    from matplotlib import pyplot as plt
-
-    detrended = pmdata.detrend(data, suffix='', **detrend_kw)
-    maxdif = (detrended.max() - detrended.min()).abs()
-    valid = tables.loc['dif_limits'] - maxdif
-    valid = ~(valid < 0)
-
-    return valid
+#def check_maxdif(data, tables, detrend=True, detrend_kw={'how':'movingmean', 'window':900}):
+#    """
+#    Check the maximum and minimum differences between the fluctuations of a run.
+#    """
+#    from . import signal as pmdata
+#    from matplotlib import pyplot as plt
+#
+#    detrended = pmdata.detrend(data, suffix='', **detrend_kw)
+#    maxdif = (detrended.max() - detrended.min()).abs()
+#    valid = tables.loc['dif_limits'] - maxdif
+#    valid = ~(valid < 0)
+#
+#    return valid
 
 
 def check_std_stationarity(data, tables, detrend=False,
@@ -85,7 +85,7 @@ def check_std_stationarity(data, tables, detrend=False,
     #-----------
 
     maxdif = (df.max() - df.min()).abs()
-    valid = tables.loc['dif_limits'] - maxdif
+    valid = tables.loc['std_dif_limits'] - maxdif
     valid = ~(valid < 0)
 
     return valid

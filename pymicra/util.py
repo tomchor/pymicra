@@ -12,23 +12,25 @@ from . import tests
 
 def qcontrol(files, fileconfig,
              read_files_kw={'parse_dates':False, 'clean_dates':False, 'only_named_cols':False, 'return_units':False},
+             begin_date=None, end_date=None,
+             file_lines=None,
+             nans_test=True,
+             lower_limits={}, upper_limits={},
              accepted_nans_percent=1.,
              accepted_spikes_percent=1.,
              accepted_bound_percent=1.,
              max_replacement_count=180,
-             file_lines=None, begin_date=None, end_date=None,
-             nans_test=True,
-             maxdif_detrend=True, maxdif_detrend_kw={'how':'movingmean', 'window':900},
-             maxdif_trend=True, maxdif_trend_kw={'how':'movingmedian', 'window':600},
+             std_limits={},
              std_detrend=True, std_detrend_kw={'how':'movingmean', 'window':900},
-             stat_std_kw={},
+             std_stat_kw={}, std_stat_limits={},
              spikes_detrend=True, spikes_detrend_kw = {'how':'linear'},
-             lower_limits={}, upper_limits={},
              spikes_test=True, visualize_spikes=False, spikes_vis_col='u',
              spikes_func = lambda x: (abs(x - x.mean()) > 4.*x.std()), 
              replace_with='interpolation',
              max_consec_spikes=3, chunk_size=1200,
-             std_limits={}, dif_limits={},
+             maxdif_detrend=True, maxdif_detrend_kw={'how':'movingmean', 'window':900},
+             maxdif_trend=True, maxdif_trend_kw={'how':'movingmedian', 'window':600},
+             dif_limits={},
              RAT = False, RAT_vars = None,
              RAT_detrend=True, RAT_detrend_kw={'how':'linear'},
              RAT_points = 50, RAT_significance = 0.05,
@@ -63,29 +65,42 @@ def qcontrol(files, fileconfig,
     - :NaN's test:
         checks for any NaN values. NaNs are replaced with interpolation or linear trend. If the percentage
         of NaNs is greater than accepted_nans_percent, run is discarded. Activate it by passing nans_test=True.
-        keywords: accepted_nans_percent, nans_test
+        - keywords: accepted_nans_percent, nans_test
+
     - :boundaries test:
         runs with values in any column lower than a pre-determined lower limit or higher
         than a upper limits are left out.
-        keywords: lower_limits, upper_limits
+        - keywords: lower_limits, upper_limits
+
     - :spikes test:
+        replace for spikes and replace them according to some keywords.
         runs with more than a certain percetage of spikes are left out. 
-        Activate it by passing a spikes_test keyword. Adjust the test with the spikes_func
-        visualize_spikes, spikes_vis_col, max_consec_spikes, accepted_spikes_percent and chunk_size keywords.
+        - keywords: spikes_test, spikes_func, visualize_spikes, spikes_vis_col, 
+                    max_consec_spikes, accepted_spikes_percent and chunk_size keywords.
     - :replacement count test:
         checks the total amount of points that were replaced (including NaN, boundaries and spikes test)
         against the max_replacement_count keyword. Fails if any columns has more replacements than that.
+        - keywords: 
+
     - :standard deviation (STD) check:
         runs with a standard deviation lower than a pre-determined value (generally close to the
         sensor precision) are left out.
-        Activate it by passing a std_limits keyword.
+        - keywords: std_limits
+
+    - :standard deviation stationarity test:
+        Checks if a run has big changes in the "moving" std, which indicates going from very turbulent
+        to very calm ones or vice versa.
+        - keywords: std_stat_kw, std_stat_limits
+
     - :maximum difference test:
         runs whose trend have a maximum difference greater than a certain value are left out.
         This excludes non-stationary runs. Activate it by passing a dif_limits keyword.
+        - keywords: dif_limits
+
     - :reverse arrangement test (RAT):
         runs that fail the reverse arrangement test for any variable are left out.
-        Activate it by passing a RAT keyword.
- 
+        - keywords: RAT, RAT_vars, RAT_detrend, RAT_detrend_kw, RAT_points, RAT_significance
+
     Parameters
     ----------
     files: list
@@ -272,7 +287,8 @@ def qcontrol(files, fileconfig,
         tables = tables.append( pd.DataFrame(std_limits, index=['std_limits']) )
         control[ STD_name ] = []
 
-    if stat_std_kw:
+    if std_stat_kw:
+        tables = tables.append( pd.DataFrame(std_stat_limits, index=['std_stat_limits']) )
         control[ STD_stat_name ] = []
 
     if RAT:
@@ -420,7 +436,7 @@ def qcontrol(files, fileconfig,
     
         #-------------------------------
         # STANDARD DEVIATION STATIONARITY TEST
-        if dif_limits:
+        if std_stat_kw:
             valid = tests.check_std_stationarity(fin, tables, detrend=maxdif_detrend, detrend_kw=maxdif_detrend_kw, 
                 moving_std_kw=std_stat_kw)
 
