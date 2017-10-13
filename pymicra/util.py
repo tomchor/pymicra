@@ -87,22 +87,22 @@ def qcontrol(files, fileconfig,
     - :replacement count test:
         checks the total amount of points that were replaced (including NaN, boundaries and spikes test)
         against the max_replacement_count keyword. Fails if any columns has more replacements than that.
-        - keywords: 
+        - keywords: max_replacement_count
 
     - :standard deviation (STD) check:
         runs with a standard deviation lower than a pre-determined value (generally close to the
         sensor precision) are left out.
-        - keywords: std_limits
+        - keywords: std_limits, std_detrend, std_detrend_kw
 
     - :standard deviation stationarity test:
         Checks if a run has big changes in the "moving" std, which indicates going from very turbulent
         to very calm ones or vice versa.
         - keywords: std_stat_mov_std_kw, std_stat_limits
 
-    - :maximum difference test:
+    - :maximum difference (stationarity) test:
         runs whose trend have a maximum difference greater than a certain value are left out.
         This excludes non-stationary runs. Activate it by passing a dif_limits keyword.
-        - keywords: dif_limits
+        - keywords: dif_limits, maxdif_detrend, maxdif_detrend_kw, maxdif_trend, maxdif_trend_kw
 
     - :reverse arrangement test (RAT):
         runs that fail the reverse arrangement test for any variable are left out.
