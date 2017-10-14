@@ -84,7 +84,7 @@ def check_std_stationarity(data, tables, detrend=False,
         df=df.rolling(**moving_std_kw).std()
     #-----------
 
-    maxdif = (df.max() - df.min()).abs()
+    maxdif = (df.max(skipna=True) - df.min(skipna=True)).abs()
     valid = tables.loc['std_stat_limits'] - maxdif
     valid = ~(valid < 0)
 

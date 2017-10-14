@@ -30,7 +30,7 @@ def qcontrol(files, fileconfig,
              std_limits={}, # min std test
              std_detrend=True, std_detrend_kw={'how':'movingmean', 'window':900},
              std_stat_limits={}, # std stationarity test
-             std_stat_mov_std_kw=dict(window=4800),
+             std_stat_mov_std_kw=dict(window=480),
              dif_limits={}, # max. dif test
              maxdif_detrend=True,
              maxdif_detrend_kw={'how':'movingmean', 'window':900},
