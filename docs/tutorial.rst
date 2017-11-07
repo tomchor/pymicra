@@ -5,6 +5,11 @@ Here we give some examples of generally-used steps to obtain fluxes, spectra
 and Ogives. This is just the commonly done procedures, but more can (and
 sometimes should) be done depending on the data.
 
+
+
+.. include:: qcontrol.rst
+
+
 Calculating auxiliary variables and units
 -----------------------------------------
 

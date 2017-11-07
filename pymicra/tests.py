@@ -305,7 +305,7 @@ def check_limits(data, tables, max_percent=1., replace_with='interpolation'):
 
 def check_spikes(data, chunk_size='2min',
                  detrend={'how':'linear'},
-                 visualize=False, vis_col=1, max_consec_spikes=3,
+                 visualize=False, vis_col=1, max_consec_spikes=10,
                  cut_func = lambda x: (abs(x - x.mean()) > 5.*x.std()),
                  replace_with='interpolation',
                  max_percent=1.):

@@ -20,7 +20,7 @@ def qc_replace(files, fileconfig,
              spikes_vis_col='u',
              spikes_detrend = {'how':'linear'},
              spikes_func = lambda x: (abs(x - x.mean()) > 5.*x.std()), 
-             max_consec_spikes=3,
+             max_consec_spikes=10,
              max_replacement_count=180, # replacement count test
              replace_with='interpolation',
              trueverbose=False, falseverbose=True, # general
@@ -34,40 +34,45 @@ def qc_replace(files, fileconfig,
     """
     This function applies various quality control checks/tests to a set of datafiles and re-writes
     the successful files in another directory. This specific function focuses on point-analysis
-    that can be fixed by replacements (removing spikes by interpolation, etc.). A list of applied tests is found 
-    below in order of application. The only test available by default is the spikes test.
-    All others depend on their respective keywords.
+    that can be fixed by replacements (removing spikes by interpolation, etc). A run fails this
+    only if (1) it is beyond the accepted dates, (2) has a different number of lines than
+    usual and (3) the number of points replaced is greater than max_replacement_count.
 
+    A list of applied tests is found below in order of application. The only test available 
+    by default is the spikes test. All others depend on their respective keywords.
+
+    Tests are based on Vickers and Mahrt, Quality control and fux sampling problems for
+    tower and aircraft data.
 
     Consistency checks
     ------------------
 
     - :date check:
-        files outside a date_range are left out.
+        Files outside a date_range are left out.
         keywords: end_date, begin_date
     - :lines test:
-        checks each file to see if they have a certain number of lines.
+        Checks each file to see if they have a certain number of lines.
         Files with a different number of lines fail this test. 
         keyworkds: file_lines
 
     Quality tests (in this order)
     -----------------------------
-    - :NaN's test:
-        checks for any NaN values. NaNs are replaced with interpolation or linear trend.
+    - :NaN's filter:
+        Checks for any NaN values. NaNs are replaced with interpolation or linear trend.
         Activate it by passing nans_test=True.
         - keywords: nans_test
 
-    - :boundaries test:
-        runs with values in any column lower than a pre-determined lower limit or higher
-        than a upper limits are left out.
+    - :boundaries filter:
+        Checks for values in any column lower than a pre-determined lower limit or higher
+        than a upper limit. If found, these points are replacted (interpolated or otherwise).
         - keywords: lower_limits, upper_limits
 
-    - :spikes test:
-        replace for spikes and replace them according to some keywords.
+    - :spikes filter:
+        Search for spikes according to user definition. Spikes are replaced (interpolated or otherwise).
         - keywords: spikes_test, spikes_func, visualize_spikes, spikes_vis_col, 
                     max_consec_spikes and chunk_size keywords.
     - :replacement count test:
-        checks the total amount of points that were replaced (including NaN, boundaries and spikes test)
+        Checks the total amount of points that were replaced (including NaN, boundaries and spikes test)
         against the max_replacement_count keyword. Fails if any columns has more replacements than that.
         - keywords: max_replacement_count
 
@@ -79,11 +84,12 @@ def qc_replace(files, fileconfig,
     fileconfig: pymicra.fileConfig object or str
         datalogger configuration object used for all files in the list of files or path to a dlc file.
     read_files_kw: dict
-        keywords to pass to pymicra.timeSeries. Default is {'parse_dates':False} because parsing dates
-        at every file is slow, so this makes the whole process faster.
-        However, {'parse_dates':True, 'clean_dates':False} is recommended if time is not a problem because
-        the window and chunk_size keywords may be used as, for example '2min', instead of 1200, which is the
-        equivalent number of points.
+        keywords to pass to pymicra.timeSeries. Default is
+        {'parse_dates':False} because parsing dates at every file is slow, so this
+        makes the whole process faster.  However, {'parse_dates':True,
+        'clean_dates':False} is recommended if time is not a problem because the window
+        and chunk_size keywords may be used as, for example '2min', instead of 1200,
+        which is the equivalent number of points.
     file_lines: int
         number of line a "good" file must have. Fails if the run has any other number of lines.
     begin_date: str
@@ -111,10 +117,17 @@ def qc_replace(files, fileconfig,
     replace_with: str
         method to use when replacing the spikes. Options are 'interpolation' and 'trend'.
     max_consec_spikes: int
-        limit of consecutive spike points to be interpolated. After this spikes are left as they are in the output.
+        Limit of consecutive spike points to be interpolated. If the number of consecutive "spikes" is more than
+        this, then we take all those points as not actually being spikes and no replacement is done. So if
+        max_consec_spikes=0, no spike replacements is ever done.
     chunk_size: str
-        string representing time length of chunks used in the spikes check. Default is "2Min".
-        Putting None will not separate in chunks. It's recommended to use rolling functions in this case (might be slow).
+        string representing time length of chunks used in the spikes check.
+        Default is "2Min".  Putting None will not separate in chunks. It's recommended
+        to use rolling functions in this case (might be slow).
+    max_replacement_count: int
+        Maximum number of replaced point a variable can have in a run. If the
+        replaced number of points is larger than this then the run fails and is
+        discarded. Generally this should be about 1% of the file_lines.
     trueverbose: bool
         whether or not to show details on the successful runs.
     falseverbose: bool
@@ -151,16 +164,13 @@ def qc_replace(files, fileconfig,
 
     total_name='total'
     lines_name='failed lines test'
-    nan_name='failed NaNs test'
-    bound_name='failed boundaries test'
-    spikes_name='failed spikes test'
-    replacement_name = 'failed max. replacement test'
+    replacement_name = 'failed replacement test'
     successful_name = 'passed all tests'
     replaced_nans_name = 'Runs with replaced nans'
     replaced_bound_name = 'Runs with replaced bound'
     replaced_spikes_name = 'Runs with replaced spikes'
 
-    order = [total_name, lines_name, nan_name, bound_name, spikes_name, replacement_name,
+    order = [total_name, lines_name, replacement_name,
                 successful_name, replaced_nans_name, replaced_bound_name, replaced_spikes_name]
 
     #--------------
@@ -193,20 +203,16 @@ def qc_replace(files, fileconfig,
     if file_lines:
         control[ lines_name ] = []
     if nans_test:
-        control[ nan_name ] = []
         control[ replaced_nans_name ] = []
 
     if upper_limits:
         tables = tables.append( pd.DataFrame(upper_limits, index=['upper_limits']) )
-        control[ bound_name ] = []
         control[ replaced_bound_name ] = []
     if lower_limits:
         tables = tables.append( pd.DataFrame(lower_limits, index=['lower_limits']) )
-        control[ bound_name ] = []
         control[ replaced_bound_name ] = []
 
     if spikes_test:
-        control[ spikes_name ] = []
         control[ replaced_spikes_name ] = []
 
     if max_replacement_count:
@@ -271,8 +277,8 @@ def qc_replace(files, fileconfig,
         if nans_test:
             valid, nans_replaced = tests.check_nans(fin, replace_with=replace_with)
 
-            result, failed = algs.testValid(valid, testname=nan_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=nan_name, filename=filename, falseshow=falseshow)
+#            result, failed = algs.testValid(valid, testname=nan_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+#            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=nan_name, filename=filename, falseshow=falseshow)
 
             #--------------
             # Add nans that were replaced to the full replaced list
@@ -288,8 +294,8 @@ def qc_replace(files, fileconfig,
         if lower_limits or upper_limits:
             fin, valid, limits_replaced = tests.check_limits(fin, tables, replace_with=replace_with)
 
-            result, failed = algs.testValid(valid, testname=bound_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=bound_name, filename=filename, falseshow=falseshow)
+#            result, failed = algs.testValid(valid, testname=bound_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+#            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=bound_name, filename=filename, falseshow=falseshow)
 
             #--------------
             # Add high/low values that were replaced to the full replaced list
@@ -307,8 +313,8 @@ def qc_replace(files, fileconfig,
                             visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size, replace_with=replace_with,
                             cut_func=spikes_func, max_consec_spikes=max_consec_spikes)
 
-            result, failed = algs.testValid(valid, testname=spikes_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=spikes_name, filename=filename, falseshow=falseshow)
+#            result, failed = algs.testValid(valid, testname=spikes_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+#            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=spikes_name, filename=filename, falseshow=falseshow)
 
             #--------------
             # Add spikes that were replaced to the full replaced list
@@ -340,7 +346,6 @@ def qc_replace(files, fileconfig,
             else:
                 fin.plot()
             plt.show()
-        #discarded[ successful_name ].append(filename)
         control.loc[idx, successful_name ] = filename
         #-----------------
 
@@ -386,7 +391,7 @@ def qc_replace(files, fileconfig,
 
 
 
-def qc_filter(files, fileconfig,
+def qc_discard(files, fileconfig,
              read_files_kw={'parse_dates':False, 'clean_dates':False, 'only_named_cols':False, 'return_units':False},
              std_limits={}, # min std test
              std_detrend=dict(how='movingmean', window=900),
@@ -404,17 +409,18 @@ def qc_filter(files, fileconfig,
     """
     Function that applies various tests quality control to a set of datafiles and re-writes
     the successful files in another directory. A list of currently-applied tests is found 
-    below in order of application. The only test available by default is the spikes test.
-    All others depend on their respective keywords.
+    below in order of application. When some variable or set of points fails a test the
+    whole file is discarded.
 
+    Tests are based on Vickers and Mahrt, Quality control and fux sampling problems for
+    tower and aircraft data.
 
 
     Quality tests (in this order)
     -----------------------------
 
     - :standard deviation (STD) check:
-        runs with a standard deviation lower than a pre-determined value (generally close to the
-        sensor precision) are left out.
+        runs with a standard deviation lower than a pre-determined value are left out.
         - keywords: std_limits, std_detrend
 
     - :maximum difference (stationarity) test:
@@ -429,23 +435,24 @@ def qc_filter(files, fileconfig,
     fileconfig: pymicra.fileConfig object or str
         datalogger configuration object used for all files in the list of files or path to a dlc file.
     read_files_kw: dict
-        keywords to pass to pymicra.timeSeries. Default is {'parse_dates':False} because parsing dates
-        at every file is slow, so this makes the whole process faster.
-        However, {'parse_dates':True, 'clean_dates':False} is recommended if time is not a problem because
-        the window and chunk_size keywords may be used as, for example '2min', instead of 1200, which is the
-        equivalent number of points.
+        keywords to pass to pymicra.timeSeries. Default is
+        {'parse_dates':False} because parsing dates at every file is slow, so this
+        makes the whole process faster. However, {'parse_dates':True,
+        'clean_dates':False} is recommended if time is not a problem because the window
+        and chunk_size keywords may be used as, for example '2min', instead of 1200,
+        which is the equivalent number of points.
     dif_limits: dict
         keys must be names of variables and values must be upper limits for the maximum difference
         of values that the linear trend of the run must have.
     maxdif_detrend: dict
         keywords to pass to pymicra.detrend when detrending for max difference test. If it's empty, no detrending is made.
     maxdif_trend: dict
-        Keywords to pass to pymicra.detrend when trending for max difference test (passed to pymicra.data.trend).
-        If empty, no trending is used.
-        This is used in the max difference test, since
-        the difference is taken between the max and min values of the trend, not of the raw timeSeries.
+        Keywords to pass to pymicra.detrend when trending for max difference
+        test (passed to pymicra.data.trend).  If empty, no trending is used.  This is
+        used in the max difference test, since the difference is taken between the max
+        and min values of the trend, not of the raw timeSeries.
     chunk_size: str
-        string representing time length of chunks used in the spikes and standard deviation check. Default is "2Min".
+        string representing time length of chunks used in the standard deviation check. Default is "2Min".
         Putting None will not separate in chunks. It's recommended to use rolling functions in this case (might be slow).
     trueverbose: bool
         whether or not to show details on the successful runs.
@@ -578,7 +585,6 @@ def qc_filter(files, fileconfig,
             else:
                 fin.plot()
             plt.show()
-        #discarded[ successful_name ].append(filename)
         control.loc[idx, successful_name ] = filename
         #-----------------
 
@@ -588,8 +594,6 @@ def qc_filter(files, fileconfig,
             print('Re-writing',filepath)
             fullfin[usedvars] = fin[usedvars]       # This is because some spikes were removed during the process
             write_as_fconfig(fullfin, join(outdir, basename(filepath)), fileconfig)
-#            fullfin.to_csv(join(outdir, basename(filepath)),
-#                       header=fileconfig.header, index=False, quoting=3, na_rep='NaN')
         #-----------------
         print()
     
