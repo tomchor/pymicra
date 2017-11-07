@@ -18,9 +18,11 @@ def check_replaced(replaced, max_count=180):
     return valid
 
 
-def check_nans(data, max_percent=0.1, replace_with='interpolation'):
+def check_nans(data, replace_with='interpolation', max_percent=100):
     """
     Checks data for NaN values
+
+    max_percent is here only for compatibility reasons but is deprecated
     """ 
     from . import signal as pmdata
     df = data.copy() 
@@ -59,8 +61,8 @@ def check_nans(data, max_percent=0.1, replace_with='interpolation'):
 #    return valid
 
 
-def check_std_stationarity(data, tables, detrend=False,
-            detrend_kw=dict(how='movingmean', window=900),
+def check_std_stationarity(data, tables,
+            detrend=dict(how='movingmean', window=900),
             moving_std_kw={}):
     """
     Check difference between the maximum and minimum values of the run trend agaisnt an upper-limit.
@@ -92,9 +94,9 @@ def check_std_stationarity(data, tables, detrend=False,
 
 
 
-def check_stationarity(data, tables, detrend=False,
-            detrend_kw=dict(how='movingmean', window=900),
-            trend=True, trend_kw={'how':'movingmedian', 'window':'1min'}):
+def check_stationarity(data, tables,
+            detrend=dict(how='movingmean', window=900),
+            trend={'how':'movingmedian', 'window':'1min'}):
     """
     Check difference between the maximum and minimum values of the run trend agaisnt an upper-limit.
     This aims to flag nonstationary runs
@@ -106,7 +108,7 @@ def check_stationarity(data, tables, detrend=False,
     #------------
     # If detrend==True, work with the fluctuations
     if detrend:
-        df = pmdata.detrend(data, suffix='', **detrend_kw)
+        df = pmdata.detrend(data, suffix='', **detrend)
     else:
         df = data.copy()
     #------------
@@ -114,7 +116,7 @@ def check_stationarity(data, tables, detrend=False,
     #------------
     # If trend==True, work with the trend of df (df being either absolute values or the fluctuation)
     if trend:
-        trend = pmdata.trend(df, **trend_kw)
+        trend = pmdata.trend(df, **trend)
     else:
         trend = df.copy()
     #------------
@@ -176,7 +178,7 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
 
 
 
-def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_size='2min', falseverbose=False):
+def check_std(data, tables, detrend=dict(how='linear'), chunk_size='2min', falseverbose=False):
     """
     Checks dataframe for columns with too small of a standard deviation
 
@@ -186,10 +188,8 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
         dataset whose standard deviation to check 
     tables: pandas.DataFrame
         dataset containing the standard deviation limits for each column
-    detrend: bool
-        whether to work with the absolute series and the fluctuations
-    detrend_kw: dict
-        keywords to pass to pymicra.detrend with detrend==True
+    detrend: dict
+        keywords to pass to pymicra.detrend with detrend==True. If empty, no detrending is done
     chunk_size: str
         pandas datetime offset string
 
@@ -206,7 +206,7 @@ def check_std(data, tables, detrend=False, detrend_kw={'how':'linear'}, chunk_si
     #-----------
     # Detrend the data or not
     if detrend:
-        df = pmdata.detrend(data, suffix='', **detrend_kw)
+        df = pmdata.detrend(data, suffix='', **detrend)
     else:
         df = data.copy()
     #-----------
@@ -304,8 +304,7 @@ def check_limits(data, tables, max_percent=1., replace_with='interpolation'):
  
 
 def check_spikes(data, chunk_size='2min',
-                 detrend=True,
-                 detrend_kw={'how':'linear'},
+                 detrend={'how':'linear'},
                  visualize=False, vis_col=1, max_consec_spikes=3,
                  cut_func = lambda x: (abs(x - x.mean()) > 5.*x.std()),
                  replace_with='interpolation',
@@ -355,7 +354,7 @@ def check_spikes(data, chunk_size='2min',
     #------------
     # If dentreded == True we save the trend for later and work with the detrended data
     if detrend:
-        origtrend = pmdata.trend(data, **detrend_kw)
+        origtrend = pmdata.trend(data, **detrend)
         detrended = original - origtrend
         dfs = algs.splitData(detrended, rule=chunk_size)
     else:
