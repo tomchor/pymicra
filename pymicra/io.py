@@ -312,6 +312,36 @@ def _read_dlc(dlcfile):
 #-------------------------------------------
 #-------------------------------------------
 
+
+def write_as_fconfig(data, fname, fileconfig):
+    """
+    Writes a pandas DataFrame in a format according to fileConfig object
+    """
+    import pandas as pd
+    #--------------
+    # If the path to the dlc is provided, we read it as a dataloggerConfig object
+    if isinstance(fileconfig, str):
+        from . import fileConfig
+        fileconfig = fileConfig(fileconfig)
+    #--------------
+
+    if fileconfig.columns_separator=='whitespace':
+        import csv
+        sep=" "
+        escapechar=" "
+        quoting=csv.QUOTE_NONE
+        float_format='%14.7e'
+    else:
+        sep=fileconfig.columns_separator
+        escapechar=None
+        quoting=None
+        float_format=None
+
+    data.to_csv(fname, index=False, sep=sep, header=fileconfig.header,
+            escapechar=escapechar, quoting=quoting, float_format=float_format)
+    return
+
+
 def _get_printable(data, units, to_tex_cols=True, to_tex_units=True):
     """
     Returns a csv that is pandas-printable. It does so changing the column names to add units to it.

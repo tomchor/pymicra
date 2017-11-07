@@ -141,6 +141,7 @@ def qc_replace(files, fileconfig,
     import pandas as pd
     import numpy as np
     from . import algs
+    from .io import write_as_fconfig
 
     if trueshow:
         import matplotlib.pyplot as plt
@@ -348,8 +349,7 @@ def qc_replace(files, fileconfig,
         if outdir:
             print('Re-writing',filepath)
             fullfin[usedvars] = fin[usedvars]       # This is because some spikes were removed during the process
-            fullfin.to_csv(join(outdir, basename(filepath)),
-                       header=fileconfig.header, index=False, quoting=3, na_rep='NaN')
+            write_as_fconfig(fullfin, join(outdir, basename(filepath)), fileconfig)
         #-----------------
         print()
     
@@ -473,6 +473,7 @@ def qc_filter(files, fileconfig,
     import pandas as pd
     import numpy as np
     from . import algs
+    from .io import write_as_fconfig
 
     if trueshow:
         import matplotlib.pyplot as plt
@@ -586,8 +587,9 @@ def qc_filter(files, fileconfig,
         if outdir:
             print('Re-writing',filepath)
             fullfin[usedvars] = fin[usedvars]       # This is because some spikes were removed during the process
-            fullfin.to_csv(join(outdir, basename(filepath)),
-                       header=fileconfig.header, index=False, quoting=3, na_rep='NaN')
+            write_as_fconfig(fullfin, join(outdir, basename(filepath)), fileconfig)
+#            fullfin.to_csv(join(outdir, basename(filepath)),
+#                       header=fileconfig.header, index=False, quoting=3, na_rep='NaN')
         #-----------------
         print()
     
@@ -1097,6 +1099,7 @@ def qcontrol(files, fileconfig,
     import pandas as pd
     import numpy as np
     from . import algs
+    from .io import write_as_fconfig
 
     if trueshow:
         import matplotlib.pyplot as plt
@@ -1310,7 +1313,7 @@ def qcontrol(files, fileconfig,
         #----------------------------------
         # STANDARD DEVIATION TEST
         if std_limits:
-            valid = tests.check_std(fin, tables, detrend=std_detrend, detrend_kw=std_detrend_kw, chunk_size=chunk_size, falseverbose=falseverbose)
+            valid = tests.check_std(fin, tables, detrend=std_detrend, chunk_size=chunk_size, falseverbose=falseverbose)
 
             result, failed = algs.testValid(valid, testname=STD_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
             control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=STD_name, filename=filename, falseshow=falseshow)
@@ -1359,8 +1362,9 @@ def qcontrol(files, fileconfig,
         if outdir:
             print('Re-writing',filepath)
             fullfin[usedvars] = fin[usedvars]       # This is because some spikes were removed during the process
-            fullfin.to_csv(join(outdir, basename(filepath)),
-                       header=fileconfig.header, index=False, quoting=3, na_rep='NaN')
+            write_as_fconfig(fullfin, join(outdir, basename(filepath)), fileconfig)
+#            fullfin.to_csv(join(outdir, basename(filepath)),
+#                       header=fileconfig.header, index=False, quoting=3, na_rep='NaN')
         #-----------------
         print()
     
