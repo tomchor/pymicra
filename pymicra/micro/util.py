@@ -333,7 +333,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         print("Fluctuations of theta not found. Will try to calculate it with theta' = (theta_v' - 0.61 theta_mean q')/(1 + 0.61 q_mean ... ", end='')
         #---------
         # We check the units of theta_v and theta
-        if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
+        if not (units[ theta_v_fluc ]==ureg.parse_expression('kelvin') and units[ defs.thermodyn_temp ]==ureg.parse_expression('kelvin')):
             raise TypeError('Units for both the virtual temp fluctuations and the thermodynamic temperature must be Kelvin')
         #---------
 
