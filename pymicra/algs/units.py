@@ -89,11 +89,11 @@ def parseUnits(unitstr):
     from .. import ureg
 
     if isinstance(unitstr, str):
-        return ureg[unitstr].u
+        return ureg(unitstr).u
     elif isinstance(unitstr, list):
-        return [ ureg[el].u for el in unitstr ]
+        return [ ureg(el).u for el in unitstr ]
     elif isinstance(unitstr, dict):
-        return { key: ureg[el].u for key, el in unitstr.items() }
+        return { key: ureg(el).u for key, el in unitstr.items() }
 
 
 def convert_to(data, inunit, outunit, inplace_units=False, key=None): 

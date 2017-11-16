@@ -394,10 +394,10 @@ def qc_replace(files, fileconfig,
 def qc_discard(files, fileconfig,
              read_files_kw={'parse_dates':False, 'clean_dates':False, 'only_named_cols':False, 'return_units':False},
              std_limits={}, # min std test
-             std_detrend=dict(how='movingmean', window=900),
+             std_detrend=dict(how='linear'),
              dif_limits={}, # max. dif test
-             maxdif_detrend={'how':'movingmean', 'window':900},
-             maxdif_trend={'how':'movingmedian', 'window':600},
+             maxdif_detrend=dict(),
+             maxdif_trend=dict(how='movingmedian', window=600),
              chunk_size=1200,
              trueverbose=False, falseverbose=True,
              falseshow=False, trueshow=False,

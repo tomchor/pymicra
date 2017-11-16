@@ -209,7 +209,8 @@ def trend(data, how='linear', rule=None, window=1200, block_func='mean',
         #-------
 
 @_decors.pdgeneral(convert_out=True)
-def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=None, inplace=True, ignore=[], **kwargs):
+def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=None, 
+                inplace_units=True, join_data=False, ignore=[], **kwargs):
     """
     Returns the detrended fluctuations of a given dataset
 
@@ -220,7 +221,19 @@ def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=Non
     how: string
         how of average to apply. Currently {'movingmean', 'movingmedian', 'block', 'linear', 'poly'}.
     rule: pandas offset string
-        the blocks for which the trends should be calculated in the block and linear type
+        the block lengths for which the trends should be calculated in the block and linear type
+    notation: pymicra.Notation
+        Notation definitions to be used
+    suffix: string
+        suffix to be put at the end of the fluctuations. If None, will get from notation
+    units: dict
+        dict of units for each detrended variable
+    inplace_units: bool
+        whether to change the units dict inplace or return a new one
+    join_data: bool
+        whether to return the dataFrame with fluctuations and original data, or just fluctuations
+    ignore: list
+        list of variables not to detrend
     window: pandas date offset string or int
         if moving mean/median is chosen, this tells us the window size to pass to pandas. If int,
         this is the number of points used in the window. If string we will to guess the number of
@@ -242,6 +255,7 @@ def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=Non
     import pandas as pd
 
     how=algs.stripDown(how.lower(), args='-_')
+    fulldf=data.copy()
     df=data.copy()
     if ignore:
         df = df.drop(ignore, axis=1)
@@ -289,15 +303,21 @@ def detrend(data, how='linear', rule=None, notation=None, suffix=None, units=Non
     #-----------
     # If units are not be changed in place, we copy them
     if units:
-        if not inplace:
+        if not inplace_units:
             units = units.copy()
         units.update(newunits)
     #-----------
 
-    if inplace:
-        return df
+    if inplace_units:
+        if join_data:
+            return fulldf.join(df)
+        else:
+            return df
     else:
-        return df, units
+        if join_data:
+            return fulldf.join(df), units
+        else:
+            return df, units
 
 
 def crossSpectra(data, frequency=10, notation=None, anti_aliasing=True):

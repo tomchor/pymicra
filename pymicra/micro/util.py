@@ -16,7 +16,7 @@ moist air heat capacity at constant pressure?
 specific evaporation heat?
 """
 
-def preProcess(data, units, notation=None, use_means=False, expand_temperature=True,
+def preProcess(data, units, notation=None, rotation='2d', use_means=False, expand_temperature=True,
         rho_air_from_theta_v=True, inplace_units=True, theta=None, theta_unit=None, solutes=[]):
     """
     Calculates moist and dry air densities, specific humidity mass density and other 
@@ -30,6 +30,8 @@ def preProcess(data, units, notation=None, use_means=False, expand_temperature=T
         units dictionary with the columns of data as keys
     notation: pymicra.notation
         defining notation used in data
+    rotation: string
+        Rotation method to use on data (passed to rotateCoor function). Default is "2d". If None, no rotation is done.
     rho_air_from_theta_v: bool
         whether to use theta_v to calculate air density or theta
     inplace_units: bool
@@ -64,6 +66,14 @@ def preProcess(data, units, notation=None, use_means=False, expand_temperature=T
     #---------
 
     print('Beginning of pre-processing ...')
+
+    #---------
+    # Rotate data
+    if rotation:
+        print('Rotating data with {} method ... '.format(rotation), end='')
+        data = data.rotateCoor(how=rotation)
+        print('Done!')
+    #---------
 
     #---------
     # First convert any temperature if it is still in Celsius
@@ -333,7 +343,7 @@ def eddyCovariance(data, units, wpl=True, get_turbulent_scales=True, site_config
         print("Fluctuations of theta not found. Will try to calculate it with theta' = (theta_v' - 0.61 theta_mean q')/(1 + 0.61 q_mean ... ", end='')
         #---------
         # We check the units of theta_v and theta
-        if not (units[ theta_v_fluc ]==ureg.parse_expression('kelvin') and units[ defs.thermodyn_temp ]==ureg.parse_expression('kelvin')):
+        if not (units[ theta_v_fluc ]==ureg('kelvin') and units[ defs.thermodyn_temp ]==ureg('kelvin')):
             raise TypeError('Units for both the virtual temp fluctuations and the thermodynamic temperature must be Kelvin')
         #---------
 

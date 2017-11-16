@@ -27,7 +27,6 @@ from . import decorators
 
 from .io import *
 from .util import *
-#from .micro import *
 from .signal import *
 from .core import *
 

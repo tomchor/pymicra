@@ -148,7 +148,7 @@ def turbulentScales(data, siteConf, units, notation=None, theta_v_mean=None, the
             print('Fluctuations of theta not found. Will try to calculate it ... ', end='')
             #---------
             # We need the mean of the specific humidity and temperature
-            if not (units[ theta_v_fluc ]==ureg['kelvin'] and units[ defs.thermodyn_temp ]==ureg['kelvin']):
+            if not (units[ theta_v_fluc ]==ureg('kelvin') and units[ defs.thermodyn_temp ]==ureg('kelvin')):
                 raise TypeError('\nUnits for both the virtual temperature fluctuations and the thermodynamic temperature fluctuations must be Kelvin')
             data_q_mean =   data[ defs.specific_humidity ].mean()
             data[ theta_fluc ] = (data[theta_v_fluc] - 0.61*theta_mean*data[q_fluc])/(1. + 0.61*data_q_mean)
