@@ -1,0 +1,8 @@
+,control,percent
+total,7,100.0
+failed lines test,0,0.0
+failed replacement test,0,0.0
+passed all tests,7,100.0
+Runs with replaced nans,0,0.0
+Runs with replaced bound,0,0.0
+Runs with replaced spikes,7,100.0

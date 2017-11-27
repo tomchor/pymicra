@@ -46,4 +46,4 @@ constants.units = algs.parseUnits(constants.units)
 # Some quick pandas display configurations
 import pandas as _pd
 _pd.options.display.max_rows=22
-_pd.options.display.width=120
+_pd.options.display.width=90

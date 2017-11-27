@@ -50,7 +50,7 @@ show the user exactly what it is doing:
 
 .. ipython:: python
 
-   data = pm.preProcess(data, units, expand_temperature=True,
+   data = pm.micro.preProcess(data, units, expand_temperature=True,
        use_means=False, rho_air_from_theta_v=True, solutes=['co2'])
    print(data.with_units(units).mean())
 

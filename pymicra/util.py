@@ -19,7 +19,7 @@ def qc_replace(files, fileconfig,
              chunk_size=1200,
              spikes_vis_col='u',
              spikes_detrend = {'how':'linear'},
-             spikes_func = lambda x: (abs(x - x.mean()) > 5.*x.std()), 
+             spikes_func = lambda x: (abs(x - x.median()) > (7./0.6745)*x.mad()), 
              max_consec_spikes=10,
              max_replacement_count=180, # replacement count test
              replace_with='interpolation',
