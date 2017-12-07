@@ -64,4 +64,24 @@ that aren't used here but let's go through the options we used
  number means that there was a problem while collecting the data and that file is discarded
 - `nans_test=True` means you want to check for "Not a Number"s, or missing numbers. If one is found it is
  interpolated
+- `lower_limits` and `upper_limits` provide the bounds for the data. Any data
+ that falls outside theese bounds is interpolated.  Usually it is suggested that
+ at least the concentrations have `0` as lower limits. Or that very high values
+ should be used that would surely indicate sensor malfunction (like temperatures
+ of over 70 degrees Celsius).
+- `spikes_test` tells the function whether to test for spikes or not. Spikes are interpolated over.
+- `spikes_func` every point is tested for spikes using this function. If the result if `True`, it
+ is considered a spike. Any Pandas function works here, as `x` in this case is a pandas `DataFrame`.
+- `visualize_spikes` decides if you want to see the points you are considering as spikes or not. A matplotlib
+ plot appears on screen. This is good for the first iterations of the quality control, so you can calibrate your
+ spike parameters and see if your spikes test is really doing what you think it's doing.
+- `max_replacement_count` sets the maximum number of replaces values a run can have before it is discarded.
+ This included replacements from the NaNs test, bounds test and spikes test.
+- `outdir` is the path to the directory where the quality-controled files will be copied.
+- `replaced_report` is the path to a file that will be created with a detailed report
+ on the replacements that were made.
+
+
+More options are available
+
 
