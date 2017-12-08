@@ -23,7 +23,7 @@ def lenYear(year):
 
 
 
-def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepath=None):
+def testValid(df_valid, testname='', failverbose=True, passverbose=True, filepath=None):
     """
     Tests a boolean DataFrane obtained from the test and prints standard output
 
@@ -33,9 +33,9 @@ def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepa
         series contaning only True or False values for each of the variables, which should be the indexes
     testname: string
         the name of the test that generated the True/False values
-    falseverbose: bool
+    failverbose: bool
         whether to return which variables caused a false result
-    trueverbose: bool
+    passverbose: bool
         whether to print something successful cases
 
     Returns
@@ -50,17 +50,17 @@ def testValid(df_valid, testname='', falseverbose=True, trueverbose=True, filepa
     if False in df_valid.values:
         failed = df_valid[ df_valid==False ].index
         print(basename(filepath), ': !FAILED',testname,'test!\n')
-        if falseverbose:
+        if failverbose:
             print('Failed variable(s):', ', '.join(failed),'\n')
             print
         return False, failed
     else:
-        if trueverbose: print(basename(filepath),'passed',testname,'test')
+        if passverbose: print(basename(filepath),'passed',testname,'test')
         return True, None
 
 
 
-def applyResult(result, failed, df, control=None, testname=None, filename=None, falseshow=False, index_n=None):
+def applyResult(result, failed, df, control=None, testname=None, filename=None, failshow=False, index_n=None):
     """
     Auxiliar function to be used with util.qcontrol
 
@@ -76,12 +76,12 @@ def applyResult(result, failed, df, control=None, testname=None, filename=None, 
         name of the test (has to match control dict)
     filename: string
         name or path or identifier of the file tested
-    falseshow: bool
+    failshow: bool
         whether to show the failed variables or not
     """
     import matplotlib.pyplot as plt
     if result==False:
-        if falseshow:
+        if failshow:
             df[failed].plot()
             plt.show()
         if type(control)==dict:

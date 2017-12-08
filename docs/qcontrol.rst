@@ -118,13 +118,30 @@ that passed the previous procedure.
     pm.util.qc_discard(fnames, fconfig,
     std_limits = dict(u=0.03, v=0.03, w=0.01, theta_v=0.02),
     std_detrend=dict(how='linear'), 
+    chunk_size=1200, 
     dif_limits = dict(u=5.0, v=5.0, theta_v=2.0),
     maxdif_trend=dict(how='movingmedian', window= 600), 
-    chunk_size=1200, 
-    falseverbose=True, 
-    trueshow=True, 
+    failverbose=True, 
+    failshow=True, 
     outdir='../examples/passed_2nd', 
     summary_file='2nd_filter_summary.csv', 
     full_report='2nd_full_report.csv')
 
+
+After the previous example you should be left with reasonably
+quality-controlled dataset. We used the following options in this case:
+
+- `std_limits` gives the minimum value for the STD before it is considered too small and the run is discarded. So,
+ values of STD larger than `std_limits` are fine.
+- `std_detrend` gives the detrending options to use before taking the STD in the STD test.
+- `chunk_size` size of chunks in which to separate the data for the STD test.
+- `dif_limits` are the maximum difference between the largest and lowest value in the Max dif (stationarity) test. If the
+ difference is larger the run is discarded.
+- `maxdif_trend` is the trend to consider when taking the difference between the lowest and highest value.
+- `failverbose` shows extra info on runs that fail any test (like which variable(s) failed).
+- `failshow` plots runs that failed some test on the screen for checking purposes.
+
+As usual, there are more options to this, but this is a basic introduction.
+With the dataset already corrected and filtered we move on to the processing of
+data.
 

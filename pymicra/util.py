@@ -23,9 +23,9 @@ def qc_replace(files, fileconfig,
              max_consec_spikes=10,
              max_replacement_count=180, # replacement count test
              replace_with='interpolation',
-             trueverbose=False, falseverbose=True, # general
-             falseshow=False, trueshow=False,
-             trueshow_vars=None,
+             passverbose=False, failverbose=True, # general
+             passshow=False, failshow=False,
+             passshow_vars=None,
              outdir='0_replaced',
              summary_file='control_replacement.csv',
              replaced_report='rreport.csv',
@@ -128,15 +128,15 @@ def qc_replace(files, fileconfig,
         Maximum number of replaced point a variable can have in a run. If the
         replaced number of points is larger than this then the run fails and is
         discarded. Generally this should be about 1% of the file_lines.
-    trueverbose: bool
+    passverbose: bool
         whether or not to show details on the successful runs.
-    falseverbose: bool
+    failverbose: bool
         whether or not to show details on the failed runs.
-    trueshow: bool
+    passshow: bool
         whether of not to plot the successful runs on screen.
-    trueshow_vars: list
+    passshow_vars: list
         list of columns to plot if run is successfull.
-    falseshow: bool
+    failshow: bool
         whether of not to plot the failed runs on screen.
     outdir: str
         name of directory in which to write the successful runs. Directory must already exist.
@@ -156,7 +156,7 @@ def qc_replace(files, fileconfig,
     from . import algs
     from .io import write_as_fconfig
 
-    if trueshow:
+    if passshow:
         import matplotlib.pyplot as plt
 
     if begin_date: begin_date=parse(begin_date)
@@ -251,9 +251,9 @@ def qc_replace(files, fileconfig,
         #-------------------------------
         # LINE NUMBERS TEST
         if file_lines:
-            valid = tests.check_numlines(filepath, numlines=file_lines, falseverbose=falseverbose)
+            valid = tests.check_numlines(filepath, numlines=file_lines, failverbose=failverbose)
 
-            result, failed = algs.testValid(valid, testname=lines_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
+            result, failed = algs.testValid(valid, testname=lines_name, passverbose=passverbose, filepath=filepath, failverbose=failverbose)
             if result == False:
                 #discarded[ lines_name ].append(filename)
                 control.loc[idx, lines_name ] = filename
@@ -277,8 +277,8 @@ def qc_replace(files, fileconfig,
         if nans_test:
             valid, nans_replaced = tests.check_nans(fin, replace_with=replace_with)
 
-#            result, failed = algs.testValid(valid, testname=nan_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-#            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=nan_name, filename=filename, falseshow=falseshow)
+#            result, failed = algs.testValid(valid, testname=nan_name, passverbose=passverbose, filepath=filepath, failverbose=failverbose)
+#            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=nan_name, filename=filename, failshow=failshow)
 
             #--------------
             # Add nans that were replaced to the full replaced list
@@ -294,8 +294,8 @@ def qc_replace(files, fileconfig,
         if lower_limits or upper_limits:
             fin, valid, limits_replaced = tests.check_limits(fin, tables, replace_with=replace_with)
 
-#            result, failed = algs.testValid(valid, testname=bound_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-#            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=bound_name, filename=filename, falseshow=falseshow)
+#            result, failed = algs.testValid(valid, testname=bound_name, passverbose=passverbose, filepath=filepath, failverbose=failverbose)
+#            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=bound_name, filename=filename, failshow=failshow)
 
             #--------------
             # Add high/low values that were replaced to the full replaced list
@@ -313,8 +313,8 @@ def qc_replace(files, fileconfig,
                             visualize=visualize_spikes, vis_col=spikes_vis_col, chunk_size=chunk_size, replace_with=replace_with,
                             cut_func=spikes_func, max_consec_spikes=max_consec_spikes)
 
-#            result, failed = algs.testValid(valid, testname=spikes_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-#            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=spikes_name, filename=filename, falseshow=falseshow)
+#            result, failed = algs.testValid(valid, testname=spikes_name, passverbose=passverbose, filepath=filepath, failverbose=failverbose)
+#            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=spikes_name, filename=filename, failshow=failshow)
 
             #--------------
             # Add spikes that were replaced to the full replaced list
@@ -330,8 +330,8 @@ def qc_replace(files, fileconfig,
         if max_replacement_count:
             valid = tests.check_replaced(replaced.iloc[-1], max_count=max_replacement_count)
 
-            result, failed = algs.testValid(valid, testname=replacement_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=replacement_name, filename=filename, falseshow=falseshow)
+            result, failed = algs.testValid(valid, testname=replacement_name, passverbose=passverbose, filepath=filepath, failverbose=failverbose)
+            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=replacement_name, filename=filename, failshow=failshow)
 
             if result==False: continue
         #-----------------
@@ -340,9 +340,9 @@ def qc_replace(files, fileconfig,
         #-----------------
         # END OF TESTS
         print('Passed all tests')
-        if trueshow:
-            if trueshow_vars:
-                fin.loc[:, trueshow_vars]
+        if passshow:
+            if passshow_vars:
+                fin.loc[:, passshow_vars]
             else:
                 fin.plot()
             plt.show()
@@ -399,9 +399,9 @@ def qc_discard(files, fileconfig,
              maxdif_detrend=dict(),
              maxdif_trend=dict(how='movingmedian', window=600),
              chunk_size=1200,
-             trueverbose=False, falseverbose=True,
-             falseshow=False, trueshow=False,
-             trueshow_vars=None,
+             passverbose=False, failverbose=True,
+             failshow=False, passshow=False,
+             passshow_vars=None,
              outdir='1_filtered',
              summary_file='filter_summary.csv',
              full_report=None):
@@ -454,15 +454,15 @@ def qc_discard(files, fileconfig,
     chunk_size: str
         string representing time length of chunks used in the standard deviation check. Default is "2Min".
         Putting None will not separate in chunks. It's recommended to use rolling functions in this case (might be slow).
-    trueverbose: bool
+    passverbose: bool
         whether or not to show details on the successful runs.
-    falseverbose: bool
+    failverbose: bool
         whether or not to show details on the failed runs.
-    trueshow: bool
+    passshow: bool
         whether of not to plot the successful runs on screen.
-    trueshow_vars: list
+    passshow_vars: list
         list of columns to plot if run is successfull.
-    falseshow: bool
+    failshow: bool
         whether of not to plot the failed runs on screen.
     outdir: str
         name of directory in which to write the successful runs. Directory must already exist.
@@ -482,7 +482,7 @@ def qc_discard(files, fileconfig,
     from . import algs
     from .io import write_as_fconfig
 
-    if trueshow:
+    if passshow:
         import matplotlib.pyplot as plt
 
     total_name='total'
@@ -556,10 +556,10 @@ def qc_discard(files, fileconfig,
         #----------------------------------
         # STANDARD DEVIATION TEST
         if std_limits:
-            valid = tests.check_std(fin, tables, detrend=std_detrend, chunk_size=chunk_size, falseverbose=falseverbose)
+            valid = tests.check_std(fin, tables, detrend=std_detrend, chunk_size=chunk_size, failverbose=failverbose)
 
-            result, failed = algs.testValid(valid, testname=STD_name, trueverbose=trueverbose, filepath=filepath, falseverbose=falseverbose)
-            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=STD_name, filename=filename, falseshow=falseshow)
+            result, failed = algs.testValid(valid, testname=STD_name, passverbose=passverbose, filepath=filepath, failverbose=failverbose)
+            control = algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=STD_name, filename=filename, failshow=failshow)
 
             if result==False: continue
         #----------------------------------
@@ -570,8 +570,8 @@ def qc_discard(files, fileconfig,
             valid = tests.check_stationarity(fin, tables, detrend=maxdif_detrend,
                                         trend=maxdif_trend)
 
-            result, failed = algs.testValid(valid, testname=maxdif_name, trueverbose=trueverbose, filepath=filepath)
-            control=algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=maxdif_name, filename=filename, falseshow=falseshow)
+            result, failed = algs.testValid(valid, testname=maxdif_name, passverbose=passverbose, filepath=filepath)
+            control=algs.applyResult(result, failed, fin, control=control, index_n=idx, testname=maxdif_name, filename=filename, failshow=failshow)
 
             if result==False: continue
         #-------------------------------
@@ -579,9 +579,9 @@ def qc_discard(files, fileconfig,
         #-----------------
         # END OF TESTS
         print('Passed all tests')
-        if trueshow:
-            if trueshow_vars:
-                fin.loc[:, trueshow_vars]
+        if passshow:
+            if passshow_vars:
+                fin.loc[:, passshow_vars]
             else:
                 fin.plot()
             plt.show()

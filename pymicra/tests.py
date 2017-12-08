@@ -178,7 +178,7 @@ def check_RA(data, detrend=True, detrend_kw={'how':'linear'},
 
 
 
-def check_std(data, tables, detrend=dict(how='linear'), chunk_size='2min', falseverbose=False):
+def check_std(data, tables, detrend=dict(how='linear'), chunk_size='2min', failverbose=False):
     """
     Checks dataframe for columns with too small of a standard deviation
 
@@ -223,7 +223,7 @@ def check_std(data, tables, detrend=dict(how='linear'), chunk_size='2min', false
     #-----------
     # Check each chunk separately
     validcols = ~( stds_list < tables.loc['std_limits'] )
-    if falseverbose and (False in validcols.values):
+    if failverbose and (False in validcols.values):
         falsecols = [ el for el in df.columns if False in validcols.loc[:, el].values ]
         print('STD test: failed variables and times are\n{0}\n'.format(validcols.loc[:, falsecols]))
     #-----------
@@ -412,7 +412,7 @@ def check_spikes(data, chunk_size='2min',
     return fou, valid, fault_count
 
 
-def check_numlines(fname, numlines=18000, falseverbose=False):
+def check_numlines(fname, numlines=18000, failverbose=False):
     """
     Checks length of file against a correct value.
     Returns False is length is wrong and True if length is right
@@ -436,7 +436,7 @@ def check_numlines(fname, numlines=18000, falseverbose=False):
     if lines==numlines:
         return pd.Series([True], index=['file'])
     else:
-        if falseverbose: print('numlines:',lines)
+        if failverbose: print('numlines:',lines)
         return pd.Series([False], index=['file'])
 
 
