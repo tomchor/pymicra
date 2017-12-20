@@ -27,7 +27,8 @@ except ImportError:
 packages = find_packages()
 #-----------
 
-extra_kwargs={'install_requires' : dependencies}
+extra_kwargs={'install_requires' : dependencies,
+            'keywords':['meteorology', 'micrometeorology', 'atmosphere', 'science']}
 
 setup(name='pymicra',
       version = __version__,
