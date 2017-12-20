@@ -1,0 +1,67 @@
+
+\begin{exampleblock}{Results are easy to visualize}
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}4}]:} \PY{n}{data}\PY{o}{.}\PY{n}{with\PYZus{}units}\PY{p}{(}\PY{n}{units}\PY{p}{)}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}4}]:} mrho\_h2o  <millimole / meter ** 3>    1.302782e+03
+        p         <kilopascal>                9.139658e+01
+        mrho\_co2  <millimole / meter ** 3>    1.325734e+01
+        theta\_v   <kelvin>                    2.983157e+02
+        u         <meter / second>            3.854082e+00
+        v         <meter / second>            9.685296e-15
+        w         <meter / second>            4.837303e-16
+        rho\_h2o   <kilogram / meter ** 3>     2.347000e-02
+        rho\_air   <kilogram / meter ** 3>     1.067299e+00
+        rho\_dry   <kilogram / meter ** 3>     1.043829e+00
+        mrho\_dry  <mole / meter ** 3>         3.603822e+01
+        q         <dimensionless>             2.199023e-02
+        r\_h2o     <dimensionless>             2.248509e-02
+        mr\_h2o    <dimensionless>             3.615090e-02
+        theta     <kelvin>                    2.943670e+02
+        rho\_co2   <kilogram / meter ** 3>     5.834487e-04
+        conc\_co2  <dimensionless>             5.466587e-04
+        r\_co2     <dimensionless>             5.589473e-04
+        mr\_co2    <dimensionless>             3.678667e-04
+        dtype: float64
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}5}]:} \PY{n}{allresults}\PY{o}{.}\PY{n}{with\PYZus{}units}\PY{p}{(}\PY{n}{units}\PY{p}{)}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}5}]:} tau            <kilogram / meter / second ** 2>       0.065194
+        H              <watt / meter ** 2>                  -16.633111
+        Hv             <watt / meter ** 2>                   -3.660275
+        E              <millimole / meter ** 2 / second>      4.111622
+        LE             <watt / meter ** 2>                  181.147458
+        F\_co2          <millimole / meter ** 2 / second>     -0.012895
+        u\_star         <meter / second>                       0.224305
+        theta\_v\_star   <kelvin>                              -0.019376
+        theta\_star     <kelvin>                              -0.085274
+        mrho\_h2o\_star  <millimole / meter ** 3>              22.130035
+        mrho\_co2\_star  <millimole / meter ** 3>              -0.069315
+        Lo             <meter>                              641.361650
+        zeta           <dimensionless>                        0.019382
+        q\_star         <dimensionless>                        0.000376
+        conc\_co2\_star  <dimensionless>                       -0.000003
+        dtype: float64
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}8}]:} \PY{n}{data}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{v}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{w}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{16}\PY{p}{,}\PY{l+m+mi}{10}\PY{p}{)}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{pprog/all_poster_files/all_poster_9_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    \end{exampleblock}
+
+

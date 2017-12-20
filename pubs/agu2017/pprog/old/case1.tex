@@ -1,0 +1,103 @@
+
+%\begin{block}{Load preamble}
+%    \begin{Verbatim}[commandchars=\\\{\}]
+%{\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{import} \PY{n+nn}{pymicra} \PY{k}{as} \PY{n+nn}{pm}
+%        \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
+%        \PY{k+kn}{from} \PY{n+nn}{glob} \PY{k}{import} \PY{n}{glob}
+%        
+%        \PY{n}{fconfig} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{fileConfig}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{tij\PYZus{}pr\PYZus{}qc.config}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+%\end{Verbatim}
+%\end{block}
+
+    After the preamble is loaded, the simplest way to obtain fluxes and
+relevant data scales is
+%\begin{enumerate}
+%\item Quality control 
+%\item Obtain fluctuations
+%\item Calculate fluxes and covariances
+%\end{enumerate}
+
+\begin{block}{Quality control}
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{import} \PY{n+nn}{pymicra} \PY{k}{as} \PY{n+nn}{pm}
+        \PY{n}{fnames} \PY{o}{=} \PY{n+nb}{sorted}\PY{p}{(}\PY{n}{glob}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mydata/*.out}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}2}]:} \PY{n}{pm}\PY{o}{.}\PY{n}{util}\PY{o}{.}\PY{n}{qc\PYZus{}replace}\PY{p}{(}\PY{n}{fnames}\PY{p}{,} \PY{n}{fconfig}\PY{p}{,}
+            \PY{n}{file\PYZus{}lines}\PY{o}{=}\PY{l+m+mi}{36000}\PY{p}{,}
+            \PY{n}{lower\PYZus{}limits}\PY{o}{=}\PY{n+nb}{dict}\PY{p}{(}\PY{n}{theta\PYZus{}v}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{,} \PY{n}{mrho\PYZus{}h2o}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{mrho\PYZus{}co2}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,}
+            \PY{n}{upper\PYZus{}limits}\PY{o}{=}\PY{n+nb}{dict}\PY{p}{(}\PY{n}{theta\PYZus{}v}\PY{o}{=}\PY{l+m+mi}{45}\PY{p}{)}\PY{p}{,}
+            \PY{n}{spikes\PYZus{}test}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}
+            \PY{n}{max\PYZus{}replacement\PYZus{}count}\PY{o}{=}\PY{l+m+mi}{360}\PY{p}{,} \PY{c+c1}{\PYZsh{} replacement count test}
+            \PY{n}{chunk\PYZus{}size}\PY{o}{=}\PY{l+m+mi}{1200}\PY{p}{,}
+            \PY{n}{outdir}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{out1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{n}{replaced\PYZus{}report}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rrep.txt}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        
+        \PY{n}{fnames2} \PY{o}{=} \PY{n+nb}{sorted}\PY{p}{(}\PY{n}{glob}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{out1/*.out}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
+        \PY{n}{pm}\PY{o}{.}\PY{n}{util}\PY{o}{.}\PY{n}{qc\PYZus{}discard}\PY{p}{(}\PY{n}{fnames2}\PY{p}{,} \PY{n}{fconfig}\PY{p}{,}
+            \PY{n}{std\PYZus{}limits} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{n}{u}\PY{o}{=}\PY{l+m+mf}{0.03}\PY{p}{,} \PY{n}{v}\PY{o}{=}\PY{l+m+mf}{0.03}\PY{p}{,} \PY{n}{w}\PY{o}{=}\PY{l+m+mf}{0.01}\PY{p}{,} \PY{n}{theta\PYZus{}v}\PY{o}{=}\PY{l+m+mf}{0.02}\PY{p}{)}\PY{p}{,}
+            \PY{n}{dif\PYZus{}limits} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{n}{u}\PY{o}{=}\PY{l+m+mf}{4.0}\PY{p}{,} \PY{n}{v}\PY{o}{=}\PY{l+m+mf}{4.0}\PY{p}{,} \PY{n}{w}\PY{o}{=}\PY{l+m+mf}{1.0}\PY{p}{,} \PY{n}{theta\PYZus{}v}\PY{o}{=}\PY{l+m+mf}{2.0}\PY{p}{)}\PY{p}{,}
+            \PY{n}{chunk\PYZus{}size}\PY{o}{=}\PY{l+m+mi}{1200}\PY{p}{,}
+            \PY{n}{outdir}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{out2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{n}{summary\PYZus{}file}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{discard\PYZus{}summary.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{n}{full\PYZus{}report}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{frep.txt}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{block}
+
+
+\begin{block}{Calculation of fluxes}
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}3}]:} \PY{n}{fconfig} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{fileConfig}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{tij\PYZus{}pr.config}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{sconfig} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{siteConfig}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{tij\PYZus{}pr.site}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{fnames} \PY{o}{=} \PY{n+nb}{sorted}\PY{p}{(}\PY{n}{glob}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{out2/*out}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
+        \PY{n}{allresults}\PY{o}{=}\PY{p}{[}\PY{p}{]}
+        \PY{k}{for} \PY{n}{fname} \PY{o+ow}{in} \PY{n}{fnames}\PY{p}{:}
+            \PY{n}{data}\PY{p}{,} \PY{n}{units} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{timeSeries}\PY{p}{(}\PY{n}{fname}\PY{p}{,} \PY{n}{fconfig}\PY{p}{,} \PY{n}{parse\PYZus{}dates}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+            \PY{n}{data} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{micro}\PY{o}{.}\PY{n}{preProcess}\PY{p}{(}\PY{n}{data}\PY{p}{,} \PY{n}{units}\PY{p}{,} \PY{n}{solutes}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{co2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+            \PY{n}{fulldata} \PY{o}{=} \PY{n}{data}\PY{o}{.}\PY{n}{detrend}\PY{p}{(}\PY{n}{units}\PY{o}{=}\PY{n}{units}\PY{p}{,} \PY{n}{ignore}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{p}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{join\PYZus{}data}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+        
+            \PY{n}{results} \PY{o}{=} \PY{n}{pm}\PY{o}{.}\PY{n}{micro}\PY{o}{.}\PY{n}{eddyCovariance}\PY{p}{(}\PY{n}{fulldata}\PY{p}{,} \PY{n}{units}\PY{p}{,} \PY{n}{site\PYZus{}config}\PY{o}{=}\PY{n}{sconfig}\PY{p}{,} \PY{n}{solutes}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{co2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+            \PY{n}{allresults}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{results}\PY{p}{)}
+        
+        \PY{n}{allresults} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{concat}\PY{p}{(}\PY{n}{allresults}\PY{p}{,} \PY{n}{ignore\PYZus{}index}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}3}]:} \PY{n+nb}{print}\PY{p}{(}\PY{n}{allresults}\PY{o}{.}\PY{n}{with\PYZus{}units}\PY{p}{(}\PY{n}{units}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+                               tau                   H                  Hv  \textbackslash{}
+  <kilogram / meter / second ** 2> <watt / meter ** 2> <watt / meter ** 2>   
+0                         0.034587          -18.135628           -5.744854   
+1                         0.016308          -15.999976           -2.961901   
+2                         0.144688          -15.763729           -2.274071   
+
+                                  E                  LE  \textbackslash{}
+  <millimole / meter ** 2 / second> <watt / meter ** 2>   
+0                          3.930086          173.166173   
+1                          4.089761          179.763498   
+2                          4.315018          190.512702   
+
+                              F\_co2           u\_star theta\_v\_star theta\_star  \textbackslash{}
+  <millimole / meter ** 2 / second> <meter / second>     <kelvin>   <kelvin>   
+0                         -0.012771         0.180323    -0.029847  -0.094221   
+1                         -0.012538         0.124400    -0.022516  -0.121627   
+2                         -0.013377         0.368191    -0.005767  -0.039974   
+
+             mrho\_h2o\_star            mrho\_co2\_star           Lo            zeta  \textbackslash{}
+  <millimole / meter ** 3> <millimole / meter ** 3>      <meter> <dimensionless>   
+0                21.794729                -0.070824    83.302161        0.022208   
+1                32.875863                -0.100788    53.002880        0.034904   
+2                11.719512                -0.036331  1787.779908        0.001035   
+
+           q\_star   conc\_co2\_star  
+  <dimensionless> <dimensionless>  
+0        0.000369       -0.000003  
+1        0.000562       -0.000004  
+2        0.000198       -0.000001  
+
+    \end{Verbatim}
+
+    
+\end{block} 

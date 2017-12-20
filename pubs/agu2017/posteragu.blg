@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: posteragu.aux
+A level-1 auxiliary file: pprog/leftex.aux
+A level-1 auxiliary file: pprog/midex.aux
+The style file: abbrvnat.bst
+Database file #1: refs/posterrefs2.bib.bib
+You've used 4 entries,
+            2773 wiz_defined-function locations,
+            619 strings with 5254 characters,
+and the built_in function-call counts, 1935 in all, are:
+= -- 156
+> -- 134
+< -- 2
++ -- 46
+- -- 42
+* -- 166
+:= -- 313
+add.period$ -- 12
+call.type$ -- 4
+change.case$ -- 26
+chr.to.int$ -- 4
+cite$ -- 8
+duplicate$ -- 77
+empty$ -- 148
+format.name$ -- 46
+if$ -- 390
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 3
+newline$ -- 28
+num.names$ -- 16
+pop$ -- 51
+preamble$ -- 1
+purify$ -- 22
+quote$ -- 0
+skip$ -- 64
+stack$ -- 0
+substring$ -- 53
+swap$ -- 4
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 44
+warning$ -- 0
+while$ -- 15
+width$ -- 0
+write$ -- 58

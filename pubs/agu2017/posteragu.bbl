@@ -1,0 +1,33 @@
+\begin{thebibliography}{4}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Community(2015)]{sunpy}
+T.~S. e.~a. Community.
+\newblock {SunPy}—python for solar physics.
+\newblock \emph{Computational Science \& Discovery}, 8\penalty0 (1):\penalty0
+  014009, 2015.
+
+\bibitem[et~al.(2013)]{astropy}
+T.~et~al.
+\newblock Astropy: A community python package for astronomy.
+\newblock \emph{Astronomy \& Astrophysics}, 558:\penalty0 A33, 2013.
+
+\bibitem[Krischer et~al.(2015)Krischer, Megies, Barsch, Beyreuther, Lecocq,
+  Caudron, and Wassermann]{obspy}
+L.~Krischer, T.~Megies, R.~Barsch, M.~Beyreuther, T.~Lecocq, C.~Caudron, and
+  J.~Wassermann.
+\newblock {ObsPy}: a bridge for seismology into the scientific python
+  ecosystem.
+\newblock \emph{Computational Science \& Discovery}, 8\penalty0 (1):\penalty0
+  014003, 2015.
+
+\bibitem[May et~al.(2008 - 2017)May, Arms, Marsh, Bruning, and Leeman]{metpy}
+R.~May, S.~Arms, P.~Marsh, E.~Bruning, and J.~Leeman.
+\newblock Metpy: A {Python} package for meteorological data, 2008 - 2017.
+\newblock URL \url{https://github.com/Unidata/MetPy}.
+
+\end{thebibliography}

@@ -1,0 +1,5 @@
+,control,percent
+total,8,100.0
+failed STD test,0,0.0
+failed maxdif test,5,62.5
+passed all tests,3,37.5

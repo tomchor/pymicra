@@ -1,0 +1,47 @@
+\begin{exampleblock}{Quality control example}
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}1}]:} \PY{n}{fnames} \PY{o}{=} \PY{n+nb}{sorted}\PY{p}{(}\PY{n}{glob}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mydata/*.out}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
+        \PY{c+c1}{\PYZsh{} Prints reports on screen and writes further info to file}
+        \PY{n}{pymicra}\PY{o}{.}\PY{n}{util}\PY{o}{.}\PY{n}{qc\PYZus{}replace}\PY{p}{(}\PY{n}{fnames}\PY{p}{,} \PY{n}{fconfig}\PY{p}{,}
+            \PY{n}{file\PYZus{}lines}\PY{o}{=}\PY{l+m+mi}{36000}\PY{p}{,}
+            \PY{n}{lower\PYZus{}limits}\PY{o}{=}\PY{n+nb}{dict}\PY{p}{(}\PY{n}{theta\PYZus{}v}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{,} \PY{n}{mrho\PYZus{}h2o}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{mrho\PYZus{}co2}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,}
+            \PY{n}{upper\PYZus{}limits}\PY{o}{=}\PY{n+nb}{dict}\PY{p}{(}\PY{n}{theta\PYZus{}v}\PY{o}{=}\PY{l+m+mi}{45}\PY{p}{)}\PY{p}{,}
+            \PY{n}{spikes\PYZus{}test}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}
+            \PY{n}{max\PYZus{}replacement\PYZus{}count}\PY{o}{=}\PY{l+m+mi}{360}\PY{p}{,}
+            \PY{n}{chunk\PYZus{}size}\PY{o}{=}\PY{l+m+mi}{1200}\PY{p}{,}
+            \PY{n}{outdir}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{out1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{n}{replaced\PYZus{}report}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rrep.txt}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        
+        \PY{n}{fnames2} \PY{o}{=} \PY{n+nb}{sorted}\PY{p}{(}\PY{n}{glob}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{out1/*.out}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
+        \PY{c+c1}{\PYZsh{} Prints reports on screen and writes further info to file}
+        \PY{n}{pymicra}\PY{o}{.}\PY{n}{util}\PY{o}{.}\PY{n}{qc\PYZus{}discard}\PY{p}{(}\PY{n}{fnames2}\PY{p}{,} \PY{n}{fconfig}\PY{p}{,}
+            \PY{n}{std\PYZus{}limits} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{n}{u}\PY{o}{=}\PY{l+m+mf}{0.03}\PY{p}{,} \PY{n}{v}\PY{o}{=}\PY{l+m+mf}{0.03}\PY{p}{,} \PY{n}{w}\PY{o}{=}\PY{l+m+mf}{0.01}\PY{p}{,} \PY{n}{theta\PYZus{}v}\PY{o}{=}\PY{l+m+mf}{0.02}\PY{p}{)}\PY{p}{,}
+            \PY{n}{dif\PYZus{}limits} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{n}{u}\PY{o}{=}\PY{l+m+mf}{4.0}\PY{p}{,} \PY{n}{v}\PY{o}{=}\PY{l+m+mf}{4.0}\PY{p}{,} \PY{n}{w}\PY{o}{=}\PY{l+m+mf}{1.0}\PY{p}{,} \PY{n}{theta\PYZus{}v}\PY{o}{=}\PY{l+m+mf}{2.0}\PY{p}{)}\PY{p}{,}
+            \PY{n}{chunk\PYZus{}size}\PY{o}{=}\PY{l+m+mi}{1200}\PY{p}{,}
+            \PY{n}{outdir}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{out2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{n}{summary\PYZus{}file}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{discard\PYZus{}summary.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+            \PY{n}{full\PYZus{}report}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{frep.txt}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{exampleblock}
+
+\begin{exampleblock}{Pre-processing and calculation of fluxes example}
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}2}]:} \PY{n}{fconfig} \PY{o}{=} \PY{n}{pymicra}\PY{o}{.}\PY{n}{fileConfig}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{tij\PYZus{}pr.config}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{sconfig} \PY{o}{=} \PY{n}{pymicra}\PY{o}{.}\PY{n}{siteConfig}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{tij\PYZus{}pr.site}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{fname} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{out2/20110224\PYZhy{}1340.out}\PY{l+s+s1}{\PYZsq{}}
+        
+        \PY{n}{data}\PY{p}{,} \PY{n}{units} \PY{o}{=} \PY{n}{pymicra}\PY{o}{.}\PY{n}{timeSeries}\PY{p}{(}\PY{n}{fname}\PY{p}{,} \PY{n}{fconfig}\PY{p}{,}
+                                         \PY{n}{parse\PYZus{}dates}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+        \PY{c+c1}{\PYZsh{} Prints reports showing which calculations are being done}
+        \PY{n}{data} \PY{o}{=} \PY{n}{pymicra}\PY{o}{.}\PY{n}{micro}\PY{o}{.}\PY{n}{preProcess}\PY{p}{(}\PY{n}{data}\PY{p}{,} \PY{n}{units}\PY{p}{,} \PY{n}{solutes}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{co2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+        \PY{n}{fulldata} \PY{o}{=} \PY{n}{data}\PY{o}{.}\PY{n}{detrend}\PY{p}{(}\PY{n}{units}\PY{o}{=}\PY{n}{units}\PY{p}{,} \PY{n}{ignore}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{p}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+                                \PY{n}{join\PYZus{}data}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+        \PY{c+c1}{\PYZsh{} Prints reports showing which calculations are being done}
+        \PY{n}{results} \PY{o}{=} \PY{n}{pymicra}\PY{o}{.}\PY{n}{micro}\PY{o}{.}\PY{n}{eddyCovariance}\PY{p}{(}\PY{n}{fulldata}\PY{p}{,} \PY{n}{units}\PY{p}{,} 
+                     \PY{n}{site\PYZus{}config}\PY{o}{=}\PY{n}{sconfig}\PY{p}{,} \PY{n}{wpl}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{solutes}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{co2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+\end{Verbatim}
+
+
+\end{exampleblock}
+
+    

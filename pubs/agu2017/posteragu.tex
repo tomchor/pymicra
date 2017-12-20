@@ -1,0 +1,231 @@
+\documentclass[final]{beamer}
+\usepackage{beamerposter} % Use the beamerposter package for laying out the poster
+\usetheme{agu2017}
+\usepackage[numbers]{natbib}
+\usepackage{wrapfig}
+
+
+%------
+% Sizes
+\setbeamerfont{title}{size={\fontsize{80}{34}}}
+\setbeamerfont{author}{size={\fontsize{50}{40}}}
+\setbeamerfont{institute}{size={\fontsize{42}{32}}}
+\setbeamerfont{date}{size={\fontsize{38}{32}}}
+
+\setbeamerfont{block title}{size={\fontsize{50}{34}}}
+\setbeamerfont{block body}{size={\fontsize{34}{40}}}
+
+\setbeamerfont{block title example}{size={\fontsize{50}{34}}}
+\setbeamerfont{block body example}{size={\fontsize{34}{40}}}
+
+\setbeamerfont{block title alerted}{size={\fontsize{50}{34}}}
+\setbeamerfont{block alerted body}{size={\fontsize{34}{40}}}
+\setbeamerfont{normal text}{size={\fontsize{50}{32}}}
+\usebeamerfont{normal text}
+%------
+
+
+%-----------------------------------------------------------
+% Define the column widths and overall poster size
+% To set effective sepwid, onecolwid and twocolwid values, first choose how many columns you want and how much separation you want between columns
+% In this template, the separation width chosen is 0.024 of the paper width and a 4-column layout
+% onecolwid should therefore be (1-(# of columns+1)*sepwid)/# of columns e.g. (1-(4+1)*0.024)/4 = 0.22
+% Set twocolwid to be (2*onecolwid)+sepwid = 0.464
+% Set threecolwid to be (3*onecolwid)+2*sepwid = 0.708
+\newlength{\sepwid}
+\newlength{\onecolwid}
+\newlength{\twocolwid}
+\newlength{\threecolwid}
+\setlength{\paperwidth}{140cm} % A0 width: 46.8in
+\setlength{\paperheight}{100cm} % A0 height: 33.1in
+\setlength{\sepwid}{0.01\paperwidth} % Separation width (white space) between columns
+\setlength{\onecolwid}{0.309\paperwidth} % Width of one column
+\setlength{\twocolwid}{0.65\paperwidth} % Width of two columns
+\setlength{\threecolwid}{1\paperwidth} % Width of three columns
+\setlength{\topmargin}{-0.5in} % Reduce the top margin size
+%-----------------------------------------------------------
+
+\usepackage{graphicx}  % Required for including images
+\newcommand{\bsize}{\fontsize{40}{50}\selectfont}
+\include{pprog/nbpreamble}
+
+
+%----------------------------------------------------------------------------------------
+%   TITLE SECTION 
+\title{{\fontsize{180}{50}\selectfont Pymicra:}\newline A Python tool for Micrometerological Analyses} % Poster title
+
+\author{
+\newauthor{Tomás L. Chor\inst{1}}{tomaschor@ucla.edu}\and\newauthor{Nelson L. Dias\inst{2}}{nldias@ufpr.br}
+}
+\institute{
+\inst{1} University of California, Los Angeles, Department of Atmospheric and Oceanic Sciences \and
+\inst{2} Federal University of Paraná, Department of Environmental Engineering }
+\date{}
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
+\begin{document}
+
+\begin{frame}[t] % The whole poster is enclosed in one beamer frame
+
+\begin{columns}[t] % The whole poster consists of three major columns, the second of which is split into two columns twice - the [t] option aligns each column's content to the top
+
+\begin{column}{2\sepwid}\end{column} % Empty spacer column
+
+
+%--------------------
+% FIRST COLUMN
+%--------------------
+\begin{column}{\onecolwid} % The first column
+
+%----------------------------------------------------------------------------------------
+%   SUMMARY AND INTRODUCTION
+%----------------------------------------------------------------------------------------
+
+\begin{alertblock}{Summary}
+\bsize
+Pymicra is a Python package that is designed to make micrometeorological data
+processing significantly more efficient.
+
+\vspace{.5cm}
+It was written with the goal of becoming a community-driven software that is a
+full-blown micrometeorology package, not an just eddy-covariance one. It was
+designed to make research more efficient and to make sharing code easier and it
+was motivated by many examples of similar initiatives that thrived: Obspy for
+seismologists \citep{obspy}, Astropy for astrophysicists \citep{astropy}, Sunpy
+for solar physicists \citep{sunpy}, Metpy for weather scientists \citep{metpy},
+etc.
+
+Here are a few characteristics that make Pymicra a good candidate to be
+community-driven:
+\begin{itemize}
+\item Open-source
+\item Code written with Pymicra is very readable and intuitive
+\item Visualization of data is extremely easy
+\item Easy to develop upon (because of well-documented Python code)
+\item Based on well-known mature Python packages
+\end{itemize}
+
+\vspace{.5cm}
+Pymicra's philosophy is not to "reinvent the wheel". There are already
+several open-source packages that process, organize and manipulate data very
+efficiently, so the goal was simply to put them together is a way specifically
+designed to the micrometeorological community.
+
+\end{alertblock}
+
+%----------------------------------------------------------------------------------------
+%   CODE SNIPETS
+%----------------------------------------------------------------------------------------
+\include{pprog/leftex}
+
+\end{column} % End of the first column
+
+
+
+
+
+
+%--------------------
+% SECOND COLUMN
+%--------------------
+\begin{column}{\sepwid}\end{column} % Empty spacer column
+\begin{column}{\onecolwid} % Begin a column which is two columns wide (column 2)
+\maketitle
+\vspace{-2cm}
+\include{pprog/midex}
+
+
+\end{column} % End of the second column
+
+
+
+
+
+%--------------------
+% THIRD COLUMN
+%--------------------
+\begin{column}{\sepwid}\end{column} % Empty spacer column
+\begin{column}{\onecolwid} % The third column
+
+\begin{center}
+\includegraphics[width=.94\columnwidth]{figs/FC2.pdf}
+\end{center}
+
+\setbeamercolor{block alerted title}{fg=black,bg=norange} % Change the alert block title colors
+\setbeamercolor{block alerted body}{fg=black,bg=white} % Change the alert block body colors
+
+
+
+
+\begin{alertblock}{Why Pymicra instead of writing my own code?}
+\bsize
+There are many advantages in migrating to a community package such as Pymicra
+aims to be, both community-wise and for the individual: 
+\begin{itemize}
+\item Package becomes very reliable (more people are constantly checking for
+bugs and improving)
+\item The amount of code to process the data is significantly smaller (thus faster
+to write)
+\item Sharing your code and understanding other people's is easier
+\end{itemize}
+
+\vspace{1cm}
+
+\begin{minipage}[]{.74\columnwidth}
+\begin{itemize}
+\item Code adaptability (no need to keep writing \emph{ad hoc} code for each dataset)
+\item Flexibility (you can easily use Pymicra to do basic processing and link it
+to other tools for more specific things)
+\end{itemize}
+\end{minipage}
+\begin{minipage}[]{.25\columnwidth}
+\begin{flushright}
+Pymicra's docs $\downarrow$
+\includegraphics[width=.75\columnwidth]{main_qrcode.eps}
+\end{flushright}
+\end{minipage}
+\end{alertblock}
+
+
+\begin{alertblock}{How to contribute}
+\bsize
+
+The code is hosted on Github and any person can fork, develop functionality into
+it and request a merge back. 
+
+\begin{minipage}[]{.74\columnwidth}
+Bug reports, suggestions and documentation
+improvements are also very welcome via Github issues or via email.
+
+\vspace{.3cm}
+Scan the QR code for more information on contributing.
+%$\rightarrow$
+
+\end{minipage}
+\begin{minipage}[]{.25\columnwidth}
+\begin{flushright}
+\includegraphics[width=.75\columnwidth]{contr_qrcode.eps}
+\end{flushright}
+\end{minipage}
+\end{alertblock}
+
+%\vspace{1cm}
+
+\begin{block}{}
+\bibliography{refs/posterrefs2.bib}
+\bibliographystyle{abbrvnat}
+\end{block}
+%----------------------------------------------------------------------------------------
+
+\end{column} % End of the third column
+
+\end{columns} % End of all the columns in the poster
+
+\end{frame} % End of the enclosing frame
+
+\end{document}
+
+              
+
