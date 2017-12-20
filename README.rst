@@ -32,6 +32,8 @@ Here's a quick (incomplete!) list of what Pymicra does:
    etc.).
 
 The package is extensively (almost entirely) based on Pandas, mostly the
-``pandas.DataFrame`` class. We use Pint for units control and (generally) Numpy
-or Scipy for some numerical functions not contained in Pandas.
+``pandas.DataFrame`` class. We use (generally) Numpy or Scipy for some
+numerical functions not contained in Pandas, Matplotlib for plotting and Pint
+for units control.
 
+This code is distributed under the GNU General Public License v3.0.
