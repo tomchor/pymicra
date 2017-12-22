@@ -156,7 +156,7 @@ check the output of this function before moving on:
 
 .. ipython:: python
 
-   results = pm.eddyCovariance(data, units, site_config=siteconf, 
+   results = pm.micro.eddyCovariance(data, units, site_config=siteconf, 
        get_turbulent_scales=True, wpl=True, solutes=['co2'])
    print(results.with_units(units).mean())
 

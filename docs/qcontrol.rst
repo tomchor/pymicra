@@ -28,7 +28,7 @@ able to perform the quality control correctly.
    from glob import glob
    fconfig = pm.fileConfig('../examples/lake.config')
    fnames = glob('../examples/ex_data/***.csv')
-   print(fnames)
+   fnames
 
 
 There are two functions that currently do the quality control in Pymicra:
@@ -56,7 +56,7 @@ control with
         upper_limits=dict(theta_v=45),
         spikes_test=True,
         spikes_func=lambda x: (abs(x - x.median()) > (5./0.6745)*x.mad()),
-        visualize_spikes=True,
+        visualize_spikes=False,
         chunk_size=2400,
         max_replacement_count=1440,
         outdir='../examples/passed_1st',
