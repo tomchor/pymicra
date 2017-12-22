@@ -113,7 +113,7 @@ that passed the previous procedure.
 .. ipython:: python
 
     fnames = sorted(glob('../examples/passed_1st/***.csv'))
-    print(fnames)
+    fnames
 
     pm.util.qc_discard(fnames, fconfig,
     std_limits = dict(u=0.03, v=0.03, w=0.01, theta_v=0.02),
