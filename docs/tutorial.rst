@@ -216,7 +216,7 @@ We begin normally with out data:
    fconfig = pm.fileConfig('../examples/lake.config')
    data, units = pm.timeSeries(fname, fconfig, parse_dates=True)
    data = data.rotateCoor(how='2d')
-   data = pm.preProcess(data, units, expand_temperature=True,
+   data = pm.micro.preProcess(data, units, expand_temperature=True,
        use_means=False, rho_air_from_theta_v=True, solutes=['co2'])
    ddata = data.detrend(how='linear', units=units, ignore=['p', 'theta'])
 

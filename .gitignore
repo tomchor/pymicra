@@ -6,3 +6,4 @@ docs/_build/html
 pymicra.egg-info/
 build/
 dist/
+publish.sh
