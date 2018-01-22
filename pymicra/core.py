@@ -253,7 +253,8 @@ class Notation(object):
         self.rotated_u=self.u
         self.rotated_v=self.u
         self.rotated_w=self.u
-    
+        self.sound_speed='sound_speed'
+        
         self.thermodynamic_temperature='theta'
         self.virtual_temperature='theta_v'
         self.sonic_temperature='theta_s'
