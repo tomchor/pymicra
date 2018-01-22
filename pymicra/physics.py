@@ -40,6 +40,48 @@ def specific_humidity_from_ppxv(data, units, notation=None, return_full_df=True,
     q = (mv*x)/(md+(mv-md)*x)
     return
 
+def theta_s_from_c(data, units, notation=None, return_full_df=True, inplace_units=True):
+    r"""Calculates sonic temperature using speed of sound
+
+    From Schotanus, Nieuwstadt, de Bruin; DOI 10.1007/BF00164332
+
+    theta_s = 1/403 * c**2
+
+    :math:`theta_s \approx 1/403 c^2`
+
+    Parameters
+    ----------
+    data: pandas.dataframe
+        dataset
+    units: dict
+        units dictionary
+    notation: pymicra.Notation
+
+    Returns
+    -------
+    pandas.Series
+        sonic temperature
+    """
+    from . import algs
+
+    defs = algs.get_notation(notation)
+    data = data.copy()
+    
+    theta_s = 1/403 * data[ defs.sound_speed ]**2
+    theta_s_unit = units['K']
+
+    if return_full_df:
+        data.loc[:, defs.sonic_temp ] = theta_s
+        out = data
+    else:
+        out = theta
+
+    if inplace_units:
+        units.update({ defs.sonic_temp : theta_s_unit })
+    else:
+        out = (out, theta_s_unit)
+
+    return out
 
 def theta_from_theta_s(data, units, notation=None, return_full_df=True, inplace_units=True):
     r"""Calculates thermodynamic temperature using sonic temperature measurements
