@@ -17,7 +17,8 @@ specific evaporation heat?
 """
 
 def preProcess(data, units, notation=None, rotation='2d', use_means=False, expand_temperature=True,
-        rho_air_from_theta_v=True, inplace_units=True, theta=None, theta_unit=None, solutes=[]):
+        rho_air_from_theta_v=True, convert_sound_speed=True, inplace_units=True, theta=None, 
+        theta_unit=None, solutes=[]):
     """
     Calculates moist and dry air densities, specific humidity mass density and other 
     important variables using the variables provided in the input DataFrame.
@@ -81,6 +82,22 @@ def preProcess(data, units, notation=None, rotation='2d', use_means=False, expan
     print('Converting {} to kelvin ... '.format(' and '.join(temps.keys())), end='')
     data = data.convert_cols(temps, units, inplace_units=True)
     print("Done!")
+    #---------
+        
+    #---------
+    # Tries to calculate theta_s if it is not found
+    if defs.sonic_temperature not in data.columns:
+        print('Sonic temperature not found ... ', end='')
+        if convert_sound_speed:
+            print('trying to calculate it ', end='')
+            if defs.sound_speed in data.columns:
+                print('with theta_s ~ 1/403 * c**2 relation ... ', end='') #Schotanus et al. 1983
+                data.loc[:, defs.sonic_temperature ] = physics.theta_s_from_sound_speed(data, units, notation=defs, return_full_df=False, inplace_units=True)
+                print('done!')
+            else:
+                print('... not possible with current variables!')
+        else:
+            print('to try to calculate it from speed of sound do convert_sound_speed=True')
     #---------
 
     #---------
