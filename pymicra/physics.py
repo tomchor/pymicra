@@ -68,19 +68,19 @@ def theta_s_from_c(data, units, notation=None, return_full_df=True, inplace_unit
     data = data.copy()
     
     theta_s = 1/403 * data[ defs.sound_speed ]**2
-    theta_s_unit = units['K']
+    theta_s_unit = 'K'
 
     if return_full_df:
         data.loc[:, defs.sonic_temp ] = theta_s
         out = data
     else:
-        out = theta
+        out = theta_s
 
     if inplace_units:
-        units.update({ defs.sonic_temp : theta_s_unit })
+        units.update({ 'sonic_temp' : theta_s_unit })
     else:
-        out = (out, theta_s_unit)
-
+        out = (out, 'K')
+ 
     return out
 
 def theta_from_theta_s(data, units, notation=None, return_full_df=True, inplace_units=True):
