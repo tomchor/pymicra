@@ -92,7 +92,7 @@ def preProcess(data, units, notation=None, rotation='2d', use_means=False, expan
             print('trying to calculate it ', end='')
             if defs.sound_speed in data.columns:
                 print('with theta_s ~ 1/403 * c**2 relation ... ', end='') #Schotanus et al. 1983
-                data.loc[:, defs.sonic_temperature ] = physics.theta_s_from_sound_speed(data, units, notation=defs, return_full_df=False, inplace_units=True)
+                data.loc[:, defs.sonic_temperature ] = physics.theta_s_from_c(data, units, notation=defs, return_full_df=False, inplace_units=True)
                 print('done!')
             else:
                 print('... not possible with current variables!')
