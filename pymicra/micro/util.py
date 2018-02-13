@@ -18,7 +18,7 @@ specific evaporation heat?
 
 def preProcess(data, units, notation=None, rotation='2d', use_means=False, expand_temperature=True,
         rho_air_from_theta_v=True, convert_sound_speed=True, skip_h2o=False, inplace_units=True, 
-        theta=None, theta_unit=None, solutes=[]):
+        theta=None, theta_unit=None, solutes=[], debug=True):
     """
     Calculates moist and dry air densities, specific humidity mass density and other 
     important variables using the variables provided in the input DataFrame.
@@ -52,6 +52,7 @@ def preProcess(data, units, notation=None, rotation='2d', use_means=False, expan
     from .. import constants
     from .. import algs
     from .. import physics
+    import atmos as atm
 
     data = data.copy()
     if not inplace_units:
@@ -99,7 +100,44 @@ def preProcess(data, units, notation=None, rotation='2d', use_means=False, expan
         else:
             print('to try to calculate it from speed of sound do convert_sound_speed=True')
     #---------
-    
+
+    #---------
+    # Collect variables to set up atmos.FluidSolver
+    fl_meas = {'debug':debug}
+    func_ls = {}
+    #---------
+
+    #---------
+    # Pressure
+    if defs.pressure in data.columns:
+        data = data.convert_cols({defs.pressure:'pascal'}, units, inplace_units=True)
+        fl_meas['p'] = data.loc[:, defs.pressure].values
+        fl_meas['p_units'] = units[defs.pressure].__str__()
+    #---------
+
+    #---------
+    # Temperature
+    if defs.thermodyn_temp in data.columns:
+        data = data.convert_cols({defs.thermodyn_temp:'kelvin'}, units, inplace_units=True)
+        fl_meas['T'] = data.loc[:, defs.thermodyn_temp].values
+        fl_meas['T_units'] = units[defs.thermodyn_temp].__str__()
+    if defs.virtual_temp in data.columns:
+        data = data.convert_cols({defs.virtual_temp:'kelvin'}, units, inplace_units=True)
+        fl_meas['Tv'] = data.loc[:, defs.virtual_temp].values
+        fl_meas['Tv_units'] = units[defs.virtual_temp].__str__()
+    #---------
+ 
+
+    #if (defs.moist_air_mass_density not in data.columns):
+    if rho_air_from_theta_v:
+        try:
+            data.loc[:, defs.moist_air_mass_density], func = atm.calculate('rho', rho_unit='kg/m**3', **fl_meas)
+            func_ls[ defs.moist_air_mass_density ] = funcs
+            units[ defs.moist_air_mass_density ] = ureg.parse_expression('kg/m**3').units
+        except ValueError:
+            print("Couldn't calculate moist air density from theta_v and R_dry")
+
+
     if not skip_h2o:
         #---------
         # Check for h2o mass density
@@ -112,8 +150,16 @@ def preProcess(data, units, notation=None, rotation='2d', use_means=False, expan
         #---------
 
         #---------
+        if defs.h2o_mass_density in data.columns:
+            data = data.convert_cols({defs.h2o_mass_density:'kg/m**3'}, units, inplace_units=True)
+            fl_meas['AH'] = data.loc[:, defs.h2o_mass_density]
+            fl_meas['AH_units'] = units[defs.h2o_mass_density]
+        print('DINE')
+        #---------
+    
+        #---------
         # Check for h2o molar density
-        if defs.h2o_molar_density not in data.columns:
+        elif defs.h2o_molar_density not in data.columns:
             print("Didn't locate molar density of h2o. Trying to calculate it ... ", end='')
             data.loc[:, defs.h2o_molar_density ] = data.loc[:, defs.h2o_mass_density ]/Mh2o
             units.update({ defs.h2o_molar_density : units[ defs.h2o_mass_density ]/molar_mass_unit })
@@ -124,10 +170,7 @@ def preProcess(data, units, notation=None, rotation='2d', use_means=False, expan
         # Calculation of rho_air is done here
         if (defs.moist_air_mass_density not in data.columns):
             print('Moist air density not present in dataset')
-            if rho_air_from_theta_v:
-                print('Calculating rho_air = p/(Rdry * theta_v) ... ', end='')
-                data = physics.airDensity_from_theta_v(data, units, notation=defs, inplace_units=True, use_means=use_means)
-            else:
+            if not rho_air_from_theta_v:
                 if theta:
                     print('Trying to calculate rho_air using auxiliar theta measurement ... ', end='')
                     data = physics.airDensity_from_theta(data, units, notation=defs, inplace_units=True, use_means=use_means, theta=theta, theta_unit=theta_unit)
